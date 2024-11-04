@@ -1,0 +1,63 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  username      String    @unique
+  firstName     String?
+  lastName      String?
+  dni           String    @unique
+  phone         String?
+  email         String    @unique
+  emailVerified DateTime?
+  address       String?
+  province      String?
+  city          String?
+  country       String?   @default("Mexico")
+  countryCode   String?   @default("MX")
+  zipCode       String?
+  role          Role      @default(ESTANDAR)
+  userType      String
+  password      String
+  status        Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Session Session[]
+}
+
+enum Role {
+  MEDICO
+  CAPACITADOR
+  COSMETOLOGO
+  ADMIN
+  ESTANDAR
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String   @unique
+  token      String
+  expires    DateTime
+
+  @@id([identifier])
+}
