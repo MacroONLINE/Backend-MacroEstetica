@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  firstName     String?
+  lastName      String?
+  phone         String?
+  email         String         @unique
+  emailVerified DateTime?
+  address       String?
+  province      String?
+  city          String?
+  country       String?        @default("Mexico")
+  countryCode   String?        @default("MX")
+  zipCode       String?
+  role          Role           @default(ESTANDAR)
+  password      String
+  status        Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  Session       Session[]
+  medico        Medico?
+  empresa       Empresa?
+}
+
+model Medico {
+  id           String  @id @default(cuid())
+  verificacion String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Empresa {
+  id        String  @id @default(cuid())
+  dni       String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Role {
+  MEDICO
+  CAPACITADOR
+  COSMETOLOGO
+  ADMIN
+  ESTANDAR
+  EMPRESA
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String   @unique
+  token      String
+  expires    DateTime
+  @@id([identifier])
+}
