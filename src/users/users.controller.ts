@@ -16,11 +16,16 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { Prisma } from '@prisma/client';
 import { UpdateMedicoDto } from './dto/update-medico.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({ status: 201, description: 'User created successfully.' })
+  @ApiResponse({ status: 409, description: 'User already exists.' })
   @Post('register')
   async register(@Body() userData: CreateUserDto) {
     const { password, email, role } = userData;
@@ -37,11 +42,7 @@ export class UsersController {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Convert the class instance to a plain object
     const dataObject = Object.assign({}, userData);
-
-    // Exclude 'verificacion' and 'dni' from the top-level
     const { verificacion, dni, ...userDataForUser } = dataObject;
 
     const userCreateInput: Prisma.UserCreateInput = {
@@ -49,21 +50,11 @@ export class UsersController {
       password: hashedPassword,
     };
 
-    // Add related models conditionally
     if (role === 'MEDICO') {
-      userCreateInput.medico = {
-        create: {
-          verificacion: verificacion!,
-        },
-      };
+      userCreateInput.medico = { create: { verificacion: verificacion! } };
     }
-
     if (role === 'EMPRESA') {
-      userCreateInput.empresa = {
-        create: {
-          dni: dni!,
-        },
-      };
+      userCreateInput.empresa = { create: { dni: dni! } };
     }
 
     const user = await this.usersService.createUser(userCreateInput);
@@ -71,6 +62,9 @@ export class UsersController {
     return { message: 'User created successfully', user: userWithoutPassword };
   }
 
+  @ApiOperation({ summary: 'User login' })
+  @ApiResponse({ status: 200, description: 'Login successful' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @Post('login')
   async login(@Body() loginData: { email: string; password: string }) {
     const { email, password } = loginData;
@@ -82,7 +76,11 @@ export class UsersController {
     return { message: 'Login successful', user: userWithoutPassword };
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get user by email' })
+  @ApiResponse({ status: 200, description: 'User found' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @Get('email/:email')
   async getUserByEmail(@Param('email') email: string) {
     const user = await this.usersService.findUserByEmail(email);
@@ -92,7 +90,11 @@ export class UsersController {
     return user;
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get user by ID' })
+  @ApiResponse({ status: 200, description: 'User found' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   @Get(':id')
   async getUserById(@Param('id') id: string) {
     const user = await this.usersService.findUserById(id);
@@ -102,8 +104,11 @@ export class UsersController {
     return user;
   }
 
-  // New methods for Medico
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get Medico by user ID' })
+  @ApiResponse({ status: 200, description: 'Medico found' })
+  @ApiResponse({ status: 404, description: 'Medico not found' })
   @Get(':userId/medico')
   async getMedicoByUserId(@Param('userId') userId: string) {
     const medico = await this.usersService.getMedicoByUserId(userId);
@@ -113,12 +118,13 @@ export class UsersController {
     return medico;
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update Medico information' })
+  @ApiResponse({ status: 200, description: 'Medico updated successfully' })
+  @ApiResponse({ status: 400, description: 'Medico update failed' })
   @Put(':userId/medico')
-  async updateMedico(
-    @Param('userId') userId: string,
-    @Body() data: UpdateMedicoDto,
-  ) {
+  async updateMedico(@Param('userId') userId: string, @Body() data: UpdateMedicoDto) {
     try {
       const updatedMedico = await this.usersService.updateMedico(userId, data);
       return updatedMedico;
@@ -127,8 +133,12 @@ export class UsersController {
     }
   }
 
-  // New methods for Empresa
+  // Empresa-specific endpoints
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get Empresa by user ID' })
+  @ApiResponse({ status: 200, description: 'Empresa found' })
+  @ApiResponse({ status: 404, description: 'Empresa not found' })
   @Get(':userId/empresa')
   async getEmpresaByUserId(@Param('userId') userId: string) {
     const empresa = await this.usersService.getEmpresaByUserId(userId);
@@ -138,12 +148,13 @@ export class UsersController {
     return empresa;
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Update Empresa information' })
+  @ApiResponse({ status: 200, description: 'Empresa updated successfully' })
+  @ApiResponse({ status: 400, description: 'Empresa update failed' })
   @Put(':userId/empresa')
-  async updateEmpresa(
-    @Param('userId') userId: string,
-    @Body() data: UpdateEmpresaDto,
-  ) {
+  async updateEmpresa(@Param('userId') userId: string, @Body() data: UpdateEmpresaDto) {
     try {
       const updatedEmpresa = await this.usersService.updateEmpresa(userId, data);
       return updatedEmpresa;
