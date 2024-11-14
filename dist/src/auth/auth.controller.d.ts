@@ -23,6 +23,7 @@ export declare class AuthController {
             status: boolean;
             createdAt: Date;
             updatedAt: Date;
+            newsletter: boolean;
         };
     }>;
     login(data: LoginDto): Promise<{

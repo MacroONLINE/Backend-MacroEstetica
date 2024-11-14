@@ -23,13 +23,15 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  
   @ApiOperation({ summary: 'Register a new user' })
   @ApiResponse({ status: 201, description: 'User created successfully.' })
   @ApiResponse({ status: 409, description: 'User already exists.' })
   @Post('register')
   async register(@Body() userData: CreateUserDto) {
-    const { password, email, role } = userData;
+    const { password, email, role, newsletter } = userData;
     const existingUser = await this.usersService.findUserByEmail(email);
+
     if (existingUser) {
       throw new HttpException('User already exists', HttpStatus.CONFLICT);
     }
@@ -42,19 +44,17 @@ export class UsersController {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const dataObject = Object.assign({}, userData);
-    const { verificacion, dni, ...userDataForUser } = dataObject;
-
     const userCreateInput: Prisma.UserCreateInput = {
-      ...userDataForUser,
+      ...userData,
       password: hashedPassword,
+      newsletter: newsletter ?? false, // Establece el valor de newsletter o false si no está definido
     };
 
     if (role === 'MEDICO') {
-      userCreateInput.medico = { create: { verificacion: verificacion! } };
+      userCreateInput.medico = { create: { verificacion: userData.verificacion! } };
     }
     if (role === 'EMPRESA') {
-      userCreateInput.empresa = { create: { dni: dni! } };
+      userCreateInput.empresa = { create: { dni: userData.dni! } };
     }
 
     const user = await this.usersService.createUser(userCreateInput);

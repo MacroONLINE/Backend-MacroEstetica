@@ -28,6 +28,7 @@ model User {
   Session       Session[]
   medico        Medico?
   empresa       Empresa?
+  newsletter    Boolean        @default(false)
 }
 
 model Medico {

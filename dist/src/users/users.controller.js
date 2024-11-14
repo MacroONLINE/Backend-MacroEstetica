@@ -26,7 +26,7 @@ let UsersController = class UsersController {
         this.usersService = usersService;
     }
     async register(userData) {
-        const { password, email, role } = userData;
+        const { password, email, role, newsletter } = userData;
         const existingUser = await this.usersService.findUserByEmail(email);
         if (existingUser) {
             throw new common_1.HttpException('User already exists', common_1.HttpStatus.CONFLICT);
@@ -38,17 +38,16 @@ let UsersController = class UsersController {
             throw new common_1.HttpException('DNI is required for EMPRESA role', common_1.HttpStatus.BAD_REQUEST);
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const dataObject = Object.assign({}, userData);
-        const { verificacion, dni, ...userDataForUser } = dataObject;
         const userCreateInput = {
-            ...userDataForUser,
+            ...userData,
             password: hashedPassword,
+            newsletter: newsletter ?? false,
         };
         if (role === 'MEDICO') {
-            userCreateInput.medico = { create: { verificacion: verificacion } };
+            userCreateInput.medico = { create: { verificacion: userData.verificacion } };
         }
         if (role === 'EMPRESA') {
-            userCreateInput.empresa = { create: { dni: dni } };
+            userCreateInput.empresa = { create: { dni: userData.dni } };
         }
         const user = await this.usersService.createUser(userCreateInput);
         const { password: _, ...userWithoutPassword } = user;

@@ -14,4 +14,5 @@ export declare class CreateUserDto {
     zipCode?: string;
     verificacion?: string;
     dni?: string;
+    newsletter?: boolean;
 }

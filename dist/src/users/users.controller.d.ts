@@ -24,6 +24,7 @@ export declare class UsersController {
             status: boolean;
             createdAt: Date;
             updatedAt: Date;
+            newsletter: boolean;
         };
     }>;
     login(loginData: {
@@ -48,6 +49,7 @@ export declare class UsersController {
             status: boolean;
             createdAt: Date;
             updatedAt: Date;
+            newsletter: boolean;
         };
     }>;
     getUserByEmail(email: string): Promise<{
@@ -68,6 +70,7 @@ export declare class UsersController {
         status: boolean;
         createdAt: Date;
         updatedAt: Date;
+        newsletter: boolean;
     }>;
     getUserById(id: string): Promise<{
         id: string;
@@ -87,6 +90,7 @@ export declare class UsersController {
         status: boolean;
         createdAt: Date;
         updatedAt: Date;
+        newsletter: boolean;
     }>;
     getMedicoByUserId(userId: string): Promise<{
         id: string;

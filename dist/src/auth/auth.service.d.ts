@@ -26,6 +26,7 @@ export declare class AuthService {
             status: boolean;
             createdAt: Date;
             updatedAt: Date;
+            newsletter: boolean;
         };
     }>;
 }

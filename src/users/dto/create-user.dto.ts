@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsEnum, MinLength, ValidateIf } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsEnum, MinLength, ValidateIf, IsBoolean } from 'class-validator';
 import { Role } from '@prisma/client';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -70,4 +70,8 @@ export class CreateUserDto {
   @IsString()
   @ValidateIf(o => o.role === 'EMPRESA')
   dni?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  newsletter?: boolean;
 }
