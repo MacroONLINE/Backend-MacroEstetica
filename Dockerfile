@@ -21,4 +21,4 @@ RUN npm run build
 EXPOSE 3001
 
 # Comando para iniciar la aplicación en producción y ejecutar migraciones
-CMD npx prisma migrate deploy && npm run start:prod
+CMD npx prisma migrate deploy && node dist/src/main
