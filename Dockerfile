@@ -14,14 +14,11 @@ COPY . .
 # Genera el cliente de Prisma
 RUN npx prisma generate
 
-# Aplica las migraciones de Prisma
-RUN npx prisma migrate deploy
-
 # Compila el proyecto de NestJS
 RUN npm run build
 
 # Expone el puerto que usará la aplicación
 EXPOSE 3001
 
-# Comando para iniciar la aplicación en producción
-CMD ["npm", "run", "start:prod"]
+# Comando para iniciar la aplicación en producción y ejecutar migraciones
+CMD npx prisma migrate deploy && npm run start:prod
