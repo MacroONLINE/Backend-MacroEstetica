@@ -22,7 +22,93 @@ let UsersService = class UsersService {
             include: {
                 medico: true,
                 empresa: true,
+                instructor: true,
             },
+        });
+    }
+    async updateUser(id, data, roleData) {
+        const { medicoData, empresaData, instructorData } = roleData || {};
+        const user = await this.prisma.user.update({
+            where: { id },
+            data,
+            include: {
+                medico: true,
+                empresa: true,
+                instructor: true,
+            },
+        });
+        if (medicoData) {
+            await this.createOrUpdateMedico(id, medicoData);
+        }
+        else if (empresaData) {
+            await this.createOrUpdateEmpresa(id, empresaData);
+        }
+        else if (instructorData) {
+            await this.createOrUpdateInstructor(id, instructorData);
+        }
+        return user;
+    }
+    async createOrUpdateMedico(userId, data) {
+        return this.prisma.medico.upsert({
+            where: { userId },
+            update: data,
+            create: {
+                ...data,
+                userId,
+            },
+        });
+    }
+    async createOrUpdateEmpresa(userId, data) {
+        return this.prisma.empresa.upsert({
+            where: { userId },
+            update: data,
+            create: {
+                ...data,
+                userId,
+            },
+        });
+    }
+    async createOrUpdateInstructor(userId, data) {
+        return this.prisma.instructor.upsert({
+            where: { userId },
+            update: data,
+            create: {
+                ...data,
+                userId,
+            },
+        });
+    }
+    async updateMedico(userId, data) {
+        return this.prisma.medico.update({
+            where: { userId },
+            data,
+        });
+    }
+    async updateEmpresa(userId, data) {
+        return this.prisma.empresa.update({
+            where: { userId },
+            data,
+        });
+    }
+    async updateInstructor(userId, data) {
+        return this.prisma.instructor.update({
+            where: { userId },
+            data,
+        });
+    }
+    async getMedicoByUserId(userId) {
+        return this.prisma.medico.findUnique({
+            where: { userId },
+        });
+    }
+    async getEmpresaByUserId(userId) {
+        return this.prisma.empresa.findUnique({
+            where: { userId },
+        });
+    }
+    async getInstructorByUserId(userId) {
+        return this.prisma.instructor.findUnique({
+            where: { userId },
         });
     }
     async findUserByEmail(email) {
@@ -31,16 +117,7 @@ let UsersService = class UsersService {
             include: {
                 medico: true,
                 empresa: true,
-            },
-        });
-    }
-    async updateUser(id, data) {
-        return this.prisma.user.update({
-            where: { id },
-            data,
-            include: {
-                medico: true,
-                empresa: true,
+                instructor: true,
             },
         });
     }
@@ -50,29 +127,8 @@ let UsersService = class UsersService {
             include: {
                 medico: true,
                 empresa: true,
+                instructor: true,
             },
-        });
-    }
-    async getMedicoByUserId(userId) {
-        return this.prisma.medico.findUnique({
-            where: { userId },
-        });
-    }
-    async updateMedico(userId, data) {
-        return this.prisma.medico.update({
-            where: { userId },
-            data,
-        });
-    }
-    async getEmpresaByUserId(userId) {
-        return this.prisma.empresa.findUnique({
-            where: { userId },
-        });
-    }
-    async updateEmpresa(userId, data) {
-        return this.prisma.empresa.update({
-            where: { userId },
-            data,
         });
     }
 };

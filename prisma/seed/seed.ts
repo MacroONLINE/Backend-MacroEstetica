@@ -27,7 +27,7 @@ async function main() {
       role: 'MEDICO',
       medico: {
         create: {
-          verificacion: 'http://example.com/verificacion/ana-gonzalez',
+          verification: 'http://example.com/verificacion/ana-gonzalez',
         },
       },
     },

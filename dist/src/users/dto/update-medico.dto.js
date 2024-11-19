@@ -10,13 +10,15 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateMedicoDto = void 0;
+const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class UpdateMedicoDto {
 }
 exports.UpdateMedicoDto = UpdateMedicoDto;
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Verification information' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], UpdateMedicoDto.prototype, "verificacion", void 0);
+], UpdateMedicoDto.prototype, "verification", void 0);
 //# sourceMappingURL=update-medico.dto.js.map

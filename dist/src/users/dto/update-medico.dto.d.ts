@@ -1,3 +1,3 @@
 export declare class UpdateMedicoDto {
-    verificacion?: string;
+    verification?: string;
 }

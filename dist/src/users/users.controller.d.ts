@@ -1,7 +1,9 @@
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateMedicoDto } from './dto/update-medico.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { UpdateInstructorDto } from './dto/update-instructor.dto';
 export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
@@ -27,10 +29,7 @@ export declare class UsersController {
             newsletter: boolean;
         };
     }>;
-    login(loginData: {
-        email: string;
-        password: string;
-    }): Promise<{
+    completeProfile(userData: UpdateUserDto): Promise<{
         message: string;
         user: {
             id: string;
@@ -52,7 +51,7 @@ export declare class UsersController {
             newsletter: boolean;
         };
     }>;
-    getUserByEmail(email: string): Promise<{
+    getProfile(req: any): Promise<{
         id: string;
         firstName: string | null;
         lastName: string | null;
@@ -66,13 +65,54 @@ export declare class UsersController {
         countryCode: string | null;
         zipCode: string | null;
         role: import(".prisma/client").$Enums.Role;
-        password: string;
         status: boolean;
         createdAt: Date;
         updatedAt: Date;
         newsletter: boolean;
     }>;
-    getUserById(id: string): Promise<{
+    updateMedico(req: any, data: UpdateMedicoDto): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        verification: string;
+        userId: string;
+    }>;
+    getMedico(req: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        verification: string;
+        userId: string;
+    }>;
+    updateEmpresa(req: any, data: UpdateEmpresaDto): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        userId: string;
+        dni: string;
+    }>;
+    getEmpresa(req: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        userId: string;
+        dni: string;
+    }>;
+    updateInstructor(req: any, data: UpdateInstructorDto): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        userId: string;
+        bio: string | null;
+    }>;
+    getInstructor(req: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        userId: string;
+        bio: string | null;
+    }>;
+    findUserById(id: string): Promise<{
         id: string;
         firstName: string | null;
         lastName: string | null;
@@ -86,38 +126,9 @@ export declare class UsersController {
         countryCode: string | null;
         zipCode: string | null;
         role: import(".prisma/client").$Enums.Role;
-        password: string;
         status: boolean;
         createdAt: Date;
         updatedAt: Date;
         newsletter: boolean;
-    }>;
-    getMedicoByUserId(userId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        verificacion: string;
-        userId: string;
-    }>;
-    updateMedico(userId: string, data: UpdateMedicoDto): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        verificacion: string;
-        userId: string;
-    }>;
-    getEmpresaByUserId(userId: string): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        dni: string;
-    }>;
-    updateEmpresa(userId: string, data: UpdateEmpresaDto): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        userId: string;
-        dni: string;
     }>;
 }

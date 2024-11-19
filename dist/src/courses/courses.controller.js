@@ -1,0 +1,123 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.CoursesController = void 0;
+const common_1 = require("@nestjs/common");
+const courses_service_1 = require("./courses.service");
+const create_course_dto_1 = require("./dto/create-course.dto");
+const create_module_dto_1 = require("./dto/create-module.dto");
+const create_class_dto_1 = require("./dto/create-class.dto");
+const create_comment_dto_1 = require("./dto/create-comment.dto");
+const create_category_dto_1 = require("./dto/create-category.dto");
+const swagger_1 = require("@nestjs/swagger");
+let CoursesController = class CoursesController {
+    constructor(coursesService) {
+        this.coursesService = coursesService;
+    }
+    async createCourse(createCourseDto) {
+        return this.coursesService.createCourse(createCourseDto);
+    }
+    async createModule(createModuleDto) {
+        return this.coursesService.createModule(createModuleDto);
+    }
+    async createClass(createClassDto) {
+        return this.coursesService.createClass(createClassDto);
+    }
+    async createComment(createCommentDto) {
+        return this.coursesService.createComment(createCommentDto);
+    }
+    async createCategory(createCategoryDto) {
+        return this.coursesService.createCategory(createCategoryDto);
+    }
+    async getAllCourses() {
+        return this.coursesService.getAllCourses();
+    }
+    async getFeaturedCourses() {
+        return this.coursesService.getFeaturedCourses();
+    }
+    async getModulesByCourseId(courseId) {
+        return this.coursesService.getModulesByCourseId(courseId);
+    }
+    async getClassesByModuleId(moduleId) {
+        return this.coursesService.getClassesByModuleId(moduleId);
+    }
+};
+exports.CoursesController = CoursesController;
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_course_dto_1.CreateCourseDto]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "createCourse", null);
+__decorate([
+    (0, common_1.Post)('modules'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_module_dto_1.CreateModuleDto]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "createModule", null);
+__decorate([
+    (0, common_1.Post)('classes'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_class_dto_1.CreateClassDto]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "createClass", null);
+__decorate([
+    (0, common_1.Post)('comments'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_comment_dto_1.CreateCommentDto]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "createComment", null);
+__decorate([
+    (0, common_1.Post)('categories'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_category_dto_1.CreateCategoryDto]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "createCategory", null);
+__decorate([
+    (0, common_1.Get)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getAllCourses", null);
+__decorate([
+    (0, common_1.Get)('featured'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getFeaturedCourses", null);
+__decorate([
+    (0, common_1.Get)(':courseId/modules'),
+    __param(0, (0, common_1.Param)('courseId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getModulesByCourseId", null);
+__decorate([
+    (0, common_1.Get)('modules/:moduleId/classes'),
+    __param(0, (0, common_1.Param)('moduleId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getClassesByModuleId", null);
+exports.CoursesController = CoursesController = __decorate([
+    (0, swagger_1.ApiTags)('courses'),
+    (0, common_1.Controller)('courses'),
+    __metadata("design:paramtypes", [courses_service_1.CoursesService])
+], CoursesController);
+//# sourceMappingURL=courses.controller.js.map

@@ -13,8 +13,6 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const users_service_1 = require("../users/users.service");
 const bcrypt = require("bcrypt");
-const common_2 = require("@nestjs/common");
-const common_3 = require("@nestjs/common");
 let AuthService = class AuthService {
     constructor(usersService) {
         this.usersService = usersService;
@@ -28,44 +26,7 @@ let AuthService = class AuthService {
         return null;
     }
     async login(user) {
-        return { success: true };
-    }
-    async register(data) {
-        const { email, password, role } = data;
-        const existingUser = await this.usersService.findUserByEmail(email);
-        if (existingUser) {
-            throw new common_2.HttpException('User already exists', common_3.HttpStatus.CONFLICT);
-        }
-        if (role === 'MEDICO' && !data.verificacion) {
-            throw new common_2.HttpException('Verificacion is required for MEDICO role', common_3.HttpStatus.BAD_REQUEST);
-        }
-        if (role === 'EMPRESA' && !data.dni) {
-            throw new common_2.HttpException('DNI is required for EMPRESA role', common_3.HttpStatus.BAD_REQUEST);
-        }
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const dataObject = Object.assign({}, data);
-        const { verificacion, dni, ...userDataForUser } = dataObject;
-        const userCreateInput = {
-            ...userDataForUser,
-            password: hashedPassword,
-        };
-        if (role === 'MEDICO') {
-            userCreateInput.medico = {
-                create: {
-                    verificacion: verificacion,
-                },
-            };
-        }
-        if (role === 'EMPRESA') {
-            userCreateInput.empresa = {
-                create: {
-                    dni: dni,
-                },
-            };
-        }
-        const user = await this.usersService.createUser(userCreateInput);
-        const { password: _, ...userWithoutPassword } = user;
-        return { message: 'User created successfully', user: userWithoutPassword };
+        return { message: 'Login successful', user };
     }
 };
 exports.AuthService = AuthService;

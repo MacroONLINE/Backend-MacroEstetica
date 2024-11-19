@@ -12,25 +12,95 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateUserDto = void 0;
 const class_validator_1 = require("class-validator");
 const client_1 = require("@prisma/client");
+const swagger_1 = require("@nestjs/swagger");
 class UpdateUserDto {
 }
 exports.UpdateUserDto = UpdateUserDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'User ID' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Ana', description: 'First name of the user' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "firstName", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Gonzalez', description: 'Last name of the user' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateUserDto.prototype, "lastName", void 0);
 __decorate([
-    (0, class_validator_1.IsEmail)(),
+    (0, swagger_1.ApiPropertyOptional)({ example: '555-1234', description: 'User phone number' }),
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], UpdateUserDto.prototype, "email", void 0);
+], UpdateUserDto.prototype, "phone", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '123 Main St', description: 'User address' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "address", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Some Province', description: 'User province' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "province", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Some City', description: 'User city' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "city", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Mexico', description: 'User country' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "country", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'MX', description: 'Country code' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "countryCode", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '12345', description: 'User zip code' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "zipCode", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'http://example.com/verification', description: 'Verification URL for MEDICO role' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.ValidateIf)(o => o.role === 'MEDICO'),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "verification", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: '123456789', description: 'DNI for EMPRESA role' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.ValidateIf)(o => o.role === 'EMPRESA'),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "dni", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Experienced instructor bio', description: 'Bio for INSTRUCTOR role' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.ValidateIf)(o => o.role === 'INSTRUCTOR'),
+    __metadata("design:type", String)
+], UpdateUserDto.prototype, "bio", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: true, description: 'Subscribe to newsletter' }),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateUserDto.prototype, "newsletter", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.Role, description: 'User role' }),
     (0, class_validator_1.IsEnum)(client_1.Role),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

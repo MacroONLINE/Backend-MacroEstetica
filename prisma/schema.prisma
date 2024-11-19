@@ -25,37 +25,61 @@ model User {
   status        Boolean        @default(true)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  newsletter    Boolean        @default(false)
   Session       Session[]
   medico        Medico?
   empresa       Empresa?
-  newsletter    Boolean        @default(false)
+  instructor    Instructor?
+  comments      Comment[] @relation("UserComments")
+  enrollments   CourseEnrollment[]
+}
+
+model Instructor {
+  id        String   @id @default(cuid())
+  bio       String?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
+  courses   Course[] @relation("InstructorCourses")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Course {
+  id               String         @id @default(cuid())
+  name             String
+  description      String?
+  cost             Float
+  discount         Float?
+  publicationDate  DateTime       @default(now())
+  level            CourseLevel
+  featured         Boolean        @default(false)
+  averageRating    Float?         @default(0.0)
+  participants     Int            @default(0)
+  instructorId     String?
+  instructor       Instructor?    @relation("InstructorCourses", fields: [instructorId], references: [id])
+  modules          Module[]
+  categories       CategoriesOnCourses[]
+  enrollments      CourseEnrollment[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @default(now())
 }
 
 model Medico {
-  id           String  @id @default(cuid())
-  verificacion String
-  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String  @unique
+  id           String   @id @default(cuid())
+  verification String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String   @unique
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @default(now())
 }
 
 model Empresa {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   dni       String
-  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String  @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String   @unique
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-enum Role {
-  MEDICO
-  CAPACITADOR
-  COSMETOLOGO
-  ADMIN
-  ESTANDAR
-  EMPRESA
+  updatedAt DateTime @default(now())
 }
 
 model Session {
@@ -65,12 +89,79 @@ model Session {
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @default(now())
 }
 
-model VerificationToken {
-  identifier String   @unique
-  token      String
-  expires    DateTime
-  @@id([identifier])
+model CategoriesOnCourses {
+  id          String   @id @default(cuid())
+  courseId    String
+  categoryId  String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  courses   CategoriesOnCourses[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  description String
+  classes     Class[]
+}
+
+model Class {
+  id          String   @id @default(cuid())
+  moduleId    String
+  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  description String
+  comments    Comment[]
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
+  classId     String
+  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  type        CommentType
+  rating      Int
+  content     String
+  createdAt   DateTime @default(now())
+}
+
+model CourseEnrollment {
+  id        String   @id @default(cuid())
+  courseId  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  enrolledAt DateTime @default(now())
+}
+
+enum Role {
+  MEDICO
+  CAPACITADOR
+  COSMETOLOGO
+  ADMIN
+  ESTANDAR
+  EMPRESA
+  INSTRUCTOR
+}
+
+enum CommentType {
+  TEXT
+  RATING
+}
+
+enum CourseLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
 }
