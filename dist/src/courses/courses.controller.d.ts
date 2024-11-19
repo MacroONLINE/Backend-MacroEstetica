@@ -8,10 +8,8 @@ export declare class CoursesController {
     private readonly coursesService;
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string | null;
         cost: number;
         discount: number | null;
@@ -21,11 +19,13 @@ export declare class CoursesController {
         averageRating: number | null;
         participants: number;
         instructorId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;
-        courseId: string;
         description: string;
+        courseId: string;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
         id: string;
@@ -36,14 +36,14 @@ export declare class CoursesController {
         id: string;
         createdAt: Date;
         userId: string;
+        classId: string;
         type: import(".prisma/client").$Enums.CommentType;
         rating: number;
         content: string;
-        classId: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
-        name: string;
         id: string;
+        name: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -56,13 +56,13 @@ export declare class CoursesController {
             }[];
         } & {
             id: string;
-            courseId: string;
             description: string;
+            courseId: string;
         })[];
         categories: ({
             category: {
-                name: string;
                 id: string;
+                name: string;
                 createdAt: Date;
                 updatedAt: Date;
             };
@@ -72,10 +72,8 @@ export declare class CoursesController {
             categoryId: string;
         })[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string | null;
         cost: number;
         discount: number | null;
@@ -85,6 +83,8 @@ export declare class CoursesController {
         averageRating: number | null;
         participants: number;
         instructorId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     getFeaturedCourses(): Promise<({
         instructor: {
@@ -96,8 +96,8 @@ export declare class CoursesController {
         };
         categories: ({
             category: {
-                name: string;
                 id: string;
+                name: string;
                 createdAt: Date;
                 updatedAt: Date;
             };
@@ -107,10 +107,8 @@ export declare class CoursesController {
             categoryId: string;
         })[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string | null;
         cost: number;
         discount: number | null;
@@ -120,6 +118,8 @@ export declare class CoursesController {
         averageRating: number | null;
         participants: number;
         instructorId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     getModulesByCourseId(courseId: string): Promise<({
         classes: {
@@ -129,18 +129,18 @@ export declare class CoursesController {
         }[];
     } & {
         id: string;
-        courseId: string;
         description: string;
+        courseId: string;
     })[]>;
     getClassesByModuleId(moduleId: string): Promise<({
         comments: {
             id: string;
             createdAt: Date;
             userId: string;
+            classId: string;
             type: import(".prisma/client").$Enums.CommentType;
             rating: number;
             content: string;
-            classId: string;
         }[];
     } & {
         id: string;

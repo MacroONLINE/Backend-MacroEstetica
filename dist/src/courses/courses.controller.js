@@ -56,6 +56,9 @@ let CoursesController = class CoursesController {
 exports.CoursesController = CoursesController;
 __decorate([
     (0, common_1.Post)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new course' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Course created successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_course_dto_1.CreateCourseDto]),
@@ -63,6 +66,9 @@ __decorate([
 ], CoursesController.prototype, "createCourse", null);
 __decorate([
     (0, common_1.Post)('modules'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new module for a course' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Module created successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_module_dto_1.CreateModuleDto]),
@@ -70,6 +76,9 @@ __decorate([
 ], CoursesController.prototype, "createModule", null);
 __decorate([
     (0, common_1.Post)('classes'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new class for a module' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Class created successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_class_dto_1.CreateClassDto]),
@@ -77,6 +86,9 @@ __decorate([
 ], CoursesController.prototype, "createClass", null);
 __decorate([
     (0, common_1.Post)('comments'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new comment for a class' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Comment created successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_comment_dto_1.CreateCommentDto]),
@@ -84,6 +96,9 @@ __decorate([
 ], CoursesController.prototype, "createComment", null);
 __decorate([
     (0, common_1.Post)('categories'),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new category' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Category created successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_category_dto_1.CreateCategoryDto]),
@@ -91,18 +106,26 @@ __decorate([
 ], CoursesController.prototype, "createCategory", null);
 __decorate([
     (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all courses' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of courses retrieved.' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getAllCourses", null);
 __decorate([
     (0, common_1.Get)('featured'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get featured courses' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of featured courses retrieved.' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getFeaturedCourses", null);
 __decorate([
     (0, common_1.Get)(':courseId/modules'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all modules for a specific course' }),
+    (0, swagger_1.ApiParam)({ name: 'courseId', description: 'The ID of the course' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of modules retrieved.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Course not found.' }),
     __param(0, (0, common_1.Param)('courseId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -110,6 +133,10 @@ __decorate([
 ], CoursesController.prototype, "getModulesByCourseId", null);
 __decorate([
     (0, common_1.Get)('modules/:moduleId/classes'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all classes for a specific module' }),
+    (0, swagger_1.ApiParam)({ name: 'moduleId', description: 'The ID of the module' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of classes retrieved.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Module not found.' }),
     __param(0, (0, common_1.Param)('moduleId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
