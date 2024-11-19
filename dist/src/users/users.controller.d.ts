@@ -9,25 +9,6 @@ export declare class UsersController {
     constructor(usersService: UsersService);
     register(userData: CreateUserDto): Promise<{
         message: string;
-        user: {
-            id: string;
-            firstName: string | null;
-            lastName: string | null;
-            phone: string | null;
-            email: string;
-            emailVerified: Date | null;
-            address: string | null;
-            province: string | null;
-            city: string | null;
-            country: string | null;
-            countryCode: string | null;
-            zipCode: string | null;
-            role: import(".prisma/client").$Enums.Role;
-            status: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            newsletter: boolean;
-        };
     }>;
     completeProfile(userData: UpdateUserDto): Promise<{
         message: string;

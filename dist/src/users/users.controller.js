@@ -42,7 +42,7 @@ let UsersController = class UsersController {
         };
         const user = await this.usersService.createUser(userCreateInput);
         const { password: _, ...userWithoutPassword } = user;
-        return { message: 'User created successfully', user: userWithoutPassword };
+        return { message: 'User created successfully' };
     }
     async completeProfile(userData) {
         try {

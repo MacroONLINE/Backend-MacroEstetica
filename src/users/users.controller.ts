@@ -52,7 +52,7 @@ export class UsersController {
 
     const user = await this.usersService.createUser(userCreateInput);
     const { password: _, ...userWithoutPassword } = user;
-    return { message: 'User created successfully', user: userWithoutPassword };
+    return { message: 'User created successfully' };
   }
 
   // Step 2: Complete user profile
@@ -200,7 +200,6 @@ async completeProfile(@Body() userData: UpdateUserDto) {
   }
 
   // Obtener un usuario por su ID
-
 @ApiOperation({ summary: 'Get user by ID' })
 @ApiResponse({ status: 200, description: 'User found.' })
 @ApiResponse({ status: 404, description: 'User not found.' })
