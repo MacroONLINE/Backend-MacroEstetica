@@ -1,3 +1,4 @@
+import { Profession } from '@prisma/client';
 export declare class UpdateInstructorDto {
-    bio?: string;
+    profession: Profession;
 }

@@ -35,13 +35,13 @@ model User {
 }
 
 model Instructor {
-  id        String   @id @default(cuid())
-  bio       String?
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String   @unique
-  courses   Course[] @relation("InstructorCourses")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  profession Profession @default(MEDICO) // Enum Profession
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String   @unique
+  courses    Course[] @relation("InstructorCourses")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
 }
 
 model Course {
@@ -74,12 +74,16 @@ model Medico {
 }
 
 model Empresa {
-  id        String   @id @default(cuid())
-  dni       String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId    String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id         String    @id @default(cuid())
+  dni        String
+  name       String
+  target     Target    @default(MEDICO) // Enum Target
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String    @unique
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @default(now())
 }
 
 model Session {
@@ -104,6 +108,7 @@ model Category {
   id        String   @id @default(cuid())
   name      String
   courses   CategoriesOnCourses[]
+  empresas  Empresa[] // Relación con empresas
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
@@ -137,11 +142,11 @@ model Comment {
 }
 
 model CourseEnrollment {
-  id        String   @id @default(cuid())
-  courseId  String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  id         String   @id @default(cuid())
+  courseId   String
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   enrolledAt DateTime @default(now())
 }
 
@@ -164,4 +169,14 @@ enum CourseLevel {
   BEGINNER
   INTERMEDIATE
   ADVANCED
+}
+
+enum Profession {
+  MEDICO
+  ESTETICISTA
+}
+
+enum Target {
+  MEDICO
+  ESTETICISTA
 }

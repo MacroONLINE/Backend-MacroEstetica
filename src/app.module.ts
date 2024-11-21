@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config'; // Importa ConfigModule
+import { ConfigModule } from '@nestjs/config'; 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersService } from './users/users.service';
@@ -11,8 +11,7 @@ import { CoursesModule } from './courses/courses.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }), // Agrega el ConfigModule y habilítalo globalmente
-    PrismaModule, 
+    ConfigModule.forRoot({ isGlobal: true }), 
     UsersModule, 
     AuthModule,
     CoursesModule

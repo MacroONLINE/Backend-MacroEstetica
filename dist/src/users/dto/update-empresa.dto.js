@@ -11,12 +11,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateEmpresaDto = void 0;
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class UpdateEmpresaDto {
 }
 exports.UpdateEmpresaDto = UpdateEmpresaDto;
 __decorate([
-    (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateEmpresaDto.prototype, "dni", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateEmpresaDto.prototype, "name", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(client_1.Target, { message: 'Target must be either MEDICO or ESTETICISTA' }),
+    __metadata("design:type", String)
+], UpdateEmpresaDto.prototype, "target", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateEmpresaDto.prototype, "categoryId", void 0);
 //# sourceMappingURL=update-empresa.dto.js.map

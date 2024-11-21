@@ -1,9 +1,7 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum } from 'class-validator';
+import { Profession } from '@prisma/client';
 
 export class UpdateInstructorDto {
-  @ApiPropertyOptional({ description: 'Bio of the instructor' })
-  @IsOptional()
-  @IsString()
-  bio?: string;
+  @IsEnum(Profession, { message: 'Profession must be either MEDICO or ESTETICISTA' })
+  profession!: Profession; // Obligatorio para Prisma
 }

@@ -16,7 +16,7 @@ class UpdateMedicoDto {
 }
 exports.UpdateMedicoDto = UpdateMedicoDto;
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ description: 'Verification information' }),
+    (0, swagger_1.ApiPropertyOptional)({ description: 'Verification file (will be stored as a URL)' }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

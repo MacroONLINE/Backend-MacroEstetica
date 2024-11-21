@@ -10,15 +10,13 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateInstructorDto = void 0;
-const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class UpdateInstructorDto {
 }
 exports.UpdateInstructorDto = UpdateInstructorDto;
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ description: 'Bio of the instructor' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEnum)(client_1.Profession, { message: 'Profession must be either MEDICO or ESTETICISTA' }),
     __metadata("design:type", String)
-], UpdateInstructorDto.prototype, "bio", void 0);
+], UpdateInstructorDto.prototype, "profession", void 0);
 //# sourceMappingURL=update-instructor.dto.js.map

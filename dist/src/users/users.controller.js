@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const platform_express_1 = require("@nestjs/platform-express");
 const users_service_1 = require("./users.service");
 const bcrypt = require("bcrypt");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
@@ -22,8 +23,8 @@ const update_user_dto_1 = require("./dto/update-user.dto");
 const update_medico_dto_1 = require("./dto/update-medico.dto");
 const update_empresa_dto_1 = require("./dto/update-empresa.dto");
 const update_instructor_dto_1 = require("./dto/update-instructor.dto");
-const common_2 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const Multer = require("multer");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -40,52 +41,30 @@ let UsersController = class UsersController {
             password: hashedPassword,
             role: role || 'ESTANDAR',
         };
-        const user = await this.usersService.createUser(userCreateInput);
-        const { password: _, ...userWithoutPassword } = user;
+        await this.usersService.createUser(userCreateInput);
         return { message: 'User created successfully' };
     }
-    async completeProfile(userData) {
+    async completeProfile(userData, empresaData) {
         try {
             if (!userData.id) {
                 throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
             }
-            const { id, role, verification, dni, bio, ...updateData } = userData;
-            if (role === 'MEDICO' && !verification) {
-                throw new common_1.HttpException('Verification is required for MEDICO role', common_1.HttpStatus.BAD_REQUEST);
-            }
-            if (role === 'EMPRESA' && !dni) {
-                throw new common_1.HttpException('DNI is required for EMPRESA role', common_1.HttpStatus.BAD_REQUEST);
-            }
-            if (role === 'INSTRUCTOR' && !bio) {
-                throw new common_1.HttpException('Bio is required for INSTRUCTOR role', common_1.HttpStatus.BAD_REQUEST);
-            }
-            const user = await this.usersService.updateUser(id, updateData);
-            if (role === 'MEDICO') {
-                await this.usersService.createOrUpdateMedico(id, { verification });
-            }
-            else if (role === 'EMPRESA') {
-                await this.usersService.createOrUpdateEmpresa(id, { dni });
-            }
-            else if (role === 'INSTRUCTOR') {
-                await this.usersService.createOrUpdateInstructor(id, { bio });
-            }
-            const { password, ...userWithoutPassword } = user;
-            return { message: 'User profile updated successfully', user: userWithoutPassword };
+            const { id, role, verification, ...updateData } = userData;
+            await this.usersService.updateUser(id, updateData, {
+                medicoData: role === 'MEDICO' ? { verification } : undefined,
+                empresaData: role === 'EMPRESA' ? empresaData : undefined,
+                instructorData: role === 'INSTRUCTOR' ? { profession: userData.bio } : undefined,
+            });
+            return { message: 'User profile updated successfully' };
         }
         catch (error) {
             throw new common_1.HttpException(error.message || 'Profile update failed', error.status || common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async getProfile(req) {
-        const userId = req.user.id;
-        const user = await this.usersService.findUserById(userId);
-        if (!user) {
-            throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
+    async updateMedico(req, data, file) {
+        if (file) {
+            data.verification = `https://mockstorage.com/`;
         }
-        const { password: _, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-    }
-    async updateMedico(req, data) {
         const userId = req.user.id;
         return this.usersService.updateMedico(userId, data);
     }
@@ -134,42 +113,28 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 200, description: 'User profile updated successfully.' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request.' }),
     (0, common_1.Put)('complete-profile'),
-    (0, swagger_1.ApiOperation)({ summary: 'Complete user profile (Step 2)' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'User profile updated successfully.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request.' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_user_dto_1.UpdateUserDto]),
+    __metadata("design:paramtypes", [update_user_dto_1.UpdateUserDto,
+        update_empresa_dto_1.UpdateEmpresaDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "completeProfile", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, swagger_1.ApiOperation)({ summary: 'Get current user profile' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'User profile retrieved successfully.' }),
-    (0, common_1.Get)('me'),
-    __param(0, (0, common_1.Request)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], UsersController.prototype, "getProfile", null);
-__decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Update Medico information' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Medico updated successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Medico update failed' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Update Medico information with file upload' }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     (0, common_1.Put)('medico'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, update_medico_dto_1.UpdateMedicoDto]),
+    __metadata("design:paramtypes", [Object, update_medico_dto_1.UpdateMedicoDto, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateMedico", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get Medico information' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Medico found' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Medico not found' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Medico found.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Medico not found.' }),
     (0, common_1.Get)('medico'),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -177,10 +142,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getMedico", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Update Empresa information' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Empresa updated successfully' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Empresa update failed' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Put)('empresa'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
@@ -189,10 +153,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateEmpresa", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get Empresa information' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Empresa found' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Empresa not found' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Empresa found.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Empresa not found.' }),
     (0, common_1.Get)('empresa'),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -200,10 +165,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getEmpresa", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Update Instructor information' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Instructor updated successfully.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Instructor update failed.' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Put)('instructor'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
@@ -212,8 +176,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateInstructor", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get Instructor information' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Instructor found.' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Instructor not found.' }),
     (0, common_1.Get)('instructor'),
@@ -227,7 +192,7 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 200, description: 'User found.' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'User not found.' }),
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_2.Param)('id')),
+    __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
