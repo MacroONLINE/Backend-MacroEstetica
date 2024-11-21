@@ -56,17 +56,22 @@ export class UsersService {
   // Create or update Medico information
   async createOrUpdateMedico(
     userId: string,
-    data: Omit<Prisma.MedicoUncheckedCreateInput, 'userId'>,
+    data: Partial<Prisma.MedicoUncheckedCreateInput>, // Allow partial inputs
   ): Promise<Medico> {
+    const createData: Prisma.MedicoUncheckedCreateInput = {
+      userId, // Required field
+      verification: data.verification || '', // Provide a default if undefined
+    };
+  
     return this.prisma.medico.upsert({
       where: { userId },
-      update: data,
-      create: {
+      update: {
         ...data,
-        userId,
-      },
+      }, // Update with provided fields
+      create: createData, // Create a new record if not found
     });
   }
+  
 
   // Create or update Empresa information
   async createOrUpdateEmpresa(
@@ -95,30 +100,6 @@ export class UsersService {
         ...data,
         userId,
       },
-    });
-  }
-
-  // Update Medico information
-  async updateMedico(userId: string, data: Prisma.MedicoUpdateInput): Promise<Medico> {
-    return this.prisma.medico.update({
-      where: { userId },
-      data,
-    });
-  }
-
-  // Update Empresa information
-  async updateEmpresa(userId: string, data: Prisma.EmpresaUpdateInput): Promise<Empresa> {
-    return this.prisma.empresa.update({
-      where: { userId },
-      data,
-    });
-  }
-
-  // Update Instructor information
-  async updateInstructor(userId: string, data: Prisma.InstructorUpdateInput): Promise<Instructor> {
-    return this.prisma.instructor.update({
-      where: { userId },
-      data,
     });
   }
 

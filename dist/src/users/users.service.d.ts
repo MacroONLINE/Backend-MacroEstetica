@@ -9,12 +9,9 @@ export declare class UsersService {
         empresaData?: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>;
         instructorData?: Omit<Prisma.InstructorUncheckedCreateInput, 'userId'>;
     }): Promise<User>;
-    createOrUpdateMedico(userId: string, data: Omit<Prisma.MedicoUncheckedCreateInput, 'userId'>): Promise<Medico>;
+    createOrUpdateMedico(userId: string, data: Partial<Prisma.MedicoUncheckedCreateInput>): Promise<Medico>;
     createOrUpdateEmpresa(userId: string, data: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>): Promise<Empresa>;
     createOrUpdateInstructor(userId: string, data: Omit<Prisma.InstructorUncheckedCreateInput, 'userId'>): Promise<Instructor>;
-    updateMedico(userId: string, data: Prisma.MedicoUpdateInput): Promise<Medico>;
-    updateEmpresa(userId: string, data: Prisma.EmpresaUpdateInput): Promise<Empresa>;
-    updateInstructor(userId: string, data: Prisma.InstructorUpdateInput): Promise<Instructor>;
     getMedicoByUserId(userId: string): Promise<Medico | null>;
     getEmpresaByUserId(userId: string): Promise<Empresa | null>;
     getInstructorByUserId(userId: string): Promise<Instructor | null>;

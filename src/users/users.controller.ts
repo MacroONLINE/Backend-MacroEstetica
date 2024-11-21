@@ -109,9 +109,8 @@ async register(@Body() userData: CreateUserDto) {
       data.verification = `https://mockstorage.com/${file.filename}`;
     }
   
-    return this.usersService.updateMedico(data.userId, data);
+    return this.usersService.createOrUpdateMedico(data.userId, data);
   }
-  
 
   @ApiOperation({ summary: 'Get Medico information' })
 
@@ -131,7 +130,7 @@ async register(@Body() userData: CreateUserDto) {
     if (!data.userId) {
       throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
     }
-    return this.usersService.updateEmpresa(data.userId, data);
+    return this.usersService.createOrUpdateEmpresa(data.userId, data);
   }
 
   @ApiOperation({ summary: 'Get Empresa information' })

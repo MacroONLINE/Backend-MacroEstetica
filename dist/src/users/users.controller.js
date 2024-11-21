@@ -69,7 +69,7 @@ let UsersController = class UsersController {
         if (file) {
             data.verification = `https://mockstorage.com/${file.filename}`;
         }
-        return this.usersService.updateMedico(data.userId, data);
+        return this.usersService.createOrUpdateMedico(data.userId, data);
     }
     async getMedico(req) {
         const userId = req.user.id;
@@ -79,7 +79,7 @@ let UsersController = class UsersController {
         if (!data.userId) {
             throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
         }
-        return this.usersService.updateEmpresa(data.userId, data);
+        return this.usersService.createOrUpdateEmpresa(data.userId, data);
     }
     async getEmpresa(req) {
         const userId = req.user.id;

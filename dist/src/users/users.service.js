@@ -49,13 +49,16 @@ let UsersService = class UsersService {
         return user;
     }
     async createOrUpdateMedico(userId, data) {
+        const createData = {
+            userId,
+            verification: data.verification || '',
+        };
         return this.prisma.medico.upsert({
             where: { userId },
-            update: data,
-            create: {
+            update: {
                 ...data,
-                userId,
             },
+            create: createData,
         });
     }
     async createOrUpdateEmpresa(userId, data) {
@@ -76,24 +79,6 @@ let UsersService = class UsersService {
                 ...data,
                 userId,
             },
-        });
-    }
-    async updateMedico(userId, data) {
-        return this.prisma.medico.update({
-            where: { userId },
-            data,
-        });
-    }
-    async updateEmpresa(userId, data) {
-        return this.prisma.empresa.update({
-            where: { userId },
-            data,
-        });
-    }
-    async updateInstructor(userId, data) {
-        return this.prisma.instructor.update({
-            where: { userId },
-            data,
         });
     }
     async getMedicoByUserId(userId) {
