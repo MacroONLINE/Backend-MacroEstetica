@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
 export class UpdateMedicoDto {
@@ -6,4 +6,8 @@ export class UpdateMedicoDto {
   @IsOptional()
   @IsString()
   verification?: string;
+
+  @ApiProperty({ description: 'ID of the associated user' })
+  @IsString()
+  userId!: string;
 }

@@ -22,9 +22,7 @@ const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const update_medico_dto_1 = require("./dto/update-medico.dto");
 const update_empresa_dto_1 = require("./dto/update-empresa.dto");
-const update_instructor_dto_1 = require("./dto/update-instructor.dto");
 const swagger_1 = require("@nestjs/swagger");
-const Multer = require("multer");
 let UsersController = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -64,28 +62,34 @@ let UsersController = class UsersController {
             throw new common_1.HttpException(error.message || 'Profile update failed', error.status || common_1.HttpStatus.BAD_REQUEST);
         }
     }
-    async updateMedico(req, data, file) {
-        if (file) {
-            data.verification = `https://mockstorage.com/`;
+    async updateMedico(file, data) {
+        if (!data.userId) {
+            throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
         }
-        const userId = req.user.id;
-        return this.usersService.updateMedico(userId, data);
+        if (file) {
+            data.verification = `https://mockstorage.com/${file.filename}`;
+        }
+        return this.usersService.updateMedico(data.userId, data);
     }
     async getMedico(req) {
         const userId = req.user.id;
         return this.usersService.getMedicoByUserId(userId);
     }
-    async updateEmpresa(req, data) {
-        const userId = req.user.id;
-        return this.usersService.updateEmpresa(userId, data);
+    async updateEmpresa(data) {
+        if (!data.userId) {
+            throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
+        }
+        return this.usersService.updateEmpresa(data.userId, data);
     }
     async getEmpresa(req) {
         const userId = req.user.id;
         return this.usersService.getEmpresaByUserId(userId);
     }
-    async updateInstructor(req, data) {
-        const userId = req.user.id;
-        return this.usersService.createOrUpdateInstructor(userId, data);
+    async updateInstructor(data) {
+        if (!data.userId) {
+            throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
+        }
+        return this.usersService.createOrUpdateInstructor(data.userId, data);
     }
     async getInstructor(req) {
         const userId = req.user.id;
@@ -124,14 +128,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "completeProfile", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Update Medico information with file upload' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Create or update a Medico with file upload' }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     (0, common_1.Put)('medico'),
-    __param(0, (0, common_1.Request)()),
+    __param(0, (0, common_1.UploadedFile)()),
     __param(1, (0, common_1.Body)()),
-    __param(2, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, update_medico_dto_1.UpdateMedicoDto, Object]),
+    __metadata("design:paramtypes", [Object, update_medico_dto_1.UpdateMedicoDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateMedico", null);
 __decorate([
@@ -146,11 +149,11 @@ __decorate([
 ], UsersController.prototype, "getMedico", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update Empresa information' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Create or update an Empresa' }),
     (0, common_1.Put)('empresa'),
-    __param(0, (0, common_1.Request)()),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, update_empresa_dto_1.UpdateEmpresaDto]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateEmpresa", null);
 __decorate([
@@ -167,11 +170,11 @@ __decorate([
 ], UsersController.prototype, "getEmpresa", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update Instructor information' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Create or update an Instructor' }),
     (0, common_1.Put)('instructor'),
-    __param(0, (0, common_1.Request)()),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, update_instructor_dto_1.UpdateInstructorDto]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateInstructor", null);
 __decorate([

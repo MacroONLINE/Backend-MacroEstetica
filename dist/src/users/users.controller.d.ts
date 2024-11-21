@@ -4,7 +4,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateMedicoDto } from './dto/update-medico.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
-import * as Multer from 'multer';
 export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
@@ -15,7 +14,7 @@ export declare class UsersController {
     completeProfile(userData: UpdateUserDto, empresaData?: UpdateEmpresaDto): Promise<{
         message: string;
     }>;
-    updateMedico(req: any, data: UpdateMedicoDto, file?: Multer.Field): Promise<{
+    updateMedico(file: Express.Multer.File, data: UpdateMedicoDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -29,7 +28,9 @@ export declare class UsersController {
         verification: string;
         userId: string;
     }>;
-    updateEmpresa(req: any, data: UpdateEmpresaDto): Promise<{
+    updateEmpresa(data: UpdateEmpresaDto & {
+        userId: string;
+    }): Promise<{
         name: string;
         id: string;
         createdAt: Date;
@@ -49,7 +50,9 @@ export declare class UsersController {
         target: import(".prisma/client").$Enums.Target;
         categoryId: string | null;
     }>;
-    updateInstructor(req: any, data: UpdateInstructorDto): Promise<{
+    updateInstructor(data: UpdateInstructorDto & {
+        userId: string;
+    }): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;

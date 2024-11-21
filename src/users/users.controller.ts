@@ -28,6 +28,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import * as Multer from 'multer';
+import { Prisma } from '@prisma/client';
 
 @ApiTags('users')
 @Controller('users')
@@ -92,23 +93,25 @@ async register(@Body() userData: CreateUserDto) {
     }
   }
 
-  @ApiOperation({ summary: 'Update Medico information with file upload' })
-
+  @ApiOperation({ summary: 'Create or update a Medico with file upload' })
   @UseInterceptors(FileInterceptor('file'))
   @Put('medico')
   async updateMedico(
-    @Request() req,
+    @UploadedFile() file: Express.Multer.File,
     @Body() data: UpdateMedicoDto,
-    @UploadedFile() file?: Multer.Field,
   ) {
-    if (file) {
-      // TODO: Implement file upload logic to a storage server
-      data.verification = `https://mockstorage.com/`;
+    if (!data.userId) {
+      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
     }
-
-    const userId = req.user.id;
-    return this.usersService.updateMedico(userId, data);
+  
+    if (file) {
+      // Simulate file storage and create a URL
+      data.verification = `https://mockstorage.com/${file.filename}`;
+    }
+  
+    return this.usersService.updateMedico(data.userId, data);
   }
+  
 
   @ApiOperation({ summary: 'Get Medico information' })
 
@@ -122,10 +125,13 @@ async register(@Body() userData: CreateUserDto) {
 
   @ApiOperation({ summary: 'Update Empresa information' })
 
+  @ApiOperation({ summary: 'Create or update an Empresa' })
   @Put('empresa')
-  async updateEmpresa(@Request() req, @Body() data: UpdateEmpresaDto) {
-    const userId = req.user.id;
-    return this.usersService.updateEmpresa(userId, data);
+  async updateEmpresa(@Body() data: UpdateEmpresaDto & { userId: string }) {
+    if (!data.userId) {
+      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.usersService.updateEmpresa(data.userId, data);
   }
 
   @ApiOperation({ summary: 'Get Empresa information' })
@@ -141,11 +147,15 @@ async register(@Body() userData: CreateUserDto) {
 
   @ApiOperation({ summary: 'Update Instructor information' })
 
+  @ApiOperation({ summary: 'Create or update an Instructor' })
   @Put('instructor')
-  async updateInstructor(@Request() req, @Body() data: UpdateInstructorDto) {
-    const userId = req.user.id;
-    return this.usersService.createOrUpdateInstructor(userId, data);
+  async updateInstructor(@Body() data: UpdateInstructorDto & { userId: string }) {
+    if (!data.userId) {
+      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
+    }
+    return this.usersService.createOrUpdateInstructor(data.userId, data);
   }
+  
 
   @ApiOperation({ summary: 'Get Instructor information' })
  

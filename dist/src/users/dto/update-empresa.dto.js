@@ -41,4 +41,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateEmpresaDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'ID of the associated user' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateEmpresaDto.prototype, "userId", void 0);
 //# sourceMappingURL=update-empresa.dto.js.map

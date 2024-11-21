@@ -7,4 +7,5 @@ export declare class UpdateEmpresaDto {
     name: string;
     target: TargetEnum;
     categoryId?: string;
+    userId: string;
 }

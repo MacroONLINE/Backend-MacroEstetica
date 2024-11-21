@@ -24,4 +24,8 @@ export class UpdateEmpresaDto {
   @IsOptional()
   @IsString()
   categoryId?: string;
+
+  @ApiProperty({ description: 'ID of the associated user' })
+  @IsString()
+  userId!: string;
 }
