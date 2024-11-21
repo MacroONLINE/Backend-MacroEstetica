@@ -41,8 +41,11 @@ let UsersController = class UsersController {
             password: hashedPassword,
             role: role || 'ESTANDAR',
         };
-        await this.usersService.createUser(userCreateInput);
-        return { message: 'User created successfully' };
+        const newUser = await this.usersService.createUser(userCreateInput);
+        return {
+            message: 'User created successfully',
+            userId: newUser.id,
+        };
     }
     async completeProfile(userData, empresaData) {
         try {

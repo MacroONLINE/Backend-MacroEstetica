@@ -35,27 +35,32 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation({ summary: 'Register a new user (Step 1)' })
-  @ApiResponse({ status: 201, description: 'User created successfully.' })
-  @ApiResponse({ status: 409, description: 'User already exists.' })
-  @Post('register')
-  async register(@Body() userData: CreateUserDto) {
-    const { password, email, role } = userData;
-    const existingUser = await this.usersService.findUserByEmail(email);
+@ApiResponse({ status: 201, description: 'User created successfully.' })
+@ApiResponse({ status: 409, description: 'User already exists.' })
+@Post('register')
+async register(@Body() userData: CreateUserDto) {
+  const { password, email, role } = userData;
 
-    if (existingUser) {
-      throw new HttpException('User already exists', HttpStatus.CONFLICT);
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const userCreateInput = {
-      email,
-      password: hashedPassword,
-      role: role || 'ESTANDAR',
-    };
-
-    await this.usersService.createUser(userCreateInput);
-    return { message: 'User created successfully' };
+  const existingUser = await this.usersService.findUserByEmail(email);
+  if (existingUser) {
+    throw new HttpException('User already exists', HttpStatus.CONFLICT);
   }
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const userCreateInput = {
+    email,
+    password: hashedPassword,
+    role: role || 'ESTANDAR',
+  };
+
+  const newUser = await this.usersService.createUser(userCreateInput);
+
+  return {
+    message: 'User created successfully',
+    userId: newUser.id, 
+  };
+}
+
 
   @ApiOperation({ summary: 'Complete user profile (Step 2)' })
   @ApiResponse({ status: 200, description: 'User profile updated successfully.' })

@@ -10,30 +10,31 @@ export declare class UsersController {
     constructor(usersService: UsersService);
     register(userData: CreateUserDto): Promise<{
         message: string;
+        userId: string;
     }>;
     completeProfile(userData: UpdateUserDto, empresaData?: UpdateEmpresaDto): Promise<{
         message: string;
     }>;
     updateMedico(req: any, data: UpdateMedicoDto, file?: Multer.Field): Promise<{
         id: string;
-        verification: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        verification: string;
+        userId: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
-        verification: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        verification: string;
+        userId: string;
     }>;
     updateEmpresa(req: any, data: UpdateEmpresaDto): Promise<{
         name: string;
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         dni: string;
         target: import(".prisma/client").$Enums.Target;
         categoryId: string | null;
@@ -41,31 +42,29 @@ export declare class UsersController {
     getEmpresa(req: any): Promise<{
         name: string;
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         dni: string;
         target: import(".prisma/client").$Enums.Target;
         categoryId: string | null;
     }>;
     updateInstructor(req: any, data: UpdateInstructorDto): Promise<{
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
     }>;
     getInstructor(req: any): Promise<{
         id: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
     }>;
     findUserById(id: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
@@ -79,6 +78,8 @@ export declare class UsersController {
         zipCode: string | null;
         role: import(".prisma/client").$Enums.Role;
         status: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         newsletter: boolean;
     }>;
 }
