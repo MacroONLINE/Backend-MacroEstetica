@@ -1,7 +1,10 @@
-import { Target } from '@prisma/client';
+export declare enum TargetEnum {
+    MEDICO = "MEDICO",
+    ESTETICISTA = "ESTETICISTA"
+}
 export declare class UpdateEmpresaDto {
     dni: string;
     name: string;
-    target: Target;
+    target: TargetEnum;
     categoryId?: string;
 }

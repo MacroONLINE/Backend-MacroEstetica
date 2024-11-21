@@ -1,17 +1,27 @@
 import { IsOptional, IsString, IsEnum } from 'class-validator';
-import { Target } from '@prisma/client';
+import { ApiProperty } from '@nestjs/swagger';
+
+// Define the enum explicitly for Swagger
+export enum TargetEnum {
+  MEDICO = 'MEDICO',
+  ESTETICISTA = 'ESTETICISTA',
+}
 
 export class UpdateEmpresaDto {
+  @ApiProperty()
   @IsString()
-  dni!: string; // Obligatorio para Prisma
+  dni!: string;
 
+  @ApiProperty()
   @IsString()
-  name!: string; // Obligatorio para Prisma
+  name!: string;
 
-  @IsEnum(Target, { message: 'Target must be either MEDICO or ESTETICISTA' })
-  target!: Target; // Obligatorio para Prisma
+  @ApiProperty({ enum: TargetEnum, description: 'Target must be either MEDICO or ESTETICISTA' })
+  @IsEnum(TargetEnum, { message: 'Target must be either MEDICO or ESTETICISTA' })
+  target!: TargetEnum;
 
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  categoryId?: string; // Opcional
+  categoryId?: string;
 }
