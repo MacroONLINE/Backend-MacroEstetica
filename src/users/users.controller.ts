@@ -121,8 +121,7 @@ async register(@Body() userData: CreateUserDto) {
   }
 
   @ApiOperation({ summary: 'Update Empresa information' })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @Put('empresa')
   async updateEmpresa(@Request() req, @Body() data: UpdateEmpresaDto) {
     const userId = req.user.id;
@@ -141,8 +140,7 @@ async register(@Body() userData: CreateUserDto) {
   }
 
   @ApiOperation({ summary: 'Update Instructor information' })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @Put('instructor')
   async updateInstructor(@Request() req, @Body() data: UpdateInstructorDto) {
     const userId = req.user.id;
@@ -150,8 +148,7 @@ async register(@Body() userData: CreateUserDto) {
   }
 
   @ApiOperation({ summary: 'Get Instructor information' })
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+ 
   @ApiResponse({ status: 200, description: 'Instructor found.' })
   @ApiResponse({ status: 404, description: 'Instructor not found.' })
   @Get('instructor')

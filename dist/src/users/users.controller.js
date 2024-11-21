@@ -146,8 +146,6 @@ __decorate([
 ], UsersController.prototype, "getMedico", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update Empresa information' }),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Put)('empresa'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
@@ -169,8 +167,6 @@ __decorate([
 ], UsersController.prototype, "getEmpresa", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update Instructor information' }),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Put)('instructor'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
@@ -180,8 +176,6 @@ __decorate([
 ], UsersController.prototype, "updateInstructor", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get Instructor information' }),
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Instructor found.' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Instructor not found.' }),
     (0, common_1.Get)('instructor'),
