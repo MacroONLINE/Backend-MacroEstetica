@@ -73,18 +73,38 @@ model Medico {
   updatedAt    DateTime @default(now())
 }
 
+model Product {
+  id                 Int       @id @default(autoincrement())
+  name               String    @db.VarChar(200)
+  description        String?   @db.Text
+  cost               Decimal   @db.Decimal(10, 2)
+  discount           Decimal?  @db.Decimal(10, 2)
+  productCode        String    @unique @db.VarChar(100)
+  availableQuantity  Int
+  companyId          String    // Foreign key to Empresa
+  company            Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  providerId         String?   // Optional foreign key for a provider
+  isFeatured         Boolean   @default(false) // Field for featured products
+  imageUrl           String?   // Field for product image URL
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+
 model Empresa {
-  id         String    @id @default(cuid())
+  id         String       @id @default(cuid())
   dni        String
   name       String
-  target     Target    @default(MEDICO) // Enum Target
+  target     Target        @default(MEDICO)
   categoryId String?
-  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String    @unique
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @default(now())
+  category   Category?     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String        @unique
+  productos  Product[]    // Relation to Producto model
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @default(now())
 }
+
 
 model Session {
   id           String   @id @default(cuid())

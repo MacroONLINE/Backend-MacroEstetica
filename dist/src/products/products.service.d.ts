@@ -1,0 +1,97 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+import { CreateProductDto } from './dto/create-product.dto';
+export declare class ProductsService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    createProduct(data: CreateProductDto): Promise<{
+        id: number;
+        name: string;
+        description: string | null;
+        cost: Prisma.Decimal;
+        discount: Prisma.Decimal | null;
+        productCode: string;
+        availableQuantity: number;
+        companyId: string;
+        providerId: string | null;
+        isFeatured: boolean;
+        imageUrl: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    getProductsByCompany(companyId: string): Promise<{
+        id: number;
+        name: string;
+        description: string | null;
+        cost: Prisma.Decimal;
+        discount: Prisma.Decimal | null;
+        productCode: string;
+        availableQuantity: number;
+        companyId: string;
+        providerId: string | null;
+        isFeatured: boolean;
+        imageUrl: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }[]>;
+    updateProduct(productId: number, data: Prisma.ProductUpdateInput): Promise<{
+        id: number;
+        name: string;
+        description: string | null;
+        cost: Prisma.Decimal;
+        discount: Prisma.Decimal | null;
+        productCode: string;
+        availableQuantity: number;
+        companyId: string;
+        providerId: string | null;
+        isFeatured: boolean;
+        imageUrl: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    deleteProduct(productId: number): Promise<{
+        id: number;
+        name: string;
+        description: string | null;
+        cost: Prisma.Decimal;
+        discount: Prisma.Decimal | null;
+        productCode: string;
+        availableQuantity: number;
+        companyId: string;
+        providerId: string | null;
+        isFeatured: boolean;
+        imageUrl: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    setProductFeatured(productId: number, isFeatured: boolean): Promise<{
+        id: number;
+        name: string;
+        description: string | null;
+        cost: Prisma.Decimal;
+        discount: Prisma.Decimal | null;
+        productCode: string;
+        availableQuantity: number;
+        companyId: string;
+        providerId: string | null;
+        isFeatured: boolean;
+        imageUrl: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    getFeaturedProducts(limit: number): Promise<{
+        id: number;
+        name: string;
+        description: string | null;
+        cost: Prisma.Decimal;
+        discount: Prisma.Decimal | null;
+        productCode: string;
+        availableQuantity: number;
+        companyId: string;
+        providerId: string | null;
+        isFeatured: boolean;
+        imageUrl: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }[]>;
+}

@@ -19,15 +19,15 @@ export declare class UsersController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        verification: string;
         userId: string;
+        verification: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        verification: string;
         userId: string;
+        verification: string;
     }>;
     updateEmpresa(req: any, data: UpdateEmpresaDto): Promise<{
         name: string;
