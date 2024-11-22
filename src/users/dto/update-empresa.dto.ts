@@ -10,6 +10,7 @@ export enum TargetEnum {
 export class UpdateEmpresaDto {
   @ApiProperty()
   @IsString()
+  @IsOptional()
   dni!: string;
 
   @ApiProperty()
