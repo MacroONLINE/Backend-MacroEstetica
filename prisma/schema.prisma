@@ -200,3 +200,17 @@ enum Target {
   MEDICO
   ESTETICISTA
 }
+
+model CoursesFetch {
+  id            String   @id @default(cuid())
+  title         String
+  instructor    String
+  price         Float
+  comments      Int
+  date          DateTime
+  rating        Float
+  imageUrl      String
+  categoryName  String
+  categoryIcon  String
+  featured      Boolean  @default(false)
+}

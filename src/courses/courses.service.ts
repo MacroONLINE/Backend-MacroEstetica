@@ -5,6 +5,7 @@ import { CreateModuleDto } from './dto/create-module.dto';
 import { CreateClassDto } from './dto/create-class.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { CoursesFetchDto } from './dto/courses-fetch.dto';
 
 @Injectable()
 export class CoursesService {
@@ -92,6 +93,13 @@ export class CoursesService {
       include: {
         comments: true,
       },
+    });
+  }
+ 
+
+  async getFeaturedCoursesFetch(): Promise<CoursesFetchDto[]> {
+    return this.prisma.coursesFetch.findMany({
+      where: { featured: true },
     });
   }
 }

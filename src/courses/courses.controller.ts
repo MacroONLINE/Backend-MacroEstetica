@@ -11,6 +11,7 @@ import {
   ApiResponse,
   ApiParam,
 } from '@nestjs/swagger';
+import { CoursesFetchDto } from './dto/courses-fetch.dto';
 
 @ApiTags('courses')
 @Controller('courses')
@@ -87,5 +88,12 @@ export class CoursesController {
   @ApiResponse({ status: 404, description: 'Module not found.' })
   async getClassesByModuleId(@Param('moduleId') moduleId: string) {
     return this.coursesService.getClassesByModuleId(moduleId);
+  }
+
+  @Get('featured-fetch')
+  @ApiOperation({ summary: 'Obtener cursos destacados' })
+  @ApiResponse({ status: 200, description: 'Lista de cursos destacados', type: [CoursesFetchDto] })
+  async getFeaturedCoursesFetch(): Promise<CoursesFetchDto[]> {
+    return this.coursesService.getFeaturedCoursesFetch();
   }
 }

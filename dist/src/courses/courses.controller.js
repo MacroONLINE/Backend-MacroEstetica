@@ -21,6 +21,7 @@ const create_class_dto_1 = require("./dto/create-class.dto");
 const create_comment_dto_1 = require("./dto/create-comment.dto");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const swagger_1 = require("@nestjs/swagger");
+const courses_fetch_dto_1 = require("./dto/courses-fetch.dto");
 let CoursesController = class CoursesController {
     constructor(coursesService) {
         this.coursesService = coursesService;
@@ -51,6 +52,9 @@ let CoursesController = class CoursesController {
     }
     async getClassesByModuleId(moduleId) {
         return this.coursesService.getClassesByModuleId(moduleId);
+    }
+    async getFeaturedCoursesFetch() {
+        return this.coursesService.getFeaturedCoursesFetch();
     }
 };
 exports.CoursesController = CoursesController;
@@ -142,6 +146,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getClassesByModuleId", null);
+__decorate([
+    (0, common_1.Get)('featured-fetch'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener cursos destacados' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de cursos destacados', type: [courses_fetch_dto_1.CoursesFetchDto] }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getFeaturedCoursesFetch", null);
 exports.CoursesController = CoursesController = __decorate([
     (0, swagger_1.ApiTags)('courses'),
     (0, common_1.Controller)('courses'),

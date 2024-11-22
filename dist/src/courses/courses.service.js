@@ -81,6 +81,11 @@ let CoursesService = class CoursesService {
             },
         });
     }
+    async getFeaturedCoursesFetch() {
+        return this.prisma.coursesFetch.findMany({
+            where: { featured: true },
+        });
+    }
 };
 exports.CoursesService = CoursesService;
 exports.CoursesService = CoursesService = __decorate([

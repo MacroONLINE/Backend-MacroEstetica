@@ -26,6 +26,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiBody,
 } from '@nestjs/swagger';
 import * as Multer from 'multer';
 import { Prisma } from '@prisma/client';
@@ -113,7 +114,6 @@ async register(@Body() userData: CreateUserDto) {
   }
 
   @ApiOperation({ summary: 'Get Medico information' })
-
   @ApiResponse({ status: 200, description: 'Medico found.' })
   @ApiResponse({ status: 404, description: 'Medico not found.' })
   @Get('medico')
@@ -122,16 +122,17 @@ async register(@Body() userData: CreateUserDto) {
     return this.usersService.getMedicoByUserId(userId);
   }
 
-  @ApiOperation({ summary: 'Update Empresa information' })
-
   @ApiOperation({ summary: 'Create or update an Empresa' })
+  @ApiResponse({ status: 200, description: 'Empresa updated successfully.' })
+  @ApiBody({ type: UpdateEmpresaDto })
   @Put('empresa')
-  async updateEmpresa(@Body() data: UpdateEmpresaDto & { userId: string }) {
+  async updateEmpresa(@Body() data: UpdateEmpresaDto) {
     if (!data.userId) {
       throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
     }
     return this.usersService.createOrUpdateEmpresa(data.userId, data);
   }
+  
 
   @ApiOperation({ summary: 'Get Empresa information' })
   @ApiBearerAuth()
