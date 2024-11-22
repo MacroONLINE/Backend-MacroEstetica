@@ -18,15 +18,15 @@ export declare class UsersController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        verification: string;
         userId: string;
+        verification: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        verification: string;
         userId: string;
+        verification: string;
     }>;
     updateEmpresa(data: UpdateEmpresaDto): Promise<{
         name: string;
@@ -34,7 +34,7 @@ export declare class UsersController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        dni: string;
+        dni: string | null;
         target: import(".prisma/client").$Enums.Target;
         categoryId: string | null;
     }>;
@@ -44,7 +44,7 @@ export declare class UsersController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        dni: string;
+        dni: string | null;
         target: import(".prisma/client").$Enums.Target;
         categoryId: string | null;
     }>;

@@ -93,7 +93,7 @@ model Product {
 
 model Empresa {
   id         String       @id @default(cuid())
-  dni        String
+  dni        String?
   name       String
   target     Target        @default(MEDICO)
   categoryId String?
