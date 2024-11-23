@@ -11,22 +11,22 @@ export declare class UsersController {
         message: string;
         userId: string;
     }>;
-    completeProfile(userData: UpdateUserDto, empresaData?: UpdateEmpresaDto): Promise<{
+    completeProfile(userData: UpdateUserDto): Promise<{
         message: string;
     }>;
-    updateMedico(file: Express.Multer.File, data: UpdateMedicoDto): Promise<{
+    updateMedico(file: Express.User, data: UpdateMedicoDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         verification: string;
+        userId: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         verification: string;
+        userId: string;
     }>;
     updateEmpresa(data: UpdateEmpresaDto): Promise<{
         name: string;
@@ -48,9 +48,7 @@ export declare class UsersController {
         target: import(".prisma/client").$Enums.Target;
         categoryId: string | null;
     }>;
-    updateInstructor(data: UpdateInstructorDto & {
-        userId: string;
-    }): Promise<{
+    updateInstructor(data: UpdateInstructorDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;

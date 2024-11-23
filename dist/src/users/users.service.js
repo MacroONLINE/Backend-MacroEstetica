@@ -26,9 +26,8 @@ let UsersService = class UsersService {
             },
         });
     }
-    async updateUser(id, data, roleData) {
-        const { medicoData, empresaData, instructorData } = roleData || {};
-        const user = await this.prisma.user.update({
+    async updateUser(id, data) {
+        return this.prisma.user.update({
             where: { id },
             data,
             include: {
@@ -37,16 +36,6 @@ let UsersService = class UsersService {
                 instructor: true,
             },
         });
-        if (medicoData) {
-            await this.createOrUpdateMedico(id, medicoData);
-        }
-        else if (empresaData) {
-            await this.createOrUpdateEmpresa(id, empresaData);
-        }
-        else if (instructorData) {
-            await this.createOrUpdateInstructor(id, instructorData);
-        }
-        return user;
     }
     async createOrUpdateMedico(userId, data) {
         const createData = {
@@ -62,9 +51,14 @@ let UsersService = class UsersService {
         });
     }
     async createOrUpdateEmpresa(userId, data) {
+        if (!data.name) {
+            throw new Error("El campo 'name' es obligatorio.");
+        }
         return this.prisma.empresa.upsert({
             where: { userId },
-            update: data,
+            update: {
+                ...data,
+            },
             create: {
                 ...data,
                 userId,

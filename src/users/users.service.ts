@@ -1,3 +1,5 @@
+// src/users/users.service.ts
+
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User, Medico, Empresa, Instructor } from '@prisma/client';
@@ -6,7 +8,7 @@ import { Prisma, User, Medico, Empresa, Instructor } from '@prisma/client';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  // Create user with email and password (Step 1)
+  // Crear usuario con email y contraseña (Paso 1)
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user.create({
       data,
@@ -18,20 +20,10 @@ export class UsersService {
     });
   }
 
-  // Update user profile (Step 2)
-  async updateUser(
-    id: string,
-    data: Prisma.UserUpdateInput,
-    roleData?: {
-      medicoData?: Omit<Prisma.MedicoUncheckedCreateInput, 'userId'>;
-      empresaData?: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>;
-      instructorData?: Omit<Prisma.InstructorUncheckedCreateInput, 'userId'>;
-    },
-  ): Promise<User> {
-    const { medicoData, empresaData, instructorData } = roleData || {};
-
-    // Update the user profile
-    const user = await this.prisma.user.update({
+  // Actualizar perfil de usuario (Paso 2)
+  async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    // Solo actualiza el perfil básico del usuario sin manejar datos específicos de roles
+    return this.prisma.user.update({
       where: { id },
       data,
       include: {
@@ -40,47 +32,41 @@ export class UsersService {
         instructor: true,
       },
     });
-
-    // Handle role-specific data
-    if (medicoData) {
-      await this.createOrUpdateMedico(id, medicoData);
-    } else if (empresaData) {
-      await this.createOrUpdateEmpresa(id, empresaData);
-    } else if (instructorData) {
-      await this.createOrUpdateInstructor(id, instructorData);
-    }
-
-    return user;
   }
 
-  // Create or update Medico information
+  // Crear o actualizar información de Medico
   async createOrUpdateMedico(
     userId: string,
-    data: Partial<Prisma.MedicoUncheckedCreateInput>, // Allow partial inputs
+    data: Partial<Prisma.MedicoUncheckedCreateInput>,
   ): Promise<Medico> {
     const createData: Prisma.MedicoUncheckedCreateInput = {
-      userId, // Required field
-      verification: data.verification || '', // Provide a default if undefined
+      userId,
+      verification: data.verification || '',
     };
-  
+
     return this.prisma.medico.upsert({
       where: { userId },
       update: {
         ...data,
-      }, // Update with provided fields
-      create: createData, // Create a new record if not found
+      },
+      create: createData,
     });
   }
-  
 
-  // Create or update Empresa information
+  // Crear o actualizar información de Empresa
   async createOrUpdateEmpresa(
     userId: string,
     data: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>,
   ): Promise<Empresa> {
+    if (!data.name) {
+      throw new Error("El campo 'name' es obligatorio.");
+    }
+
     return this.prisma.empresa.upsert({
       where: { userId },
-      update: data,
+      update: {
+        ...data,
+      },
       create: {
         ...data,
         userId,
@@ -88,7 +74,7 @@ export class UsersService {
     });
   }
 
-  // Create or update Instructor information
+  // Crear o actualizar información de Instructor
   async createOrUpdateInstructor(
     userId: string,
     data: Omit<Prisma.InstructorUncheckedCreateInput, 'userId'>,
@@ -103,28 +89,28 @@ export class UsersService {
     });
   }
 
-  // Get Medico by user ID
+  // Obtener Medico por ID de usuario
   async getMedicoByUserId(userId: string): Promise<Medico | null> {
     return this.prisma.medico.findUnique({
       where: { userId },
     });
   }
 
-  // Get Empresa by user ID
+  // Obtener Empresa por ID de usuario
   async getEmpresaByUserId(userId: string): Promise<Empresa | null> {
     return this.prisma.empresa.findUnique({
       where: { userId },
     });
   }
 
-  // Get Instructor by user ID
+  // Obtener Instructor por ID de usuario
   async getInstructorByUserId(userId: string): Promise<Instructor | null> {
     return this.prisma.instructor.findUnique({
       where: { userId },
     });
   }
 
-  // Find user by email
+  // Encontrar usuario por email
   async findUserByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email },
@@ -136,7 +122,7 @@ export class UsersService {
     });
   }
 
-  // Find user by ID
+  // Encontrar usuario por ID
   async findUserById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { id },

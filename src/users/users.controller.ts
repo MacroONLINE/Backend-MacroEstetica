@@ -1,3 +1,5 @@
+// src/users/users.controller.ts
+
 import {
   Controller,
   Post,
@@ -28,7 +30,6 @@ import {
   ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
-import * as Multer from 'multer';
 import { Prisma } from '@prisma/client';
 
 @ApiTags('users')
@@ -37,53 +38,49 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation({ summary: 'Register a new user (Step 1)' })
-@ApiResponse({ status: 201, description: 'User created successfully.' })
-@ApiResponse({ status: 409, description: 'User already exists.' })
-@Post('register')
-async register(@Body() userData: CreateUserDto) {
-  const { password, email, role } = userData;
+  @ApiResponse({ status: 201, description: 'User created successfully.' })
+  @ApiResponse({ status: 409, description: 'User already exists.' })
+  @Post('register')
+  async register(@Body() userData: CreateUserDto) {
+    const { password, email, role } = userData;
 
-  const existingUser = await this.usersService.findUserByEmail(email);
-  if (existingUser) {
-    throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    const existingUser = await this.usersService.findUserByEmail(email);
+    if (existingUser) {
+      throw new HttpException('User already exists', HttpStatus.CONFLICT);
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const userCreateInput = {
+      email,
+      password: hashedPassword,
+      role: role || 'ESTANDAR',
+    };
+
+    const newUser = await this.usersService.createUser(userCreateInput);
+
+    return {
+      message: 'User created successfully',
+      userId: newUser.id,
+    };
   }
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const userCreateInput = {
-    email,
-    password: hashedPassword,
-    role: role || 'ESTANDAR',
-  };
-
-  const newUser = await this.usersService.createUser(userCreateInput);
-
-  return {
-    message: 'User created successfully',
-    userId: newUser.id, 
-  };
-}
-
 
   @ApiOperation({ summary: 'Complete user profile (Step 2)' })
   @ApiResponse({ status: 200, description: 'User profile updated successfully.' })
   @ApiResponse({ status: 400, description: 'Bad request.' })
   @Put('complete-profile')
-  async completeProfile(
-    @Body() userData: UpdateUserDto,
-    @Body() empresaData?: UpdateEmpresaDto,
-  ) {
+  async completeProfile(@Body() userData: UpdateUserDto) {
     try {
       if (!userData.id) {
         throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
       }
 
-      const { id, role, verification, ...updateData } = userData;
+      const { id, role, ...updateData } = userData;
 
-      await this.usersService.updateUser(id, updateData, {
-        medicoData: role === 'MEDICO' ? { verification } : undefined,
-        empresaData: role === 'EMPRESA' ? empresaData : undefined,
-        instructorData: role === 'INSTRUCTOR' ? { profession: userData.bio as any } : undefined,
-      });
+      // Actualizar el perfil básico del usuario sin manejar datos específicos de roles
+      await this.usersService.updateUser(id, updateData);
+
+      // Los datos específicos de roles se manejan en endpoints separados
+      // Puedes agregar aquí una validación para recordar al usuario que complete la información específica de su rol si es necesario
 
       return { message: 'User profile updated successfully' };
     } catch (error) {
@@ -94,22 +91,23 @@ async register(@Body() userData: CreateUserDto) {
     }
   }
 
+  // Endpoint para MEDICO
   @ApiOperation({ summary: 'Create or update a Medico with file upload' })
   @UseInterceptors(FileInterceptor('file'))
   @Put('medico')
   async updateMedico(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: Express.User,
     @Body() data: UpdateMedicoDto,
   ) {
     if (!data.userId) {
       throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
     }
-  
+
     if (file) {
-      // Simulate file storage and create a URL
-      data.verification = `https://mockstorage.com/${file.filename}`;
+      // Simula el almacenamiento del archivo y crea una URL
+      data.verification = `https://mockstorage.com/}`;
     }
-  
+
     return this.usersService.createOrUpdateMedico(data.userId, data);
   }
 
@@ -122,17 +120,21 @@ async register(@Body() userData: CreateUserDto) {
     return this.usersService.getMedicoByUserId(userId);
   }
 
+  // Endpoint para EMPRESA
   @ApiOperation({ summary: 'Create or update an Empresa' })
   @ApiResponse({ status: 200, description: 'Empresa updated successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
   @ApiBody({ type: UpdateEmpresaDto })
   @Put('empresa')
   async updateEmpresa(@Body() data: UpdateEmpresaDto) {
     if (!data.userId) {
       throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
     }
+    if (!data.name) {
+      throw new HttpException('El campo "name" es obligatorio', HttpStatus.BAD_REQUEST);
+    }
     return this.usersService.createOrUpdateEmpresa(data.userId, data);
   }
-  
 
   @ApiOperation({ summary: 'Get Empresa information' })
   @ApiBearerAuth()
@@ -145,20 +147,20 @@ async register(@Body() userData: CreateUserDto) {
     return this.usersService.getEmpresaByUserId(userId);
   }
 
-  @ApiOperation({ summary: 'Update Instructor information' })
-
+  // Endpoint para INSTRUCTOR
   @ApiOperation({ summary: 'Create or update an Instructor' })
+  @ApiResponse({ status: 200, description: 'Instructor updated successfully.' })
+  @ApiResponse({ status: 400, description: 'Bad request.' })
+  @ApiBody({ type: UpdateInstructorDto })
   @Put('instructor')
-  async updateInstructor(@Body() data: UpdateInstructorDto & { userId: string }) {
+  async updateInstructor(@Body() data: UpdateInstructorDto) {
     if (!data.userId) {
       throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
     }
     return this.usersService.createOrUpdateInstructor(data.userId, data);
   }
-  
 
   @ApiOperation({ summary: 'Get Instructor information' })
- 
   @ApiResponse({ status: 200, description: 'Instructor found.' })
   @ApiResponse({ status: 404, description: 'Instructor not found.' })
   @Get('instructor')

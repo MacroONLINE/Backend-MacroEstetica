@@ -25,8 +25,8 @@ export declare class CoursesController {
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;
-        courseId: string;
         description: string;
+        courseId: string;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
         id: string;
@@ -37,10 +37,10 @@ export declare class CoursesController {
         id: string;
         createdAt: Date;
         userId: string;
-        type: import(".prisma/client").$Enums.CommentType;
-        rating: number;
         content: string;
+        type: import(".prisma/client").$Enums.CommentType;
         classId: string;
+        rating: number;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
         name: string;
@@ -57,8 +57,8 @@ export declare class CoursesController {
             }[];
         } & {
             id: string;
-            courseId: string;
             description: string;
+            courseId: string;
         })[];
         categories: ({
             category: {
@@ -130,18 +130,18 @@ export declare class CoursesController {
         }[];
     } & {
         id: string;
-        courseId: string;
         description: string;
+        courseId: string;
     })[]>;
     getClassesByModuleId(moduleId: string): Promise<({
         comments: {
             id: string;
             createdAt: Date;
             userId: string;
-            type: import(".prisma/client").$Enums.CommentType;
-            rating: number;
             content: string;
+            type: import(".prisma/client").$Enums.CommentType;
             classId: string;
+            rating: number;
         }[];
     } & {
         id: string;

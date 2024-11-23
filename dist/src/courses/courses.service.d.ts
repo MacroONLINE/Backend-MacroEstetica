@@ -25,8 +25,8 @@ export declare class CoursesService {
     }>;
     createModule(data: CreateModuleDto): Promise<{
         id: string;
-        courseId: string;
         description: string;
+        courseId: string;
     }>;
     createClass(data: CreateClassDto): Promise<{
         id: string;
@@ -37,10 +37,10 @@ export declare class CoursesService {
         id: string;
         createdAt: Date;
         userId: string;
-        type: import(".prisma/client").$Enums.CommentType;
-        rating: number;
         content: string;
+        type: import(".prisma/client").$Enums.CommentType;
         classId: string;
+        rating: number;
     }>;
     createCategory(data: CreateCategoryDto): Promise<{
         name: string;
@@ -57,8 +57,8 @@ export declare class CoursesService {
             }[];
         } & {
             id: string;
-            courseId: string;
             description: string;
+            courseId: string;
         })[];
         categories: ({
             category: {
@@ -130,18 +130,18 @@ export declare class CoursesService {
         }[];
     } & {
         id: string;
-        courseId: string;
         description: string;
+        courseId: string;
     })[]>;
     getClassesByModuleId(moduleId: string): Promise<({
         comments: {
             id: string;
             createdAt: Date;
             userId: string;
-            type: import(".prisma/client").$Enums.CommentType;
-            rating: number;
             content: string;
+            type: import(".prisma/client").$Enums.CommentType;
             classId: string;
+            rating: number;
         }[];
     } & {
         id: string;

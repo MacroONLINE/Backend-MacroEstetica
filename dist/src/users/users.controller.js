@@ -22,6 +22,7 @@ const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const update_medico_dto_1 = require("./dto/update-medico.dto");
 const update_empresa_dto_1 = require("./dto/update-empresa.dto");
+const update_instructor_dto_1 = require("./dto/update-instructor.dto");
 const swagger_1 = require("@nestjs/swagger");
 let UsersController = class UsersController {
     constructor(usersService) {
@@ -45,17 +46,13 @@ let UsersController = class UsersController {
             userId: newUser.id,
         };
     }
-    async completeProfile(userData, empresaData) {
+    async completeProfile(userData) {
         try {
             if (!userData.id) {
                 throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
             }
-            const { id, role, verification, ...updateData } = userData;
-            await this.usersService.updateUser(id, updateData, {
-                medicoData: role === 'MEDICO' ? { verification } : undefined,
-                empresaData: role === 'EMPRESA' ? empresaData : undefined,
-                instructorData: role === 'INSTRUCTOR' ? { profession: userData.bio } : undefined,
-            });
+            const { id, role, ...updateData } = userData;
+            await this.usersService.updateUser(id, updateData);
             return { message: 'User profile updated successfully' };
         }
         catch (error) {
@@ -67,7 +64,7 @@ let UsersController = class UsersController {
             throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
         }
         if (file) {
-            data.verification = `https://mockstorage.com/${file.filename}`;
+            data.verification = `https://mockstorage.com/}`;
         }
         return this.usersService.createOrUpdateMedico(data.userId, data);
     }
@@ -78,6 +75,9 @@ let UsersController = class UsersController {
     async updateEmpresa(data) {
         if (!data.userId) {
             throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
+        }
+        if (!data.name) {
+            throw new common_1.HttpException('El campo "name" es obligatorio', common_1.HttpStatus.BAD_REQUEST);
         }
         return this.usersService.createOrUpdateEmpresa(data.userId, data);
     }
@@ -121,10 +121,8 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request.' }),
     (0, common_1.Put)('complete-profile'),
     __param(0, (0, common_1.Body)()),
-    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_user_dto_1.UpdateUserDto,
-        update_empresa_dto_1.UpdateEmpresaDto]),
+    __metadata("design:paramtypes", [update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "completeProfile", null);
 __decorate([
@@ -150,6 +148,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Create or update an Empresa' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Empresa updated successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request.' }),
     (0, swagger_1.ApiBody)({ type: update_empresa_dto_1.UpdateEmpresaDto }),
     (0, common_1.Put)('empresa'),
     __param(0, (0, common_1.Body)()),
@@ -170,12 +169,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getEmpresa", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Update Instructor information' }),
     (0, swagger_1.ApiOperation)({ summary: 'Create or update an Instructor' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Instructor updated successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request.' }),
+    (0, swagger_1.ApiBody)({ type: update_instructor_dto_1.UpdateInstructorDto }),
     (0, common_1.Put)('instructor'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [update_instructor_dto_1.UpdateInstructorDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateInstructor", null);
 __decorate([
