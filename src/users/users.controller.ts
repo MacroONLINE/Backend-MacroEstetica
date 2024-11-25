@@ -31,11 +31,13 @@ import {
   ApiBody,
 } from '@nestjs/swagger';
 import { Prisma } from '@prisma/client';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService, private readonly cloudinaryService: CloudinaryService) {}
+  
 
   @ApiOperation({ summary: 'Register a new user (Step 1)' })
   @ApiResponse({ status: 201, description: 'User created successfully.' })
@@ -92,24 +94,33 @@ export class UsersController {
   }
 
   // Endpoint para MEDICO
-  @ApiOperation({ summary: 'Create or update a Medico with file upload' })
-  @UseInterceptors(FileInterceptor('file'))
-  @Put('medico')
-  async updateMedico(
-    @UploadedFile() file: Express.User,
-    @Body() data: UpdateMedicoDto,
-  ) {
-    if (!data.userId) {
-      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
-    }
-
-    if (file) {
-      // Simula el almacenamiento del archivo y crea una URL
-      data.verification = `https://mockstorage.com/}`;
-    }
-
-    return this.usersService.createOrUpdateMedico(data.userId, data);
+  @ApiOperation({ summary: 'Crear o actualizar un Medico con carga de archivo' })
+@UseInterceptors(FileInterceptor('file'))
+@Put('medico')
+async updateMedico(
+  @UploadedFile() file: Express.Multer.File,
+  @Body() data: UpdateMedicoDto,
+) {
+  if (!data.userId) {
+    throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
   }
+
+  if (file) {
+    try {
+      // Subir el archivo a Cloudinary
+      const uploadResult = await this.cloudinaryService.uploadImage(file);
+      // Guardar la URL en el campo verification
+      data.verification = uploadResult.secure_url;
+    } catch (error) {
+      throw new HttpException(
+        'Error al subir el archivo',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  return this.usersService.createOrUpdateMedico(data.userId, data);
+}
 
   @ApiOperation({ summary: 'Get Medico information' })
   @ApiResponse({ status: 200, description: 'Medico found.' })

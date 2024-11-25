@@ -4,9 +4,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateMedicoDto } from './dto/update-medico.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 export declare class UsersController {
     private readonly usersService;
-    constructor(usersService: UsersService);
+    private readonly cloudinaryService;
+    constructor(usersService: UsersService, cloudinaryService: CloudinaryService);
     register(userData: CreateUserDto): Promise<{
         message: string;
         userId: string;
@@ -14,19 +16,19 @@ export declare class UsersController {
     completeProfile(userData: UpdateUserDto): Promise<{
         message: string;
     }>;
-    updateMedico(file: Express.User, data: UpdateMedicoDto): Promise<{
+    updateMedico(file: Express.Multer.File, data: UpdateMedicoDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        verification: string;
         userId: string;
+        verification: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        verification: string;
         userId: string;
+        verification: string;
     }>;
     updateEmpresa(data: UpdateEmpresaDto): Promise<{
         name: string;

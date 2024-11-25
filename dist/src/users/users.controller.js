@@ -24,9 +24,11 @@ const update_medico_dto_1 = require("./dto/update-medico.dto");
 const update_empresa_dto_1 = require("./dto/update-empresa.dto");
 const update_instructor_dto_1 = require("./dto/update-instructor.dto");
 const swagger_1 = require("@nestjs/swagger");
+const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 let UsersController = class UsersController {
-    constructor(usersService) {
+    constructor(usersService, cloudinaryService) {
         this.usersService = usersService;
+        this.cloudinaryService = cloudinaryService;
     }
     async register(userData) {
         const { password, email, role } = userData;
@@ -64,7 +66,13 @@ let UsersController = class UsersController {
             throw new common_1.HttpException('User ID is required', common_1.HttpStatus.BAD_REQUEST);
         }
         if (file) {
-            data.verification = `https://mockstorage.com/}`;
+            try {
+                const uploadResult = await this.cloudinaryService.uploadImage(file);
+                data.verification = uploadResult.secure_url;
+            }
+            catch (error) {
+                throw new common_1.HttpException('Error al subir el archivo', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
         return this.usersService.createOrUpdateMedico(data.userId, data);
     }
@@ -126,7 +134,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "completeProfile", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Create or update a Medico with file upload' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar un Medico con carga de archivo' }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     (0, common_1.Put)('medico'),
     __param(0, (0, common_1.UploadedFile)()),
@@ -202,6 +210,6 @@ __decorate([
 exports.UsersController = UsersController = __decorate([
     (0, swagger_1.ApiTags)('users'),
     (0, common_1.Controller)('users'),
-    __metadata("design:paramtypes", [users_service_1.UsersService])
+    __metadata("design:paramtypes", [users_service_1.UsersService, cloudinary_service_1.CloudinaryService])
 ], UsersController);
 //# sourceMappingURL=users.controller.js.map

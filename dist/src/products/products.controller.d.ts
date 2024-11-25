@@ -14,10 +14,10 @@ export declare class ProductsController {
         discount: import("@prisma/client/runtime/library").Decimal | null;
         productCode: string;
         availableQuantity: number;
-        companyId: string;
         providerId: string | null;
         isFeatured: boolean;
         imageUrl: string | null;
+        companyId: string;
     }>;
     getProductsByCompany(companyId: string): Promise<{
         name: string;
@@ -29,10 +29,10 @@ export declare class ProductsController {
         discount: import("@prisma/client/runtime/library").Decimal | null;
         productCode: string;
         availableQuantity: number;
-        companyId: string;
         providerId: string | null;
         isFeatured: boolean;
         imageUrl: string | null;
+        companyId: string;
     }[]>;
     updateProduct(productId: number, updateProductDto: UpdateProductDto): Promise<{
         name: string;
@@ -44,10 +44,10 @@ export declare class ProductsController {
         discount: import("@prisma/client/runtime/library").Decimal | null;
         productCode: string;
         availableQuantity: number;
-        companyId: string;
         providerId: string | null;
         isFeatured: boolean;
         imageUrl: string | null;
+        companyId: string;
     }>;
     deleteProduct(productId: number): Promise<{
         name: string;
@@ -59,10 +59,10 @@ export declare class ProductsController {
         discount: import("@prisma/client/runtime/library").Decimal | null;
         productCode: string;
         availableQuantity: number;
-        companyId: string;
         providerId: string | null;
         isFeatured: boolean;
         imageUrl: string | null;
+        companyId: string;
     }>;
     setProductFeatured(productId: number, isFeatured: boolean): Promise<{
         name: string;
@@ -74,10 +74,10 @@ export declare class ProductsController {
         discount: import("@prisma/client/runtime/library").Decimal | null;
         productCode: string;
         availableQuantity: number;
-        companyId: string;
         providerId: string | null;
         isFeatured: boolean;
         imageUrl: string | null;
+        companyId: string;
     }>;
     getFeaturedProducts(limit?: number): Promise<{
         name: string;
@@ -89,9 +89,9 @@ export declare class ProductsController {
         discount: import("@prisma/client/runtime/library").Decimal | null;
         productCode: string;
         availableQuantity: number;
-        companyId: string;
         providerId: string | null;
         isFeatured: boolean;
         imageUrl: string | null;
+        companyId: string;
     }[]>;
 }
