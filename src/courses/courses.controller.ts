@@ -92,7 +92,6 @@ export class CoursesController {
   }
 
   @Get('featured-fetch')
-  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener cursos destacados' })
   @ApiResponse({ status: 200, description: 'Lista de cursos destacados', type: [CoursesFetchDto] })
   async getFeaturedCoursesFetch(): Promise<CoursesFetchDto[]> {
