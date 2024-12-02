@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Query, UseGuards } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CreateModuleDto } from './dto/create-module.dto';
@@ -12,6 +12,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { CoursesFetchDto } from './dto/courses-fetch.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('courses')
 @Controller('courses')
@@ -91,6 +92,7 @@ export class CoursesController {
   }
 
   @Get('featured-fetch')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Obtener cursos destacados' })
   @ApiResponse({ status: 200, description: 'Lista de cursos destacados', type: [CoursesFetchDto] })
   async getFeaturedCoursesFetch(): Promise<CoursesFetchDto[]> {
