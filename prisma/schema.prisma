@@ -30,47 +30,126 @@ model User {
   medico        Medico?
   empresa       Empresa?
   instructor    Instructor?
-  comments      Comment[] @relation("UserComments")
+  comments      Comment[]      @relation("UserComments")
   enrollments   CourseEnrollment[]
 }
 
 model Instructor {
-  id         String   @id @default(cuid())
-  profession Profession @default(MEDICO) // Enum Profession
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String   @unique
-  courses    Course[] @relation("InstructorCourses")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
-}
-
-model Course {
-  id               String         @id @default(cuid())
-  name             String
-  description      String?
-  cost             Float
-  discount         Float?
-  publicationDate  DateTime       @default(now())
-  level            CourseLevel
-  featured         Boolean        @default(false)
-  averageRating    Float?         @default(0.0)
-  participants     Int            @default(0)
-  instructorId     String?
-  instructor       Instructor?    @relation("InstructorCourses", fields: [instructorId], references: [id])
-  modules          Module[]
-  categories       CategoriesOnCourses[]
-  enrollments      CourseEnrollment[]
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @default(now())
+  id                String       @id @default(cuid())
+  profession        Profession
+  type              ProfessionType
+  description       String
+  experienceYears   Int
+  certificationsUrl String
+  status            String
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String       @unique
+  courses           Course[]     @relation("InstructorCourses") // Relación inversa hacia Course
+  companyId         String?
+  company           Empresa?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @default(now())
 }
 
 model Medico {
-  id           String   @id @default(cuid())
+  id           String       @id @default(cuid())
+  profession   Profession   @default(ESTETICA)      // Cambiado a ESTETICA
+  type         ProfessionType @default(ESTETICISTA) // Cambiado a ESTETICISTA
   verification String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String       @unique
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now())
+}
+
+model Empresa {
+  id         String       @id @default(cuid())
+  dni        String?
+  name       String
+  giro       Giro          @default(SERVICIOS)
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String        @unique
+  instructores Instructor[] // Relación inversa hacia Instructor
+  productos  Product[]
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @default(now())
+}
+
+model Course {
+  id                  String    @id @default(cuid())
+  title               String
+  bannerUrl           String
+  description         String
+  categoryId          String
+  category            Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Relación con Category
+  instructorId        String?
+  instructor          Instructor? @relation("InstructorCourses", fields: [instructorId], references: [id]) // Relación con Instructor
+  rating              Float     @default(0)
+  commentsCount       Int       @default(0)
+  averageRating       Float     @default(0)
+  level               String
+  price               Float
+  discountPercentage  Float?
+  participantsCount   Int       @default(0)
+  target              Target    @default(MEDICO)
+  isFeatured          Boolean?  // Campo opcional para destacar un curso
+  modules             Module[]
+  enrollments         CourseEnrollment[]
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+model Category {
+  id        String      @id @default(cuid())
+  name      String
+  urlIcon   String
+  colorHex  String
+  courses   Course[]    // Relación inversa hacia Course
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @default(now())
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade) // Relación con Course
+  description String
+  classes     Class[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+}
+
+model Class {
+  id          String   @id @default(cuid())
+  moduleId    String
+  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade) // Relación con Module
+  description String
+  comments    Comment[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+}
+
+model Comment {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade) // Relación con User
+  classId     String
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade) // Relación con Class
+  type        CommentType
+  rating      Int
+  content     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now())
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String   @unique
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Product {
@@ -81,84 +160,11 @@ model Product {
   discount           Decimal?  @db.Decimal(10, 2)
   productCode        String    @unique @db.VarChar(100)
   availableQuantity  Int
-  companyId          String    // Foreign key to Empresa
+  isFeatured         Boolean   @default(false)
+  companyId          String
   company            Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  providerId         String?   // Optional foreign key for a provider
-  isFeatured         Boolean   @default(false) // Field for featured products
-  imageUrl           String?   // Field for product image URL
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
-}
-
-
-model Empresa {
-  id         String       @id @default(cuid())
-  dni        String?
-  name       String
-  target     Target        @default(MEDICO)
-  categoryId String?
-  category   Category?     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String        @unique
-  productos  Product[]    // Relation to Product model
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @default(now())
-}
-
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
-}
-
-model CategoriesOnCourses {
-  id          String   @id @default(cuid())
-  courseId    String
-  categoryId  String
-  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-}
-
-model Category {
-  id        String   @id @default(cuid())
-  name      String
-  courses   CategoriesOnCourses[]
-  empresas  Empresa[] // Relación con empresas
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-}
-
-model Module {
-  id          String   @id @default(cuid())
-  courseId    String
-  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  description String
-  classes     Class[]
-}
-
-model Class {
-  id          String   @id @default(cuid())
-  moduleId    String
-  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  description String
-  comments    Comment[]
-}
-
-model Comment {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
-  classId     String
-  class       Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
-  type        CommentType
-  rating      Int
-  content     String
-  createdAt   DateTime @default(now())
 }
 
 model CourseEnrollment {
@@ -166,7 +172,7 @@ model CourseEnrollment {
   courseId   String
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade) // Relación con Course
   enrolledAt DateTime @default(now())
 }
 
@@ -180,20 +186,31 @@ enum Role {
   INSTRUCTOR
 }
 
-enum CommentType {
-  TEXT
-  RATING
-}
-
-enum CourseLevel {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-}
-
 enum Profession {
+  DERMATOLOGIA
+  MEDICINA_ESTETICA
+  ESTUDIANTE_DE_MEDICINA
+  ESTETICA
+  COSMIATRIA
+  COSMETOLOGIA
+  ADMINISTRACION_SPA
+  NUTRICION
+  TERAPIA_FISICA_REHABILITACION
+  MEDICINA_ALTERNATIVA
+  QUIMICA_COSMETICA
+  ESTUDIANTE_AREA_ESTETICA
+}
+
+enum ProfessionType {
   MEDICO
   ESTETICISTA
+}
+
+enum Giro {
+  SERVICIOS
+  PRODUCTOS
+  CONSULTORIA
+  OTRO
 }
 
 enum Target {
@@ -201,16 +218,7 @@ enum Target {
   ESTETICISTA
 }
 
-model CoursesFetch {
-  id            String   @id @default(cuid())
-  title         String
-  instructor    String
-  price         Float
-  comments      Int
-  date          DateTime
-  rating        Float
-  imageUrl      String
-  categoryName  String
-  categoryIcon  String
-  featured      Boolean  @default(false)
+enum CommentType {
+  TEXT
+  RATING
 }

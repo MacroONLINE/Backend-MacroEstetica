@@ -12,29 +12,125 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CoursesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const client_1 = require("@prisma/client");
 let CoursesService = class CoursesService {
     constructor(prisma) {
         this.prisma = prisma;
     }
     async createCourse(data) {
-        return this.prisma.course.create({ data });
+        const { instructorId, categoryId, ...rest } = data;
+        return this.prisma.course.create({
+            data: {
+                ...rest,
+                instructor: instructorId ? { connect: { id: instructorId } } : undefined,
+                category: categoryId ? { connect: { id: categoryId } } : undefined,
+            },
+        });
+    }
+    async getCourseById(courseId) {
+        const course = await this.prisma.course.findUnique({
+            where: { id: courseId },
+            include: {
+                instructor: true,
+                category: true,
+            },
+        });
+        if (!course) {
+            throw new common_1.NotFoundException(`Course with ID ${courseId} not found.`);
+        }
+        return course;
+    }
+    async getAllCourses() {
+        return this.prisma.course.findMany({
+            include: {
+                instructor: true,
+                category: true,
+            },
+        });
+    }
+    async getFeaturedCourses() {
+        return this.prisma.course.findMany({
+            where: { isFeatured: true },
+            include: {
+                instructor: true,
+                category: true,
+            },
+        });
+    }
+    async getCoursesByCategory(categoryId) {
+        return this.prisma.course.findMany({
+            where: { categoryId },
+            include: {
+                instructor: true,
+                category: true,
+            },
+        });
+    }
+    async getCoursesByInstructor(instructorId) {
+        return this.prisma.course.findMany({
+            where: { instructorId },
+            include: {
+                instructor: true,
+                category: true,
+            },
+        });
+    }
+    async getCoursesByTarget(target) {
+        const validatedTarget = Object.values(client_1.Target).includes(target)
+            ? target
+            : client_1.Target.ESTETICISTA;
+        return this.prisma.course.findMany({
+            where: {
+                target: validatedTarget,
+            },
+            include: {
+                instructor: true,
+                category: true,
+            },
+        });
     }
     async createModule(data) {
-        return this.prisma.module.create({ data });
+        const { courseId, description } = data;
+        const courseExists = await this.prisma.course.findUnique({
+            where: { id: courseId },
+        });
+        if (!courseExists) {
+            throw new common_1.NotFoundException(`Course with ID ${courseId} not found.`);
+        }
+        return this.prisma.module.create({
+            data: {
+                courseId,
+                description,
+            },
+        });
     }
     async createClass(data) {
-        return this.prisma.class.create({ data });
+        const { moduleId, description } = data;
+        const moduleExists = await this.prisma.module.findUnique({
+            where: { id: moduleId },
+        });
+        if (!moduleExists) {
+            throw new common_1.NotFoundException(`Module with ID ${moduleId} not found.`);
+        }
+        return this.prisma.class.create({
+            data: {
+                moduleId,
+                description,
+            },
+        });
     }
     async createComment(data) {
         const { userId, classId, type, rating, content } = data;
+        const classExists = await this.prisma.class.findUnique({
+            where: { id: classId },
+        });
+        if (!classExists) {
+            throw new common_1.NotFoundException(`Class with ID ${classId} not found.`);
+        }
         return this.prisma.comment.create({
             data: {
-                user: {
-                    connect: { id: userId },
-                },
-                class: {
-                    connect: { id: classId },
-                },
+                userId,
+                classId,
                 type,
                 rating,
                 content,
@@ -42,48 +138,35 @@ let CoursesService = class CoursesService {
         });
     }
     async createCategory(data) {
-        return this.prisma.category.create({ data });
-    }
-    async getAllCourses() {
-        return this.prisma.course.findMany({
-            include: {
-                modules: {
-                    include: { classes: true },
-                },
-                categories: {
-                    include: { category: true },
-                },
-            },
-        });
-    }
-    async getFeaturedCourses() {
-        return this.prisma.course.findMany({
-            where: { featured: true },
-            include: {
-                instructor: true,
-                categories: {
-                    include: { category: true },
-                },
+        const { name, urlIcon, colorHex } = data;
+        return this.prisma.category.create({
+            data: {
+                name,
+                urlIcon,
+                colorHex,
             },
         });
     }
     async getModulesByCourseId(courseId) {
+        const courseExists = await this.prisma.course.findUnique({
+            where: { id: courseId },
+        });
+        if (!courseExists) {
+            throw new common_1.NotFoundException(`Course with ID ${courseId} not found.`);
+        }
         return this.prisma.module.findMany({
             where: { courseId },
-            include: { classes: true },
         });
     }
     async getClassesByModuleId(moduleId) {
+        const moduleExists = await this.prisma.module.findUnique({
+            where: { id: moduleId },
+        });
+        if (!moduleExists) {
+            throw new common_1.NotFoundException(`Module with ID ${moduleId} not found.`);
+        }
         return this.prisma.class.findMany({
             where: { moduleId },
-            include: {
-                comments: true,
-            },
-        });
-    }
-    async getFeaturedCoursesFetch() {
-        return this.prisma.coursesFetch.findMany({
-            where: { featured: true },
         });
     }
 };

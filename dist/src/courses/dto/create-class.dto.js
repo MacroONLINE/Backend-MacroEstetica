@@ -16,13 +16,13 @@ class CreateClassDto {
 }
 exports.CreateClassDto = CreateClassDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Clase 1: Configuración inicial', description: 'Descripción de la clase' }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateClassDto.prototype, "description", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 'moduloId123', description: 'ID del módulo asociado' }),
+    (0, swagger_1.ApiProperty)({ description: 'Module ID the class belongs to' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateClassDto.prototype, "moduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Description of the class' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateClassDto.prototype, "description", void 0);
 //# sourceMappingURL=create-class.dto.js.map

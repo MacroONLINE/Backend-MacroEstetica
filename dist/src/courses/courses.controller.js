@@ -21,7 +21,7 @@ const create_class_dto_1 = require("./dto/create-class.dto");
 const create_comment_dto_1 = require("./dto/create-comment.dto");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const swagger_1 = require("@nestjs/swagger");
-const courses_fetch_dto_1 = require("./dto/courses-fetch.dto");
+const client_1 = require("@prisma/client");
 let CoursesController = class CoursesController {
     constructor(coursesService) {
         this.coursesService = coursesService;
@@ -47,14 +47,23 @@ let CoursesController = class CoursesController {
     async getFeaturedCourses() {
         return this.coursesService.getFeaturedCourses();
     }
+    async getCoursesByCategory(categoryId) {
+        return this.coursesService.getCoursesByCategory(categoryId);
+    }
+    async getCoursesByInstructor(instructorId) {
+        return this.coursesService.getCoursesByInstructor(instructorId);
+    }
+    async getCoursesByTarget(target) {
+        return this.coursesService.getCoursesByTarget(target);
+    }
     async getModulesByCourseId(courseId) {
         return this.coursesService.getModulesByCourseId(courseId);
     }
     async getClassesByModuleId(moduleId) {
         return this.coursesService.getClassesByModuleId(moduleId);
     }
-    async getFeaturedCoursesFetch() {
-        return this.coursesService.getFeaturedCoursesFetch();
+    async getCourseById(courseId) {
+        return this.coursesService.getCourseById(courseId);
     }
 };
 exports.CoursesController = CoursesController;
@@ -62,7 +71,6 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new course' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Course created successfully.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_course_dto_1.CreateCourseDto]),
@@ -72,7 +80,6 @@ __decorate([
     (0, common_1.Post)('modules'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new module for a course' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Module created successfully.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_module_dto_1.CreateModuleDto]),
@@ -82,7 +89,6 @@ __decorate([
     (0, common_1.Post)('classes'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new class for a module' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Class created successfully.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_class_dto_1.CreateClassDto]),
@@ -92,7 +98,6 @@ __decorate([
     (0, common_1.Post)('comments'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new comment for a class' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Comment created successfully.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_comment_dto_1.CreateCommentDto]),
@@ -102,7 +107,6 @@ __decorate([
     (0, common_1.Post)('categories'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new category' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Category created successfully.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid input data.' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_category_dto_1.CreateCategoryDto]),
@@ -125,11 +129,40 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getFeaturedCourses", null);
 __decorate([
+    (0, common_1.Get)('by-category/:categoryId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get courses by category' }),
+    (0, swagger_1.ApiParam)({ name: 'categoryId', description: 'The ID of the category' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of courses retrieved.' }),
+    __param(0, (0, common_1.Param)('categoryId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getCoursesByCategory", null);
+__decorate([
+    (0, common_1.Get)('by-instructor/:instructorId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get courses by instructor' }),
+    (0, swagger_1.ApiParam)({ name: 'instructorId', description: 'The ID of the instructor' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of courses retrieved.' }),
+    __param(0, (0, common_1.Param)('instructorId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getCoursesByInstructor", null);
+__decorate([
+    (0, common_1.Get)('by-target/:target'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get courses by target audience' }),
+    (0, swagger_1.ApiParam)({ name: 'target', description: 'Target audience (e.g., MEDICO, ESTETICISTA)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of courses retrieved.' }),
+    __param(0, (0, common_1.Param)('target')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getCoursesByTarget", null);
+__decorate([
     (0, common_1.Get)(':courseId/modules'),
     (0, swagger_1.ApiOperation)({ summary: 'Get all modules for a specific course' }),
     (0, swagger_1.ApiParam)({ name: 'courseId', description: 'The ID of the course' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of modules retrieved.' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Course not found.' }),
     __param(0, (0, common_1.Param)('courseId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -140,20 +173,22 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get all classes for a specific module' }),
     (0, swagger_1.ApiParam)({ name: 'moduleId', description: 'The ID of the module' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of classes retrieved.' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Module not found.' }),
     __param(0, (0, common_1.Param)('moduleId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getClassesByModuleId", null);
 __decorate([
-    (0, common_1.Get)('featured-fetch'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtener cursos destacados' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de cursos destacados', type: [courses_fetch_dto_1.CoursesFetchDto] }),
+    (0, common_1.Get)(':courseId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Get a course by ID' }),
+    (0, swagger_1.ApiParam)({ name: 'courseId', description: 'The ID of the course' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Course retrieved successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Course not found.' }),
+    __param(0, (0, common_1.Param)('courseId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], CoursesController.prototype, "getFeaturedCoursesFetch", null);
+], CoursesController.prototype, "getCourseById", null);
 exports.CoursesController = CoursesController = __decorate([
     (0, swagger_1.ApiTags)('courses'),
     (0, common_1.Controller)('courses'),

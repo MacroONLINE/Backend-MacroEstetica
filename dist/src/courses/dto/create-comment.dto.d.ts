@@ -1,8 +1,8 @@
-import { CommentType } from '@prisma/client';
+import { CommentType } from '../enums/comment-type.enum';
 export declare class CreateCommentDto {
-    content: string;
-    type: CommentType;
-    rating?: number;
-    classId: string;
     userId: string;
+    classId: string;
+    type: CommentType;
+    rating: number;
+    content: string;
 }

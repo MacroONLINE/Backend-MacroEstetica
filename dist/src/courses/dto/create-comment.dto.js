@@ -12,34 +12,33 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateCommentDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
-const client_1 = require("@prisma/client");
+const comment_type_enum_1 = require("../enums/comment-type.enum");
 class CreateCommentDto {
 }
 exports.CreateCommentDto = CreateCommentDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Muy buena clase', description: 'Contenido del comentario' }),
+    (0, swagger_1.ApiProperty)({ description: 'User ID who created the comment' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateCommentDto.prototype, "content", void 0);
+], CreateCommentDto.prototype, "userId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: client_1.CommentType, description: 'Tipo de comentario' }),
-    (0, class_validator_1.IsEnum)(client_1.CommentType),
-    __metadata("design:type", String)
-], CreateCommentDto.prototype, "type", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 5, description: 'Calificación de la clase', required: false }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsInt)(),
-    __metadata("design:type", Number)
-], CreateCommentDto.prototype, "rating", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 'claseId123', description: 'ID de la clase asociada' }),
+    (0, swagger_1.ApiProperty)({ description: 'Class ID the comment belongs to' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateCommentDto.prototype, "classId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'userId123', description: 'ID del usuario que comenta' }),
+    (0, swagger_1.ApiProperty)({ description: 'Type of the comment', enum: comment_type_enum_1.CommentType }),
+    (0, class_validator_1.IsEnum)(comment_type_enum_1.CommentType),
+    __metadata("design:type", String)
+], CreateCommentDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Rating of the comment' }),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateCommentDto.prototype, "rating", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Content of the comment' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateCommentDto.prototype, "userId", void 0);
+], CreateCommentDto.prototype, "content", void 0);
 //# sourceMappingURL=create-comment.dto.js.map

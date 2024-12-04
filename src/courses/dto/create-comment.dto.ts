@@ -1,26 +1,25 @@
-import { IsString, IsInt, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsEnum, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { CommentType } from '@prisma/client';
+import { CommentType } from '../enums/comment-type.enum';
 
 export class CreateCommentDto {
-  @ApiProperty({ example: 'Muy buena clase', description: 'Contenido del comentario' })
+  @ApiProperty({ description: 'User ID who created the comment' })
   @IsString()
-  content: string;
+  userId: string;
 
-  @ApiProperty({ enum: CommentType, description: 'Tipo de comentario' })
-  @IsEnum(CommentType)
-  type: CommentType;
-
-  @ApiProperty({ example: 5, description: 'Calificación de la clase', required: false })
-  @IsOptional()
-  @IsInt()
-  rating?: number;
-
-  @ApiProperty({ example: 'claseId123', description: 'ID de la clase asociada' })
+  @ApiProperty({ description: 'Class ID the comment belongs to' })
   @IsString()
   classId: string;
 
-  @ApiProperty({ example: 'userId123', description: 'ID del usuario que comenta' })
+  @ApiProperty({ description: 'Type of the comment', enum: CommentType })
+  @IsEnum(CommentType)
+  type: CommentType;
+
+  @ApiProperty({ description: 'Rating of the comment' })
+  @IsNumber()
+  rating: number;
+
+  @ApiProperty({ description: 'Content of the comment' })
   @IsString()
-  userId: string;
+  content: string;
 }

@@ -1,34 +1,54 @@
-import { IsString, IsOptional, IsEnum, IsNumber, Min, IsBoolean } from 'class-validator';
+import { IsString, IsNumber, IsBoolean, IsOptional, IsJSON, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { CourseLevel } from '@prisma/client';
+import { Target } from '../enums/target.enum';
 
 export class CreateCourseDto {
-  @ApiProperty({ example: 'Curso de Node.js', description: 'Nombre del curso' })
+  @ApiProperty({ description: 'Title of the course' })
   @IsString()
-  name: string;
+  title: string;
 
-  @ApiProperty({ example: 'Aprende Node.js desde cero', description: 'Descripción del curso', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Banner URL of the course' })
   @IsString()
-  description?: string;
+  bannerUrl: string;
 
-  @ApiProperty({ example: 100.0, description: 'Costo del curso' })
+  @ApiProperty({ description: 'Description of the course' })
+  @IsString()
+  description: string;
+
+  @ApiProperty({ description: 'Category ID to associate the course' })
+  @IsString()
+  categoryId: string;
+
+  @ApiProperty({ description: 'Level of the course' })
+  @IsString()
+  level: string;
+
+  @ApiProperty({ description: 'Price of the course' })
   @IsNumber()
-  @Min(0)
-  cost: number;
+  price: number;
 
-  @ApiProperty({ example: 10.0, description: 'Descuento aplicado al curso', required: false })
-  @IsOptional()
+  @ApiProperty({ description: 'Discount percentage of the course', required: false })
   @IsNumber()
-  @Min(0)
-  discount?: number;
-
-  @ApiProperty({ enum: CourseLevel, description: 'Nivel del curso' })
-  @IsEnum(CourseLevel)
-  level: CourseLevel;
-
-  @ApiProperty({ example: true, description: 'Indica si el curso está destacado', required: false })
   @IsOptional()
+  discountPercentage?: number;
+
+  @ApiProperty({ description: 'Target audience of the course', enum: Target, required: false })
+  @IsEnum(Target)
+  @IsOptional()
+  target?: Target;
+
+  @ApiProperty({ description: 'Instructor ID to associate with the course', required: false })
+  @IsString()
+  @IsOptional()
+  instructorId?: string;
+
+  @ApiProperty({ description: 'JSON for "What you will learn"', required: false })
+  @IsJSON()
+  @IsOptional()
+  whatYouWillLearn?: string;
+
+  @ApiProperty({ description: 'Whether the course is featured', required: false })
   @IsBoolean()
-  featured?: boolean;
+  @IsOptional()
+  isFeatured?: boolean; // Campo opcional para indicar si el curso es destacado
 }

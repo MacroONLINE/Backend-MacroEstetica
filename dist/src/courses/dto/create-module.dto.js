@@ -16,13 +16,13 @@ class CreateModuleDto {
 }
 exports.CreateModuleDto = CreateModuleDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Introducción a Node.js', description: 'Descripción del módulo' }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateModuleDto.prototype, "description", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 'claseId123', description: 'ID del curso asociado' }),
+    (0, swagger_1.ApiProperty)({ description: 'Course ID the module belongs to' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateModuleDto.prototype, "courseId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Description of the module' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateModuleDto.prototype, "description", void 0);
 //# sourceMappingURL=create-module.dto.js.map

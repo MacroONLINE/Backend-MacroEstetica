@@ -2,11 +2,11 @@ import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateModuleDto {
-  @ApiProperty({ example: 'Introducción a Node.js', description: 'Descripción del módulo' })
-  @IsString()
-  description: string;
-
-  @ApiProperty({ example: 'claseId123', description: 'ID del curso asociado' })
+  @ApiProperty({ description: 'Course ID the module belongs to' })
   @IsString()
   courseId: string;
+
+  @ApiProperty({ description: 'Description of the module' })
+  @IsString()
+  description: string;
 }

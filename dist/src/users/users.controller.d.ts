@@ -21,6 +21,8 @@ export declare class UsersController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        profession: import(".prisma/client").$Enums.Profession;
+        type: import(".prisma/client").$Enums.ProfessionType;
         verification: string;
     }>;
     getMedico(req: any): Promise<{
@@ -28,6 +30,8 @@ export declare class UsersController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        profession: import(".prisma/client").$Enums.Profession;
+        type: import(".prisma/client").$Enums.ProfessionType;
         verification: string;
     }>;
     updateEmpresa(data: UpdateEmpresaDto): Promise<{
@@ -37,8 +41,7 @@ export declare class UsersController {
         updatedAt: Date;
         userId: string;
         dni: string | null;
-        target: import(".prisma/client").$Enums.Target;
-        categoryId: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
     }>;
     getEmpresa(req: any): Promise<{
         name: string;
@@ -47,22 +50,33 @@ export declare class UsersController {
         updatedAt: Date;
         userId: string;
         dni: string | null;
-        target: import(".prisma/client").$Enums.Target;
-        categoryId: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
     }>;
     updateInstructor(data: UpdateInstructorDto): Promise<{
         id: string;
+        status: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         profession: import(".prisma/client").$Enums.Profession;
+        type: import(".prisma/client").$Enums.ProfessionType;
+        description: string;
+        experienceYears: number;
+        certificationsUrl: string;
+        companyId: string | null;
     }>;
     getInstructor(req: any): Promise<{
         id: string;
+        status: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         profession: import(".prisma/client").$Enums.Profession;
+        type: import(".prisma/client").$Enums.ProfessionType;
+        description: string;
+        experienceYears: number;
+        certificationsUrl: string;
+        companyId: string | null;
     }>;
     findUserById(id: string): Promise<{
         id: string;

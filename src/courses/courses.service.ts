@@ -1,44 +1,154 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CreateModuleDto } from './dto/create-module.dto';
 import { CreateClassDto } from './dto/create-class.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { CoursesFetchDto } from './dto/courses-fetch.dto';
+import { Target } from '@prisma/client';
 
 @Injectable()
 export class CoursesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  // Crear un curso
   async createCourse(data: CreateCourseDto) {
-    return this.prisma.course.create({ data });
+    const { instructorId, categoryId, ...rest } = data;
+
+    return this.prisma.course.create({
+      data: {
+        ...rest,
+        instructor: instructorId ? { connect: { id: instructorId } } : undefined,
+        category: categoryId ? { connect: { id: categoryId } } : undefined,
+      },
+    });
   }
 
-  // Crear un módulo
+  async getCourseById(courseId: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      include: {
+        instructor: true,
+        category: true, // Include category details
+      },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${courseId} not found.`);
+    }
+
+    return course;
+  }
+
+  async getAllCourses() {
+    return this.prisma.course.findMany({
+      include: {
+        instructor: true,
+        category: true,
+      },
+    });
+  }
+
+  async getFeaturedCourses() {
+    return this.prisma.course.findMany({
+      where: { isFeatured: true }, // Filtra los cursos destacados
+      include: {
+        instructor: true,
+        category: true, // Incluye los detalles de la categoría
+      },
+    });
+  }
+
+  async getCoursesByCategory(categoryId: string) {
+    return this.prisma.course.findMany({
+      where: { categoryId },
+      include: {
+        instructor: true,
+        category: true,
+      },
+    });
+  }
+
+  async getCoursesByInstructor(instructorId: string) {
+    return this.prisma.course.findMany({
+      where: { instructorId },
+      include: {
+        instructor: true,
+        category: true,
+      },
+    });
+  }
+
+  async getCoursesByTarget(target: string) {
+    // Validar el target o asignar el valor predeterminado
+    const validatedTarget: Target = 
+      Object.values(Target).includes(target as Target) 
+        ? (target as Target) 
+        : Target.ESTETICISTA;
+
+    return this.prisma.course.findMany({
+      where: {
+        target: validatedTarget, // Asignar el target validado
+      },
+      include: {
+        instructor: true,
+        category: true,
+      },
+    });
+  }
+
   async createModule(data: CreateModuleDto) {
-    return this.prisma.module.create({ data });
+    const { courseId, description } = data;
+
+    const courseExists = await this.prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!courseExists) {
+      throw new NotFoundException(`Course with ID ${courseId} not found.`);
+    }
+
+    return this.prisma.module.create({
+      data: {
+        courseId,
+        description,
+      },
+    });
   }
 
-  // Crear una clase
   async createClass(data: CreateClassDto) {
-    return this.prisma.class.create({ data });
+    const { moduleId, description } = data;
+
+    const moduleExists = await this.prisma.module.findUnique({
+      where: { id: moduleId },
+    });
+
+    if (!moduleExists) {
+      throw new NotFoundException(`Module with ID ${moduleId} not found.`);
+    }
+
+    return this.prisma.class.create({
+      data: {
+        moduleId,
+        description,
+      },
+    });
   }
 
-  // Crear un comentario
   async createComment(data: CreateCommentDto) {
-    // Desestructurar los datos del DTO
     const { userId, classId, type, rating, content } = data;
+
+    const classExists = await this.prisma.class.findUnique({
+      where: { id: classId },
+    });
+
+    if (!classExists) {
+      throw new NotFoundException(`Class with ID ${classId} not found.`);
+    }
 
     return this.prisma.comment.create({
       data: {
-        user: {
-          connect: { id: userId },
-        },
-        class: {
-          connect: { id: classId },
-        },
+        userId,
+        classId,
         type,
         rating,
         content,
@@ -46,60 +156,43 @@ export class CoursesService {
     });
   }
 
-  // Crear una categoría
   async createCategory(data: CreateCategoryDto) {
-    return this.prisma.category.create({ data });
-  }
+    const { name, urlIcon, colorHex } = data;
 
-  // Obtener todos los cursos
-  async getAllCourses() {
-    return this.prisma.course.findMany({
-      include: {
-        modules: {
-          include: { classes: true },
-        },
-        categories: {
-          include: { category: true },
-        },
+    return this.prisma.category.create({
+      data: {
+        name,
+        urlIcon,
+        colorHex,
       },
     });
   }
 
-  // Obtener cursos destacados
-  async getFeaturedCourses() {
-    return this.prisma.course.findMany({
-      where: { featured: true },
-      include: {
-        instructor: true,
-        categories: {
-          include: { category: true },
-        },
-      },
-    });
-  }
-
-  // Obtener módulos por el ID del curso
   async getModulesByCourseId(courseId: string) {
+    const courseExists = await this.prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!courseExists) {
+      throw new NotFoundException(`Course with ID ${courseId} not found.`);
+    }
+
     return this.prisma.module.findMany({
       where: { courseId },
-      include: { classes: true },
     });
   }
 
-  // Obtener clases por el ID del módulo
   async getClassesByModuleId(moduleId: string) {
+    const moduleExists = await this.prisma.module.findUnique({
+      where: { id: moduleId },
+    });
+
+    if (!moduleExists) {
+      throw new NotFoundException(`Module with ID ${moduleId} not found.`);
+    }
+
     return this.prisma.class.findMany({
       where: { moduleId },
-      include: {
-        comments: true,
-      },
-    });
-  }
- 
-
-  async getFeaturedCoursesFetch(): Promise<CoursesFetchDto[]> {
-    return this.prisma.coursesFetch.findMany({
-      where: { featured: true },
     });
   }
 }

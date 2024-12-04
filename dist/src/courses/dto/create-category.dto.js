@@ -16,8 +16,18 @@ class CreateCategoryDto {
 }
 exports.CreateCategoryDto = CreateCategoryDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Programación', description: 'Nombre de la categoría' }),
+    (0, swagger_1.ApiProperty)({ description: 'Name of the category' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateCategoryDto.prototype, "name", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'URL of the category icon' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "urlIcon", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Color hex code of the category' }),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateCategoryDto.prototype, "colorHex", void 0);
 //# sourceMappingURL=create-category.dto.js.map

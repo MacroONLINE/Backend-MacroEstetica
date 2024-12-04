@@ -1,9 +1,14 @@
-import { CourseLevel } from '@prisma/client';
+import { Target } from '../enums/target.enum';
 export declare class CreateCourseDto {
-    name: string;
-    description?: string;
-    cost: number;
-    discount?: number;
-    level: CourseLevel;
-    featured?: boolean;
+    title: string;
+    bannerUrl: string;
+    description: string;
+    categoryId: string;
+    level: string;
+    price: number;
+    discountPercentage?: number;
+    target?: Target;
+    instructorId?: string;
+    whatYouWillLearn?: string;
+    isFeatured?: boolean;
 }
