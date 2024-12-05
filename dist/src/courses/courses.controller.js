@@ -22,6 +22,7 @@ const create_comment_dto_1 = require("./dto/create-comment.dto");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const swagger_1 = require("@nestjs/swagger");
 const client_1 = require("@prisma/client");
+const course_response_dto_1 = require("./response-dto/course-response.dto");
 let CoursesController = class CoursesController {
     constructor(coursesService) {
         this.coursesService = coursesService;
@@ -182,7 +183,7 @@ __decorate([
     (0, common_1.Get)(':courseId'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a course by ID' }),
     (0, swagger_1.ApiParam)({ name: 'courseId', description: 'The ID of the course' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Course retrieved successfully.' }),
+    (0, swagger_1.ApiResponse)({ status: 200, type: course_response_dto_1.CourseResponseDto, description: 'Course retrieved successfully.' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Course not found.' }),
     __param(0, (0, common_1.Param)('courseId')),
     __metadata("design:type", Function),

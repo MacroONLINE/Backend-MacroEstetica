@@ -11,6 +11,11 @@ export class CreateCourseDto {
   @IsString()
   bannerUrl: string;
 
+  @ApiProperty({ description: 'Course Image URL (square)' })
+  @IsString()
+  @IsOptional()
+  courseImageUrl?: string; // Nueva propiedad para la imagen cuadrada del curso
+
   @ApiProperty({ description: 'Description of the course' })
   @IsString()
   description: string;

@@ -7,10 +7,13 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { Target } from '@prisma/client';
+import { CourseResponseDto } from './response-dto/course-response.dto';
+
+
 
 @ApiTags('courses')
 @Controller('courses')
-export class CoursesController {c
+export class CoursesController {
   constructor(private readonly coursesService: CoursesService) {}
 
 
@@ -108,12 +111,12 @@ export class CoursesController {c
 
   
 
-@Get(':courseId')
-@ApiOperation({ summary: 'Get a course by ID' })
-@ApiParam({ name: 'courseId', description: 'The ID of the course' })
-@ApiResponse({ status: 200, description: 'Course retrieved successfully.' })
-@ApiResponse({ status: 404, description: 'Course not found.' })
-async getCourseById(@Param('courseId') courseId: string) {
-  return this.coursesService.getCourseById(courseId);
-}
+  @Get(':courseId')
+  @ApiOperation({ summary: 'Get a course by ID' })
+  @ApiParam({ name: 'courseId', description: 'The ID of the course' })
+  @ApiResponse({ status: 200, type: CourseResponseDto, description: 'Course retrieved successfully.' })
+  @ApiResponse({ status: 404, description: 'Course not found.' })
+  async getCourseById(@Param('courseId') courseId: string): Promise<CourseResponseDto> {
+    return this.coursesService.getCourseById(courseId);
+  }
 }

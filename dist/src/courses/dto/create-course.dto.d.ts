@@ -2,6 +2,7 @@ import { Target } from '../enums/target.enum';
 export declare class CreateCourseDto {
     title: string;
     bannerUrl: string;
+    courseImageUrl?: string;
     description: string;
     categoryId: string;
     level: string;

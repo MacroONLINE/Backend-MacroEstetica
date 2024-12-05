@@ -6,6 +6,7 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Target } from '@prisma/client';
+import { CourseResponseDto } from './response-dto/course-response.dto';
 
 @Injectable()
 export class CoursesService {
@@ -23,21 +24,51 @@ export class CoursesService {
     });
   }
 
-  async getCourseById(courseId: string) {
+  async getCourseById(courseId: string): Promise<CourseResponseDto> {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        instructor: true,
-        category: true, // Include category details
+        category: true,
+        instructor: {
+          include: { user: true },
+        },
       },
     });
-
+  
     if (!course) {
       throw new NotFoundException(`Course with ID ${courseId} not found.`);
     }
-
-    return course;
+  
+    // Mapeamos los campos desde el curso y sus relaciones
+    const response: CourseResponseDto = {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      price: course.price,
+      discountPercentage: course.discountPercentage || 0,
+      level: course.level,
+      target: course.target,
+      participantsCount: course.participantsCount,
+      rating: course.rating,
+      isFeatured: course.isFeatured || false,
+      bannerUrl: course.bannerUrl || '',
+      courseImageUrl: course.courseImageUrl || '',
+  
+      // Relacionado con categoría
+      categoryName: course.category?.name || 'N/A',
+      categoryColor: course.category?.colorHex || 'N/A',
+      categoryIcon: course.category?.urlIcon || 'N/A',
+  
+      // Relacionado con el instructor
+      instructorName: `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() || 'N/A',
+      instructorExperience: course.instructor?.experienceYears || 0,
+      instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
+      instructorStatus: course.instructor?.status || 'N/A',
+    };
+  
+    return response;
   }
+  
 
   async getAllCourses() {
     return this.prisma.course.findMany({
@@ -190,7 +221,6 @@ export class CoursesService {
     if (!moduleExists) {
       throw new NotFoundException(`Module with ID ${moduleId} not found.`);
     }
-
     return this.prisma.class.findMany({
       where: { moduleId },
     });

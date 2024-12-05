@@ -27,6 +27,12 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCourseDto.prototype, "bannerUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Course Image URL (square)' }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCourseDto.prototype, "courseImageUrl", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'Description of the course' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)

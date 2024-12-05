@@ -31,14 +31,37 @@ let CoursesService = class CoursesService {
         const course = await this.prisma.course.findUnique({
             where: { id: courseId },
             include: {
-                instructor: true,
                 category: true,
+                instructor: {
+                    include: { user: true },
+                },
             },
         });
         if (!course) {
             throw new common_1.NotFoundException(`Course with ID ${courseId} not found.`);
         }
-        return course;
+        const response = {
+            id: course.id,
+            title: course.title,
+            description: course.description,
+            price: course.price,
+            discountPercentage: course.discountPercentage || 0,
+            level: course.level,
+            target: course.target,
+            participantsCount: course.participantsCount,
+            rating: course.rating,
+            isFeatured: course.isFeatured || false,
+            bannerUrl: course.bannerUrl || '',
+            courseImageUrl: course.courseImageUrl || '',
+            categoryName: course.category?.name || 'N/A',
+            categoryColor: course.category?.colorHex || 'N/A',
+            categoryIcon: course.category?.urlIcon || 'N/A',
+            instructorName: `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() || 'N/A',
+            instructorExperience: course.instructor?.experienceYears || 0,
+            instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
+            instructorStatus: course.instructor?.status || 'N/A',
+        };
+        return response;
     }
     async getAllCourses() {
         return this.prisma.course.findMany({

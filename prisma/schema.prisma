@@ -79,6 +79,7 @@ model Course {
   id                  String    @id @default(cuid())
   title               String
   bannerUrl           String
+  courseImageUrl      String    @default("") // Nueva columna para la imagen cuadrada del curso
   description         String
   categoryId          String
   category            Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Relación con Category
@@ -92,12 +93,13 @@ model Course {
   discountPercentage  Float?
   participantsCount   Int       @default(0)
   target              Target    @default(MEDICO)
-  isFeatured          Boolean?  // Campo opcional para destacar un curso
+  isFeatured          Boolean?
   modules             Module[]
   enrollments         CourseEnrollment[]
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 }
+
 
 model Category {
   id        String      @id @default(cuid())
