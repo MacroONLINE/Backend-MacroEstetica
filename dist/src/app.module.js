@@ -18,6 +18,7 @@ const auth_module_1 = require("./auth/auth.module");
 const courses_module_1 = require("./courses/courses.module");
 const products_module_1 = require("./products/products.module");
 const cloudinary_module_1 = require("./cloudinary/cloudinary.module");
+const payment_module_1 = require("./payment/payment.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -29,7 +30,8 @@ exports.AppModule = AppModule = __decorate([
             auth_module_1.AuthModule,
             courses_module_1.CoursesModule,
             products_module_1.ProductsModule,
-            cloudinary_module_1.CloudinaryModule
+            cloudinary_module_1.CloudinaryModule,
+            payment_module_1.PaymentModule
         ],
         controllers: [app_controller_1.AppController, users_controller_1.UsersController],
         providers: [app_service_1.AppService, users_service_1.UsersService],

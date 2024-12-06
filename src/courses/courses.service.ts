@@ -13,6 +13,9 @@ export class CoursesService {
   constructor(private readonly prisma: PrismaService) {}
 
   private mapToCourseResponseDto(course: any): CourseResponseDto {
+    const totalModules = course.modules?.length || 0;
+    const totalResources = course.resources?.length || 0;
+
     return {
       id: course.id,
       title: course.title,
@@ -26,6 +29,10 @@ export class CoursesService {
       isFeatured: course.isFeatured || false,
       bannerUrl: course.bannerUrl || '',
       courseImageUrl: course.courseImageUrl || '',
+      totalHours: course.totalHours || 1,
+      aboutDescription: course.aboutDescription || '',
+      whatYouWillLearn: course.whatYouWillLearn || [],
+      requirements: course.requirements || [],
 
       categoryName: course.category?.name || 'N/A',
       categoryColor: course.category?.colorHex || 'N/A',
@@ -35,6 +42,15 @@ export class CoursesService {
       instructorExperience: course.instructor?.experienceYears || 0,
       instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
       instructorStatus: course.instructor?.status || 'N/A',
+
+      modules: course.modules?.map((module: any) => ({
+        id: module.id,
+        description: module.description,
+        classes: module.classes || [],
+      })) || [],
+      totalModules,
+      resources: course.resources || [],
+      totalResources,
     };
   }
 
@@ -58,6 +74,12 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
+        modules: {
+          include: {
+            classes: true,
+          },
+        },
+        resources: true,
       },
     });
 
@@ -75,6 +97,8 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
+        modules: true,
+        resources: true,
       },
     });
 
@@ -89,6 +113,8 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
+        modules: true,
+        resources: true,
       },
     });
 
@@ -103,6 +129,8 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
+        modules: true,
+        resources: true,
       },
     });
 
@@ -117,6 +145,8 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
+        modules: true,
+        resources: true,
       },
     });
 
@@ -136,6 +166,8 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
+        modules: true,
+        resources: true,
       },
     });
 
@@ -211,33 +243,6 @@ export class CoursesService {
         urlIcon,
         colorHex,
       },
-    });
-  }
-
-  async getModulesByCourseId(courseId: string) {
-    const courseExists = await this.prisma.course.findUnique({
-      where: { id: courseId },
-    });
-
-    if (!courseExists) {
-      throw new NotFoundException(`Course with ID ${courseId} not found.`);
-    }
-
-    return this.prisma.module.findMany({
-      where: { courseId },
-    });
-  }
-
-  async getClassesByModuleId(moduleId: string) {
-    const moduleExists = await this.prisma.module.findUnique({
-      where: { id: moduleId },
-    });
-
-    if (!moduleExists) {
-      throw new NotFoundException(`Module with ID ${moduleId} not found.`);
-    }
-    return this.prisma.class.findMany({
-      where: { moduleId },
     });
   }
 }

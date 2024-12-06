@@ -4,6 +4,8 @@ export declare class CreateCourseDto {
     bannerUrl: string;
     courseImageUrl?: string;
     description: string;
+    aboutDescription?: string;
+    totalHours?: number;
     categoryId: string;
     level: string;
     price: number;
@@ -11,5 +13,6 @@ export declare class CreateCourseDto {
     target?: Target;
     instructorId?: string;
     whatYouWillLearn?: string;
+    requirements?: string;
     isFeatured?: boolean;
 }

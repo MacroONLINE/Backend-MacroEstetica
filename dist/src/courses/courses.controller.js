@@ -57,12 +57,6 @@ let CoursesController = class CoursesController {
     async getCoursesByTarget(target) {
         return this.coursesService.getCoursesByTarget(target);
     }
-    async getModulesByCourseId(courseId) {
-        return this.coursesService.getModulesByCourseId(courseId);
-    }
-    async getClassesByModuleId(moduleId) {
-        return this.coursesService.getClassesByModuleId(moduleId);
-    }
     async getCourseById(courseId) {
         return this.coursesService.getCourseById(courseId);
     }
@@ -159,26 +153,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getCoursesByTarget", null);
-__decorate([
-    (0, common_1.Get)(':courseId/modules'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all modules for a specific course' }),
-    (0, swagger_1.ApiParam)({ name: 'courseId', description: 'The ID of the course' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of modules retrieved.' }),
-    __param(0, (0, common_1.Param)('courseId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], CoursesController.prototype, "getModulesByCourseId", null);
-__decorate([
-    (0, common_1.Get)('modules/:moduleId/classes'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all classes for a specific module' }),
-    (0, swagger_1.ApiParam)({ name: 'moduleId', description: 'The ID of the module' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'List of classes retrieved.' }),
-    __param(0, (0, common_1.Param)('moduleId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], CoursesController.prototype, "getClassesByModuleId", null);
 __decorate([
     (0, common_1.Get)(':courseId'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a course by ID' }),

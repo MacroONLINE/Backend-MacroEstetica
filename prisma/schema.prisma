@@ -34,7 +34,6 @@ model User {
   enrollments   CourseEnrollment[]
 }
 
-
 model Medico {
   id           String       @id @default(cuid())
   profession   Profession   @default(ESTETICA)
@@ -58,12 +57,32 @@ model Empresa {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @default(now())
 }
+
+model Comment {
+  id          String       @id @default(cuid())
+  userId      String
+  user        User         @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
+  classId     String?
+  class       Class?       @relation(fields: [classId], references: [id], onDelete: Cascade)
+  courseId    String?
+  course      Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  type        CommentType
+  rating      Int
+  content     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now())
+}
+
 model Course {
   id                  String    @id @default(cuid())
   title               String
   bannerUrl           String
   courseImageUrl      String    @default("")
   description         String
+  aboutDescription    String?   // Hacemos opcional esta columna
+  totalHours          Int       @default(1)
+  whatYouWillLearn    Json?     // Hacemos opcional esta columna
+  requirements        Json?     // Hacemos opcional esta columna
   categoryId          String
   category            Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   instructorId        String?
@@ -78,9 +97,21 @@ model Course {
   target              Target    @default(MEDICO)
   isFeatured          Boolean?
   modules             Module[]
+  resources           Resource[]
+  comments            Comment[]
   enrollments         CourseEnrollment[]
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @default(now())
+}
+
+
+model Resource {
+  id        String   @id @default(cuid())
+  courseId  String
+  course    Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  url       String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
 }
 
 model Instructor {
@@ -93,13 +124,12 @@ model Instructor {
   status            String
   user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId            String       @unique
-  courses           Course[]     // Relación inversa hacia Course
+  courses           Course[]
   companyId         String?
   company           Empresa?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @default(now())
 }
-
 
 model Category {
   id        String      @id @default(cuid())
@@ -113,8 +143,8 @@ model Category {
 
 model Module {
   id          String   @id @default(cuid())
-  courseId    String
-  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId    String?
+  course      Course?   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   description String
   classes     Class[]
   createdAt   DateTime  @default(now())
@@ -123,25 +153,12 @@ model Module {
 
 model Class {
   id          String   @id @default(cuid())
-  moduleId    String
-  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  moduleId    String?
+  module      Module?   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   description String
   comments    Comment[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())
-}
-
-model Comment {
-  id          String       @id @default(cuid())
-  userId      String
-  user        User         @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
-  classId     String
-  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
-  type        CommentType
-  rating      Int
-  content     String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now())
 }
 
 model Session {
@@ -166,7 +183,7 @@ model Product {
   companyId          String
   company            Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  updatedAt          DateTime  @default(now())
 }
 
 model CourseEnrollment {

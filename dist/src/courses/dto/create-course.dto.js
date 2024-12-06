@@ -27,16 +27,28 @@ __decorate([
     __metadata("design:type", String)
 ], CreateCourseDto.prototype, "bannerUrl", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Course Image URL (square)' }),
+    (0, swagger_1.ApiProperty)({ description: 'Square course image URL', required: false }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCourseDto.prototype, "courseImageUrl", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Description of the course' }),
+    (0, swagger_1.ApiProperty)({ description: 'Short description of the course' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateCourseDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Detailed about description of the course', required: false }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCourseDto.prototype, "aboutDescription", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Total hours of the course', required: false }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateCourseDto.prototype, "totalHours", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Category ID to associate the course' }),
     (0, class_validator_1.IsString)(),
@@ -76,6 +88,12 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCourseDto.prototype, "whatYouWillLearn", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'JSON for "Requirements"', required: false }),
+    (0, class_validator_1.IsJSON)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateCourseDto.prototype, "requirements", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Whether the course is featured', required: false }),
     (0, class_validator_1.IsBoolean)(),

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CourseResponseDto = void 0;
+exports.ClassResponseDto = exports.ModuleResponseDto = exports.CourseResponseDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 class CourseResponseDto {
 }
@@ -27,11 +27,19 @@ __decorate([
     __metadata("design:type", String)
 ], CourseResponseDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Longer about description of the course', required: false }),
+    __metadata("design:type", String)
+], CourseResponseDto.prototype, "aboutDescription", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Total hours of the course' }),
+    __metadata("design:type", Number)
+], CourseResponseDto.prototype, "totalHours", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'Price of the course' }),
     __metadata("design:type", Number)
 ], CourseResponseDto.prototype, "price", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Discount percentage of the course' }),
+    (0, swagger_1.ApiProperty)({ description: 'Discount percentage of the course', required: false }),
     __metadata("design:type", Number)
 ], CourseResponseDto.prototype, "discountPercentage", void 0);
 __decorate([
@@ -63,6 +71,14 @@ __decorate([
     __metadata("design:type", String)
 ], CourseResponseDto.prototype, "courseImageUrl", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'What you will learn in the course (JSON)', required: false }),
+    __metadata("design:type", Object)
+], CourseResponseDto.prototype, "whatYouWillLearn", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Requirements for the course (JSON)', required: false }),
+    __metadata("design:type", Object)
+], CourseResponseDto.prototype, "requirements", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'Name of the category' }),
     __metadata("design:type", String)
 ], CourseResponseDto.prototype, "categoryName", void 0);
@@ -90,4 +106,46 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Status of the instructor' }),
     __metadata("design:type", String)
 ], CourseResponseDto.prototype, "instructorStatus", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Number of resources in the course' }),
+    __metadata("design:type", Number)
+], CourseResponseDto.prototype, "totalResources", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'List of resources for the course' }),
+    __metadata("design:type", Array)
+], CourseResponseDto.prototype, "resources", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Total number of modules in the course' }),
+    __metadata("design:type", Number)
+], CourseResponseDto.prototype, "totalModules", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'List of modules in the course', type: () => [ModuleResponseDto] }),
+    __metadata("design:type", Array)
+], CourseResponseDto.prototype, "modules", void 0);
+class ModuleResponseDto {
+}
+exports.ModuleResponseDto = ModuleResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'ID of the module' }),
+    __metadata("design:type", String)
+], ModuleResponseDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Description of the module' }),
+    __metadata("design:type", String)
+], ModuleResponseDto.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'List of classes in the module', type: () => [ClassResponseDto] }),
+    __metadata("design:type", Array)
+], ModuleResponseDto.prototype, "classes", void 0);
+class ClassResponseDto {
+}
+exports.ClassResponseDto = ClassResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'ID of the class' }),
+    __metadata("design:type", String)
+], ClassResponseDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Description of the class' }),
+    __metadata("design:type", String)
+], ClassResponseDto.prototype, "description", void 0);
 //# sourceMappingURL=course-response.dto.js.map

@@ -18,6 +18,8 @@ let CoursesService = class CoursesService {
         this.prisma = prisma;
     }
     mapToCourseResponseDto(course) {
+        const totalModules = course.modules?.length || 0;
+        const totalResources = course.resources?.length || 0;
         return {
             id: course.id,
             title: course.title,
@@ -31,6 +33,10 @@ let CoursesService = class CoursesService {
             isFeatured: course.isFeatured || false,
             bannerUrl: course.bannerUrl || '',
             courseImageUrl: course.courseImageUrl || '',
+            totalHours: course.totalHours || 1,
+            aboutDescription: course.aboutDescription || '',
+            whatYouWillLearn: course.whatYouWillLearn || [],
+            requirements: course.requirements || [],
             categoryName: course.category?.name || 'N/A',
             categoryColor: course.category?.colorHex || 'N/A',
             categoryIcon: course.category?.urlIcon || 'N/A',
@@ -38,6 +44,14 @@ let CoursesService = class CoursesService {
             instructorExperience: course.instructor?.experienceYears || 0,
             instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
             instructorStatus: course.instructor?.status || 'N/A',
+            modules: course.modules?.map((module) => ({
+                id: module.id,
+                description: module.description,
+                classes: module.classes || [],
+            })) || [],
+            totalModules,
+            resources: course.resources || [],
+            totalResources,
         };
     }
     async createCourse(data) {
@@ -58,6 +72,12 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
+                modules: {
+                    include: {
+                        classes: true,
+                    },
+                },
+                resources: true,
             },
         });
         if (!course) {
@@ -72,6 +92,8 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
+                modules: true,
+                resources: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -84,6 +106,8 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
+                modules: true,
+                resources: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -96,6 +120,8 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
+                modules: true,
+                resources: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -108,6 +134,8 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
+                modules: true,
+                resources: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -123,6 +151,8 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
+                modules: true,
+                resources: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -183,28 +213,6 @@ let CoursesService = class CoursesService {
                 urlIcon,
                 colorHex,
             },
-        });
-    }
-    async getModulesByCourseId(courseId) {
-        const courseExists = await this.prisma.course.findUnique({
-            where: { id: courseId },
-        });
-        if (!courseExists) {
-            throw new common_1.NotFoundException(`Course with ID ${courseId} not found.`);
-        }
-        return this.prisma.module.findMany({
-            where: { courseId },
-        });
-    }
-    async getClassesByModuleId(moduleId) {
-        const moduleExists = await this.prisma.module.findUnique({
-            where: { id: moduleId },
-        });
-        if (!moduleExists) {
-            throw new common_1.NotFoundException(`Module with ID ${moduleId} not found.`);
-        }
-        return this.prisma.class.findMany({
-            where: { moduleId },
         });
     }
 };

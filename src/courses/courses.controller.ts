@@ -93,22 +93,6 @@ export class CoursesController {
     return this.coursesService.getCoursesByTarget(target);
   }
   
-  @Get(':courseId/modules')
-  @ApiOperation({ summary: 'Get all modules for a specific course' })
-  @ApiParam({ name: 'courseId', description: 'The ID of the course' })
-  @ApiResponse({ status: 200, description: 'List of modules retrieved.' })
-  async getModulesByCourseId(@Param('courseId') courseId: string) {
-    return this.coursesService.getModulesByCourseId(courseId);
-  }
-
-  @Get('modules/:moduleId/classes')
-  @ApiOperation({ summary: 'Get all classes for a specific module' })
-  @ApiParam({ name: 'moduleId', description: 'The ID of the module' })
-  @ApiResponse({ status: 200, description: 'List of classes retrieved.' })
-  async getClassesByModuleId(@Param('moduleId') moduleId: string) {
-    return this.coursesService.getClassesByModuleId(moduleId);
-  }
-
   
 
   @Get(':courseId')

@@ -11,14 +11,24 @@ export class CreateCourseDto {
   @IsString()
   bannerUrl: string;
 
-  @ApiProperty({ description: 'Course Image URL (square)' })
+  @ApiProperty({ description: 'Square course image URL', required: false })
   @IsString()
   @IsOptional()
-  courseImageUrl?: string; // Nueva propiedad para la imagen cuadrada del curso
+  courseImageUrl?: string;
 
-  @ApiProperty({ description: 'Description of the course' })
+  @ApiProperty({ description: 'Short description of the course' })
   @IsString()
   description: string;
+
+  @ApiProperty({ description: 'Detailed about description of the course', required: false })
+  @IsString()
+  @IsOptional()
+  aboutDescription?: string;
+
+  @ApiProperty({ description: 'Total hours of the course', required: false })
+  @IsNumber()
+  @IsOptional()
+  totalHours?: number;
 
   @ApiProperty({ description: 'Category ID to associate the course' })
   @IsString()
@@ -52,8 +62,13 @@ export class CreateCourseDto {
   @IsOptional()
   whatYouWillLearn?: string;
 
+  @ApiProperty({ description: 'JSON for "Requirements"', required: false })
+  @IsJSON()
+  @IsOptional()
+  requirements?: string;
+
   @ApiProperty({ description: 'Whether the course is featured', required: false })
   @IsBoolean()
   @IsOptional()
-  isFeatured?: boolean; // Campo opcional para indicar si el curso es destacado
+  isFeatured?: boolean;
 }
