@@ -34,27 +34,11 @@ model User {
   enrollments   CourseEnrollment[]
 }
 
-model Instructor {
-  id                String       @id @default(cuid())
-  profession        Profession
-  type              ProfessionType
-  description       String
-  experienceYears   Int
-  certificationsUrl String
-  status            String
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId            String       @unique
-  courses           Course[]     @relation("InstructorCourses") // Relación inversa hacia Course
-  companyId         String?
-  company           Empresa?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @default(now())
-}
 
 model Medico {
   id           String       @id @default(cuid())
-  profession   Profession   @default(ESTETICA)      // Cambiado a ESTETICA
-  type         ProfessionType @default(ESTETICISTA) // Cambiado a ESTETICISTA
+  profession   Profession   @default(ESTETICA)
+  type         ProfessionType @default(ESTETICISTA)
   verification String
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId       String       @unique
@@ -69,22 +53,21 @@ model Empresa {
   giro       Giro          @default(SERVICIOS)
   user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String        @unique
-  instructores Instructor[] // Relación inversa hacia Instructor
+  instructores Instructor[]
   productos  Product[]
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @default(now())
 }
-
 model Course {
   id                  String    @id @default(cuid())
   title               String
   bannerUrl           String
-  courseImageUrl      String    @default("") // Nueva columna para la imagen cuadrada del curso
+  courseImageUrl      String    @default("")
   description         String
   categoryId          String
-  category            Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade) // Relación con Category
+  category            Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   instructorId        String?
-  instructor          Instructor? @relation("InstructorCourses", fields: [instructorId], references: [id]) // Relación con Instructor
+  instructor          Instructor? @relation(fields: [instructorId], references: [id])
   rating              Float     @default(0)
   commentsCount       Int       @default(0)
   averageRating       Float     @default(0)
@@ -97,7 +80,24 @@ model Course {
   modules             Module[]
   enrollments         CourseEnrollment[]
   createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  updatedAt           DateTime  @default(now())
+}
+
+model Instructor {
+  id                String       @id @default(cuid())
+  profession        Profession
+  type              ProfessionType
+  description       String
+  experienceYears   Int
+  certificationsUrl String
+  status            String
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String       @unique
+  courses           Course[]     // Relación inversa hacia Course
+  companyId         String?
+  company           Empresa?     @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @default(now())
 }
 
 
@@ -106,7 +106,7 @@ model Category {
   name      String
   urlIcon   String
   colorHex  String
-  courses   Course[]    // Relación inversa hacia Course
+  courses   Course[]
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now())
 }
@@ -114,7 +114,7 @@ model Category {
 model Module {
   id          String   @id @default(cuid())
   courseId    String
-  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade) // Relación con Course
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
   description String
   classes     Class[]
   createdAt   DateTime  @default(now())
@@ -124,7 +124,7 @@ model Module {
 model Class {
   id          String   @id @default(cuid())
   moduleId    String
-  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade) // Relación con Module
+  module      Module    @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   description String
   comments    Comment[]
   createdAt   DateTime  @default(now())
@@ -134,9 +134,9 @@ model Class {
 model Comment {
   id          String       @id @default(cuid())
   userId      String
-  user        User         @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade) // Relación con User
+  user        User         @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
   classId     String
-  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade) // Relación con Class
+  class       Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   type        CommentType
   rating      Int
   content     String
@@ -174,13 +174,12 @@ model CourseEnrollment {
   courseId   String
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade) // Relación con Course
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   enrolledAt DateTime @default(now())
 }
 
 enum Role {
   MEDICO
-  CAPACITADOR
   COSMETOLOGO
   ADMIN
   ESTANDAR
