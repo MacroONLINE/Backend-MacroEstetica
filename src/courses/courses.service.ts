@@ -12,6 +12,32 @@ import { CourseResponseDto } from './response-dto/course-response.dto';
 export class CoursesService {
   constructor(private readonly prisma: PrismaService) {}
 
+  private mapToCourseResponseDto(course: any): CourseResponseDto {
+    return {
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      price: course.price,
+      discountPercentage: course.discountPercentage || 0,
+      level: course.level,
+      target: course.target,
+      participantsCount: course.participantsCount,
+      rating: course.rating,
+      isFeatured: course.isFeatured || false,
+      bannerUrl: course.bannerUrl || '',
+      courseImageUrl: course.courseImageUrl || '',
+
+      categoryName: course.category?.name || 'N/A',
+      categoryColor: course.category?.colorHex || 'N/A',
+      categoryIcon: course.category?.urlIcon || 'N/A',
+
+      instructorName: `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() || 'N/A',
+      instructorExperience: course.instructor?.experienceYears || 0,
+      instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
+      instructorStatus: course.instructor?.status || 'N/A',
+    };
+  }
+
   async createCourse(data: CreateCourseDto) {
     const { instructorId, categoryId, ...rest } = data;
 
@@ -34,97 +60,86 @@ export class CoursesService {
         },
       },
     });
-  
+
     if (!course) {
       throw new NotFoundException(`Course with ID ${courseId} not found.`);
     }
-  
-    // Mapeamos los campos desde el curso y sus relaciones
-    const response: CourseResponseDto = {
-      id: course.id,
-      title: course.title,
-      description: course.description,
-      price: course.price,
-      discountPercentage: course.discountPercentage || 0,
-      level: course.level,
-      target: course.target,
-      participantsCount: course.participantsCount,
-      rating: course.rating,
-      isFeatured: course.isFeatured || false,
-      bannerUrl: course.bannerUrl || '',
-      courseImageUrl: course.courseImageUrl || '',
-  
-      // Relacionado con categoría
-      categoryName: course.category?.name || 'N/A',
-      categoryColor: course.category?.colorHex || 'N/A',
-      categoryIcon: course.category?.urlIcon || 'N/A',
-  
-      // Relacionado con el instructor
-      instructorName: `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() || 'N/A',
-      instructorExperience: course.instructor?.experienceYears || 0,
-      instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
-      instructorStatus: course.instructor?.status || 'N/A',
-    };
-  
-    return response;
-  }
-  
 
-  async getAllCourses() {
-    return this.prisma.course.findMany({
+    return this.mapToCourseResponseDto(course);
+  }
+
+  async getAllCourses(): Promise<CourseResponseDto[]> {
+    const courses = await this.prisma.course.findMany({
       include: {
-        instructor: true,
         category: true,
+        instructor: {
+          include: { user: true },
+        },
       },
     });
+
+    return courses.map(this.mapToCourseResponseDto);
   }
 
-  async getFeaturedCourses() {
-    return this.prisma.course.findMany({
-      where: { isFeatured: true }, // Filtra los cursos destacados
+  async getFeaturedCourses(): Promise<CourseResponseDto[]> {
+    const courses = await this.prisma.course.findMany({
+      where: { isFeatured: true },
       include: {
-        instructor: true,
-        category: true, // Incluye los detalles de la categoría
+        category: true,
+        instructor: {
+          include: { user: true },
+        },
       },
     });
+
+    return courses.map(this.mapToCourseResponseDto);
   }
 
-  async getCoursesByCategory(categoryId: string) {
-    return this.prisma.course.findMany({
+  async getCoursesByCategory(categoryId: string): Promise<CourseResponseDto[]> {
+    const courses = await this.prisma.course.findMany({
       where: { categoryId },
       include: {
-        instructor: true,
         category: true,
+        instructor: {
+          include: { user: true },
+        },
       },
     });
+
+    return courses.map(this.mapToCourseResponseDto);
   }
 
-  async getCoursesByInstructor(instructorId: string) {
-    return this.prisma.course.findMany({
+  async getCoursesByInstructor(instructorId: string): Promise<CourseResponseDto[]> {
+    const courses = await this.prisma.course.findMany({
       where: { instructorId },
       include: {
-        instructor: true,
         category: true,
+        instructor: {
+          include: { user: true },
+        },
       },
     });
+
+    return courses.map(this.mapToCourseResponseDto);
   }
 
-  async getCoursesByTarget(target: string) {
-    // Validar el target o asignar el valor predeterminado
-    const validatedTarget: Target = 
-      Object.values(Target).includes(target as Target) 
-        ? (target as Target) 
+  async getCoursesByTarget(target: string): Promise<CourseResponseDto[]> {
+    const validatedTarget: Target =
+      Object.values(Target).includes(target as Target)
+        ? (target as Target)
         : Target.ESTETICISTA;
 
-    return this.prisma.course.findMany({
-      where: {
-        target: validatedTarget, // Asignar el target validado
-      },
+    const courses = await this.prisma.course.findMany({
+      where: { target: validatedTarget },
       include: {
-        instructor: true,
         category: true,
+        instructor: {
+          include: { user: true },
+        },
       },
     });
+
+    return courses.map(this.mapToCourseResponseDto);
   }
 
   async createModule(data: CreateModuleDto) {
