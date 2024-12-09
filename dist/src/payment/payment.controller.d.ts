@@ -6,5 +6,5 @@ export declare class PaymentController {
     createCheckoutSession(courseId: string, userId: string): Promise<{
         url: string;
     }>;
-    handleWebhook(signature: string, req: Request, res: Response): Promise<void>;
+    handleWebhook(signature: string, req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
 }

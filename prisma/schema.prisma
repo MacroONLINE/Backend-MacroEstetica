@@ -32,7 +32,10 @@ model User {
   instructor    Instructor?
   comments      Comment[]      @relation("UserComments")
   enrollments   CourseEnrollment[]
+  payments      Payment[]      // Relación inversa con el modelo Payment
 }
+
+
 
 model Medico {
   id           String       @id @default(cuid())
@@ -73,6 +76,7 @@ model Comment {
   updatedAt   DateTime     @default(now())
 }
 
+
 model Course {
   id                  String    @id @default(cuid())
   title               String
@@ -100,6 +104,7 @@ model Course {
   resources           Resource[]
   comments            Comment[]
   enrollments         CourseEnrollment[]
+  payments            Payment[]      // Relación inversa con el modelo Payment
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @default(now())
 }
@@ -218,6 +223,24 @@ enum Profession {
   QUIMICA_COSMETICA
   ESTUDIANTE_AREA_ESTETICA
 }
+
+
+model Payment {
+  id                     String   @id @default(cuid())
+  stripePaymentIntentId  String   @unique
+  stripeCheckoutSessionId String   @unique
+  amount                 Float
+  currency               String
+  status                 String   @default("pending")
+  userId                 String
+  courseId               String
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
 
 enum ProfessionType {
   MEDICO

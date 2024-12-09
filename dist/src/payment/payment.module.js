@@ -11,17 +11,17 @@ const common_1 = require("@nestjs/common");
 const payment_service_1 = require("./payment.service");
 const payment_controller_1 = require("./payment.controller");
 const config_1 = require("@nestjs/config");
-const courses_module_1 = require("../courses/courses.module");
 const prisma_module_1 = require("../prisma/prisma.module");
+const courses_module_1 = require("../courses/courses.module");
 let PaymentModule = class PaymentModule {
 };
 exports.PaymentModule = PaymentModule;
 exports.PaymentModule = PaymentModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule,
-            courses_module_1.CoursesModule,
+            config_1.ConfigModule.forRoot({ isGlobal: true }),
             prisma_module_1.PrismaModule,
+            courses_module_1.CoursesModule,
         ],
         providers: [payment_service_1.PaymentService],
         controllers: [payment_controller_1.PaymentController],
