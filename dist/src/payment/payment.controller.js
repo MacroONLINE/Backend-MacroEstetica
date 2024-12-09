@@ -21,34 +21,34 @@ let PaymentController = class PaymentController {
         this.paymentService = paymentService;
     }
     async createCheckoutSession(body) {
-        console.log('Cuerpo recibido:', body);
         const { courseId, userId } = body;
+        console.log('Cuerpo recibido:', body);
         if (!courseId) {
-            throw new common_1.HttpException('courseId is required', common_1.HttpStatus.BAD_REQUEST);
+            throw new common_1.HttpException('courseId es requerido', common_1.HttpStatus.BAD_REQUEST);
         }
         if (!userId) {
-            throw new common_1.HttpException('userId is required', common_1.HttpStatus.BAD_REQUEST);
+            throw new common_1.HttpException('userId es requerido', common_1.HttpStatus.BAD_REQUEST);
         }
         try {
             const session = await this.paymentService.createCheckoutSession(courseId, userId);
             return { url: session.url };
         }
         catch (error) {
-            console.error('Error al crear la sesión de Stripe:', error.message);
+            console.error('Error en createCheckoutSession:', error.message);
             throw new common_1.HttpException('Error al crear la sesión de Stripe', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     async handleWebhook(signature, req, res) {
+        console.log('Webhook recibido con firma:', signature);
         if (!signature) {
-            console.error('Falta el header stripe-signature');
-            return res.status(400).send('Missing stripe-signature header');
+            return res.status(400).send('Falta el header stripe-signature');
         }
         try {
             const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
             res.status(200).send(result);
         }
         catch (error) {
-            console.error('Webhook Error:', error.message);
+            console.error('Error en el webhook:', error.message);
             res.status(400).send(`Webhook Error: ${error.message}`);
         }
     }
@@ -63,6 +63,7 @@ __decorate([
                 courseId: { type: 'string', description: 'ID del curso que el usuario desea comprar' },
                 userId: { type: 'string', description: 'ID del usuario que realiza la compra' },
             },
+            required: ['courseId', 'userId'],
         },
     }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' }),
