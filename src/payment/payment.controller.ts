@@ -13,58 +13,40 @@ export class PaymentController {
   @ApiBody({
     schema: {
       properties: {
-        courseId: { type: 'string', description: 'ID del curso que el usuario desea comprar' },
-        userId: { type: 'string', description: 'ID del usuario que realiza la compra' },
+        courseId: { type: 'string', description: 'ID del curso' },
+        userId: { type: 'string', description: 'ID del usuario' },
       },
-      required: ['courseId', 'userId'],
     },
   })
   @ApiResponse({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' })
-  @ApiResponse({ status: 400, description: 'Falta el courseId o el userId.' })
-  async createCheckoutSession(@Body() body: { courseId: string; userId: string }) {
-    const { courseId, userId } = body;
-
-    console.log('Cuerpo recibido:', body);
-
-    // Validar campos requeridos
-    if (!courseId) {
-      throw new HttpException('courseId es requerido', HttpStatus.BAD_REQUEST);
-    }
-    if (!userId) {
-      throw new HttpException('userId es requerido', HttpStatus.BAD_REQUEST);
+  @ApiResponse({ status: 400, description: 'Error en los parámetros proporcionados.' })
+  async createCheckoutSession(@Body('courseId') courseId: string, @Body('userId') userId: string) {
+    if (!courseId || !userId) {
+      throw new HttpException('courseId and userId are required', HttpStatus.BAD_REQUEST);
     }
 
-    try {
-      // Llamar al servicio para crear la sesión
-      const session = await this.paymentService.createCheckoutSession(courseId, userId);
-      return { url: session.url };
-    } catch (error) {
-      console.error('Error en createCheckoutSession:', error.message);
-      throw new HttpException('Error al crear la sesión de Stripe', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const session = await this.paymentService.createCheckoutSession(courseId, userId);
+    return { url: session.url };
   }
 
   @Post('webhook')
-  @ApiOperation({ summary: 'Endpoint para recibir notificaciones (webhooks) de Stripe' })
-  @ApiResponse({ status: 200, description: 'Confirma que el webhook se recibió correctamente.' })
+  @ApiOperation({ summary: 'Endpoint para recibir notificaciones de Stripe' })
+  @ApiResponse({ status: 200, description: 'Confirma que el webhook fue recibido.' })
   @ApiResponse({ status: 400, description: 'Error al procesar el webhook.' })
   async handleWebhook(
     @Headers('stripe-signature') signature: string,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    console.log('Webhook recibido con firma:', signature);
-
     if (!signature) {
-      return res.status(400).send('Falta el header stripe-signature');
+      return res.status(400).send('Missing stripe-signature header');
     }
 
     try {
-      // Llamar al servicio para manejar el webhook
       const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
       res.status(200).send(result);
     } catch (error) {
-      console.error('Error en el webhook:', error.message);
+      console.error('Webhook Error:', error.message);
       res.status(400).send(`Webhook Error: ${error.message}`);
     }
   }
