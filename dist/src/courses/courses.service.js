@@ -37,6 +37,7 @@ let CoursesService = class CoursesService {
             aboutDescription: course.aboutDescription || '',
             whatYouWillLearn: course.whatYouWillLearn || [],
             requirements: course.requirements || [],
+            instructorId: course.instructorId || 'N/A',
             categoryName: course.category?.name || 'N/A',
             categoryColor: course.category?.colorHex || 'N/A',
             categoryIcon: course.category?.urlIcon || 'N/A',
@@ -47,11 +48,25 @@ let CoursesService = class CoursesService {
             modules: course.modules?.map((module) => ({
                 id: module.id,
                 description: module.description,
-                classes: module.classes || [],
+                classes: module.classes?.map((cls) => ({
+                    id: cls.id,
+                    description: cls.description,
+                })) || [],
             })) || [],
             totalModules,
-            resources: course.resources || [],
+            resources: course.resources?.map((resource) => ({
+                id: resource.id,
+                url: resource.url,
+            })) || [],
             totalResources,
+            comments: course.comments?.map((comment) => ({
+                id: comment.id,
+                userId: comment.userId,
+                content: comment.content,
+                rating: comment.rating,
+                createdAt: comment.createdAt,
+                updatedAt: comment.updatedAt,
+            })) || [],
         };
     }
     async createCourse(data) {
@@ -78,6 +93,7 @@ let CoursesService = class CoursesService {
                     },
                 },
                 resources: true,
+                comments: true,
             },
         });
         if (!course) {
@@ -92,8 +108,13 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
-                modules: true,
+                modules: {
+                    include: {
+                        classes: true,
+                    },
+                },
                 resources: true,
+                comments: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -106,8 +127,13 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
-                modules: true,
+                modules: {
+                    include: {
+                        classes: true,
+                    },
+                },
                 resources: true,
+                comments: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -120,8 +146,13 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
-                modules: true,
+                modules: {
+                    include: {
+                        classes: true,
+                    },
+                },
                 resources: true,
+                comments: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -134,8 +165,13 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
-                modules: true,
+                modules: {
+                    include: {
+                        classes: true,
+                    },
+                },
                 resources: true,
+                comments: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);
@@ -151,8 +187,13 @@ let CoursesService = class CoursesService {
                 instructor: {
                     include: { user: true },
                 },
-                modules: true,
+                modules: {
+                    include: {
+                        classes: true,
+                    },
+                },
                 resources: true,
+                comments: true,
             },
         });
         return courses.map(this.mapToCourseResponseDto);

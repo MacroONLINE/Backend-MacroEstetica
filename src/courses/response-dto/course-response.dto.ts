@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CourseResponseDto {
-  // Campos del curso
   @ApiProperty({ description: 'ID of the course' })
   id: string;
 
@@ -50,6 +49,9 @@ export class CourseResponseDto {
   @ApiProperty({ description: 'Requirements for the course (JSON)', required: false })
   requirements?: any;
 
+  @ApiProperty({ description: 'Instructor ID of the course' })
+  instructorId: string;
+
   // Campos relacionados de categoría
   @ApiProperty({ description: 'Name of the category' })
   categoryName: string;
@@ -86,6 +88,10 @@ export class CourseResponseDto {
 
   @ApiProperty({ description: 'List of modules in the course', type: () => [ModuleResponseDto] })
   modules: ModuleResponseDto[];
+
+  // Comentarios del curso
+  @ApiProperty({ description: 'List of comments associated with the course', type: () => [CommentResponseDto] })
+  comments: CommentResponseDto[];
 }
 
 export class ModuleResponseDto {
@@ -105,4 +111,24 @@ export class ClassResponseDto {
 
   @ApiProperty({ description: 'Description of the class' })
   description: string;
+}
+
+export class CommentResponseDto {
+  @ApiProperty({ description: 'ID of the comment' })
+  id: string;
+
+  @ApiProperty({ description: 'ID of the user who made the comment' })
+  userId: string;
+
+  @ApiProperty({ description: 'Content of the comment' })
+  content: string;
+
+  @ApiProperty({ description: 'Rating of the comment' })
+  rating: number;
+
+  @ApiProperty({ description: 'Date when the comment was created' })
+  createdAt: Date;
+
+  @ApiProperty({ description: 'Date when the comment was last updated' })
+  updatedAt: Date;
 }

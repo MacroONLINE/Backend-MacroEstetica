@@ -33,24 +33,36 @@ export class CoursesService {
       aboutDescription: course.aboutDescription || '',
       whatYouWillLearn: course.whatYouWillLearn || [],
       requirements: course.requirements || [],
-
+      instructorId: course.instructorId || 'N/A',
       categoryName: course.category?.name || 'N/A',
       categoryColor: course.category?.colorHex || 'N/A',
       categoryIcon: course.category?.urlIcon || 'N/A',
-
       instructorName: `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() || 'N/A',
       instructorExperience: course.instructor?.experienceYears || 0,
       instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
       instructorStatus: course.instructor?.status || 'N/A',
-
       modules: course.modules?.map((module: any) => ({
         id: module.id,
         description: module.description,
-        classes: module.classes || [],
+        classes: module.classes?.map((cls: any) => ({
+          id: cls.id,
+          description: cls.description,
+        })) || [],
       })) || [],
       totalModules,
-      resources: course.resources || [],
+      resources: course.resources?.map((resource: any) => ({
+        id: resource.id,
+        url: resource.url,
+      })) || [],
       totalResources,
+      comments: course.comments?.map((comment: any) => ({
+        id: comment.id,
+        userId: comment.userId,
+        content: comment.content,
+        rating: comment.rating,
+        createdAt: comment.createdAt,
+        updatedAt: comment.updatedAt,
+      })) || [],
     };
   }
 
@@ -80,6 +92,7 @@ export class CoursesService {
           },
         },
         resources: true,
+        comments: true, // Incluir comentarios
       },
     });
 
@@ -97,8 +110,13 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
-        modules: true,
+        modules: {
+          include: {
+            classes: true,
+          },
+        },
         resources: true,
+        comments: true, // Incluir comentarios
       },
     });
 
@@ -113,8 +131,13 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
-        modules: true,
+        modules: {
+          include: {
+            classes: true,
+          },
+        },
         resources: true,
+        comments: true, // Incluir comentarios
       },
     });
 
@@ -129,8 +152,13 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
-        modules: true,
+        modules: {
+          include: {
+            classes: true,
+          },
+        },
         resources: true,
+        comments: true, // Incluir comentarios
       },
     });
 
@@ -145,8 +173,13 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
-        modules: true,
+        modules: {
+          include: {
+            classes: true,
+          },
+        },
         resources: true,
+        comments: true, // Incluir comentarios
       },
     });
 
@@ -166,8 +199,13 @@ export class CoursesService {
         instructor: {
           include: { user: true },
         },
-        modules: true,
+        modules: {
+          include: {
+            classes: true,
+          },
+        },
         resources: true,
+        comments: true, // Incluir comentarios
       },
     });
 

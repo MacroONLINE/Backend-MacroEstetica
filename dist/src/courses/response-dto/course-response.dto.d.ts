@@ -15,6 +15,7 @@ export declare class CourseResponseDto {
     courseImageUrl: string;
     whatYouWillLearn?: any;
     requirements?: any;
+    instructorId: string;
     categoryName: string;
     categoryColor: string;
     categoryIcon: string;
@@ -29,6 +30,7 @@ export declare class CourseResponseDto {
     }[];
     totalModules: number;
     modules: ModuleResponseDto[];
+    comments: CommentResponseDto[];
 }
 export declare class ModuleResponseDto {
     id: string;
@@ -38,4 +40,12 @@ export declare class ModuleResponseDto {
 export declare class ClassResponseDto {
     id: string;
     description: string;
+}
+export declare class CommentResponseDto {
+    id: string;
+    userId: string;
+    content: string;
+    rating: number;
+    createdAt: Date;
+    updatedAt: Date;
 }

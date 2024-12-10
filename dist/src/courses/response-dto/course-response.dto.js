@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ClassResponseDto = exports.ModuleResponseDto = exports.CourseResponseDto = void 0;
+exports.CommentResponseDto = exports.ClassResponseDto = exports.ModuleResponseDto = exports.CourseResponseDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 class CourseResponseDto {
 }
@@ -79,6 +79,10 @@ __decorate([
     __metadata("design:type", Object)
 ], CourseResponseDto.prototype, "requirements", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Instructor ID of the course' }),
+    __metadata("design:type", String)
+], CourseResponseDto.prototype, "instructorId", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ description: 'Name of the category' }),
     __metadata("design:type", String)
 ], CourseResponseDto.prototype, "categoryName", void 0);
@@ -122,6 +126,10 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'List of modules in the course', type: () => [ModuleResponseDto] }),
     __metadata("design:type", Array)
 ], CourseResponseDto.prototype, "modules", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'List of comments associated with the course', type: () => [CommentResponseDto] }),
+    __metadata("design:type", Array)
+], CourseResponseDto.prototype, "comments", void 0);
 class ModuleResponseDto {
 }
 exports.ModuleResponseDto = ModuleResponseDto;
@@ -148,4 +156,31 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Description of the class' }),
     __metadata("design:type", String)
 ], ClassResponseDto.prototype, "description", void 0);
+class CommentResponseDto {
+}
+exports.CommentResponseDto = CommentResponseDto;
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'ID of the comment' }),
+    __metadata("design:type", String)
+], CommentResponseDto.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'ID of the user who made the comment' }),
+    __metadata("design:type", String)
+], CommentResponseDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Content of the comment' }),
+    __metadata("design:type", String)
+], CommentResponseDto.prototype, "content", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Rating of the comment' }),
+    __metadata("design:type", Number)
+], CommentResponseDto.prototype, "rating", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Date when the comment was created' }),
+    __metadata("design:type", Date)
+], CommentResponseDto.prototype, "createdAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Date when the comment was last updated' }),
+    __metadata("design:type", Date)
+], CommentResponseDto.prototype, "updatedAt", void 0);
 //# sourceMappingURL=course-response.dto.js.map

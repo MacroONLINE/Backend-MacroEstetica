@@ -47,7 +47,7 @@ export class PaymentService {
         userId,
         courseId,
       },
-      success_url: `${this.configService.get<string>('APP_URL')}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${this.configService.get<string>('APP_URL')}/payment/success`, //?session_id={CHECKOUT_SESSION_ID}
       cancel_url: `${this.configService.get<string>('APP_URL')}/payment/cancel`,
     });
 
