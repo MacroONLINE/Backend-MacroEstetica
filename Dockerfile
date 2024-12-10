@@ -1,5 +1,8 @@
-# Usa una imagen de Node.js
+# Usa una imagen de Node.js basada en Alpine
 FROM node:18-alpine
+
+# Instala OpenSSL, necesario para Prisma en entornos Alpine
+RUN apk update && apk add --no-cache openssl
 
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /app
