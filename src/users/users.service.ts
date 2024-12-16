@@ -1,6 +1,6 @@
 // src/users/users.service.ts
 
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User, Medico, Empresa, Instructor } from '@prisma/client';
 
@@ -110,17 +110,6 @@ export class UsersService {
     });
   }
 
-  // Encontrar usuario por email
-  async findUserByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: { email },
-      include: {
-        medico: true,
-        empresa: true,
-        instructor: true,
-      },
-    });
-  }
 
   // Encontrar usuario por ID
   async findUserById(id: string): Promise<User | null> {
@@ -133,4 +122,61 @@ export class UsersService {
       },
     });
   }
+
+  async findUserByEmail(email: string): Promise<User | null> {
+    const standardizedEmail = email.trim().toLowerCase();
+    return this.prisma.user.findFirst({
+      where: { email: standardizedEmail },
+      include: {
+        medico: true,
+        empresa: true,
+        instructor: true,
+      },
+    });
+  }
+
+  async checkUserExistsByEmail(email: string): Promise<{ exists: boolean; user?: Partial<User>; debugInfo?: any }> {
+    const standardizedEmail = email.trim().toLowerCase();
+    const debugInfo: any = {
+      receivedEmail: email,
+      standardizedEmail: standardizedEmail,
+      prismaResult: null,
+    };
+  
+    // Intentamos encontrar el usuario con findFirst
+    const user = await this.prisma.user.findFirst({
+      where: { email: standardizedEmail },
+    });
+  
+    debugInfo.prismaResult = user;
+  
+    if (user) {
+      const { password, ...userWithoutPassword } = user;
+      return {
+        exists: true,
+        user: userWithoutPassword,
+        debugInfo,
+      };
+    } else {
+      return {
+        exists: false,
+        debugInfo: {
+          ...debugInfo,
+          message: `User not found for email: ${standardizedEmail}`,
+        },
+      };
+    }
+  }
+  
+  
+  async checkEmail(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+  
 }

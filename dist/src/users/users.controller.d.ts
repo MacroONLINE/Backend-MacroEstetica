@@ -9,6 +9,11 @@ export declare class UsersController {
     private readonly usersService;
     private readonly cloudinaryService;
     constructor(usersService: UsersService, cloudinaryService: CloudinaryService);
+    checkUserByEmail(email: string): Promise<{
+        exists: boolean;
+        user?: Partial<import(".prisma/client").User>;
+        debugInfo?: any;
+    }>;
     register(userData: CreateUserDto): Promise<{
         message: string;
         userId: string;
@@ -20,19 +25,19 @@ export declare class UsersController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
         verification: string;
+        userId: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
         verification: string;
+        userId: string;
     }>;
     updateEmpresa(data: UpdateEmpresaDto): Promise<{
         name: string;
@@ -57,9 +62,9 @@ export declare class UsersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
+        userId: string;
         description: string;
         experienceYears: number;
         certificationsUrl: string;
@@ -70,9 +75,9 @@ export declare class UsersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
+        userId: string;
         description: string;
         experienceYears: number;
         certificationsUrl: string;

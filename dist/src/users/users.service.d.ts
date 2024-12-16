@@ -11,6 +11,31 @@ export declare class UsersService {
     getMedicoByUserId(userId: string): Promise<Medico | null>;
     getEmpresaByUserId(userId: string): Promise<Empresa | null>;
     getInstructorByUserId(userId: string): Promise<Instructor | null>;
-    findUserByEmail(email: string): Promise<User | null>;
     findUserById(id: string): Promise<User | null>;
+    findUserByEmail(email: string): Promise<User | null>;
+    checkUserExistsByEmail(email: string): Promise<{
+        exists: boolean;
+        user?: Partial<User>;
+        debugInfo?: any;
+    }>;
+    checkEmail(email: string): Promise<{
+        id: string;
+        firstName: string | null;
+        lastName: string | null;
+        phone: string | null;
+        email: string;
+        emailVerified: Date | null;
+        address: string | null;
+        province: string | null;
+        city: string | null;
+        country: string | null;
+        countryCode: string | null;
+        zipCode: string | null;
+        role: import(".prisma/client").$Enums.Role;
+        password: string;
+        status: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        newsletter: boolean;
+    }>;
 }

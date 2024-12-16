@@ -11,6 +11,7 @@ import { CoursesModule } from './courses/courses.module';
 import { ProductsModule } from './products/products.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PaymentModule } from './payment/payment.module';
+import { ResetPasswordModule } from './reset-password/reset-password.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { PaymentModule } from './payment/payment.module';
     CoursesModule,
     ProductsModule,
     CloudinaryModule,
-    PaymentModule
+    PaymentModule,
+    ResetPasswordModule
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],

@@ -90,16 +90,6 @@ let UsersService = class UsersService {
             where: { userId },
         });
     }
-    async findUserByEmail(email) {
-        return this.prisma.user.findUnique({
-            where: { email },
-            include: {
-                medico: true,
-                empresa: true,
-                instructor: true,
-            },
-        });
-    }
     async findUserById(id) {
         return this.prisma.user.findUnique({
             where: { id },
@@ -109,6 +99,55 @@ let UsersService = class UsersService {
                 instructor: true,
             },
         });
+    }
+    async findUserByEmail(email) {
+        const standardizedEmail = email.trim().toLowerCase();
+        return this.prisma.user.findFirst({
+            where: { email: standardizedEmail },
+            include: {
+                medico: true,
+                empresa: true,
+                instructor: true,
+            },
+        });
+    }
+    async checkUserExistsByEmail(email) {
+        const standardizedEmail = email.trim().toLowerCase();
+        const debugInfo = {
+            receivedEmail: email,
+            standardizedEmail: standardizedEmail,
+            prismaResult: null,
+        };
+        const user = await this.prisma.user.findFirst({
+            where: { email: standardizedEmail },
+        });
+        debugInfo.prismaResult = user;
+        if (user) {
+            const { password, ...userWithoutPassword } = user;
+            return {
+                exists: true,
+                user: userWithoutPassword,
+                debugInfo,
+            };
+        }
+        else {
+            return {
+                exists: false,
+                debugInfo: {
+                    ...debugInfo,
+                    message: `User not found for email: ${standardizedEmail}`,
+                },
+            };
+        }
+    }
+    async checkEmail(email) {
+        const user = await this.prisma.user.findUnique({
+            where: { email },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        return user;
     }
 };
 exports.UsersService = UsersService;

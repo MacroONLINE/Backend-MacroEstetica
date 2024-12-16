@@ -13,6 +13,7 @@ import {
   UploadedFile,
   UseInterceptors,
   Param,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
@@ -33,11 +34,24 @@ import {
 import { Prisma } from '@prisma/client';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 
+
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService, private readonly cloudinaryService: CloudinaryService) {}
   
+
+  @ApiOperation({ summary: 'Check if a user exists by email' })
+  @ApiResponse({ status: 200, description: 'User found.' })
+  @ApiResponse({ status: 404, description: 'User not found.' })
+  @Get('check-email')
+  async checkUserByEmail(@Query('email') email: string) {
+    if (!email) {
+      throw new HttpException('Email is required', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.usersService.checkUserExistsByEmail(email);
+  }
 
   @ApiOperation({ summary: 'Register a new user (Step 1)' })
   @ApiResponse({ status: 201, description: 'User created successfully.' })
@@ -192,4 +206,6 @@ async updateMedico(
     const { password, ...userWithoutPassword } = user;
     return userWithoutPassword;
   }
+
+
 }

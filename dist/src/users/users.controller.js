@@ -30,6 +30,12 @@ let UsersController = class UsersController {
         this.usersService = usersService;
         this.cloudinaryService = cloudinaryService;
     }
+    async checkUserByEmail(email) {
+        if (!email) {
+            throw new common_1.HttpException('Email is required', common_1.HttpStatus.BAD_REQUEST);
+        }
+        return this.usersService.checkUserExistsByEmail(email);
+    }
     async register(userData) {
         const { password, email, role } = userData;
         const existingUser = await this.usersService.findUserByEmail(email);
@@ -113,6 +119,16 @@ let UsersController = class UsersController {
     }
 };
 exports.UsersController = UsersController;
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Check if a user exists by email' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'User found.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'User not found.' }),
+    (0, common_1.Get)('check-email'),
+    __param(0, (0, common_1.Query)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UsersController.prototype, "checkUserByEmail", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Register a new user (Step 1)' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'User created successfully.' }),

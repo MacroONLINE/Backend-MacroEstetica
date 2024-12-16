@@ -83,10 +83,10 @@ model Course {
   bannerUrl           String
   courseImageUrl      String    @default("")
   description         String
-  aboutDescription    String?   // Hacemos opcional esta columna
+  aboutDescription    String?   
   totalHours          Int       @default(1)
-  whatYouWillLearn    Json?     // Hacemos opcional esta columna
-  requirements        Json?     // Hacemos opcional esta columna
+  whatYouWillLearn    Json?     
+  requirements        Json?     
   categoryId          String
   category            Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   instructorId        String?
@@ -104,7 +104,7 @@ model Course {
   resources           Resource[]
   comments            Comment[]
   enrollments         CourseEnrollment[]
-  payments            Payment[]      // Relación inversa con el modelo Payment
+  payments            Payment[]      
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @default(now())
 }
@@ -239,6 +239,14 @@ model Payment {
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+}
+
+model PasswordReset {
+  id        Int      @id @default(autoincrement())
+  email     String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
 }
 
 

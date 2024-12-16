@@ -11,17 +11,18 @@ export declare class CoursesController {
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        description: string;
+        rating: number;
+        isFeatured: boolean | null;
         title: string;
         bannerUrl: string;
         courseImageUrl: string;
-        description: string;
         aboutDescription: string | null;
         totalHours: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
-        categoryId: string;
-        instructorId: string | null;
-        rating: number;
         commentsCount: number;
         averageRating: number;
         level: string;
@@ -29,40 +30,39 @@ export declare class CoursesController {
         discountPercentage: number | null;
         participantsCount: number;
         target: import(".prisma/client").$Enums.Target;
-        isFeatured: boolean | null;
-        createdAt: Date;
-        updatedAt: Date;
+        categoryId: string;
+        instructorId: string | null;
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         courseId: string | null;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         moduleId: string | null;
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
         id: string;
-        rating: number;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         type: import(".prisma/client").$Enums.CommentType;
-        courseId: string | null;
-        classId: string | null;
+        rating: number;
         content: string;
+        classId: string | null;
+        courseId: string | null;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         urlIcon: string;
         colorHex: string;
     }>;
