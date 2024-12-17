@@ -1,11 +1,18 @@
-export declare enum TargetEnum {
-    MEDICO = "MEDICO",
-    ESTETICISTA = "ESTETICISTA"
+export declare enum SubscriptionType {
+    ORO = "ORO",
+    PLATA = "PLATA",
+    BRONCE = "BRONCE"
 }
-export declare class UpdateEmpresaDto {
-    dni: string;
+export declare enum GiroEnum {
+    SERVICIOS = "SERVICIOS",
+    PRODUCTOS = "PRODUCTOS",
+    CONSULTORIA = "CONSULTORIA",
+    OTRO = "OTRO"
+}
+export declare class CreateEmpresaDto {
+    dni?: string;
     name: string;
-    target: TargetEnum;
-    categoryId?: string;
+    giro?: GiroEnum;
+    subscription?: SubscriptionType;
     userId: string;
 }

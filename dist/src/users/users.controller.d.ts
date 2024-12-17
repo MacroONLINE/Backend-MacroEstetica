@@ -2,7 +2,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateMedicoDto } from './dto/update-medico.dto';
-import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { CreateEmpresaDto } from './dto/update-empresa.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 export declare class UsersController {
@@ -39,7 +39,7 @@ export declare class UsersController {
         verification: string;
         userId: string;
     }>;
-    updateEmpresa(data: UpdateEmpresaDto): Promise<{
+    updateEmpresa(data: CreateEmpresaDto): Promise<{
         name: string;
         id: string;
         createdAt: Date;
@@ -47,6 +47,7 @@ export declare class UsersController {
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
     }>;
     getEmpresa(req: any): Promise<{
         name: string;
@@ -56,6 +57,7 @@ export declare class UsersController {
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
     }>;
     updateInstructor(data: UpdateInstructorDto): Promise<{
         id: string;

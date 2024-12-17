@@ -35,8 +35,6 @@ model User {
   payments      Payment[]      // Relación inversa con el modelo Payment
 }
 
-
-
 model Medico {
   id           String       @id @default(cuid())
   profession   Profession   @default(ESTETICA)
@@ -49,16 +47,17 @@ model Medico {
 }
 
 model Empresa {
-  id         String       @id @default(cuid())
-  dni        String?
-  name       String
-  giro       Giro          @default(SERVICIOS)
-  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId     String        @unique
+  id           String            @id @default(cuid())
+  dni          String?
+  name         String
+  giro         Giro              @default(SERVICIOS)
+  subscription SubscriptionType? // Nuevo campo opcional de tipo enum SubscriptionType
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String            @unique
   instructores Instructor[]
-  productos  Product[]
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @default(now())
+  productos    Product[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @default(now())
 }
 
 model Comment {
@@ -75,7 +74,6 @@ model Comment {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now())
 }
-
 
 model Course {
   id                  String    @id @default(cuid())
@@ -108,7 +106,6 @@ model Course {
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @default(now())
 }
-
 
 model Resource {
   id        String   @id @default(cuid())
@@ -200,6 +197,12 @@ model CourseEnrollment {
   enrolledAt DateTime @default(now())
 }
 
+enum SubscriptionType {
+  ORO
+  PLATA
+  BRONCE
+}
+
 enum Role {
   MEDICO
   COSMETOLOGO
@@ -224,6 +227,27 @@ enum Profession {
   ESTUDIANTE_AREA_ESTETICA
 }
 
+enum Giro {
+  SERVICIOS
+  PRODUCTOS
+  CONSULTORIA
+  OTRO
+}
+
+enum Target {
+  MEDICO
+  ESTETICISTA
+}
+
+enum CommentType {
+  TEXT
+  RATING
+}
+
+enum ProfessionType {
+  MEDICO
+  ESTETICISTA
+}
 
 model Payment {
   id                     String   @id @default(cuid())
@@ -247,27 +271,4 @@ model PasswordReset {
   token     String   @unique
   createdAt DateTime @default(now())
   expiresAt DateTime
-}
-
-
-enum ProfessionType {
-  MEDICO
-  ESTETICISTA
-}
-
-enum Giro {
-  SERVICIOS
-  PRODUCTOS
-  CONSULTORIA
-  OTRO
-}
-
-enum Target {
-  MEDICO
-  ESTETICISTA
-}
-
-enum CommentType {
-  TEXT
-  RATING
 }

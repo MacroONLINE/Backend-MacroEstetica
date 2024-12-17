@@ -54,15 +54,24 @@ let UsersService = class UsersService {
         if (!data.name) {
             throw new Error("El campo 'name' es obligatorio.");
         }
+        const updateData = {
+            name: data.name,
+            giro: data.giro || 'SERVICIOS',
+            subscription: data.subscription,
+            updatedAt: new Date(),
+        };
+        const createData = {
+            userId,
+            name: data.name,
+            giro: data.giro || 'SERVICIOS',
+            subscription: data.subscription,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+        };
         return this.prisma.empresa.upsert({
             where: { userId },
-            update: {
-                ...data,
-            },
-            create: {
-                ...data,
-                userId,
-            },
+            update: updateData,
+            create: createData,
         });
     }
     async createOrUpdateInstructor(userId, data) {

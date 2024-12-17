@@ -1,32 +1,47 @@
 import { IsOptional, IsString, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-// Define the enum explicitly for Swagger
-export enum TargetEnum {
-  MEDICO = 'MEDICO',
-  ESTETICISTA = 'ESTETICISTA',
+// Enum para SubscriptionType
+export enum SubscriptionType {
+  ORO = 'ORO',
+  PLATA = 'PLATA',
+  BRONCE = 'BRONCE',
 }
 
-export class UpdateEmpresaDto {
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  dni!: string;
+// Enum para Giro
+export enum GiroEnum {
+  SERVICIOS = 'SERVICIOS',
+  PRODUCTOS = 'PRODUCTOS',
+  CONSULTORIA = 'CONSULTORIA',
+  OTRO = 'OTRO',
+}
 
-  @ApiProperty()
-  @IsString()
-  name!: string;
-
-  @ApiProperty({ enum: TargetEnum, description: 'Target must be either MEDICO or ESTETICISTA' })
-  @IsEnum(TargetEnum, { message: 'Target must be either MEDICO or ESTETICISTA' })
-  target!: TargetEnum;
-
-  @ApiProperty({ required: false })
+export class CreateEmpresaDto {
+  @ApiProperty({ description: 'DNI de la empresa', required: false })
   @IsOptional()
   @IsString()
-  categoryId?: string;
+  dni?: string;
 
-  @ApiProperty({ description: 'ID of the associated user' })
+  @ApiProperty({ description: 'Nombre de la empresa' })
   @IsString()
-  userId!: string;
+  name: string;
+
+  @ApiProperty({ enum: GiroEnum, description: 'Giro de la empresa' })
+  @IsEnum(GiroEnum, { message: 'Giro must be SERVICIOS, PRODUCTOS, CONSULTORIA, or OTRO' })
+  giro?: GiroEnum;
+
+  @ApiProperty({
+    enum: SubscriptionType,
+    description: 'Tipo de suscripción de la empresa',
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(SubscriptionType, {
+    message: 'Subscription must be ORO, PLATA, or BRONCE',
+  })
+  subscription?: SubscriptionType;
+
+  @ApiProperty({ description: 'ID del usuario asociado a la empresa' })
+  @IsString()
+  userId: string;
 }

@@ -93,6 +93,9 @@ let UsersController = class UsersController {
         if (!data.name) {
             throw new common_1.HttpException('El campo "name" es obligatorio', common_1.HttpStatus.BAD_REQUEST);
         }
+        if (data.subscription && !['ORO', 'PLATA', 'BRONCE'].includes(data.subscription)) {
+            throw new common_1.HttpException('Subscription type must be ORO, PLATA, or BRONCE', common_1.HttpStatus.BAD_REQUEST);
+        }
         return this.usersService.createOrUpdateEmpresa(data.userId, data);
     }
     async getEmpresa(req) {
@@ -173,11 +176,11 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Create or update an Empresa' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Empresa updated successfully.' }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Bad request.' }),
-    (0, swagger_1.ApiBody)({ type: update_empresa_dto_1.UpdateEmpresaDto }),
+    (0, swagger_1.ApiBody)({ type: update_empresa_dto_1.CreateEmpresaDto }),
     (0, common_1.Put)('empresa'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [update_empresa_dto_1.UpdateEmpresaDto]),
+    __metadata("design:paramtypes", [update_empresa_dto_1.CreateEmpresaDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateEmpresa", null);
 __decorate([

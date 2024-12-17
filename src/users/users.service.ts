@@ -54,25 +54,40 @@ export class UsersService {
   }
 
   // Crear o actualizar información de Empresa
-  async createOrUpdateEmpresa(
-    userId: string,
-    data: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>,
-  ): Promise<Empresa> {
-    if (!data.name) {
-      throw new Error("El campo 'name' es obligatorio.");
-    }
-
-    return this.prisma.empresa.upsert({
-      where: { userId },
-      update: {
-        ...data,
-      },
-      create: {
-        ...data,
-        userId,
-      },
-    });
+  // Crear o actualizar información de Empresa
+async createOrUpdateEmpresa(
+  userId: string,
+  data: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>,
+): Promise<Empresa> {
+  if (!data.name) {
+    throw new Error("El campo 'name' es obligatorio.");
   }
+
+  // Preparar los datos a actualizar o crear
+  const updateData: Prisma.EmpresaUncheckedUpdateInput = {
+    name: data.name,
+    giro: data.giro || 'SERVICIOS', // Por defecto es 'SERVICIOS' si no se proporciona
+    subscription: data.subscription, // Campo opcional
+    updatedAt: new Date(), // Actualiza la fecha
+  };
+
+  const createData: Prisma.EmpresaUncheckedCreateInput = {
+    userId,
+    name: data.name,
+    giro: data.giro || 'SERVICIOS',
+    subscription: data.subscription,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  // Upsert para actualizar o crear la empresa
+  return this.prisma.empresa.upsert({
+    where: { userId },
+    update: updateData,
+    create: createData,
+  });
+}
+
 
   // Crear o actualizar información de Instructor
   async createOrUpdateInstructor(

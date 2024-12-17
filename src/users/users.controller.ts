@@ -22,7 +22,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateMedicoDto } from './dto/update-medico.dto';
-import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { CreateEmpresaDto } from './dto/update-empresa.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
 import {
   ApiTags,
@@ -147,19 +147,28 @@ async updateMedico(
 
   // Endpoint para EMPRESA
   @ApiOperation({ summary: 'Create or update an Empresa' })
-  @ApiResponse({ status: 200, description: 'Empresa updated successfully.' })
-  @ApiResponse({ status: 400, description: 'Bad request.' })
-  @ApiBody({ type: UpdateEmpresaDto })
-  @Put('empresa')
-  async updateEmpresa(@Body() data: UpdateEmpresaDto) {
-    if (!data.userId) {
-      throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
-    }
-    if (!data.name) {
-      throw new HttpException('El campo "name" es obligatorio', HttpStatus.BAD_REQUEST);
-    }
-    return this.usersService.createOrUpdateEmpresa(data.userId, data);
+@ApiResponse({ status: 200, description: 'Empresa updated successfully.' })
+@ApiResponse({ status: 400, description: 'Bad request.' })
+@ApiBody({ type: CreateEmpresaDto }) // Cambiado al nuevo DTO
+@Put('empresa')
+async updateEmpresa(@Body() data: CreateEmpresaDto) {
+  if (!data.userId) {
+    throw new HttpException('User ID is required', HttpStatus.BAD_REQUEST);
   }
+
+  if (!data.name) {
+    throw new HttpException('El campo "name" es obligatorio', HttpStatus.BAD_REQUEST);
+  }
+
+  if (data.subscription && !['ORO', 'PLATA', 'BRONCE'].includes(data.subscription)) {
+    throw new HttpException(
+      'Subscription type must be ORO, PLATA, or BRONCE',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  return this.usersService.createOrUpdateEmpresa(data.userId, data);
+}
 
   @ApiOperation({ summary: 'Get Empresa information' })
   @ApiBearerAuth()
