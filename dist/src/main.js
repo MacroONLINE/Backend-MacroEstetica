@@ -6,8 +6,10 @@ const swagger_1 = require("@nestjs/swagger");
 const express = require("express");
 async function bootstrap() {
     console.log('Inicializando aplicación...');
-    const app = await core_1.NestFactory.create(app_module_1.AppModule, { bodyParser: false });
-    console.log('Aplicación creada.');
+    const app = await core_1.NestFactory.create(app_module_1.AppModule, {
+        bodyParser: false,
+        logger: ['log', 'error', 'warn', 'debug'],
+    });
     app.use('/payment/webhook', express.raw({ type: 'application/json' }));
     console.log('Middleware raw configurado para /payment/webhook.');
     app.use(express.json());

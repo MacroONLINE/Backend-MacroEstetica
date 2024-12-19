@@ -6,8 +6,12 @@ import * as express from 'express';
 async function bootstrap() {
   console.log('Inicializando aplicación...');
   
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
-  console.log('Aplicación creada.');
+
+  const app = await NestFactory.create(AppModule, { 
+    bodyParser: false,
+    logger: ['log', 'error', 'warn', 'debug'], // Niveles de log que quieres habilitar
+  });
+  
 
   app.use('/payment/webhook', express.raw({ type: 'application/json' }));
   console.log('Middleware raw configurado para /payment/webhook.');
