@@ -1,6 +1,6 @@
 import { IsString, IsNumber, IsBoolean, IsOptional, IsJSON, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Target } from '../enums/target.enum';
+import { Target } from '@prisma/client';
 
 export class CreateCourseDto {
   @ApiProperty({ description: 'Title of the course' })

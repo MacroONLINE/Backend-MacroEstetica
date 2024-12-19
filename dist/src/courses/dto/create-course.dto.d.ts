@@ -1,4 +1,4 @@
-import { Target } from '../enums/target.enum';
+import { Target } from '@prisma/client';
 export declare class CreateCourseDto {
     title: string;
     bannerUrl: string;

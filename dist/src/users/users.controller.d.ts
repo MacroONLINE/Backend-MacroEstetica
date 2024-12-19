@@ -25,19 +25,19 @@ export declare class UsersController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
-        verification: string;
         userId: string;
+        profession: import(".prisma/client").$Enums.Profession;
+        verification: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
-        verification: string;
         userId: string;
+        profession: import(".prisma/client").$Enums.Profession;
+        verification: string;
     }>;
     updateEmpresa(data: CreateEmpresaDto): Promise<{
         name: string;
@@ -64,9 +64,9 @@ export declare class UsersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
         userId: string;
+        profession: import(".prisma/client").$Enums.Profession;
         description: string;
         experienceYears: number;
         certificationsUrl: string;
@@ -77,9 +77,9 @@ export declare class UsersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
-        profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
         userId: string;
+        profession: import(".prisma/client").$Enums.Profession;
         description: string;
         experienceYears: number;
         certificationsUrl: string;

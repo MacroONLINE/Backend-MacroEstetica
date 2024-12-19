@@ -69,6 +69,18 @@ let PaymentService = class PaymentService {
                 console.error('Faltan metadata en la sesión de Stripe. No se puede procesar el pago.');
                 return { received: true };
             }
+            await this.prisma.transaction.create({
+                data: {
+                    stripePaymentIntentId: session.payment_intent,
+                    stripeCheckoutSessionId: session.id,
+                    status: session.payment_status,
+                    amount: session.amount_total / 100,
+                    currency: session.currency,
+                    userId,
+                    courseId,
+                    responseData: session,
+                },
+            });
             await this.prisma.courseEnrollment.create({
                 data: {
                     userId,
@@ -76,7 +88,7 @@ let PaymentService = class PaymentService {
                     enrolledAt: new Date(),
                 },
             });
-            console.log('Usuario inscrito en el curso:', { userId, courseId });
+            console.log('Usuario inscrito y transacción registrada:', { userId, courseId });
         }
         return { received: true };
     }

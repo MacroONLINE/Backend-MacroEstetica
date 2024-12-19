@@ -11,11 +11,11 @@ export declare class ProductsService {
         updatedAt: Date;
         description: string | null;
         companyId: string;
+        isFeatured: boolean;
         cost: Prisma.Decimal;
         discount: Prisma.Decimal | null;
         productCode: string;
         availableQuantity: number;
-        isFeatured: boolean;
     }>;
     getProductsByCompany(companyId: string): Promise<{
         name: string;
@@ -24,11 +24,11 @@ export declare class ProductsService {
         updatedAt: Date;
         description: string | null;
         companyId: string;
+        isFeatured: boolean;
         cost: Prisma.Decimal;
         discount: Prisma.Decimal | null;
         productCode: string;
         availableQuantity: number;
-        isFeatured: boolean;
     }[]>;
     updateProduct(productId: number, data: Prisma.ProductUpdateInput): Promise<{
         name: string;
@@ -37,11 +37,11 @@ export declare class ProductsService {
         updatedAt: Date;
         description: string | null;
         companyId: string;
+        isFeatured: boolean;
         cost: Prisma.Decimal;
         discount: Prisma.Decimal | null;
         productCode: string;
         availableQuantity: number;
-        isFeatured: boolean;
     }>;
     deleteProduct(productId: number): Promise<{
         name: string;
@@ -50,11 +50,11 @@ export declare class ProductsService {
         updatedAt: Date;
         description: string | null;
         companyId: string;
+        isFeatured: boolean;
         cost: Prisma.Decimal;
         discount: Prisma.Decimal | null;
         productCode: string;
         availableQuantity: number;
-        isFeatured: boolean;
     }>;
     setProductFeatured(productId: number, isFeatured: boolean): Promise<{
         name: string;
@@ -63,11 +63,11 @@ export declare class ProductsService {
         updatedAt: Date;
         description: string | null;
         companyId: string;
+        isFeatured: boolean;
         cost: Prisma.Decimal;
         discount: Prisma.Decimal | null;
         productCode: string;
         availableQuantity: number;
-        isFeatured: boolean;
     }>;
     getFeaturedProducts(limit: number): Promise<{
         name: string;
@@ -76,10 +76,10 @@ export declare class ProductsService {
         updatedAt: Date;
         description: string | null;
         companyId: string;
+        isFeatured: boolean;
         cost: Prisma.Decimal;
         discount: Prisma.Decimal | null;
         productCode: string;
         availableQuantity: number;
-        isFeatured: boolean;
     }[]>;
 }

@@ -13,23 +13,23 @@ export declare class CoursesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         rating: number;
-        isFeatured: boolean | null;
+        description: string;
         title: string;
         bannerUrl: string;
-        courseImageUrl: string;
-        aboutDescription: string | null;
-        totalHours: number;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
-        requirements: import("@prisma/client/runtime/library").JsonValue | null;
+        level: string;
         commentsCount: number;
         averageRating: number;
-        level: string;
         price: number;
         discountPercentage: number | null;
         participantsCount: number;
         target: import(".prisma/client").$Enums.Target;
+        isFeatured: boolean | null;
+        courseImageUrl: string;
+        aboutDescription: string | null;
+        requirements: import("@prisma/client/runtime/library").JsonValue | null;
+        totalHours: number;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         categoryId: string;
         instructorId: string | null;
     }>;
@@ -43,8 +43,8 @@ export declare class CoursesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         courseId: string | null;
+        description: string;
     }>;
     createClass(data: CreateClassDto): Promise<{
         id: string;
@@ -57,12 +57,12 @@ export declare class CoursesService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         type: import(".prisma/client").$Enums.CommentType;
         rating: number;
         content: string;
         classId: string | null;
         courseId: string | null;
+        userId: string;
     }>;
     createCategory(data: CreateCategoryDto): Promise<{
         name: string;

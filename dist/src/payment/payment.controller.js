@@ -16,9 +16,11 @@ exports.PaymentController = void 0;
 const common_1 = require("@nestjs/common");
 const payment_service_1 = require("./payment.service");
 const swagger_1 = require("@nestjs/swagger");
+const prisma_service_1 = require("../prisma/prisma.service");
 let PaymentController = class PaymentController {
-    constructor(paymentService) {
+    constructor(paymentService, prisma) {
         this.paymentService = paymentService;
+        this.prisma = prisma;
     }
     async createCheckoutSession(courseId, userId) {
         if (!courseId || !userId) {
@@ -39,6 +41,20 @@ let PaymentController = class PaymentController {
             console.error('Webhook Error:', error.message);
             res.status(400).send(`Webhook Error: ${error.message}`);
         }
+    }
+    async enrollUser(courseId, userId) {
+        const course = await this.prisma.course.findUnique({ where: { id: courseId } });
+        if (!course) {
+            throw new common_1.HttpException('El curso no existe', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const enrollment = await this.prisma.courseEnrollment.create({
+            data: {
+                userId,
+                courseId,
+                enrolledAt: new Date(),
+            },
+        });
+        return { message: 'Inscripción registrada exitosamente', enrollment };
     }
 };
 exports.PaymentController = PaymentController;
@@ -73,9 +89,29 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "handleWebhook", null);
+__decorate([
+    (0, common_1.Post)('enroll'),
+    (0, swagger_1.ApiOperation)({ summary: 'Registrar la inscripción de un usuario en un curso' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                courseId: { type: 'string', description: 'ID del curso' },
+                userId: { type: 'string', description: 'ID del usuario' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Usuario inscrito exitosamente.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error al registrar la inscripción.' }),
+    __param(0, (0, common_1.Body)('courseId')),
+    __param(1, (0, common_1.Body)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "enrollUser", null);
 exports.PaymentController = PaymentController = __decorate([
     (0, swagger_1.ApiTags)('payment'),
     (0, common_1.Controller)('payment'),
-    __metadata("design:paramtypes", [payment_service_1.PaymentService])
+    __metadata("design:paramtypes", [payment_service_1.PaymentService,
+        prisma_service_1.PrismaService])
 ], PaymentController);
 //# sourceMappingURL=payment.controller.js.map

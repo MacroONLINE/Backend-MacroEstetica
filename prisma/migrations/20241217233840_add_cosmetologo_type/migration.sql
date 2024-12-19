@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "ProfessionType" ADD VALUE 'COSMETOLOGO';
+
+-- AlterEnum
+ALTER TYPE "Target" ADD VALUE 'COSMETOLOGO';

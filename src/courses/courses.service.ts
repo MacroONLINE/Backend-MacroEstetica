@@ -190,7 +190,7 @@ export class CoursesService {
     const validatedTarget: Target =
       Object.values(Target).includes(target as Target)
         ? (target as Target)
-        : Target.ESTETICISTA;
+        : Target.COSMETOLOGO;
 
     const courses = await this.prisma.course.findMany({
       where: { target: validatedTarget },

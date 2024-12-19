@@ -179,7 +179,7 @@ let CoursesService = class CoursesService {
     async getCoursesByTarget(target) {
         const validatedTarget = Object.values(client_1.Target).includes(target)
             ? target
-            : client_1.Target.ESTETICISTA;
+            : client_1.Target.COSMETOLOGO;
         const courses = await this.prisma.course.findMany({
             where: { target: validatedTarget },
             include: {

@@ -19,12 +19,12 @@ exports.PaymentModule = PaymentModule;
 exports.PaymentModule = PaymentModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            config_1.ConfigModule.forRoot({ isGlobal: true }),
+            config_1.ConfigModule,
             prisma_module_1.PrismaModule,
             courses_module_1.CoursesModule,
         ],
-        providers: [payment_service_1.PaymentService],
         controllers: [payment_controller_1.PaymentController],
+        providers: [payment_service_1.PaymentService],
     })
 ], PaymentModule);
 //# sourceMappingURL=payment.module.js.map

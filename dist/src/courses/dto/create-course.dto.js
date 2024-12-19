@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateCourseDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
-const target_enum_1 = require("../enums/target.enum");
+const client_1 = require("@prisma/client");
 class CreateCourseDto {
 }
 exports.CreateCourseDto = CreateCourseDto;
@@ -71,8 +71,8 @@ __decorate([
     __metadata("design:type", Number)
 ], CreateCourseDto.prototype, "discountPercentage", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Target audience of the course', enum: target_enum_1.Target, required: false }),
-    (0, class_validator_1.IsEnum)(target_enum_1.Target),
+    (0, swagger_1.ApiProperty)({ description: 'Target audience of the course', enum: client_1.Target, required: false }),
+    (0, class_validator_1.IsEnum)(client_1.Target),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateCourseDto.prototype, "target", void 0);
