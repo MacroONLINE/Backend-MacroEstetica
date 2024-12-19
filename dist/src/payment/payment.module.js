@@ -11,7 +11,9 @@ const common_1 = require("@nestjs/common");
 const payment_service_1 = require("./payment.service");
 const payment_controller_1 = require("./payment.controller");
 const config_1 = require("@nestjs/config");
+const payment_scheduler_1 = require("./payment.scheduler");
 const prisma_module_1 = require("../prisma/prisma.module");
+const schedule_1 = require("@nestjs/schedule");
 const courses_module_1 = require("../courses/courses.module");
 let PaymentModule = class PaymentModule {
 };
@@ -22,9 +24,10 @@ exports.PaymentModule = PaymentModule = __decorate([
             config_1.ConfigModule,
             prisma_module_1.PrismaModule,
             courses_module_1.CoursesModule,
+            schedule_1.ScheduleModule.forRoot()
         ],
         controllers: [payment_controller_1.PaymentController],
-        providers: [payment_service_1.PaymentService],
+        providers: [payment_service_1.PaymentService, payment_scheduler_1.PaymentScheduler],
     })
 ], PaymentModule);
 //# sourceMappingURL=payment.module.js.map

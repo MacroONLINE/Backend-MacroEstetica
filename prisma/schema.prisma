@@ -47,18 +47,47 @@ model Medico {
 }
 
 model Empresa {
-  id           String            @id @default(cuid())
+  id           String                  @id @default(cuid())
   dni          String?
   name         String
-  giro         Giro              @default(SERVICIOS)
-  userId       String            @unique
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @default(now())
+  giro         Giro                    @default(SERVICIOS)
+  userId       String                  @unique
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @default(now())
   subscription SubscriptionType?
-  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   instructores Instructor[]
   productos    Product[]
+  empresaSubscriptions EmpresaSubscription[] 
 }
+
+
+model Subscription {
+  id               String             @id @default(cuid())
+  type             SubscriptionType   @unique // Marcar como único
+  description      String
+  price            Float              // Precio mensual
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  subscriptions    EmpresaSubscription[]
+}
+
+
+
+model EmpresaSubscription {
+  id               String   @id @default(cuid())
+  empresaId        String
+  subscriptionId   String
+  startDate        DateTime @default(now())
+  endDate          DateTime
+  status           String   @default("active") 
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  empresa          Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  subscription     Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+}
+
 
 model Comment {
   id        String      @id @default(cuid())

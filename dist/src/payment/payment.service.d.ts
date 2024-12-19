@@ -10,4 +10,16 @@ export declare class PaymentService {
     handleWebhookEvent(signature: string, payload: Buffer): Promise<{
         received: boolean;
     }>;
+    createCompanySubscription(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{
+        id: string;
+        status: string;
+        createdAt: Date;
+        updatedAt: Date;
+        empresaId: string;
+        subscriptionId: string;
+        startDate: Date;
+        endDate: Date;
+    }>;
+    renewSubscriptions(): Promise<void>;
+    createSubscriptionSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<Stripe.Response<Stripe.Checkout.Session>>;
 }

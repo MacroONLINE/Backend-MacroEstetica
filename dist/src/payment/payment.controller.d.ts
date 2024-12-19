@@ -1,21 +1,26 @@
 import { PaymentService } from './payment.service';
 import { Request, Response } from 'express';
-import { PrismaService } from '../prisma/prisma.service';
 export declare class PaymentController {
     private readonly paymentService;
-    private readonly prisma;
-    constructor(paymentService: PaymentService, prisma: PrismaService);
+    constructor(paymentService: PaymentService);
     createCheckoutSession(courseId: string, userId: string): Promise<{
         url: string;
     }>;
     handleWebhook(signature: string, req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
-    enrollUser(courseId: string, userId: string): Promise<{
+    createCompanySubscription(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{
         message: string;
-        enrollment: {
+        subscription: {
             id: string;
-            userId: string;
-            courseId: string;
-            enrolledAt: Date;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            empresaId: string;
+            subscriptionId: string;
+            startDate: Date;
+            endDate: Date;
         };
+    }>;
+    createSubscriptionSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{
+        url: string;
     }>;
 }

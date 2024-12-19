@@ -40,6 +40,7 @@ export declare class UsersController {
         verification: string;
     }>;
     updateEmpresa(data: CreateEmpresaDto): Promise<{
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
         id: string;
         createdAt: Date;
@@ -47,9 +48,9 @@ export declare class UsersController {
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
     }>;
     getEmpresa(req: any): Promise<{
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
         id: string;
         createdAt: Date;
@@ -57,7 +58,6 @@ export declare class UsersController {
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
     }>;
     updateInstructor(data: UpdateInstructorDto): Promise<{
         id: string;

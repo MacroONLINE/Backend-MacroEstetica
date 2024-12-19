@@ -16,45 +16,43 @@ exports.PaymentController = void 0;
 const common_1 = require("@nestjs/common");
 const payment_service_1 = require("./payment.service");
 const swagger_1 = require("@nestjs/swagger");
-const prisma_service_1 = require("../prisma/prisma.service");
 let PaymentController = class PaymentController {
-    constructor(paymentService, prisma) {
+    constructor(paymentService) {
         this.paymentService = paymentService;
-        this.prisma = prisma;
     }
     async createCheckoutSession(courseId, userId) {
         if (!courseId || !userId) {
-            throw new common_1.HttpException('courseId and userId are required', common_1.HttpStatus.BAD_REQUEST);
+            throw new common_1.HttpException('courseId y userId son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
         const session = await this.paymentService.createCheckoutSession(courseId, userId);
         return { url: session.url };
     }
     async handleWebhook(signature, req, res) {
         if (!signature) {
-            return res.status(400).send('Missing stripe-signature header');
+            return res.status(400).send('Falta el encabezado stripe-signature');
         }
         try {
             const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
             res.status(200).send(result);
         }
         catch (error) {
-            console.error('Webhook Error:', error.message);
-            res.status(400).send(`Webhook Error: ${error.message}`);
+            console.error('Error en Webhook:', error.message);
+            res.status(400).send(`Error en Webhook: ${error.message}`);
         }
     }
-    async enrollUser(courseId, userId) {
-        const course = await this.prisma.course.findUnique({ where: { id: courseId } });
-        if (!course) {
-            throw new common_1.HttpException('El curso no existe', common_1.HttpStatus.BAD_REQUEST);
+    async createCompanySubscription(empresaId, subscriptionType) {
+        if (!empresaId || !subscriptionType) {
+            throw new common_1.HttpException('empresaId y subscriptionType son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
-        const enrollment = await this.prisma.courseEnrollment.create({
-            data: {
-                userId,
-                courseId,
-                enrolledAt: new Date(),
-            },
-        });
-        return { message: 'Inscripción registrada exitosamente', enrollment };
+        const subscription = await this.paymentService.createCompanySubscription(empresaId, subscriptionType);
+        return { message: 'Suscripción creada exitosamente', subscription };
+    }
+    async createSubscriptionSession(empresaId, subscriptionType) {
+        if (!empresaId || !subscriptionType) {
+            throw new common_1.HttpException('empresaId y subscriptionType son requeridos', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const session = await this.paymentService.createSubscriptionSession(empresaId, subscriptionType);
+        return { url: session.url };
     }
 };
 exports.PaymentController = PaymentController;
@@ -90,28 +88,46 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "handleWebhook", null);
 __decorate([
-    (0, common_1.Post)('enroll'),
-    (0, swagger_1.ApiOperation)({ summary: 'Registrar la inscripción de un usuario en un curso' }),
+    (0, common_1.Post)('company-subscription'),
+    (0, swagger_1.ApiOperation)({ summary: 'Crea una suscripción para una empresa' }),
     (0, swagger_1.ApiBody)({
         schema: {
             properties: {
-                courseId: { type: 'string', description: 'ID del curso' },
-                userId: { type: 'string', description: 'ID del usuario' },
+                empresaId: { type: 'string', description: 'ID de la empresa' },
+                subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
             },
         },
     }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Usuario inscrito exitosamente.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error al registrar la inscripción.' }),
-    __param(0, (0, common_1.Body)('courseId')),
-    __param(1, (0, common_1.Body)('userId')),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Suscripción creada exitosamente.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error al crear la suscripción.' }),
+    __param(0, (0, common_1.Body)('empresaId')),
+    __param(1, (0, common_1.Body)('subscriptionType')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
-], PaymentController.prototype, "enrollUser", null);
+], PaymentController.prototype, "createCompanySubscription", null);
+__decorate([
+    (0, common_1.Post)('subscription-session'),
+    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de Stripe para suscripciones empresariales' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                empresaId: { type: 'string', description: 'ID de la empresa' },
+                subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en los parámetros proporcionados.' }),
+    __param(0, (0, common_1.Body)('empresaId')),
+    __param(1, (0, common_1.Body)('subscriptionType')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "createSubscriptionSession", null);
 exports.PaymentController = PaymentController = __decorate([
     (0, swagger_1.ApiTags)('payment'),
     (0, common_1.Controller)('payment'),
-    __metadata("design:paramtypes", [payment_service_1.PaymentService,
-        prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [payment_service_1.PaymentService])
 ], PaymentController);
 //# sourceMappingURL=payment.controller.js.map
