@@ -11,14 +11,16 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var PaymentController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentController = void 0;
 const common_1 = require("@nestjs/common");
 const payment_service_1 = require("./payment.service");
 const swagger_1 = require("@nestjs/swagger");
-let PaymentController = class PaymentController {
+let PaymentController = PaymentController_1 = class PaymentController {
     constructor(paymentService) {
         this.paymentService = paymentService;
+        this.logger = new common_1.Logger(PaymentController_1.name);
     }
     async createCheckoutSession(courseId, userId) {
         if (!courseId || !userId) {
@@ -28,15 +30,18 @@ let PaymentController = class PaymentController {
         return { url: session.url };
     }
     async handleWebhook(signature, req, res) {
+        this.logger.log('Webhook recibido en /payment/webhook');
         if (!signature) {
+            this.logger.error('Falta el encabezado stripe-signature');
             return res.status(400).send('Falta el encabezado stripe-signature');
         }
         try {
             const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
+            this.logger.log('Webhook procesado correctamente');
             res.status(200).send(result);
         }
         catch (error) {
-            console.error('Error en Webhook:', error.message);
+            this.logger.error('Error en Webhook:', error.message);
             res.status(400).send(`Error en Webhook: ${error.message}`);
         }
     }
@@ -45,6 +50,7 @@ let PaymentController = class PaymentController {
             throw new common_1.HttpException('empresaId y subscriptionType son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
         const subscription = await this.paymentService.createCompanySubscription(empresaId, subscriptionType);
+        this.logger.log(`Suscripción creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
         return { message: 'Suscripción creada exitosamente', subscription };
     }
     async createSubscriptionSession(empresaId, subscriptionType) {
@@ -52,6 +58,7 @@ let PaymentController = class PaymentController {
             throw new common_1.HttpException('empresaId y subscriptionType son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
         const session = await this.paymentService.createSubscriptionSession(empresaId, subscriptionType);
+        this.logger.log(`Sesión de suscripción creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
         return { url: session.url };
     }
 };
@@ -125,7 +132,7 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "createSubscriptionSession", null);
-exports.PaymentController = PaymentController = __decorate([
+exports.PaymentController = PaymentController = PaymentController_1 = __decorate([
     (0, swagger_1.ApiTags)('payment'),
     (0, common_1.Controller)('payment'),
     __metadata("design:paramtypes", [payment_service_1.PaymentService])

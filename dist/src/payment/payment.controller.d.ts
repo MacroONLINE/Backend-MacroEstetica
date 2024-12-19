@@ -2,6 +2,7 @@ import { PaymentService } from './payment.service';
 import { Request, Response } from 'express';
 export declare class PaymentController {
     private readonly paymentService;
+    private readonly logger;
     constructor(paymentService: PaymentService);
     createCheckoutSession(courseId: string, userId: string): Promise<{
         url: string;
@@ -11,13 +12,13 @@ export declare class PaymentController {
         message: string;
         subscription: {
             id: string;
-            status: string;
             createdAt: Date;
             updatedAt: Date;
             empresaId: string;
             subscriptionId: string;
             startDate: Date;
             endDate: Date;
+            status: string;
         };
     }>;
     createSubscriptionSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{

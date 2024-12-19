@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Headers, Req, Res, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Req, Res, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
@@ -6,6 +6,8 @@ import { Request, Response } from 'express';
 @ApiTags('payment')
 @Controller('payment')
 export class PaymentController {
+  private readonly logger = new Logger(PaymentController.name);
+
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post('checkout')
@@ -38,15 +40,19 @@ export class PaymentController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
+    this.logger.log('Webhook recibido en /payment/webhook');
+
     if (!signature) {
+      this.logger.error('Falta el encabezado stripe-signature');
       return res.status(400).send('Falta el encabezado stripe-signature');
     }
 
     try {
       const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
+      this.logger.log('Webhook procesado correctamente');
       res.status(200).send(result);
     } catch (error) {
-      console.error('Error en Webhook:', error.message);
+      this.logger.error('Error en Webhook:', error.message);
       res.status(400).send(`Error en Webhook: ${error.message}`);
     }
   }
@@ -72,6 +78,7 @@ export class PaymentController {
     }
 
     const subscription = await this.paymentService.createCompanySubscription(empresaId, subscriptionType);
+    this.logger.log(`Suscripción creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
     return { message: 'Suscripción creada exitosamente', subscription };
   }
 
@@ -96,6 +103,7 @@ export class PaymentController {
     }
 
     const session = await this.paymentService.createSubscriptionSession(empresaId, subscriptionType);
+    this.logger.log(`Sesión de suscripción creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
     return { url: session.url };
   }
 }
