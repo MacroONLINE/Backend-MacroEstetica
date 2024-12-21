@@ -14,8 +14,8 @@ export declare class CoursesController {
         createdAt: Date;
         updatedAt: Date;
         rating: number;
-        description: string;
         title: string;
+        description: string;
         bannerUrl: string;
         level: string;
         commentsCount: number;

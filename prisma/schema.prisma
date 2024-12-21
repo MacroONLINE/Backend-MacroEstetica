@@ -37,8 +37,8 @@ model User {
 
 model Medico {
   id           String         @id @default(cuid())
-  profession   Profession     @default(ESTETICA)
-  type         ProfessionType @default(ESTETICISTA)
+  profession   Profession     @default(DERMATOLOGIA)
+  type         ProfessionType @default(COSMETOLOGO)
   verification String
   userId       String         @unique
   createdAt    DateTime       @default(now())
@@ -47,19 +47,29 @@ model Medico {
 }
 
 model Empresa {
-  id           String                  @id @default(cuid())
-  dni          String?
-  name         String
-  giro         Giro                    @default(SERVICIOS)
-  userId       String                  @unique
-  createdAt    DateTime                @default(now())
-  updatedAt    DateTime                @default(now())
-  subscription SubscriptionType?
-  user         User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  instructores Instructor[]
-  productos    Product[]
-  empresaSubscriptions EmpresaSubscription[] 
+  id                     String                  @id @default(cuid())
+  dni                    String?
+  name                   String
+  giro                   Giro                    @default(EMPRESA_PROFESIONAL_PERFIL)
+  categoria              EmpresaCategory         @default(EMPRESA_PERFIL)
+  userId                 String                  @unique
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @default(now())
+  subscription           SubscriptionType?
+  user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instructores           Instructor[]
+  productos              Product[]
+  empresaSubscriptions   EmpresaSubscription[]
+  bannerImage            String?
+  logo                   String?
+  title                  String?
+  profileImage           String?
+  ceo                    String?
+  ceoRole                String?
+  location               String?
+  followers              Int                    @default(0)
 }
+
 
 
 model Subscription {
@@ -292,12 +302,25 @@ enum Profession {
 
 
 enum Giro {
-  SERVICIOS
-  PRODUCTOS
-  CONSULTORIA
-  OTRO
+  EMPRESA_PROFESIONAL_PERFIL
+  EMPRESA_APARATOLOGIA_PERFIL
+  EMPRESA_MOBILIARIO_PERFIL
+  EMPRESA_DESECHABLES_PERFIL
+  EMPRESA_AROMATERAPIA_PERFIL
+  EMPRESA_FABRICANTE_LABORATORIO_PERFIL
+  EMPRESA_ADMINISTRACION_PERFIL
+  SOCIEDAD_ASOCIACION_PERFIL
+  UNIVERSIDAD_ESCUELA_PERFIL
+  OTRO_PERFIL
 }
 
+
+enum EmpresaCategory {
+  EMPRESA_PERFIL
+  SOCIEDAD_ASOCIACION_PERFIL
+  UNIVERSIDAD_ESCUELA_PERFIL
+  OTRO_PERFIL
+}
 
 
 enum CommentType {

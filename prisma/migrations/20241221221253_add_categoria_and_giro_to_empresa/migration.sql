@@ -1,0 +1,32 @@
+-- CreateEnum
+CREATE TYPE "EmpresaCategory" AS ENUM ('EMPRESA_PERFIL', 'SOCIEDAD_ASOCIACION_PERFIL', 'UNIVERSIDAD_ESCUELA_PERFIL', 'OTRO_PERFIL');
+
+-- AlterEnum
+-- This migration adds more than one value to an enum.
+-- With PostgreSQL versions 11 and earlier, this is not possible
+-- in a single migration. This can be worked around by creating
+-- multiple migrations, each migration adding only one value to
+-- the enum.
+
+
+ALTER TYPE "Giro" ADD VALUE 'EMPRESA_PROFESIONAL_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'EMPRESA_APARATOLOGIA_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'EMPRESA_MOBILIARIO_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'EMPRESA_DESECHABLES_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'EMPRESA_AROMATERAPIA_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'EMPRESA_FABRICANTE_LABORATORIO_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'EMPRESA_ADMINISTRACION_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'SOCIEDAD_ASOCIACION_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'UNIVERSIDAD_ESCUELA_PERFIL';
+ALTER TYPE "Giro" ADD VALUE 'OTRO_PERFIL';
+
+-- AlterTable
+ALTER TABLE "Empresa" ADD COLUMN     "bannerImage" TEXT,
+ADD COLUMN     "categoria" "EmpresaCategory" NOT NULL DEFAULT 'EMPRESA_PERFIL',
+ADD COLUMN     "ceo" TEXT,
+ADD COLUMN     "ceoRole" TEXT,
+ADD COLUMN     "followers" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "location" TEXT,
+ADD COLUMN     "logo" TEXT,
+ADD COLUMN     "profileImage" TEXT,
+ADD COLUMN     "title" TEXT;

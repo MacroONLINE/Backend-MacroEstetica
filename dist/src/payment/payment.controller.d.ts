@@ -12,13 +12,13 @@ export declare class PaymentController {
         message: string;
         subscription: {
             id: string;
+            status: string;
             createdAt: Date;
             updatedAt: Date;
             empresaId: string;
             subscriptionId: string;
             startDate: Date;
             endDate: Date;
-            status: string;
         };
     }>;
     createSubscriptionSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{

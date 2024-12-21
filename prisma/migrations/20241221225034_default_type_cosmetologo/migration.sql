@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Medico" ALTER COLUMN "type" SET DEFAULT 'COSMETOLOGO';

@@ -1,20 +1,6 @@
 import { IsOptional, IsString, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-
-// Enum para SubscriptionType
-export enum SubscriptionType {
-  ORO = 'ORO',
-  PLATA = 'PLATA',
-  BRONCE = 'BRONCE',
-}
-
-// Enum para Giro
-export enum GiroEnum {
-  SERVICIOS = 'SERVICIOS',
-  PRODUCTOS = 'PRODUCTOS',
-  CONSULTORIA = 'CONSULTORIA',
-  OTRO = 'OTRO',
-}
+import { Giro, SubscriptionType } from '@prisma/client'; // Importa los enums generados por Prisma
 
 export class CreateEmpresaDto {
   @ApiProperty({ description: 'DNI de la empresa', required: false })
@@ -26,9 +12,9 @@ export class CreateEmpresaDto {
   @IsString()
   name: string;
 
-  @ApiProperty({ enum: GiroEnum, description: 'Giro de la empresa' })
-  @IsEnum(GiroEnum, { message: 'Giro must be SERVICIOS, PRODUCTOS, CONSULTORIA, or OTRO' })
-  giro?: GiroEnum;
+  @ApiProperty({ enum: Giro, description: 'Giro de la empresa' })
+  @IsEnum(Giro, { message: 'Giro must be a valid enum value' })
+  giro: Giro;
 
   @ApiProperty({
     enum: SubscriptionType,
@@ -37,11 +23,51 @@ export class CreateEmpresaDto {
   })
   @IsOptional()
   @IsEnum(SubscriptionType, {
-    message: 'Subscription must be ORO, PLATA, or BRONCE',
+    message: 'Subscription must be a valid enum value',
   })
   subscription?: SubscriptionType;
 
   @ApiProperty({ description: 'ID del usuario asociado a la empresa' })
   @IsString()
   userId: string;
+
+  @ApiProperty({ description: 'Imagen del banner de la empresa', required: false })
+  @IsOptional()
+  @IsString()
+  bannerImage?: string;
+
+  @ApiProperty({ description: 'Logo de la empresa', required: false })
+  @IsOptional()
+  @IsString()
+  logo?: string;
+
+  @ApiProperty({ description: 'Título de la empresa', required: false })
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiProperty({ description: 'Imagen de perfil de la empresa', required: false })
+  @IsOptional()
+  @IsString()
+  profileImage?: string;
+
+  @ApiProperty({ description: 'Nombre del CEO de la empresa', required: false })
+  @IsOptional()
+  @IsString()
+  ceo?: string;
+
+  @ApiProperty({ description: 'Cargo del CEO de la empresa', required: false })
+  @IsOptional()
+  @IsString()
+  ceoRole?: string;
+
+  @ApiProperty({ description: 'Ubicación de la empresa', required: false })
+  @IsOptional()
+  @IsString()
+  location?: string;
+
+  @ApiProperty({ description: 'Número de seguidores de la empresa', required: false })
+  @IsOptional()
+  @IsString()
+  followers?: number;
 }

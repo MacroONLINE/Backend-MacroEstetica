@@ -1,18 +1,16 @@
-export declare enum SubscriptionType {
-    ORO = "ORO",
-    PLATA = "PLATA",
-    BRONCE = "BRONCE"
-}
-export declare enum GiroEnum {
-    SERVICIOS = "SERVICIOS",
-    PRODUCTOS = "PRODUCTOS",
-    CONSULTORIA = "CONSULTORIA",
-    OTRO = "OTRO"
-}
+import { Giro, SubscriptionType } from '@prisma/client';
 export declare class CreateEmpresaDto {
     dni?: string;
     name: string;
-    giro?: GiroEnum;
+    giro: Giro;
     subscription?: SubscriptionType;
     userId: string;
+    bannerImage?: string;
+    logo?: string;
+    title?: string;
+    profileImage?: string;
+    ceo?: string;
+    ceoRole?: string;
+    location?: string;
+    followers?: number;
 }

@@ -66,15 +66,15 @@ async createOrUpdateEmpresa(
   // Preparar los datos a actualizar o crear
   const updateData: Prisma.EmpresaUncheckedUpdateInput = {
     name: data.name,
-    giro: data.giro || 'SERVICIOS', // Por defecto es 'SERVICIOS' si no se proporciona
-    subscription: data.subscription, // Campo opcional
-    updatedAt: new Date(), // Actualiza la fecha
+    giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL', 
+    subscription: data.subscription, 
+    updatedAt: new Date(), 
   };
 
   const createData: Prisma.EmpresaUncheckedCreateInput = {
     userId,
     name: data.name,
-    giro: data.giro || 'SERVICIOS',
+    giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
     subscription: data.subscription,
     createdAt: new Date(),
     updatedAt: new Date(),

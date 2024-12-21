@@ -9,22 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateEmpresaDto = exports.GiroEnum = exports.SubscriptionType = void 0;
+exports.CreateEmpresaDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
-var SubscriptionType;
-(function (SubscriptionType) {
-    SubscriptionType["ORO"] = "ORO";
-    SubscriptionType["PLATA"] = "PLATA";
-    SubscriptionType["BRONCE"] = "BRONCE";
-})(SubscriptionType || (exports.SubscriptionType = SubscriptionType = {}));
-var GiroEnum;
-(function (GiroEnum) {
-    GiroEnum["SERVICIOS"] = "SERVICIOS";
-    GiroEnum["PRODUCTOS"] = "PRODUCTOS";
-    GiroEnum["CONSULTORIA"] = "CONSULTORIA";
-    GiroEnum["OTRO"] = "OTRO";
-})(GiroEnum || (exports.GiroEnum = GiroEnum = {}));
+const client_1 = require("@prisma/client");
 class CreateEmpresaDto {
 }
 exports.CreateEmpresaDto = CreateEmpresaDto;
@@ -40,19 +28,19 @@ __decorate([
     __metadata("design:type", String)
 ], CreateEmpresaDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: GiroEnum, description: 'Giro de la empresa' }),
-    (0, class_validator_1.IsEnum)(GiroEnum, { message: 'Giro must be SERVICIOS, PRODUCTOS, CONSULTORIA, or OTRO' }),
+    (0, swagger_1.ApiProperty)({ enum: client_1.Giro, description: 'Giro de la empresa' }),
+    (0, class_validator_1.IsEnum)(client_1.Giro, { message: 'Giro must be a valid enum value' }),
     __metadata("design:type", String)
 ], CreateEmpresaDto.prototype, "giro", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        enum: SubscriptionType,
+        enum: client_1.SubscriptionType,
         description: 'Tipo de suscripción de la empresa',
         required: false,
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsEnum)(SubscriptionType, {
-        message: 'Subscription must be ORO, PLATA, or BRONCE',
+    (0, class_validator_1.IsEnum)(client_1.SubscriptionType, {
+        message: 'Subscription must be a valid enum value',
     }),
     __metadata("design:type", String)
 ], CreateEmpresaDto.prototype, "subscription", void 0);
@@ -61,4 +49,52 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateEmpresaDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Imagen del banner de la empresa', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmpresaDto.prototype, "bannerImage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Logo de la empresa', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmpresaDto.prototype, "logo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Título de la empresa', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmpresaDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Imagen de perfil de la empresa', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmpresaDto.prototype, "profileImage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Nombre del CEO de la empresa', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmpresaDto.prototype, "ceo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Cargo del CEO de la empresa', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmpresaDto.prototype, "ceoRole", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Ubicación de la empresa', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmpresaDto.prototype, "location", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'Número de seguidores de la empresa', required: false }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", Number)
+], CreateEmpresaDto.prototype, "followers", void 0);
 //# sourceMappingURL=update-empresa.dto.js.map

@@ -56,14 +56,14 @@ let UsersService = class UsersService {
         }
         const updateData = {
             name: data.name,
-            giro: data.giro || 'SERVICIOS',
+            giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
             subscription: data.subscription,
             updatedAt: new Date(),
         };
         const createData = {
             userId,
             name: data.name,
-            giro: data.giro || 'SERVICIOS',
+            giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
             subscription: data.subscription,
             createdAt: new Date(),
             updatedAt: new Date(),
