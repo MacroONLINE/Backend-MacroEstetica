@@ -12,13 +12,13 @@ export declare class PaymentService {
     }>;
     createCompanySubscription(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{
         id: string;
-        status: string;
         createdAt: Date;
         updatedAt: Date;
         empresaId: string;
         subscriptionId: string;
         startDate: Date;
         endDate: Date;
+        status: string;
     }>;
     renewSubscriptions(): Promise<void>;
     createSubscriptionSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<Stripe.Response<Stripe.Checkout.Session>>;

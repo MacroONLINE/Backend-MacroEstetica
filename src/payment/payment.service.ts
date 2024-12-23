@@ -118,9 +118,6 @@ export class PaymentService {
     return { received: true };
   }
 
-  /**
-   * Crear una suscripción para una empresa
-   */
   async createCompanySubscription(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE') {
     // Verificar si el tipo de suscripción existe
     const subscription = await this.prisma.subscription.findUnique({
