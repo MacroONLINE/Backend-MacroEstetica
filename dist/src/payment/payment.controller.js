@@ -45,20 +45,16 @@ let PaymentController = PaymentController_1 = class PaymentController {
             res.status(400).send(`Error en Webhook: ${error.message}`);
         }
     }
-    async createCompanySubscription(empresaId, subscriptionType) {
+    async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType) {
         if (!empresaId || !subscriptionType) {
             throw new common_1.HttpException('empresaId y subscriptionType son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
-        const subscription = await this.paymentService.createCompanySubscription(empresaId, subscriptionType);
-        this.logger.log(`Suscripción creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
-        return { message: 'Suscripción creada exitosamente', subscription };
-    }
-    async createSubscriptionSession(empresaId, subscriptionType) {
-        if (!empresaId || !subscriptionType) {
-            throw new common_1.HttpException('empresaId y subscriptionType son requeridos', common_1.HttpStatus.BAD_REQUEST);
+        const validSubscriptionTypes = ['ORO', 'PLATA', 'BRONCE'];
+        if (!validSubscriptionTypes.includes(subscriptionType)) {
+            throw new common_1.HttpException(`Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
         }
-        const session = await this.paymentService.createSubscriptionSession(empresaId, subscriptionType);
-        this.logger.log(`Sesión de suscripción creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
+        const session = await this.paymentService.createCompanySubscriptionCheckoutSession(empresaId, subscriptionType);
+        this.logger.log(`Sesión de checkout creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
         return { url: session.url };
     }
 };
@@ -95,27 +91,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "handleWebhook", null);
 __decorate([
-    (0, common_1.Post)('company-subscription'),
-    (0, swagger_1.ApiOperation)({ summary: 'Crea una suscripción para una empresa' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            properties: {
-                empresaId: { type: 'string', description: 'ID de la empresa' },
-                subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Suscripción creada exitosamente.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error al crear la suscripción.' }),
-    __param(0, (0, common_1.Body)('empresaId')),
-    __param(1, (0, common_1.Body)('subscriptionType')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", Promise)
-], PaymentController.prototype, "createCompanySubscription", null);
-__decorate([
-    (0, common_1.Post)('subscription-session'),
-    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de Stripe para suscripciones empresariales' }),
+    (0, common_1.Post)('subscription-checkout'),
+    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' }),
     (0, swagger_1.ApiBody)({
         schema: {
             properties: {
@@ -131,7 +108,7 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
-], PaymentController.prototype, "createSubscriptionSession", null);
+], PaymentController.prototype, "createCompanySubscriptionCheckoutSession", null);
 exports.PaymentController = PaymentController = PaymentController_1 = __decorate([
     (0, swagger_1.ApiTags)('payment'),
     (0, common_1.Controller)('payment'),

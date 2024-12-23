@@ -6,20 +6,10 @@ export declare class PaymentService {
     private readonly prisma;
     private stripe;
     constructor(configService: ConfigService, prisma: PrismaService);
-    createCheckoutSession(courseId: string, userId: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
+    createCompanySubscriptionCheckoutSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<Stripe.Response<Stripe.Checkout.Session>>;
     handleWebhookEvent(signature: string, payload: Buffer): Promise<{
         received: boolean;
     }>;
-    createCompanySubscription(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        empresaId: string;
-        subscriptionId: string;
-        startDate: Date;
-        endDate: Date;
-        status: string;
-    }>;
+    createCheckoutSession(courseId: string, userId: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
     renewSubscriptions(): Promise<void>;
-    createSubscriptionSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<Stripe.Response<Stripe.Checkout.Session>>;
 }

@@ -2,6 +2,7 @@ import { Controller, Post, Body, Headers, Req, Res, HttpException, HttpStatus, L
 import { PaymentService } from './payment.service';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { SubscriptionType } from '@prisma/client';
 
 @ApiTags('payment')
 @Controller('payment')
@@ -57,33 +58,8 @@ export class PaymentController {
     }
   }
 
-  @Post('company-subscription')
-  @ApiOperation({ summary: 'Crea una suscripción para una empresa' })
-  @ApiBody({
-    schema: {
-      properties: {
-        empresaId: { type: 'string', description: 'ID de la empresa' },
-        subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
-      },
-    },
-  })
-  @ApiResponse({ status: 201, description: 'Suscripción creada exitosamente.' })
-  @ApiResponse({ status: 400, description: 'Error al crear la suscripción.' })
-  async createCompanySubscription(
-    @Body('empresaId') empresaId: string,
-    @Body('subscriptionType') subscriptionType: 'ORO' | 'PLATA' | 'BRONCE',
-  ) {
-    if (!empresaId || !subscriptionType) {
-      throw new HttpException('empresaId y subscriptionType son requeridos', HttpStatus.BAD_REQUEST);
-    }
-
-    const subscription = await this.paymentService.createCompanySubscription(empresaId, subscriptionType);
-    this.logger.log(`Suscripción creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
-    return { message: 'Suscripción creada exitosamente', subscription };
-  }
-
-  @Post('subscription-session')
-  @ApiOperation({ summary: 'Crea una sesión de Stripe para suscripciones empresariales' })
+  @Post('subscription-checkout')
+  @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' })
   @ApiBody({
     schema: {
       properties: {
@@ -94,7 +70,7 @@ export class PaymentController {
   })
   @ApiResponse({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' })
   @ApiResponse({ status: 400, description: 'Error en los parámetros proporcionados.' })
-  async createSubscriptionSession(
+  async createCompanySubscriptionCheckoutSession(
     @Body('empresaId') empresaId: string,
     @Body('subscriptionType') subscriptionType: 'ORO' | 'PLATA' | 'BRONCE',
   ) {
@@ -102,8 +78,20 @@ export class PaymentController {
       throw new HttpException('empresaId y subscriptionType son requeridos', HttpStatus.BAD_REQUEST);
     }
 
-    const session = await this.paymentService.createSubscriptionSession(empresaId, subscriptionType);
-    this.logger.log(`Sesión de suscripción creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
+    // Validar el tipo de suscripción
+    const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
+    if (!validSubscriptionTypes.includes(subscriptionType as SubscriptionType)) {
+      throw new HttpException(
+        `Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const session = await this.paymentService.createCompanySubscriptionCheckoutSession(
+      empresaId,
+      subscriptionType as SubscriptionType, // Conversión explícita
+    );
+    this.logger.log(`Sesión de checkout creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
     return { url: session.url };
   }
 }

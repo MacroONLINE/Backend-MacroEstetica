@@ -8,20 +8,7 @@ export declare class PaymentController {
         url: string;
     }>;
     handleWebhook(signature: string, req: Request, res: Response): Promise<Response<any, Record<string, any>>>;
-    createCompanySubscription(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{
-        message: string;
-        subscription: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            empresaId: string;
-            subscriptionId: string;
-            startDate: Date;
-            endDate: Date;
-            status: string;
-        };
-    }>;
-    createSubscriptionSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{
+    createCompanySubscriptionCheckoutSession(empresaId: string, subscriptionType: 'ORO' | 'PLATA' | 'BRONCE'): Promise<{
         url: string;
     }>;
 }
