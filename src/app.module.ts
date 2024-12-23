@@ -12,6 +12,7 @@ import { ProductsModule } from './products/products.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PaymentModule } from './payment/payment.module';
 import { ResetPasswordModule } from './reset-password/reset-password.module';
+import { EmpresaModule } from './empresa/empresa.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { ResetPasswordModule } from './reset-password/reset-password.module';
     ProductsModule,
     CloudinaryModule,
     PaymentModule,
-    ResetPasswordModule
+    ResetPasswordModule,
+    EmpresaModule
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],

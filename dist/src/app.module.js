@@ -20,6 +20,7 @@ const products_module_1 = require("./products/products.module");
 const cloudinary_module_1 = require("./cloudinary/cloudinary.module");
 const payment_module_1 = require("./payment/payment.module");
 const reset_password_module_1 = require("./reset-password/reset-password.module");
+const empresa_module_1 = require("./empresa/empresa.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -33,7 +34,8 @@ exports.AppModule = AppModule = __decorate([
             products_module_1.ProductsModule,
             cloudinary_module_1.CloudinaryModule,
             payment_module_1.PaymentModule,
-            reset_password_module_1.ResetPasswordModule
+            reset_password_module_1.ResetPasswordModule,
+            empresa_module_1.EmpresaModule
         ],
         controllers: [app_controller_1.AppController, users_controller_1.UsersController],
         providers: [app_service_1.AppService, users_service_1.UsersService],
