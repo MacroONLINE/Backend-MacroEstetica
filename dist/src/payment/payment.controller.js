@@ -22,11 +22,11 @@ let PaymentController = PaymentController_1 = class PaymentController {
         this.paymentService = paymentService;
         this.logger = new common_1.Logger(PaymentController_1.name);
     }
-    async createCheckoutSession(courseId, userId) {
-        if (!courseId || !userId) {
-            throw new common_1.HttpException('courseId y userId son requeridos', common_1.HttpStatus.BAD_REQUEST);
+    async createCheckoutSession(courseId, userId, email) {
+        if (!courseId || !userId || !email) {
+            throw new common_1.HttpException('courseId, userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
-        const session = await this.paymentService.createCheckoutSession(courseId, userId);
+        const session = await this.paymentService.createCheckoutSession(courseId, userId, email);
         return { url: session.url };
     }
     async handleWebhook(signature, req, res) {
@@ -45,16 +45,12 @@ let PaymentController = PaymentController_1 = class PaymentController {
             res.status(400).send(`Error en Webhook: ${error.message}`);
         }
     }
-    async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType) {
-        if (!empresaId || !subscriptionType) {
-            throw new common_1.HttpException('empresaId y subscriptionType son requeridos', common_1.HttpStatus.BAD_REQUEST);
+    async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType, email) {
+        if (!empresaId || !subscriptionType || !email) {
+            throw new common_1.HttpException('empresaId, subscriptionType y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
-        const validSubscriptionTypes = ['ORO', 'PLATA', 'BRONCE'];
-        if (!validSubscriptionTypes.includes(subscriptionType)) {
-            throw new common_1.HttpException(`Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
-        }
-        const session = await this.paymentService.createCompanySubscriptionCheckoutSession(empresaId, subscriptionType);
-        this.logger.log(`Sesión de checkout creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
+        const session = await this.paymentService.createCompanySubscriptionCheckoutSession(empresaId, subscriptionType, email);
+        this.logger.log(`Sesión de checkout creada para empresaId: ${empresaId}, tipo: ${subscriptionType}, email: ${email}`);
         return { url: session.url };
     }
 };
@@ -67,6 +63,7 @@ __decorate([
             properties: {
                 courseId: { type: 'string', description: 'ID del curso' },
                 userId: { type: 'string', description: 'ID del usuario' },
+                email: { type: 'string', description: 'Email del usuario' },
             },
         },
     }),
@@ -74,8 +71,9 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en los parámetros proporcionados.' }),
     __param(0, (0, common_1.Body)('courseId')),
     __param(1, (0, common_1.Body)('userId')),
+    __param(2, (0, common_1.Body)('email')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "createCheckoutSession", null);
 __decorate([
@@ -98,6 +96,7 @@ __decorate([
             properties: {
                 empresaId: { type: 'string', description: 'ID de la empresa' },
                 subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
+                email: { type: 'string', description: 'Email del administrador de la empresa' },
             },
         },
     }),
@@ -105,8 +104,9 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en los parámetros proporcionados.' }),
     __param(0, (0, common_1.Body)('empresaId')),
     __param(1, (0, common_1.Body)('subscriptionType')),
+    __param(2, (0, common_1.Body)('email')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "createCompanySubscriptionCheckoutSession", null);
 exports.PaymentController = PaymentController = PaymentController_1 = __decorate([

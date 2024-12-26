@@ -22,7 +22,39 @@ let PaymentService = class PaymentService {
             apiVersion: '2024-11-20.acacia',
         });
     }
-    async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType) {
+    async createCheckoutSession(courseId, userId, email) {
+        const course = await this.prisma.course.findUnique({ where: { id: courseId } });
+        if (!course) {
+            throw new common_1.HttpException('El curso no existe', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const priceInCents = Math.round(course.price * 100);
+        const session = await this.stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        unit_amount: priceInCents,
+                        product_data: {
+                            name: course.title,
+                            description: course.description,
+                        },
+                    },
+                    quantity: 1,
+                },
+            ],
+            customer_email: email,
+            metadata: {
+                userId,
+                courseId,
+            },
+            success_url: `${this.configService.get('APP_URL')}/payment/success`,
+            cancel_url: `${this.configService.get('APP_URL')}/payment/cancel`,
+        });
+        return session;
+    }
+    async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType, email) {
         this.validateSubscriptionType(subscriptionType);
         const unitAmount = this.getSubscriptionPrice(subscriptionType);
         const session = await this.stripe.checkout.sessions.create({
@@ -42,6 +74,7 @@ let PaymentService = class PaymentService {
                     quantity: 1,
                 },
             ],
+            customer_email: email,
             metadata: { empresaId, subscriptionType },
             success_url: `${this.configService.get('APP_URL')}/subscription/success`,
             cancel_url: `${this.configService.get('APP_URL')}/subscription/cancel`,
@@ -73,73 +106,52 @@ let PaymentService = class PaymentService {
         }
         switch (event.type) {
             case 'checkout.session.completed': {
-                break;
-            }
-            case 'subscription.created': {
-                const subscription = event.data.object;
-                const { empresaId } = await this.prisma.customer.findUnique({
-                    where: { stripeCustomerId: subscription.customer },
-                    select: { empresaId: true },
-                });
-                if (!empresaId) {
-                    console.error('Empresa no encontrada para la suscripción creada');
+                const session = event.data.object;
+                const { empresaId, subscriptionType } = session.metadata || {};
+                if (!empresaId || !subscriptionType) {
+                    console.error('Faltan metadata en la sesión de Stripe. No se puede procesar el pago.');
                     return { received: true };
                 }
-                const existingSubscription = await this.prisma.empresaSubscription.findUnique({
-                    where: { stripeSubscriptionId: subscription.id },
+                const validSubscriptionTypes = ['ORO', 'PLATA', 'BRONCE'];
+                if (!validSubscriptionTypes.includes(subscriptionType)) {
+                    console.error('Tipo de suscripción inválido');
+                    return { received: true };
+                }
+                const subscription = await this.prisma.subscription.findUnique({
+                    where: { type: subscriptionType },
                 });
-                if (existingSubscription) {
-                    console.log(`Subscription actualizada para empresa ${empresaId}`);
+                if (!subscription) {
+                    console.error('El tipo de suscripción no existe');
+                    return { received: true };
                 }
-                else {
-                    await this.prisma.empresaSubscription.create({
-                        data: {
-                            empresaId,
-                            stripeSubscriptionId: subscription.id,
-                            startDate: new Date(subscription.created * 1000),
-                            endDate: calculateSubscriptionEndDate(subscription.current_period_end * 1000),
-                            status: subscription.status,
-                        },
-                    });
-                    console.log(`Suscripción creada para empresa ${empresaId}`);
-                }
+                await this.prisma.transaction.create({
+                    data: {
+                        stripePaymentIntentId: session.payment_intent,
+                        stripeCheckoutSessionId: session.id,
+                        status: session.payment_status,
+                        amount: session.amount_total / 100,
+                        currency: session.currency,
+                        userId: null,
+                        courseId: null,
+                        responseData: session,
+                    },
+                });
+                await this.prisma.empresaSubscription.create({
+                    data: {
+                        empresaId,
+                        subscriptionId: subscription.id,
+                        startDate: new Date(),
+                        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+                        status: 'active',
+                    },
+                });
+                console.log(`Suscripción registrada para empresa ${empresaId}, tipo: ${subscriptionType}`);
                 break;
             }
             default:
                 console.log(`Evento no manejado: ${event.type}`);
         }
         return { received: true };
-    }
-    async createCheckoutSession(courseId, userId) {
-        const course = await this.prisma.course.findUnique({ where: { id: courseId } });
-        if (!course) {
-            throw new common_1.HttpException('El curso no existe', common_1.HttpStatus.BAD_REQUEST);
-        }
-        const priceInCents = Math.round(course.price * 100);
-        const session = await this.stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            mode: 'payment',
-            line_items: [
-                {
-                    price_data: {
-                        currency: 'usd',
-                        unit_amount: priceInCents,
-                        product_data: {
-                            name: course.title,
-                            description: course.description,
-                        },
-                    },
-                    quantity: 1,
-                },
-            ],
-            metadata: {
-                userId,
-                courseId,
-            },
-            success_url: `${this.configService.get('APP_URL')}/payment/success`,
-            cancel_url: `${this.configService.get('APP_URL')}/payment/cancel`,
-        });
-        return session;
     }
     async renewSubscriptions() {
         const now = new Date();

@@ -18,17 +18,22 @@ export class PaymentController {
       properties: {
         courseId: { type: 'string', description: 'ID del curso' },
         userId: { type: 'string', description: 'ID del usuario' },
+        email: { type: 'string', description: 'Email del usuario' },
       },
     },
   })
   @ApiResponse({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' })
   @ApiResponse({ status: 400, description: 'Error en los parámetros proporcionados.' })
-  async createCheckoutSession(@Body('courseId') courseId: string, @Body('userId') userId: string) {
-    if (!courseId || !userId) {
-      throw new HttpException('courseId y userId son requeridos', HttpStatus.BAD_REQUEST);
+  async createCheckoutSession(
+    @Body('courseId') courseId: string,
+    @Body('userId') userId: string,
+    @Body('email') email: string,
+  ) {
+    if (!courseId || !userId || !email) {
+      throw new HttpException('courseId, userId y email son requeridos', HttpStatus.BAD_REQUEST);
     }
 
-    const session = await this.paymentService.createCheckoutSession(courseId, userId);
+    const session = await this.paymentService.createCheckoutSession(courseId, userId, email);
     return { url: session.url };
   }
 
@@ -65,6 +70,7 @@ export class PaymentController {
       properties: {
         empresaId: { type: 'string', description: 'ID de la empresa' },
         subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
+        email: { type: 'string', description: 'Email del administrador de la empresa' },
       },
     },
   })
@@ -73,25 +79,20 @@ export class PaymentController {
   async createCompanySubscriptionCheckoutSession(
     @Body('empresaId') empresaId: string,
     @Body('subscriptionType') subscriptionType: 'ORO' | 'PLATA' | 'BRONCE',
+    @Body('email') email: string,
   ) {
-    if (!empresaId || !subscriptionType) {
-      throw new HttpException('empresaId y subscriptionType son requeridos', HttpStatus.BAD_REQUEST);
-    }
-
-    // Validar el tipo de suscripción
-    const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
-    if (!validSubscriptionTypes.includes(subscriptionType as SubscriptionType)) {
-      throw new HttpException(
-        `Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`,
-        HttpStatus.BAD_REQUEST,
-      );
+    if (!empresaId || !subscriptionType || !email) {
+      throw new HttpException('empresaId, subscriptionType y email son requeridos', HttpStatus.BAD_REQUEST);
     }
 
     const session = await this.paymentService.createCompanySubscriptionCheckoutSession(
       empresaId,
-      subscriptionType as SubscriptionType, // Conversión explícita
+      subscriptionType as SubscriptionType,
+      email,
     );
-    this.logger.log(`Sesión de checkout creada para empresaId: ${empresaId}, tipo: ${subscriptionType}`);
+    this.logger.log(
+      `Sesión de checkout creada para empresaId: ${empresaId}, tipo: ${subscriptionType}, email: ${email}`,
+    );
     return { url: session.url };
   }
 }

@@ -7,12 +7,12 @@ export declare class PaymentService {
     private readonly prisma;
     private stripe;
     constructor(configService: ConfigService, prisma: PrismaService);
-    createCompanySubscriptionCheckoutSession(empresaId: string, subscriptionType: SubscriptionType): Promise<Stripe.Response<Stripe.Checkout.Session>>;
+    createCheckoutSession(courseId: string, userId: string, email: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
+    createCompanySubscriptionCheckoutSession(empresaId: string, subscriptionType: SubscriptionType, email: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
     private validateSubscriptionType;
     private getSubscriptionPrice;
     handleWebhookEvent(signature: string, payload: Buffer): Promise<{
         received: boolean;
     }>;
-    createCheckoutSession(courseId: string, userId: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
     renewSubscriptions(): Promise<void>;
 }
