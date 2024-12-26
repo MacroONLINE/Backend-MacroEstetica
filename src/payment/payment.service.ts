@@ -44,7 +44,7 @@ export class PaymentService {
     // Crear sesión de Stripe para el checkout
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      mode: 'payment', // Usar modo pago único
+      mode: 'subscription', 
       line_items: [
         {
           price_data: {
