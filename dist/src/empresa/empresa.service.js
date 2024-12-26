@@ -18,12 +18,37 @@ let EmpresaService = class EmpresaService {
     }
     async getAllByCategory(category) {
         return this.prisma.empresa.findMany({
-            where: { categoria: category },
+            where: {
+                giro: category,
+            },
+            include: {
+                user: true,
+            },
         });
     }
     async getAllByTarget(target) {
         return this.prisma.empresa.findMany({
-            where: { instructores: { some: { courses: { some: { target } } } } },
+            where: {
+                user: {
+                    role: target,
+                },
+            },
+            include: {
+                user: true,
+            },
+        });
+    }
+    async getAllByGiroAndTarget(giro, target) {
+        return this.prisma.empresa.findMany({
+            where: {
+                giro,
+                user: {
+                    role: target,
+                },
+            },
+            include: {
+                user: true,
+            },
         });
     }
 };

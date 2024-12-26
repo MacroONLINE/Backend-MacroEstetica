@@ -22,16 +22,25 @@ let EmpresaController = class EmpresaController {
         this.empresaService = empresaService;
     }
     async getAllByCategory(category) {
-        if (!category || !(category in client_1.EmpresaCategory)) {
-            throw new common_1.HttpException('Invalid category', common_1.HttpStatus.BAD_REQUEST);
+        if (!category || !(category in client_1.Giro)) {
+            throw new common_1.HttpException('Categoría inválida', common_1.HttpStatus.BAD_REQUEST);
         }
         return this.empresaService.getAllByCategory(category);
     }
     async getAllByTarget(target) {
         if (!target || !(target in client_1.Target)) {
-            throw new common_1.HttpException('Invalid target', common_1.HttpStatus.BAD_REQUEST);
+            throw new common_1.HttpException('Target inválido', common_1.HttpStatus.BAD_REQUEST);
         }
         return this.empresaService.getAllByTarget(target);
+    }
+    async getAllByGiroAndTarget(giro, target) {
+        if (!giro || !(giro in client_1.Giro)) {
+            throw new common_1.HttpException('Giro inválido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        if (!target || !(target in client_1.Target)) {
+            throw new common_1.HttpException('Target inválido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        return this.empresaService.getAllByGiroAndTarget(giro, target);
     }
 };
 exports.EmpresaController = EmpresaController;
@@ -44,12 +53,22 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "getAllByCategory", null);
 __decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener empresas por target' }),
     (0, common_1.Get)('by-target'),
     __param(0, (0, common_1.Query)('target')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "getAllByTarget", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener empresas por giro y target' }),
+    (0, common_1.Get)('by-giro-target'),
+    __param(0, (0, common_1.Query)('giro')),
+    __param(1, (0, common_1.Query)('target')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], EmpresaController.prototype, "getAllByGiroAndTarget", null);
 exports.EmpresaController = EmpresaController = __decorate([
     (0, swagger_1.ApiTags)('empresa'),
     (0, common_1.Controller)('empresa'),

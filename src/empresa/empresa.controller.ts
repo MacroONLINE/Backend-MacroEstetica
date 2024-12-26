@@ -1,7 +1,7 @@
 import { Controller, Get, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { EmpresaService } from './empresa.service';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { EmpresaCategory, Target } from '@prisma/client';
+import { Giro, Target } from '@prisma/client';
 
 @ApiTags('empresa')
 @Controller('empresa')
@@ -10,19 +10,34 @@ export class EmpresaController {
 
   @ApiOperation({ summary: 'Obtener empresas por categoría' })
   @Get('by-category')
-async getAllByCategory(@Query('category') category: string) {
-  if (!category || !(category in EmpresaCategory)) {
-    throw new HttpException('Invalid category', HttpStatus.BAD_REQUEST);
+  async getAllByCategory(@Query('category') category: string) {
+    if (!category || !(category in Giro)) {
+      throw new HttpException('Categoría inválida', HttpStatus.BAD_REQUEST);
+    }
+    return this.empresaService.getAllByCategory(category as Giro);
   }
-  return this.empresaService.getAllByCategory(category as EmpresaCategory);
-}
 
-@Get('by-target')
-async getAllByTarget(@Query('target') target: string) {
-  if (!target || !(target in Target)) {
-    throw new HttpException('Invalid target', HttpStatus.BAD_REQUEST);
+  @ApiOperation({ summary: 'Obtener empresas por target' })
+  @Get('by-target')
+  async getAllByTarget(@Query('target') target: string) {
+    if (!target || !(target in Target)) {
+      throw new HttpException('Target inválido', HttpStatus.BAD_REQUEST);
+    }
+    return this.empresaService.getAllByTarget(target as Target);
   }
-  return this.empresaService.getAllByTarget(target as Target);
-}
 
+  @ApiOperation({ summary: 'Obtener empresas por giro y target' })
+  @Get('by-giro-target')
+  async getAllByGiroAndTarget(
+    @Query('giro') giro: string,
+    @Query('target') target: string,
+  ) {
+    if (!giro || !(giro in Giro)) {
+      throw new HttpException('Giro inválido', HttpStatus.BAD_REQUEST);
+    }
+    if (!target || !(target in Target)) {
+      throw new HttpException('Target inválido', HttpStatus.BAD_REQUEST);
+    }
+    return this.empresaService.getAllByGiroAndTarget(giro as Giro, target as Target);
+  }
 }

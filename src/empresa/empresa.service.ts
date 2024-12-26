@@ -1,22 +1,46 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, EmpresaCategory, Target } from '@prisma/client';
-
+import { Giro, Target } from '@prisma/client';
 
 @Injectable()
 export class EmpresaService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllByCategory(category: EmpresaCategory) {
+  async getAllByCategory(category: Giro) {
     return this.prisma.empresa.findMany({
-      where: { categoria: category },
+      where: {
+        giro: category,
+      },
+      include: {
+        user: true, // Incluye información del usuario relacionado, si es necesario
+      },
     });
   }
-  
+
   async getAllByTarget(target: Target) {
     return this.prisma.empresa.findMany({
-      where: { instructores: { some: { courses: { some: { target } } } } },
+      where: {
+        user: {
+          role: target,
+        },
+      },
+      include: {
+        user: true, 
+      },
     });
   }
-  
+
+  async getAllByGiroAndTarget(giro: Giro, target: Target) {
+    return this.prisma.empresa.findMany({
+      where: {
+        giro,
+        user: {
+          role: target,
+        },
+      },
+      include: {
+        user: true, 
+      },
+    });
+  }
 }
