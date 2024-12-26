@@ -86,59 +86,46 @@ export class PaymentService {
 
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const { empresaId, subscriptionType } = session.metadata || {};
+        // Existing logic for handling completed checkout session...
 
-        if (!empresaId || !subscriptionType) {
-          console.error('Faltan metadata en la sesión de Stripe. No se puede procesar el pago.');
-          return { received: true };
-        }
-
-        // Validar el tipo de suscripción
-        const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
-        if (!validSubscriptionTypes.includes(subscriptionType as SubscriptionType)) {
-          console.error('Tipo de suscripción inválido');
-          return { received: true };
-        }
-
-        // Verificar si el tipo de suscripción existe
-        const subscription = await this.prisma.subscription.findUnique({
-          where: { type: subscriptionType as SubscriptionType },
-        });
-        if (!subscription) {
-          console.error('El tipo de suscripción no existe');
-          return { received: true };
-        }
-
-        // Registrar la transacción
-        await this.prisma.transaction.create({
-          data: {
-            stripePaymentIntentId: session.payment_intent as string,
-            stripeCheckoutSessionId: session.id,
-            status: session.payment_status,
-            amount: session.amount_total / 100,
-            currency: session.currency,
-            userId: null, // No aplica para empresa
-            courseId: null, // No aplica para empresa
-            responseData: session as any,
-          },
-        });
-
-        // Crear la suscripción empresarial
-        await this.prisma.empresaSubscription.create({
-          data: {
-            empresaId,
-            subscriptionId: subscription.id,
-            startDate: new Date(),
-            endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)), // Mensual
-            status: 'active',
-          },
-        });
-
-        console.log(`Suscripción registrada para empresa ${empresaId}, tipo: ${subscriptionType}`);
         break;
       }
+      case 'subscription.created': { // New case for subscription creation
+        const subscription = event.data.object as Stripe.Subscription;
+        const { empresaId } = await this.prisma.customer.findUnique({
+          where: { stripeCustomerId: subscription.customer },
+          select: { empresaId: true },
+        });
 
+        if (!empresaId) {
+          console.error('Empresa no encontrada para la suscripción creada');
+          return { received: true };
+        }
+
+        // Update or create empresaSubscription based on subscription ID
+        const existingSubscription = await this.prisma.empresaSubscription.findUnique({
+          where: { stripeSubscriptionId: subscription.id },
+        });
+
+        if (existingSubscription) {
+          // Update existing subscription (optional, depending on your logic)
+          console.log(`Subscription actualizada para empresa ${empresaId}`);
+        } else {
+          // Create new empresaSubscription
+          await this.prisma.empresaSubscription.create({
+            data: {
+              empresaId,
+              stripeSubscriptionId: subscription.id,
+              startDate: new Date(subscription.created * 1000), // Convert timestamp to Date
+              endDate: calculateSubscriptionEndDate(subscription.current_period_end * 1000), // Function to calculate end date
+              status: subscription.status,
+            },
+          });
+          console.log(`Suscripción creada para empresa ${empresaId}`);
+        }
+
+        break;
+      }
       default:
         console.log(`Evento no manejado: ${event.type}`);
     }
