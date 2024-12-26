@@ -4,15 +4,15 @@ export declare class EmpresaService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     getAllByCategory(category: EmpresaCategory): Promise<{
-        id: string;
-        dni: string | null;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
-        giro: import(".prisma/client").$Enums.Giro;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        userId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        userId: string;
+        dni: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -23,15 +23,15 @@ export declare class EmpresaService {
         followers: number;
     }[]>;
     getAllByTarget(target: Target): Promise<{
-        id: string;
-        dni: string | null;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
-        giro: import(".prisma/client").$Enums.Giro;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        userId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        userId: string;
+        dni: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;

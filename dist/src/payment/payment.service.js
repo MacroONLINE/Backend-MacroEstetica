@@ -23,16 +23,8 @@ let PaymentService = class PaymentService {
         });
     }
     async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType) {
-        const validSubscriptionTypes = ['ORO', 'PLATA', 'BRONCE'];
-        if (!validSubscriptionTypes.includes(subscriptionType)) {
-            throw new common_1.HttpException(`Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
-        }
-        const subscription = await this.prisma.subscription.findUnique({
-            where: { type: subscriptionType },
-        });
-        if (!subscription) {
-            throw new common_1.HttpException('El tipo de suscripción no existe', common_1.HttpStatus.BAD_REQUEST);
-        }
+        this.validateSubscriptionType(subscriptionType);
+        const unitAmount = this.getSubscriptionPrice(subscriptionType);
         const session = await this.stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'subscription',
@@ -40,23 +32,35 @@ let PaymentService = class PaymentService {
                 {
                     price_data: {
                         currency: 'usd',
-                        unit_amount: Math.round(subscription.price * 100),
+                        recurring: { interval: 'month' },
+                        unit_amount: unitAmount,
                         product_data: {
                             name: `Suscripción ${subscriptionType}`,
-                            description: subscription.description,
+                            description: `Suscripción ${subscriptionType} para empresa`,
                         },
                     },
                     quantity: 1,
                 },
             ],
-            metadata: {
-                empresaId,
-                subscriptionType,
-            },
+            metadata: { empresaId, subscriptionType },
             success_url: `${this.configService.get('APP_URL')}/subscription/success`,
             cancel_url: `${this.configService.get('APP_URL')}/subscription/cancel`,
         });
         return session;
+    }
+    validateSubscriptionType(subscriptionType) {
+        const validSubscriptionTypes = ['ORO', 'PLATA', 'BRONCE'];
+        if (!validSubscriptionTypes.includes(subscriptionType)) {
+            throw new common_1.HttpException(`Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    getSubscriptionPrice(subscriptionType) {
+        const subscriptionPrices = {
+            ORO: 2000,
+            PLATA: 1200,
+            BRONCE: 800,
+        };
+        return subscriptionPrices[subscriptionType];
     }
     async handleWebhookEvent(signature, payload) {
         const webhookSecret = this.configService.get('STRIPE_WEBHOOK_SECRET');

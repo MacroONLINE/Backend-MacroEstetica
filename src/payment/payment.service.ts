@@ -22,51 +22,53 @@ export class PaymentService {
    */
   async createCompanySubscriptionCheckoutSession(
     empresaId: string,
-    subscriptionType: 'ORO' | 'PLATA' | 'BRONCE',
+    subscriptionType: SubscriptionType,
   ) {
-    // Validar el tipo de suscripción
-    const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
-    if (!validSubscriptionTypes.includes(subscriptionType as SubscriptionType)) {
-      throw new HttpException(
-        `Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    this.validateSubscriptionType(subscriptionType);
+    const unitAmount = this.getSubscriptionPrice(subscriptionType);
 
-    // Verificar si el tipo de suscripción existe
-    const subscription = await this.prisma.subscription.findUnique({
-      where: { type: subscriptionType as SubscriptionType }, // Conversión explícita
-    });
-    if (!subscription) {
-      throw new HttpException('El tipo de suscripción no existe', HttpStatus.BAD_REQUEST);
-    }
-
-    // Crear sesión de Stripe para el checkout
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      mode: 'subscription', 
+      mode: 'subscription',
       line_items: [
         {
           price_data: {
             currency: 'usd',
-            unit_amount: Math.round(subscription.price * 100), // Precio en centavos
+            recurring: { interval: 'month' },
+            unit_amount: unitAmount,
             product_data: {
               name: `Suscripción ${subscriptionType}`,
-              description: subscription.description,
+              description: `Suscripción ${subscriptionType} para empresa`,
             },
           },
           quantity: 1,
         },
       ],
-      metadata: {
-        empresaId,
-        subscriptionType,
-      },
+      metadata: { empresaId, subscriptionType },
       success_url: `${this.configService.get<string>('APP_URL')}/subscription/success`,
       cancel_url: `${this.configService.get<string>('APP_URL')}/subscription/cancel`,
     });
 
     return session;
+  }
+
+  private validateSubscriptionType(subscriptionType: SubscriptionType) {
+    const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
+    if (!validSubscriptionTypes.includes(subscriptionType)) {
+      throw new HttpException(
+        `Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  private getSubscriptionPrice(subscriptionType: SubscriptionType): number {
+    const subscriptionPrices = {
+      ORO: 2000,
+      PLATA: 1200,
+      BRONCE: 800,
+    };
+    return subscriptionPrices[subscriptionType];
   }
 
   /**
