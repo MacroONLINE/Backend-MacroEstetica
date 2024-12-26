@@ -31,6 +31,10 @@ let PaymentController = PaymentController_1 = class PaymentController {
     }
     async handleWebhook(signature, req, res) {
         this.logger.log('Webhook recibido en /payment/webhook');
+        if (!req['rawBody']) {
+            this.logger.error('El cuerpo sin procesar (rawBody) no está disponible.');
+            return res.status(400).send('El cuerpo sin procesar (rawBody) no está disponible.');
+        }
         if (!signature) {
             this.logger.error('Falta el encabezado stripe-signature');
             return res.status(400).send('Falta el encabezado stripe-signature');

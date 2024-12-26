@@ -48,16 +48,19 @@ async handleWebhook(
 ) {
   this.logger.log('Webhook recibido en /payment/webhook');
 
+  // Debug: verifica el rawBody
+  if (!req['rawBody']) {
+    this.logger.error('El cuerpo sin procesar (rawBody) no está disponible.');
+    return res.status(400).send('El cuerpo sin procesar (rawBody) no está disponible.');
+  }
+
   if (!signature) {
     this.logger.error('Falta el encabezado stripe-signature');
     return res.status(400).send('Falta el encabezado stripe-signature');
   }
 
   try {
-    const result = await this.paymentService.handleWebhookEvent(
-      signature,
-      req['rawBody'], // Asegúrate de que rawBody esté configurado correctamente
-    );
+    const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
     this.logger.log('Webhook procesado correctamente');
     res.status(200).send(result);
   } catch (error) {
