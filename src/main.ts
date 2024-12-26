@@ -10,14 +10,14 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, { 
     bodyParser: false,
-    logger: ['log', 'error', 'warn', 'debug'], // Niveles de log que quieres habilitar
+    logger: ['log', 'error', 'warn', 'debug'], 
   });
 
-  app.use('/payment/webhook', express.raw({ type: 'application/json' })); // Middleware para raw body
+  app.use('/payment/webhook', express.raw({ type: 'application/json' })); 
   logger.log('Middleware raw configurado para /payment/webhook.');
 
-  app.use(express.json()); // Middleware para JSON
-  app.use(express.urlencoded({ extended: true })); // Middleware para URL-encoded
+  app.use(express.json()); 
+  app.use(express.urlencoded({ extended: true })); 
   logger.log('Middleware JSON y URL-encoded habilitados.');
 
   app.enableCors();
