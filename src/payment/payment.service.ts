@@ -108,8 +108,7 @@ export class PaymentService {
   }
 
   async handleWebhookEvent(signature: string, payload: Buffer) {
-    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
-
+    const webhookSecret = "whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW";
     this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
     this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
 
