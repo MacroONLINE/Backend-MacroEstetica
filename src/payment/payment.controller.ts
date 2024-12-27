@@ -71,7 +71,6 @@ export class PaymentController {
     this.logger.log(
       `Sesión de checkout creada para empresaId: ${empresaId}, userId: ${userId}, tipo: ${subscriptionType}, email: ${email}`,
     );
-    this.logger.debug(`Detalles de la sesión: ${JSON.stringify(session)}`);
     return { url: session.url };
   }
 
@@ -86,9 +85,6 @@ export class PaymentController {
   ) {
     this.logger.log('Webhook recibido en /payment/webhook');
 
-    this.logger.debug(`Encabezados recibidos: ${JSON.stringify(req.headers)}`);
-    this.logger.debug(`Cuerpo sin procesar: ${req['rawBody']}`);
-
     if (!signature) {
       this.logger.error('Falta el encabezado stripe-signature');
       return res.status(400).send('Falta el encabezado stripe-signature');
@@ -97,7 +93,6 @@ export class PaymentController {
     try {
       const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody'] as Buffer);
       this.logger.log('Webhook procesado correctamente');
-      this.logger.debug(`Resultado del procesamiento: ${JSON.stringify(result)}`);
       res.status(200).send(result);
     } catch (error) {
       this.logger.error(`Error en Webhook: ${error.message}`);

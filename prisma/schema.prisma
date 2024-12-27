@@ -31,7 +31,6 @@ model User {
   empresa       Empresa?
   instructor    Instructor?
   medico        Medico?
-  payments      Payment[]
   Session       Session[]
 }
 
@@ -143,7 +142,6 @@ model Course {
   instructor         Instructor?        @relation(fields: [instructorId], references: [id])
   enrollments        CourseEnrollment[]
   modules            Module[]
-  payments           Payment[]
   resources          Resource[]
 }
 
@@ -237,20 +235,7 @@ model CourseEnrollment {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Payment {
-  id                      String   @id @default(cuid())
-  stripePaymentIntentId   String   @unique
-  stripeCheckoutSessionId String   @unique
-  amount                  Float
-  currency                String
-  status                  String   @default("pending")
-  userId                  String
-  courseId                String
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @default(now())
-  course                  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
+
 
 model PasswordReset {
   id        Int      @id @default(autoincrement())
@@ -331,16 +316,17 @@ enum CommentType {
 
 model Transaction {
   id                      String   @id @default(cuid())
-  stripePaymentIntentId   String   @unique
-  stripeCheckoutSessionId String   @unique
+  stripePaymentIntentId   String?  @unique
+  stripeCheckoutSessionId String?  @unique
+  invoiceId               String?
   status                  String
   amount                  Float
   currency                String
-  userId                  String
-  courseId                String
+  userId                  String?
+  courseId                String?
   description             String?
-  invoiceId               String?  
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
   responseData            Json
 }
+

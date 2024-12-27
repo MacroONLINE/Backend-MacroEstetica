@@ -121,7 +121,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         return subscriptionPrices[subscriptionType];
     }
     async handleWebhookEvent(signature, payload) {
-        const webhookSecret = this.configService.get('STRIPE_WEBHOOK_SECRET');
+        const webhookSecret = 'whsec_38b59e2a5b4389710613f3ca0954c1f730797a8ba2f842e56eefd42f07b79cbd';
         this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
         this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
         let event;
@@ -153,6 +153,43 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 }
                 break;
             }
+            case 'invoice.payment_succeeded': {
+                const invoice = event.data.object;
+                try {
+                    if (!invoice.subscription) {
+                        this.logger.warn('El invoice no tiene suscripción asociada.');
+                        break;
+                    }
+                    const subscription = await this.stripe.subscriptions.retrieve(invoice.subscription);
+                    this.logger.debug(`Metadata de la suscripción: ${JSON.stringify(subscription.metadata)}`);
+                    const { empresaId, userId, subscriptionType } = subscription.metadata;
+                    const paymentIntentId = invoice.payment_intent;
+                    const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+                    const transaction = await this.prisma.transaction.create({
+                        data: {
+                            stripePaymentIntentId: paymentIntentId,
+                            stripeCheckoutSessionId: null,
+                            amount: invoice.amount_paid / 100,
+                            currency: invoice.currency,
+                            status: invoice.status ?? paymentIntent.status,
+                            userId: userId || null,
+                            courseId: null,
+                            responseData: invoice,
+                        },
+                    });
+                    if (empresaId && subscriptionType) {
+                        await this.createEmpresaSubscription(empresaId, subscriptionType, transaction.id);
+                    }
+                    else {
+                        this.logger.warn('No se encontró empresaId o subscriptionType en la metadata de la suscripción.');
+                    }
+                }
+                catch (error) {
+                    this.logger.error(`Error procesando invoice.payment_succeeded: ${error.message}`);
+                    throw new common_1.HttpException(`Error procesando invoice: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                break;
+            }
             default:
                 this.logger.warn(`Evento no manejado: ${event.type}`);
         }
@@ -173,10 +210,10 @@ let PaymentService = PaymentService_1 = class PaymentService {
             data: {
                 stripePaymentIntentId: payment_intent,
                 stripeCheckoutSessionId: session.id,
-                amount: amount_total / 100,
+                amount: (amount_total ?? 0) / 100,
                 currency,
                 status,
-                userId,
+                userId: userId || null,
                 courseId: courseId || null,
                 responseData: session,
             },
@@ -205,7 +242,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 status: 'active',
             },
         });
-        this.logger.log(`Suscripción ${subscriptionType} creada para empresa ${empresaId}`);
+        this.logger.log(`Suscripción ${subscriptionType} creada/renovada para empresa ${empresaId}`);
     }
     async enrollUserInCourse(userId, courseId, transactionId) {
         await this.prisma.courseEnrollment.create({
