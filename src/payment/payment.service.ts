@@ -108,22 +108,15 @@ export class PaymentService {
   }
 
   async handleWebhookEvent(signature: string, payload: Buffer) {
-    // Coloca directamente el secreto del webhook aquí
     const webhookSecret = 'whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj';
   
-    // Imprime el secreto para verificar
     this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
     console.log(`Secreto del webhook usado: ${webhookSecret}`);
-  
-    if (!webhookSecret) {
-      this.logger.error('El secreto del webhook no está configurado.');
-      throw new HttpException('El secreto del webhook no está configurado.', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
   
     let event: Stripe.Event;
   
     try {
-      // Verifica la firma del webhook usando el secreto directamente
+      // Verifica la firma del webhook con el raw body
       event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
     } catch (err) {
       this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
@@ -132,22 +125,18 @@ export class PaymentService {
   
     this.logger.log(`Evento recibido: ${event.type}`);
   
+    // Procesa el evento
     switch (event.type) {
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-  
-        this.logger.log(`PaymentIntent procesado con éxito: ${paymentIntent.id}`);
-        console.log(`PaymentIntent procesado con éxito: ${paymentIntent.id}`);
+      case 'payment_intent.succeeded':
+        this.logger.log('Pago completado con éxito');
         break;
-      }
-  
       default:
         this.logger.warn(`Evento no manejado: ${event.type}`);
-        console.log(`Evento no manejado: ${event.type}`);
     }
   
     return { received: true };
   }
+  
   
     
 

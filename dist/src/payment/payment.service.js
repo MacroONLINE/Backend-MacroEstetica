@@ -101,10 +101,6 @@ let PaymentService = PaymentService_1 = class PaymentService {
         const webhookSecret = 'whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj';
         this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
         console.log(`Secreto del webhook usado: ${webhookSecret}`);
-        if (!webhookSecret) {
-            this.logger.error('El secreto del webhook no está configurado.');
-            throw new common_1.HttpException('El secreto del webhook no está configurado.', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
-        }
         let event;
         try {
             event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
@@ -115,15 +111,11 @@ let PaymentService = PaymentService_1 = class PaymentService {
         }
         this.logger.log(`Evento recibido: ${event.type}`);
         switch (event.type) {
-            case 'payment_intent.succeeded': {
-                const paymentIntent = event.data.object;
-                this.logger.log(`PaymentIntent procesado con éxito: ${paymentIntent.id}`);
-                console.log(`PaymentIntent procesado con éxito: ${paymentIntent.id}`);
+            case 'payment_intent.succeeded':
+                this.logger.log('Pago completado con éxito');
                 break;
-            }
             default:
                 this.logger.warn(`Evento no manejado: ${event.type}`);
-                console.log(`Evento no manejado: ${event.type}`);
         }
         return { received: true };
     }
