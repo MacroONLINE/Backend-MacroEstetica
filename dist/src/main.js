@@ -14,6 +14,8 @@ async function bootstrap() {
     });
     app.use('/payment/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
         req['rawBody'] = req.body;
+        console.log('RawBody recibido:', req['rawBody']);
+        console.log('Es Buffer:', Buffer.isBuffer(req['rawBody']));
         next();
     });
     logger.log('Middleware raw configurado para /payment/webhook.');

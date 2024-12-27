@@ -98,7 +98,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         return subscriptionPrices[subscriptionType];
     }
     async handleWebhookEvent(signature, payload) {
-        const webhookSecret = 'whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj';
+        const webhookSecret = 'whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW';
         this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
         this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
         let event;

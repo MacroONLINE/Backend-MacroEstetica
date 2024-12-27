@@ -8,8 +8,9 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   logger.log('Inicializando aplicación...');
 
+  // Crear la aplicación deshabilitando el bodyParser predeterminado
   const app = await NestFactory.create(AppModule, {
-    bodyParser: false, // Deshabilita el bodyParser predeterminado de NestJS
+    bodyParser: false,
     logger: ['log', 'error', 'warn', 'debug'],
   });
 
@@ -18,7 +19,9 @@ async function bootstrap() {
     '/payment/webhook',
     express.raw({ type: 'application/json' }),
     (req, res, next) => {
-      req['rawBody'] = req.body; // Guardar el Buffer en rawBody
+      req['rawBody'] = req.body;
+      console.log('RawBody recibido:', req['rawBody']);
+      console.log('Es Buffer:', Buffer.isBuffer(req['rawBody']));
       next();
     },
   );
@@ -29,9 +32,11 @@ async function bootstrap() {
   app.use(express.urlencoded({ extended: true }));
   logger.log('Middleware JSON y URL-encoded habilitados.');
 
+  // Habilitar CORS
   app.enableCors();
   logger.log('CORS habilitado.');
 
+  // Configuración de Swagger
   const config = new DocumentBuilder()
     .setTitle('Documentación de la API')
     .setDescription('Documentación de la API para la aplicación')
@@ -43,6 +48,7 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
   logger.log('Swagger configurado en /api-docs.');
 
+  // Iniciar la aplicación en el puerto 3001
   await app.listen(3001);
   logger.log('Aplicación escuchando en http://localhost:3001');
 }
