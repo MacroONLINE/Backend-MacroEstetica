@@ -100,16 +100,18 @@ let PaymentService = PaymentService_1 = class PaymentService {
     async handleWebhookEvent(signature, payload) {
         const webhookSecret = 'whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj';
         this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
-        console.log(`Secreto del webhook usado: ${webhookSecret}`);
+        this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
         let event;
         try {
             event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+            this.logger.log(`Evento recibido: ${event.type}`);
+            this.logger.debug(`Evento completo: ${JSON.stringify(event)}`);
         }
         catch (err) {
             this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
+            this.logger.error(`Tipo de payload: ${typeof payload}, Longitud: ${payload.length}`);
             throw new common_1.HttpException(`Webhook signature verification failed: ${err.message}`, common_1.HttpStatus.BAD_REQUEST);
         }
-        this.logger.log(`Evento recibido: ${event.type}`);
         switch (event.type) {
             case 'payment_intent.succeeded':
                 this.logger.log('Pago completado con éxito');

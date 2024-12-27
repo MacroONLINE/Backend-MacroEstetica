@@ -31,12 +31,15 @@ let PaymentController = PaymentController_1 = class PaymentController {
     }
     async handleWebhook(signature, req, res) {
         this.logger.log('Webhook recibido en /payment/webhook');
+        this.logger.debug(`Encabezados: ${JSON.stringify(req.headers)}`);
+        this.logger.debug(`Cuerpo recibido: ${JSON.stringify(req.body)}`);
+        this.logger.debug(`Cuerpo sin procesar: ${req['rawBody']}`);
         if (!signature) {
             this.logger.error('Falta el encabezado stripe-signature');
             return res.status(400).send('Falta el encabezado stripe-signature');
         }
         try {
-            const result = await this.paymentService.handleWebhookEvent(signature, req.body);
+            const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
             this.logger.log('Webhook procesado correctamente');
             res.status(200).send(result);
         }

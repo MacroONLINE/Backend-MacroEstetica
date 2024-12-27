@@ -111,19 +111,19 @@ export class PaymentService {
     const webhookSecret = 'whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj';
   
     this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
-    console.log(`Secreto del webhook usado: ${webhookSecret}`);
+    this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
   
     let event: Stripe.Event;
   
     try {
-      // Verifica la firma del webhook con el raw body
       event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      this.logger.log(`Evento recibido: ${event.type}`);
+      this.logger.debug(`Evento completo: ${JSON.stringify(event)}`);
     } catch (err) {
       this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
+      this.logger.error(`Tipo de payload: ${typeof payload}, Longitud: ${payload.length}`);
       throw new HttpException(`Webhook signature verification failed: ${err.message}`, HttpStatus.BAD_REQUEST);
     }
-  
-    this.logger.log(`Evento recibido: ${event.type}`);
   
     // Procesa el evento
     switch (event.type) {
@@ -136,6 +136,7 @@ export class PaymentService {
   
     return { received: true };
   }
+  
   
   
     
