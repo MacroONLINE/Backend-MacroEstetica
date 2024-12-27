@@ -13,20 +13,15 @@ async function bootstrap() {
     logger: ['log', 'error', 'warn', 'debug'],
   });
 
-  // Middleware personalizado para capturar el rawBody solo en /payment/webhook
-  app.use('/payment/webhook', (req, res, next) => {
-    express.raw({ type: 'application/json' })(req, res, (err) => {
-      if (err) {
-        next(err);
-      } else {
-        req['rawBody'] = req.body; // Almacena el raw body en la propiedad rawBody
-        next();
-      }
-    });
+  // Middleware para capturar el rawBody solo para /payment/webhook
+  app.use('/payment/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+    // Almacena el rawBody en la solicitud para usarlo en el controlador
+    req['rawBody'] = req.body;
+    next();
   });
   logger.log('Middleware raw configurado para /payment/webhook.');
 
-  // Middleware para JSON y URL-encoded para el resto de las rutas
+  // Middleware estándar para manejar JSON y URL-encoded en las demás rutas
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   logger.log('Middleware JSON y URL-encoded habilitados.');
