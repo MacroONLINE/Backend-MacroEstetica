@@ -46,9 +46,18 @@ export class PaymentService {
       metadata: {
         userId,
         courseId,
+        checkoutSessionId: '',
       },
       success_url: `${this.configService.get<string>('APP_URL')}/payment/success`,
       cancel_url: `${this.configService.get<string>('APP_URL')}/payment/cancel`,
+    });
+
+    await this.stripe.checkout.sessions.update(session.id, {
+      metadata: {
+        userId,
+        courseId,
+        checkoutSessionId: session.id,
+      },
     });
 
     return session;
@@ -56,6 +65,7 @@ export class PaymentService {
 
   async createCompanySubscriptionCheckoutSession(
     empresaId: string,
+    userId: string,
     subscriptionType: SubscriptionType,
     email: string,
   ) {
@@ -80,9 +90,23 @@ export class PaymentService {
         },
       ],
       customer_email: email,
-      metadata: { empresaId, subscriptionType },
+      metadata: {
+        empresaId,
+        userId,
+        subscriptionType,
+        checkoutSessionId: '',
+      },
       success_url: `${this.configService.get<string>('APP_URL')}/subscription/success`,
       cancel_url: `${this.configService.get<string>('APP_URL')}/subscription/cancel`,
+    });
+
+    await this.stripe.checkout.sessions.update(session.id, {
+      metadata: {
+        empresaId,
+        userId,
+        subscriptionType,
+        checkoutSessionId: session.id,
+      },
     });
 
     return session;
@@ -122,11 +146,27 @@ export class PaymentService {
       throw new HttpException('Webhook signature verification failed', HttpStatus.BAD_REQUEST);
     }
 
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object as Stripe.Checkout.Session;
-      await this.processTransaction(session);
-    } else {
-      this.logger.warn(`Evento no manejado: ${event.type}`);
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        await this.processTransaction(session);
+        break;
+      }
+
+      case 'payment_intent.succeeded': {
+        const intent = event.data.object as Stripe.PaymentIntent;
+
+        if (intent.metadata?.checkoutSessionId) {
+          const session = await this.stripe.checkout.sessions.retrieve(intent.metadata.checkoutSessionId);
+          await this.processTransaction(session);
+        } else {
+          this.logger.warn('No se encontró checkoutSessionId en los metadatos del intent.');
+        }
+        break;
+      }
+
+      default:
+        this.logger.warn(`Evento no manejado: ${event.type}`);
     }
 
     return { received: true };
@@ -152,7 +192,7 @@ export class PaymentService {
         amount: amount_total / 100,
         currency,
         status,
-        userId: userId || null,
+        userId,
         courseId: courseId || null,
         responseData: session as unknown as Prisma.JsonValue,
       },

@@ -29,11 +29,16 @@ let PaymentController = PaymentController_1 = class PaymentController {
         const session = await this.paymentService.createCheckoutSession(courseId, userId, email);
         return { url: session.url };
     }
+    async createCompanySubscriptionCheckoutSession(empresaId, userId, subscriptionType, email) {
+        if (!empresaId || !userId || !subscriptionType || !email) {
+            throw new common_1.HttpException('empresaId, userId, subscriptionType y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const session = await this.paymentService.createCompanySubscriptionCheckoutSession(empresaId, userId, subscriptionType, email);
+        this.logger.log(`Sesión de checkout creada para empresaId: ${empresaId}, userId: ${userId}, tipo: ${subscriptionType}, email: ${email}`);
+        return { url: session.url };
+    }
     async handleWebhook(signature, req, res) {
         this.logger.log('Webhook recibido en /payment/webhook');
-        this.logger.debug(`Encabezados: ${JSON.stringify(req.headers)}`);
-        this.logger.debug(`Cuerpo recibido: ${JSON.stringify(req.body)}`);
-        this.logger.debug(`Cuerpo sin procesar: ${req['rawBody']}`);
         if (!signature) {
             this.logger.error('Falta el encabezado stripe-signature');
             return res.status(400).send('Falta el encabezado stripe-signature');
@@ -47,14 +52,6 @@ let PaymentController = PaymentController_1 = class PaymentController {
             this.logger.error(`Error en Webhook: ${error.message}`);
             res.status(400).send(`Error en Webhook: ${error.message}`);
         }
-    }
-    async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType, email) {
-        if (!empresaId || !subscriptionType || !email) {
-            throw new common_1.HttpException('empresaId, subscriptionType y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
-        }
-        const session = await this.paymentService.createCompanySubscriptionCheckoutSession(empresaId, subscriptionType, email);
-        this.logger.log(`Sesión de checkout creada para empresaId: ${empresaId}, tipo: ${subscriptionType}, email: ${email}`);
-        return { url: session.url };
     }
 };
 exports.PaymentController = PaymentController;
@@ -80,6 +77,29 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "createCheckoutSession", null);
 __decorate([
+    (0, common_1.Post)('subscription-checkout'),
+    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                empresaId: { type: 'string', description: 'ID de la empresa' },
+                userId: { type: 'string', description: 'ID del usuario' },
+                subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
+                email: { type: 'string', description: 'Email del administrador de la empresa' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en los parámetros proporcionados.' }),
+    __param(0, (0, common_1.Body)('empresaId')),
+    __param(1, (0, common_1.Body)('userId')),
+    __param(2, (0, common_1.Body)('subscriptionType')),
+    __param(3, (0, common_1.Body)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "createCompanySubscriptionCheckoutSession", null);
+__decorate([
     (0, common_1.Post)('webhook'),
     (0, swagger_1.ApiOperation)({ summary: 'Endpoint para recibir notificaciones de Stripe' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Confirma que el webhook fue recibido.' }),
@@ -91,27 +111,6 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "handleWebhook", null);
-__decorate([
-    (0, common_1.Post)('subscription-checkout'),
-    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            properties: {
-                empresaId: { type: 'string', description: 'ID de la empresa' },
-                subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
-                email: { type: 'string', description: 'Email del administrador de la empresa' },
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en los parámetros proporcionados.' }),
-    __param(0, (0, common_1.Body)('empresaId')),
-    __param(1, (0, common_1.Body)('subscriptionType')),
-    __param(2, (0, common_1.Body)('email')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String]),
-    __metadata("design:returntype", Promise)
-], PaymentController.prototype, "createCompanySubscriptionCheckoutSession", null);
 exports.PaymentController = PaymentController = PaymentController_1 = __decorate([
     (0, swagger_1.ApiTags)('payment'),
     (0, common_1.Controller)('payment'),

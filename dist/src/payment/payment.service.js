@@ -50,13 +50,21 @@ let PaymentService = PaymentService_1 = class PaymentService {
             metadata: {
                 userId,
                 courseId,
+                checkoutSessionId: '',
             },
             success_url: `${this.configService.get('APP_URL')}/payment/success`,
             cancel_url: `${this.configService.get('APP_URL')}/payment/cancel`,
         });
+        await this.stripe.checkout.sessions.update(session.id, {
+            metadata: {
+                userId,
+                courseId,
+                checkoutSessionId: session.id,
+            },
+        });
         return session;
     }
-    async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType, email) {
+    async createCompanySubscriptionCheckoutSession(empresaId, userId, subscriptionType, email) {
         this.validateSubscriptionType(subscriptionType);
         const unitAmount = this.getSubscriptionPrice(subscriptionType);
         const session = await this.stripe.checkout.sessions.create({
@@ -77,9 +85,22 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 },
             ],
             customer_email: email,
-            metadata: { empresaId, subscriptionType },
+            metadata: {
+                empresaId,
+                userId,
+                subscriptionType,
+                checkoutSessionId: '',
+            },
             success_url: `${this.configService.get('APP_URL')}/subscription/success`,
             cancel_url: `${this.configService.get('APP_URL')}/subscription/cancel`,
+        });
+        await this.stripe.checkout.sessions.update(session.id, {
+            metadata: {
+                empresaId,
+                userId,
+                subscriptionType,
+                checkoutSessionId: session.id,
+            },
         });
         return session;
     }
@@ -111,12 +132,25 @@ let PaymentService = PaymentService_1 = class PaymentService {
             this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
             throw new common_1.HttpException('Webhook signature verification failed', common_1.HttpStatus.BAD_REQUEST);
         }
-        if (event.type === 'checkout.session.completed') {
-            const session = event.data.object;
-            await this.processTransaction(session);
-        }
-        else {
-            this.logger.warn(`Evento no manejado: ${event.type}`);
+        switch (event.type) {
+            case 'checkout.session.completed': {
+                const session = event.data.object;
+                await this.processTransaction(session);
+                break;
+            }
+            case 'payment_intent.succeeded': {
+                const intent = event.data.object;
+                if (intent.metadata?.checkoutSessionId) {
+                    const session = await this.stripe.checkout.sessions.retrieve(intent.metadata.checkoutSessionId);
+                    await this.processTransaction(session);
+                }
+                else {
+                    this.logger.warn('No se encontró checkoutSessionId en los metadatos del intent.');
+                }
+                break;
+            }
+            default:
+                this.logger.warn(`Evento no manejado: ${event.type}`);
         }
         return { received: true };
     }
@@ -137,7 +171,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 amount: amount_total / 100,
                 currency,
                 status,
-                userId: userId || null,
+                userId,
                 courseId: courseId || null,
                 responseData: session,
             },

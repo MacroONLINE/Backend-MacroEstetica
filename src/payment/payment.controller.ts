@@ -37,6 +37,42 @@ export class PaymentController {
     return { url: session.url };
   }
 
+  @Post('subscription-checkout')
+  @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' })
+  @ApiBody({
+    schema: {
+      properties: {
+        empresaId: { type: 'string', description: 'ID de la empresa' },
+        userId: { type: 'string', description: 'ID del usuario' },
+        subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
+        email: { type: 'string', description: 'Email del administrador de la empresa' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' })
+  @ApiResponse({ status: 400, description: 'Error en los parámetros proporcionados.' })
+  async createCompanySubscriptionCheckoutSession(
+    @Body('empresaId') empresaId: string,
+    @Body('userId') userId: string,
+    @Body('subscriptionType') subscriptionType: 'ORO' | 'PLATA' | 'BRONCE',
+    @Body('email') email: string,
+  ) {
+    if (!empresaId || !userId || !subscriptionType || !email) {
+      throw new HttpException('empresaId, userId, subscriptionType y email son requeridos', HttpStatus.BAD_REQUEST);
+    }
+
+    const session = await this.paymentService.createCompanySubscriptionCheckoutSession(
+      empresaId,
+      userId,
+      subscriptionType as SubscriptionType,
+      email,
+    );
+    this.logger.log(
+      `Sesión de checkout creada para empresaId: ${empresaId}, userId: ${userId}, tipo: ${subscriptionType}, email: ${email}`,
+    );
+    return { url: session.url };
+  }
+
   @Post('webhook')
   @ApiOperation({ summary: 'Endpoint para recibir notificaciones de Stripe' })
   @ApiResponse({ status: 200, description: 'Confirma que el webhook fue recibido.' })
@@ -47,11 +83,6 @@ export class PaymentController {
     @Res() res: Response,
   ) {
     this.logger.log('Webhook recibido en /payment/webhook');
-
-    // Imprimir encabezados y cuerpo completo
-    this.logger.debug(`Encabezados: ${JSON.stringify(req.headers)}`);
-    this.logger.debug(`Cuerpo recibido: ${JSON.stringify(req.body)}`);
-    this.logger.debug(`Cuerpo sin procesar: ${req['rawBody']}`);
 
     if (!signature) {
       this.logger.error('Falta el encabezado stripe-signature');
@@ -66,38 +97,5 @@ export class PaymentController {
       this.logger.error(`Error en Webhook: ${error.message}`);
       res.status(400).send(`Error en Webhook: ${error.message}`);
     }
-  }
-
-  @Post('subscription-checkout')
-  @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' })
-  @ApiBody({
-    schema: {
-      properties: {
-        empresaId: { type: 'string', description: 'ID de la empresa' },
-        subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
-        email: { type: 'string', description: 'Email del administrador de la empresa' },
-      },
-    },
-  })
-  @ApiResponse({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' })
-  @ApiResponse({ status: 400, description: 'Error en los parámetros proporcionados.' })
-  async createCompanySubscriptionCheckoutSession(
-    @Body('empresaId') empresaId: string,
-    @Body('subscriptionType') subscriptionType: 'ORO' | 'PLATA' | 'BRONCE',
-    @Body('email') email: string,
-  ) {
-    if (!empresaId || !subscriptionType || !email) {
-      throw new HttpException('empresaId, subscriptionType y email son requeridos', HttpStatus.BAD_REQUEST);
-    }
-
-    const session = await this.paymentService.createCompanySubscriptionCheckoutSession(
-      empresaId,
-      subscriptionType as SubscriptionType,
-      email,
-    );
-    this.logger.log(
-      `Sesión de checkout creada para empresaId: ${empresaId}, tipo: ${subscriptionType}, email: ${email}`,
-    );
-    return { url: session.url };
   }
 }
