@@ -38,36 +38,35 @@ export class PaymentController {
   }
 
   @Post('webhook')
-@ApiOperation({ summary: 'Endpoint para recibir notificaciones de Stripe' })
-@ApiResponse({ status: 200, description: 'Confirma que el webhook fue recibido.' })
-@ApiResponse({ status: 400, description: 'Error al procesar el webhook.' })
-async handleWebhook(
-  @Headers('stripe-signature') signature: string,
-  @Req() req: Request,
-  @Res() res: Response,
-) {
-  this.logger.log('Webhook recibido en /payment/webhook');
+  @ApiOperation({ summary: 'Endpoint para recibir notificaciones de Stripe' })
+  @ApiResponse({ status: 200, description: 'Confirma que el webhook fue recibido.' })
+  @ApiResponse({ status: 400, description: 'Error al procesar el webhook.' })
+  async handleWebhook(
+    @Headers('stripe-signature') signature: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    this.logger.log('Webhook recibido en /payment/webhook');
 
-  // Imprimir encabezados y cuerpo completo
-  this.logger.debug(`Encabezados: ${JSON.stringify(req.headers)}`);
-  this.logger.debug(`Cuerpo recibido: ${JSON.stringify(req.body)}`);
-  this.logger.debug(`Cuerpo sin procesar: ${req['rawBody']}`);
+    // Imprimir encabezados y cuerpo completo
+    this.logger.debug(`Encabezados: ${JSON.stringify(req.headers)}`);
+    this.logger.debug(`Cuerpo recibido: ${JSON.stringify(req.body)}`);
+    this.logger.debug(`Cuerpo sin procesar: ${req['rawBody']}`);
 
-  if (!signature) {
-    this.logger.error('Falta el encabezado stripe-signature');
-    return res.status(400).send('Falta el encabezado stripe-signature');
+    if (!signature) {
+      this.logger.error('Falta el encabezado stripe-signature');
+      return res.status(400).send('Falta el encabezado stripe-signature');
+    }
+
+    try {
+      const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody'] as Buffer);
+      this.logger.log('Webhook procesado correctamente');
+      res.status(200).send(result);
+    } catch (error) {
+      this.logger.error(`Error en Webhook: ${error.message}`);
+      res.status(400).send(`Error en Webhook: ${error.message}`);
+    }
   }
-
-  try {
-    const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody'] as Buffer);
-    this.logger.log('Webhook procesado correctamente');
-    res.status(200).send(result);
-  } catch (error) {
-    this.logger.error(`Error en Webhook: ${error.message}`);
-    res.status(400).send(`Error en Webhook: ${error.message}`);
-  }
-}
-
 
   @Post('subscription-checkout')
   @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' })

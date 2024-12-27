@@ -140,9 +140,9 @@ export class PaymentService {
     const empresaId = metadata.empresaId;
     const subscriptionType = metadata.subscriptionType;
 
-    if (!userId) {
-      this.logger.error('El ID del usuario no está presente en los metadatos.');
-      throw new HttpException('El ID del usuario no está presente en los metadatos.', HttpStatus.BAD_REQUEST);
+    if (!userId && !empresaId) {
+      this.logger.error('El ID del usuario o empresa no está presente en los metadatos.');
+      throw new HttpException('El ID del usuario o empresa no está presente en los metadatos.', HttpStatus.BAD_REQUEST);
     }
 
     const transaction = await this.prisma.transaction.create({
@@ -152,9 +152,8 @@ export class PaymentService {
         amount: amount_total / 100,
         currency,
         status,
-        userId,
+        userId: userId || null,
         courseId: courseId || null,
-        invoiceId: session.invoice as string || null,
         responseData: session as unknown as Prisma.JsonValue,
       },
     });
