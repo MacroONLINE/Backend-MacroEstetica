@@ -98,7 +98,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         return subscriptionPrices[subscriptionType];
     }
     async handleWebhookEvent(signature, payload) {
-        const webhookSecret = 'whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW';
+        const webhookSecret = this.configService.get('STRIPE_WEBHOOK_SECRET');
         this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
         this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
         let event;
@@ -109,17 +109,74 @@ let PaymentService = PaymentService_1 = class PaymentService {
         }
         catch (err) {
             this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
-            this.logger.error(`Tipo de payload: ${typeof payload}, Longitud: ${payload.length}`);
-            throw new common_1.HttpException(`Webhook signature verification failed: ${err.message}`, common_1.HttpStatus.BAD_REQUEST);
+            throw new common_1.HttpException('Webhook signature verification failed', common_1.HttpStatus.BAD_REQUEST);
         }
-        switch (event.type) {
-            case 'payment_intent.succeeded':
-                this.logger.log('Pago completado con éxito');
-                break;
-            default:
-                this.logger.warn(`Evento no manejado: ${event.type}`);
+        if (event.type === 'checkout.session.completed') {
+            const session = event.data.object;
+            await this.processTransaction(session);
+        }
+        else {
+            this.logger.warn(`Evento no manejado: ${event.type}`);
         }
         return { received: true };
+    }
+    async processTransaction(session) {
+        const { metadata, payment_intent, amount_total, currency, status } = session;
+        const userId = metadata.userId;
+        const courseId = metadata.courseId;
+        const empresaId = metadata.empresaId;
+        const subscriptionType = metadata.subscriptionType;
+        if (!userId) {
+            this.logger.error('El ID del usuario no está presente en los metadatos.');
+            throw new common_1.HttpException('El ID del usuario no está presente en los metadatos.', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const transaction = await this.prisma.transaction.create({
+            data: {
+                stripePaymentIntentId: payment_intent,
+                stripeCheckoutSessionId: session.id,
+                amount: amount_total / 100,
+                currency,
+                status,
+                userId,
+                courseId: courseId || null,
+                invoiceId: session.invoice || null,
+                responseData: session,
+            },
+        });
+        if (empresaId && subscriptionType) {
+            await this.createEmpresaSubscription(empresaId, subscriptionType, transaction.id);
+        }
+        else if (courseId) {
+            await this.enrollUserInCourse(userId, courseId, transaction.id);
+        }
+        this.logger.log(`Transacción procesada con éxito para sesión ${session.id}`);
+    }
+    async createEmpresaSubscription(empresaId, subscriptionType, transactionId) {
+        const subscription = await this.prisma.subscription.findUnique({
+            where: { type: subscriptionType },
+        });
+        if (!subscription) {
+            throw new common_1.HttpException('Tipo de suscripción no válido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        await this.prisma.empresaSubscription.create({
+            data: {
+                empresaId,
+                subscriptionId: subscription.id,
+                startDate: new Date(),
+                endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+                status: 'active',
+            },
+        });
+        this.logger.log(`Suscripción ${subscriptionType} creada para empresa ${empresaId}`);
+    }
+    async enrollUserInCourse(userId, courseId, transactionId) {
+        await this.prisma.courseEnrollment.create({
+            data: {
+                userId,
+                courseId,
+            },
+        });
+        this.logger.log(`Usuario ${userId} inscrito en el curso ${courseId}`);
     }
     async renewSubscriptions() {
         const now = new Date();
