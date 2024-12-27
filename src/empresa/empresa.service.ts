@@ -12,6 +12,17 @@ export class EmpresaService {
         giro: category,
       },
       include: {
+        user: true, 
+      },
+    });
+  }
+
+  async getAllByGiro(giro: Giro) {
+    return this.prisma.empresa.findMany({
+      where: {
+        giro,
+      },
+      include: {
         user: true, // Incluye información del usuario relacionado, si es necesario
       },
     });

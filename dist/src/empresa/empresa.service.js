@@ -26,6 +26,16 @@ let EmpresaService = class EmpresaService {
             },
         });
     }
+    async getAllByGiro(giro) {
+        return this.prisma.empresa.findMany({
+            where: {
+                giro,
+            },
+            include: {
+                user: true,
+            },
+        });
+    }
     async getAllByTarget(target) {
         return this.prisma.empresa.findMany({
             where: {

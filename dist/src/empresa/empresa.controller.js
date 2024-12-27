@@ -27,6 +27,12 @@ let EmpresaController = class EmpresaController {
         }
         return this.empresaService.getAllByCategory(category);
     }
+    async getAllByGiro(giro) {
+        if (!giro || !(giro in client_1.Giro)) {
+            throw new common_1.HttpException('Giro inválido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        return this.empresaService.getAllByGiro(giro);
+    }
     async getAllByTarget(target) {
         if (!target || !(target in client_1.Target)) {
             throw new common_1.HttpException('Target inválido', common_1.HttpStatus.BAD_REQUEST);
@@ -52,6 +58,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "getAllByCategory", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener empresas por giro' }),
+    (0, common_1.Get)('by-giro'),
+    __param(0, (0, common_1.Query)('giro')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EmpresaController.prototype, "getAllByGiro", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener empresas por target' }),
     (0, common_1.Get)('by-target'),

@@ -17,6 +17,15 @@ export class EmpresaController {
     return this.empresaService.getAllByCategory(category as Giro);
   }
 
+  @ApiOperation({ summary: 'Obtener empresas por giro' })
+  @Get('by-giro')
+  async getAllByGiro(@Query('giro') giro: string) {
+    if (!giro || !(giro in Giro)) {
+      throw new HttpException('Giro inválido', HttpStatus.BAD_REQUEST);
+    }
+    return this.empresaService.getAllByGiro(giro as Giro);
+  }
+
   @ApiOperation({ summary: 'Obtener empresas por target' })
   @Get('by-target')
   async getAllByTarget(@Query('target') target: string) {

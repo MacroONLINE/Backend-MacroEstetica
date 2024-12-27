@@ -12,7 +12,17 @@ async function bootstrap() {
         bodyParser: false,
         logger: ['log', 'error', 'warn', 'debug'],
     });
-    app.use('/payment/webhook', express.raw({ type: 'application/json' }));
+    app.use('/payment/webhook', (req, res, next) => {
+        express.raw({ type: 'application/json' })(req, res, (err) => {
+            if (err) {
+                next(err);
+            }
+            else {
+                req['rawBody'] = req.body;
+                next();
+            }
+        });
+    });
     logger.log('Middleware raw configurado para /payment/webhook.');
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));

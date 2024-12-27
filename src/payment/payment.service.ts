@@ -109,70 +109,51 @@ export class PaymentService {
   async handleWebhookEvent(signature: string, payload: Buffer) {
     const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
     let event: Stripe.Event;
-
+  
     try {
+      // Verifica la firma del webhook
       event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
     } catch (err) {
       throw new HttpException(`Webhook signature verification failed: ${err.message}`, HttpStatus.BAD_REQUEST);
     }
-
+  
+    this.logger.log(`Evento recibido: ${event.type}`);
+  
+    // Procesa diferentes tipos de eventos
     switch (event.type) {
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        const { empresaId, subscriptionType } = session.metadata || {};
-
-        if (!empresaId || !subscriptionType) {
-          console.error('Faltan metadata en la sesión de Stripe. No se puede procesar el pago.');
-          return { received: true };
-        }
-
-        const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
-        if (!validSubscriptionTypes.includes(subscriptionType as SubscriptionType)) {
-          console.error('Tipo de suscripción inválido');
-          return { received: true };
-        }
-
-        const subscription = await this.prisma.subscription.findUnique({
-          where: { type: subscriptionType as SubscriptionType },
-        });
-        if (!subscription) {
-          console.error('El tipo de suscripción no existe');
-          return { received: true };
-        }
-
+      case 'payment_intent.succeeded': {
+        const paymentIntent = event.data.object as Stripe.PaymentIntent;
+  
+        // Extrae información del payment intent
+        const { id, amount, currency, customer, status, description, metadata, invoice } = paymentIntent;
+  
+        this.logger.log(`PaymentIntent completado con éxito: ${id}`);
+        this.logger.log(`Monto: ${amount}, Moneda: ${currency}, Cliente: ${customer}`);
+  
+        // Procesa la lógica de negocio asociada (por ejemplo, registrar en la base de datos)
         await this.prisma.transaction.create({
           data: {
-            stripePaymentIntentId: session.payment_intent as string,
-            stripeCheckoutSessionId: session.id,
-            status: session.payment_status,
-            amount: session.amount_total / 100,
-            currency: session.currency,
-            userId: null,
-            courseId: null,
-            responseData: session as any,
+            stripePaymentIntentId: id,
+            amount: amount / 100, // Convierte centavos a la moneda base
+            currency,
+            customerId: customer ? customer.toString() : null,
+            description,
+            status,
+            invoiceId: invoice,
+            metadata: metadata || {},
           },
         });
-
-        await this.prisma.empresaSubscription.create({
-          data: {
-            empresaId,
-            subscriptionId: subscription.id,
-            startDate: new Date(),
-            endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-            status: 'active',
-          },
-        });
-
-        console.log(`Suscripción registrada para empresa ${empresaId}, tipo: ${subscriptionType}`);
+  
         break;
       }
-
+  
       default:
-        console.log(`Evento no manejado: ${event.type}`);
+        this.logger.warn(`Evento no manejado: ${event.type}`);
     }
-
+  
     return { received: true };
   }
+  
 
   async renewSubscriptions() {
     const now = new Date();

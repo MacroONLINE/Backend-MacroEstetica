@@ -42,6 +42,46 @@ export declare class EmpresaController {
         location: string | null;
         followers: number;
     })[]>;
+    getAllByGiro(giro: string): Promise<({
+        user: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: import(".prisma/client").$Enums.Role;
+            password: string;
+            status: boolean;
+            newsletter: boolean;
+        };
+    } & {
+        id: string;
+        dni: string | null;
+        name: string;
+        giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
+        userId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        bannerImage: string | null;
+        logo: string | null;
+        title: string | null;
+        profileImage: string | null;
+        ceo: string | null;
+        ceoRole: string | null;
+        location: string | null;
+        followers: number;
+    })[]>;
     getAllByTarget(target: string): Promise<({
         user: {
             id: string;

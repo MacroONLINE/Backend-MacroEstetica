@@ -38,36 +38,38 @@ export class PaymentController {
   }
 
   @Post('webhook')
-@ApiOperation({ summary: 'Endpoint para recibir notificaciones de Stripe' })
-@ApiResponse({ status: 200, description: 'Confirma que el webhook fue recibido.' })
-@ApiResponse({ status: 400, description: 'Error al procesar el webhook.' })
-async handleWebhook(
-  @Headers('stripe-signature') signature: string,
-  @Req() req: Request,
-  @Res() res: Response,
-) {
-  this.logger.log('Webhook recibido en /payment/webhook');
-
-  // Debug: verifica el rawBody
-  if (!req['rawBody']) {
-    this.logger.error('El cuerpo sin procesar (rawBody) no está disponible.');
-    return res.status(400).send('El cuerpo sin procesar (rawBody) no está disponible.');
+  @ApiOperation({ summary: 'Endpoint para recibir notificaciones de Stripe' })
+  @ApiResponse({ status: 200, description: 'Confirma que el webhook fue recibido.' })
+  @ApiResponse({ status: 400, description: 'Error al procesar el webhook.' })
+  async handleWebhook(
+    @Headers('stripe-signature') signature: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    this.logger.log('Webhook recibido en /payment/webhook');
+  
+    // Verificar que rawBody esté disponible
+    if (!req['rawBody']) {
+      this.logger.error('El cuerpo sin procesar (rawBody) no está disponible.');
+      return res.status(400).send('El cuerpo sin procesar (rawBody) no está disponible.');
+    }
+  
+    if (!signature) {
+      this.logger.error('Falta el encabezado stripe-signature');
+      return res.status(400).send('Falta el encabezado stripe-signature');
+    }
+  
+    try {
+      const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
+      this.logger.log('Webhook procesado correctamente');
+      res.status(200).send(result);
+    } catch (error) {
+      this.logger.error('Error en Webhook:', error.message);
+      res.status(400).send(`Error en Webhook: ${error.message}`);
+    }
   }
+  
 
-  if (!signature) {
-    this.logger.error('Falta el encabezado stripe-signature');
-    return res.status(400).send('Falta el encabezado stripe-signature');
-  }
-
-  try {
-    const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
-    this.logger.log('Webhook procesado correctamente');
-    res.status(200).send(result);
-  } catch (error) {
-    this.logger.error('Error en Webhook:', error.message);
-    res.status(400).send(`Error en Webhook: ${error.message}`);
-  }
-}
 
 
   @Post('subscription-checkout')

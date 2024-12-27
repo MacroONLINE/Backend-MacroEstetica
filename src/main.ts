@@ -8,16 +8,27 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   logger.log('Inicializando aplicación...');
 
-  const app = await NestFactory.create(AppModule, { 
-    bodyParser: false,
-    logger: ['log', 'error', 'warn', 'debug'], 
+  const app = await NestFactory.create(AppModule, {
+    bodyParser: false, // Deshabilita el bodyParser predeterminado de NestJS
+    logger: ['log', 'error', 'warn', 'debug'],
   });
 
-  app.use('/payment/webhook', express.raw({ type: 'application/json' })); 
+  // Middleware personalizado para capturar el rawBody solo en /payment/webhook
+  app.use('/payment/webhook', (req, res, next) => {
+    express.raw({ type: 'application/json' })(req, res, (err) => {
+      if (err) {
+        next(err);
+      } else {
+        req['rawBody'] = req.body;
+        next();
+      }
+    });
+  });
   logger.log('Middleware raw configurado para /payment/webhook.');
 
-  app.use(express.json()); 
-  app.use(express.urlencoded({ extended: true })); 
+  // Middleware para JSON y URL-encoded para el resto de las rutas
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
   logger.log('Middleware JSON y URL-encoded habilitados.');
 
   app.enableCors();
