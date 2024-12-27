@@ -63,10 +63,6 @@ export class PaymentController {
       res.status(400).send(`Error en Webhook: ${error.message}`);
     }
   }
-  
-  
-
-
 
   @Post('subscription-checkout')
   @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' })

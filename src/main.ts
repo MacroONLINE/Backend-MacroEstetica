@@ -19,7 +19,7 @@ async function bootstrap() {
       if (err) {
         next(err);
       } else {
-        req['rawBody'] = req.body;
+        req['rawBody'] = req.body; // Almacena el raw body en la propiedad rawBody
         next();
       }
     });
