@@ -25,9 +25,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         });
     }
     async createCheckoutSession(courseId, userId, email) {
-        const course = await this.prisma.course.findUnique({
-            where: { id: courseId },
-        });
+        const course = await this.prisma.course.findUnique({ where: { id: courseId } });
         if (!course) {
             throw new common_1.HttpException('El curso no existe', common_1.HttpStatus.BAD_REQUEST);
         }
@@ -101,15 +99,13 @@ let PaymentService = PaymentService_1 = class PaymentService {
     }
     async handleWebhookEvent(signature, payload) {
         const webhookSecret = 'whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj';
-        this.logger.log(`Usando webhookSecret: ${webhookSecret}`);
-        this.logger.log(`Firma (stripe-signature) recibida: ${signature}`);
-        this.logger.debug(`Payload crudo (Buffer -> string): ${payload.toString('utf8')}`);
-        this.logger.debug(`Tipo de payload: ${typeof payload}, Longitud: ${payload.length}`);
+        this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
+        this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
         let event;
         try {
             event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
-            this.logger.log(`Evento recibido de Stripe: ${event.type}`);
-            this.logger.debug(`Evento completo: ${JSON.stringify(event, null, 2)}`);
+            this.logger.log(`Evento recibido: ${event.type}`);
+            this.logger.debug(`Evento completo: ${JSON.stringify(event)}`);
         }
         catch (err) {
             this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
@@ -117,14 +113,11 @@ let PaymentService = PaymentService_1 = class PaymentService {
             throw new common_1.HttpException(`Webhook signature verification failed: ${err.message}`, common_1.HttpStatus.BAD_REQUEST);
         }
         switch (event.type) {
-            case 'payment_intent.succeeded': {
-                this.logger.log('🔔 Pago completado con éxito (payment_intent.succeeded)');
+            case 'payment_intent.succeeded':
+                this.logger.log('Pago completado con éxito');
                 break;
-            }
-            default: {
+            default:
                 this.logger.warn(`Evento no manejado: ${event.type}`);
-                break;
-            }
         }
         return { received: true };
     }
