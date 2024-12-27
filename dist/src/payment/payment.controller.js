@@ -27,6 +27,7 @@ let PaymentController = PaymentController_1 = class PaymentController {
             throw new common_1.HttpException('courseId, userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
         const session = await this.paymentService.createCheckoutSession(courseId, userId, email);
+        this.logger.log(`Sesión de checkout creada: ${JSON.stringify(session)}`);
         return { url: session.url };
     }
     async createCompanySubscriptionCheckoutSession(empresaId, userId, subscriptionType, email) {

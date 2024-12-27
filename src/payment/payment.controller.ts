@@ -34,6 +34,7 @@ export class PaymentController {
     }
 
     const session = await this.paymentService.createCheckoutSession(courseId, userId, email);
+    this.logger.log(`Sesión de checkout creada: ${JSON.stringify(session)}`);
     return { url: session.url };
   }
 

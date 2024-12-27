@@ -60,6 +60,7 @@ export class PaymentService {
       },
     });
 
+    this.logger.log(`Sesión de checkout creada: ${JSON.stringify(session)}`);
     return session;
   }
 
@@ -109,6 +110,7 @@ export class PaymentService {
       },
     });
 
+    this.logger.log(`Sesión de suscripción creada: ${JSON.stringify(session)}`);
     return session;
   }
 
@@ -149,6 +151,7 @@ export class PaymentService {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
+        this.logger.debug(`Metadata de la sesión: ${JSON.stringify(session.metadata)}`);
         await this.processTransaction(session);
         break;
       }
@@ -157,6 +160,7 @@ export class PaymentService {
         const intent = event.data.object as Stripe.PaymentIntent;
 
         if (intent.metadata?.checkoutSessionId) {
+          this.logger.debug(`Metadata del intent: ${JSON.stringify(intent.metadata)}`);
           const session = await this.stripe.checkout.sessions.retrieve(intent.metadata.checkoutSessionId);
           await this.processTransaction(session);
         } else {
@@ -174,6 +178,8 @@ export class PaymentService {
 
   private async processTransaction(session: Stripe.Checkout.Session) {
     const { metadata, payment_intent, amount_total, currency, status } = session;
+
+    this.logger.debug(`Procesando transacción con metadata: ${JSON.stringify(metadata)}`);
 
     const userId = metadata.userId;
     const courseId = metadata.courseId;
