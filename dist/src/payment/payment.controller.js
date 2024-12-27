@@ -31,9 +31,16 @@ let PaymentController = PaymentController_1 = class PaymentController {
     }
     async handleWebhook(signature, req, res) {
         this.logger.log('Webhook recibido en /payment/webhook');
-        this.logger.debug(`Encabezados: ${JSON.stringify(req.headers)}`);
-        this.logger.debug(`Cuerpo recibido: ${JSON.stringify(req.body)}`);
-        this.logger.debug(`Cuerpo sin procesar: ${req['rawBody']}`);
+        this.logger.debug(`Encabezados: ${JSON.stringify(req.headers, null, 2)}`);
+        this.logger.debug(`Cuerpo recibido parseado (req.body): ${JSON.stringify(req.body, null, 2)}`);
+        if (req['rawBody']) {
+            this.logger.debug(`Cuerpo sin procesar (req['rawBody']): ${req['rawBody'].toString('utf8')}`);
+        }
+        else {
+            this.logger.debug(`Cuerpo sin procesar (req['rawBody']): NO EXISTE O ES UNDEFINED`);
+        }
+        this.logger.debug(`stripe-signature header: ${signature}`);
+        this.logger.debug(`Content-Type header: ${req.headers['content-type']}`);
         if (!signature) {
             this.logger.error('Falta el encabezado stripe-signature');
             return res.status(400).send('Falta el encabezado stripe-signature');
@@ -41,11 +48,11 @@ let PaymentController = PaymentController_1 = class PaymentController {
         try {
             const result = await this.paymentService.handleWebhookEvent(signature, req['rawBody']);
             this.logger.log('Webhook procesado correctamente');
-            res.status(200).send(result);
+            return res.status(200).send(result);
         }
         catch (error) {
             this.logger.error(`Error en Webhook: ${error.message}`);
-            res.status(400).send(`Error en Webhook: ${error.message}`);
+            return res.status(400).send(`Error en Webhook: ${error.message}`);
         }
     }
     async createCompanySubscriptionCheckoutSession(empresaId, subscriptionType, email) {
@@ -93,17 +100,25 @@ __decorate([
 ], PaymentController.prototype, "handleWebhook", null);
 __decorate([
     (0, common_1.Post)('subscription-checkout'),
-    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales',
+    }),
     (0, swagger_1.ApiBody)({
         schema: {
             properties: {
                 empresaId: { type: 'string', description: 'ID de la empresa' },
-                subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
+                subscriptionType: {
+                    type: 'string',
+                    description: 'Tipo de suscripción (ORO, PLATA, BRONCE)',
+                },
                 email: { type: 'string', description: 'Email del administrador de la empresa' },
             },
         },
     }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Devuelve la URL de la sesión de Stripe.',
+    }),
     (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en los parámetros proporcionados.' }),
     __param(0, (0, common_1.Body)('empresaId')),
     __param(1, (0, common_1.Body)('subscriptionType')),
