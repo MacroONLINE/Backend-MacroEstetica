@@ -99,34 +99,23 @@ let PaymentService = PaymentService_1 = class PaymentService {
     }
     async handleWebhookEvent(signature, payload) {
         const webhookSecret = this.configService.get('STRIPE_WEBHOOK_SECRET');
+        if (!webhookSecret) {
+            this.logger.error('El secreto del webhook no está configurado.');
+            throw new common_1.HttpException('El secreto del webhook no está configurado.', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         let event;
         try {
             event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
         }
         catch (err) {
+            this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
             throw new common_1.HttpException(`Webhook signature verification failed: ${err.message}`, common_1.HttpStatus.BAD_REQUEST);
         }
         this.logger.log(`Evento recibido: ${event.type}`);
         switch (event.type) {
             case 'payment_intent.succeeded': {
                 const paymentIntent = event.data.object;
-                const { id, amount, currency, customer, status, description, metadata, invoice } = paymentIntent;
-                this.logger.log(`PaymentIntent completado con éxito: ${id}`);
-                this.logger.log(`Monto: ${amount}, Moneda: ${currency}, Cliente: ${customer}`);
-                await this.prisma.transaction.create({
-                    data: {
-                        stripePaymentIntentId: id,
-                        stripeCheckoutSessionId: metadata.stripeCheckoutSessionId || null,
-                        amount: amount / 100,
-                        currency,
-                        userId: metadata.userId || null,
-                        courseId: metadata.courseId || null,
-                        description: description || 'No description',
-                        status,
-                        invoiceId: typeof invoice === 'string' ? invoice : null,
-                        responseData: paymentIntent,
-                    },
-                });
+                this.logger.log(`PaymentIntent procesado con éxito: ${paymentIntent.id}`);
                 break;
             }
             default:

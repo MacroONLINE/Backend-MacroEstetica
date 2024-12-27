@@ -109,50 +109,36 @@ export class PaymentService {
 
   async handleWebhookEvent(signature: string, payload: Buffer) {
     const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+  
+    if (!webhookSecret) {
+      this.logger.error('El secreto del webhook no está configurado.');
+      throw new HttpException('El secreto del webhook no está configurado.', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  
     let event: Stripe.Event;
-
+  
     try {
       event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
     } catch (err) {
+      this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
       throw new HttpException(`Webhook signature verification failed: ${err.message}`, HttpStatus.BAD_REQUEST);
     }
-
+  
     this.logger.log(`Evento recibido: ${event.type}`);
-
+  
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-
-        const { id, amount, currency, customer, status, description, metadata, invoice } = paymentIntent;
-
-        this.logger.log(`PaymentIntent completado con éxito: ${id}`);
-        this.logger.log(`Monto: ${amount}, Moneda: ${currency}, Cliente: ${customer}`);
-
-        await this.prisma.transaction.create({
-          data: {
-            stripePaymentIntentId: id,
-            stripeCheckoutSessionId: metadata.stripeCheckoutSessionId || null, // Asegúrate de que este valor exista
-            amount: amount / 100, // Convierte centavos a dólares
-            currency,
-            userId: metadata.userId || null, // Usa userId del metadata
-            courseId: metadata.courseId || null,
-            description: description || 'No description', // Maneja un valor por defecto
-            status,
-            invoiceId: typeof invoice === 'string' ? invoice : null, // Asegura que sea string o null
-            responseData: paymentIntent as any,
-          },
-        });
-        
-        
+        this.logger.log(`PaymentIntent procesado con éxito: ${paymentIntent.id}`);
         break;
       }
-
       default:
         this.logger.warn(`Evento no manejado: ${event.type}`);
     }
-
+  
     return { received: true };
   }
+    
 
   async renewSubscriptions() {
     const now = new Date();
