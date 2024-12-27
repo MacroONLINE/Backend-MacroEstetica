@@ -8,16 +8,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var PaymentService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentService = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const stripe_1 = require("stripe");
 const prisma_service_1 = require("../prisma/prisma.service");
-let PaymentService = class PaymentService {
+let PaymentService = PaymentService_1 = class PaymentService {
     constructor(configService, prisma) {
         this.configService = configService;
         this.prisma = prisma;
+        this.logger = new common_1.Logger(PaymentService_1.name);
         this.stripe = new stripe_1.default(this.configService.get('STRIPE_SECRET_KEY'), {
             apiVersion: '2024-11-20.acacia',
         });
@@ -114,13 +116,15 @@ let PaymentService = class PaymentService {
                 await this.prisma.transaction.create({
                     data: {
                         stripePaymentIntentId: id,
+                        stripeCheckoutSessionId: metadata.stripeCheckoutSessionId || null,
                         amount: amount / 100,
                         currency,
-                        customerId: customer ? customer.toString() : null,
-                        description,
+                        userId: metadata.userId || null,
+                        courseId: metadata.courseId || null,
+                        description: description || 'No description',
                         status,
-                        invoiceId: invoice,
-                        metadata: metadata || {},
+                        invoiceId: typeof invoice === 'string' ? invoice : null,
+                        responseData: paymentIntent,
                     },
                 });
                 break;
@@ -150,7 +154,7 @@ let PaymentService = class PaymentService {
     }
 };
 exports.PaymentService = PaymentService;
-exports.PaymentService = PaymentService = __decorate([
+exports.PaymentService = PaymentService = PaymentService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService,
         prisma_service_1.PrismaService])

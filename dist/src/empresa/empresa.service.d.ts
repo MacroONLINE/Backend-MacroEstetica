@@ -6,8 +6,6 @@ export declare class EmpresaService {
     getAllByCategory(category: Giro): Promise<({
         user: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -22,18 +20,20 @@ export declare class EmpresaService {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
         };
     } & {
-        id: string;
-        dni: string | null;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
-        giro: import(".prisma/client").$Enums.Giro;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        userId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        userId: string;
+        dni: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -46,8 +46,6 @@ export declare class EmpresaService {
     getAllByGiro(giro: Giro): Promise<({
         user: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -62,18 +60,20 @@ export declare class EmpresaService {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
         };
     } & {
-        id: string;
-        dni: string | null;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
-        giro: import(".prisma/client").$Enums.Giro;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        userId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        userId: string;
+        dni: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -86,8 +86,6 @@ export declare class EmpresaService {
     getAllByTarget(target: Target): Promise<({
         user: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -102,18 +100,20 @@ export declare class EmpresaService {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
         };
     } & {
-        id: string;
-        dni: string | null;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
-        giro: import(".prisma/client").$Enums.Giro;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        userId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        userId: string;
+        dni: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -126,8 +126,6 @@ export declare class EmpresaService {
     getAllByGiroAndTarget(giro: Giro, target: Target): Promise<({
         user: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -142,18 +140,20 @@ export declare class EmpresaService {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
         };
     } & {
-        id: string;
-        dni: string | null;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
-        giro: import(".prisma/client").$Enums.Giro;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        userId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        userId: string;
+        dni: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;

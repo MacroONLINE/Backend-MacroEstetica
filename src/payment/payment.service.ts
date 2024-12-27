@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { PrismaService } from '../prisma/prisma.service';
@@ -6,7 +6,8 @@ import { SubscriptionType } from '@prisma/client';
 
 @Injectable()
 export class PaymentService {
-  private stripe: Stripe;
+  private readonly stripe: Stripe;
+  private readonly logger = new Logger(PaymentService.name);
 
   constructor(
     private readonly configService: ConfigService,
@@ -109,51 +110,49 @@ export class PaymentService {
   async handleWebhookEvent(signature: string, payload: Buffer) {
     const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
     let event: Stripe.Event;
-  
+
     try {
-      // Verifica la firma del webhook
       event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
     } catch (err) {
       throw new HttpException(`Webhook signature verification failed: ${err.message}`, HttpStatus.BAD_REQUEST);
     }
-  
+
     this.logger.log(`Evento recibido: ${event.type}`);
-  
-    // Procesa diferentes tipos de eventos
+
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-  
-        // Extrae información del payment intent
+
         const { id, amount, currency, customer, status, description, metadata, invoice } = paymentIntent;
-  
+
         this.logger.log(`PaymentIntent completado con éxito: ${id}`);
         this.logger.log(`Monto: ${amount}, Moneda: ${currency}, Cliente: ${customer}`);
-  
-        // Procesa la lógica de negocio asociada (por ejemplo, registrar en la base de datos)
+
         await this.prisma.transaction.create({
           data: {
             stripePaymentIntentId: id,
-            amount: amount / 100, // Convierte centavos a la moneda base
+            stripeCheckoutSessionId: metadata.stripeCheckoutSessionId || null, // Asegúrate de que este valor exista
+            amount: amount / 100, // Convierte centavos a dólares
             currency,
-            customerId: customer ? customer.toString() : null,
-            description,
+            userId: metadata.userId || null, // Usa userId del metadata
+            courseId: metadata.courseId || null,
+            description: description || 'No description', // Maneja un valor por defecto
             status,
-            invoiceId: invoice,
-            metadata: metadata || {},
+            invoiceId: typeof invoice === 'string' ? invoice : null, // Asegura que sea string o null
+            responseData: paymentIntent as any,
           },
         });
-  
+        
+        
         break;
       }
-  
+
       default:
         this.logger.warn(`Evento no manejado: ${event.type}`);
     }
-  
+
     return { received: true };
   }
-  
 
   async renewSubscriptions() {
     const now = new Date();
