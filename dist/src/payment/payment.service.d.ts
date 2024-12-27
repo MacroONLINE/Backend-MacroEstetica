@@ -15,8 +15,5 @@ export declare class PaymentService {
     handleWebhookEvent(signature: string, payload: Buffer): Promise<{
         received: boolean;
     }>;
-    private processTransaction;
-    private createEmpresaSubscription;
-    private enrollUserInCourse;
     renewSubscriptions(): Promise<void>;
 }
