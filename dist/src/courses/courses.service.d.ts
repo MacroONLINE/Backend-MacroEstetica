@@ -30,6 +30,7 @@ export declare class CoursesService {
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
         totalHours: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        introductoryVideoUrl: string | null;
         categoryId: string;
         instructorId: string | null;
     }>;
