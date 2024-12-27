@@ -108,7 +108,7 @@ export class PaymentService {
   }
 
   async handleWebhookEvent(signature: string, payload: Buffer) {
-    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+    const webhookSecret = "whsec_38b59e2a5b4389710613f3ca0954c1f730797a8ba2f842e56eefd42f07b79cbd";
     this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
 
     let event: Stripe.Event;
