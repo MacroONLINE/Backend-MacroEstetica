@@ -162,7 +162,7 @@ export class PaymentService {
    * WEBHOOK: RECIBE TODOS LOS EVENTOS DE STRIPE
    */
   async handleWebhookEvent(signature: string, payload: Buffer) {
-    const webhookSecret = 'whsec_38b59e2a5b4389710613f3ca0954c1f730797a8ba2f842e56eefd42f07b79cbd';
+    const webhookSecret = 'whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW';
     this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
     this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
 
