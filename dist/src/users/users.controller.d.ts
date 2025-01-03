@@ -8,6 +8,7 @@ import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 export declare class UsersController {
     private readonly usersService;
     private readonly cloudinaryService;
+    private readonly logger;
     constructor(usersService: UsersService, cloudinaryService: CloudinaryService);
     checkUserByEmail(email: string): Promise<{
         exists: boolean;
@@ -21,26 +22,25 @@ export declare class UsersController {
     completeProfile(userData: UpdateUserDto): Promise<{
         message: string;
     }>;
-    updateMedico(file: Express.Multer.File, data: UpdateMedicoDto): Promise<{
+    updateMedico(req: any, file: Express.Multer.File, data: UpdateMedicoDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        type: import(".prisma/client").$Enums.ProfessionType;
-        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
+        type: import(".prisma/client").$Enums.ProfessionType;
         verification: string;
+        userId: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        type: import(".prisma/client").$Enums.ProfessionType;
-        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
+        type: import(".prisma/client").$Enums.ProfessionType;
         verification: string;
+        userId: string;
     }>;
     updateEmpresa(data: CreateEmpresaDto): Promise<{
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
         id: string;
         createdAt: Date;
@@ -49,6 +49,7 @@ export declare class UsersController {
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -59,7 +60,6 @@ export declare class UsersController {
         followers: number;
     }>;
     getEmpresa(req: any): Promise<{
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
         id: string;
         createdAt: Date;
@@ -68,6 +68,7 @@ export declare class UsersController {
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -82,9 +83,9 @@ export declare class UsersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
         userId: string;
-        profession: import(".prisma/client").$Enums.Profession;
         description: string;
         experienceYears: number;
         certificationsUrl: string;
@@ -95,9 +96,9 @@ export declare class UsersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
         userId: string;
-        profession: import(".prisma/client").$Enums.Profession;
         description: string;
         experienceYears: number;
         certificationsUrl: string;
