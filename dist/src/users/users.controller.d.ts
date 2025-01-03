@@ -58,6 +58,7 @@ export declare class UsersController {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     }>;
     getEmpresa(req: any): Promise<{
         name: string;
@@ -77,6 +78,7 @@ export declare class UsersController {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     }>;
     updateInstructor(data: UpdateInstructorDto): Promise<{
         id: string;

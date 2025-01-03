@@ -42,6 +42,7 @@ export declare class EmpresaService {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     })[]>;
     getAllByGiro(giro: Giro): Promise<({
         user: {
@@ -82,6 +83,7 @@ export declare class EmpresaService {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     })[]>;
     getAllByTarget(target: Target): Promise<({
         user: {
@@ -122,6 +124,7 @@ export declare class EmpresaService {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     })[]>;
     getAllByGiroAndTarget(giro: Giro, target: Target): Promise<({
         user: {
@@ -162,5 +165,6 @@ export declare class EmpresaService {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     })[]>;
 }

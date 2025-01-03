@@ -97,4 +97,10 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", Number)
 ], CreateEmpresaDto.prototype, "followers", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ description: 'URL del sitio web de la empresa' }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateEmpresaDto.prototype, "webUrl", void 0);
 //# sourceMappingURL=update-empresa.dto.js.map

@@ -41,6 +41,7 @@ export declare class EmpresaController {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     })[]>;
     getAllByGiro(giro: string): Promise<({
         user: {
@@ -81,6 +82,7 @@ export declare class EmpresaController {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     })[]>;
     getAllByTarget(target: string): Promise<({
         user: {
@@ -121,6 +123,7 @@ export declare class EmpresaController {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     })[]>;
     getAllByGiroAndTarget(giro: string, target: string): Promise<({
         user: {
@@ -161,5 +164,6 @@ export declare class EmpresaController {
         ceoRole: string | null;
         location: string | null;
         followers: number;
+        webUrl: string | null;
     })[]>;
 }

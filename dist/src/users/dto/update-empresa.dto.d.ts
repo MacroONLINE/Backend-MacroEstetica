@@ -13,4 +13,5 @@ export declare class CreateEmpresaDto {
     ceoRole?: string;
     location?: string;
     followers?: number;
+    webUrl: string;
 }

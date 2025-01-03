@@ -67,8 +67,10 @@ model Empresa {
   ceo                    String?
   ceoRole                String?
   location               String?
-  followers              Int                    @default(0)
+  followers              Int                     @default(0)
+  webUrl                 String?                
 }
+
 
 
 

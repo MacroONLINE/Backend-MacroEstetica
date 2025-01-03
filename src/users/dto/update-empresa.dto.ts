@@ -70,4 +70,9 @@ export class CreateEmpresaDto {
   @IsOptional()
   @IsString()
   followers?: number;
+
+  @ApiProperty({ description: 'URL del sitio web de la empresa' })
+  @IsOptional()
+  @IsString()
+  webUrl: string;
 }

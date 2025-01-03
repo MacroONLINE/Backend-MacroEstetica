@@ -55,6 +55,8 @@ export class UsersService {
 
   // Crear o actualizar información de Empresa
   // Crear o actualizar información de Empresa
+// src/users/users.service.ts
+
 async createOrUpdateEmpresa(
   userId: string,
   data: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>,
@@ -63,12 +65,30 @@ async createOrUpdateEmpresa(
     throw new Error("El campo 'name' es obligatorio.");
   }
 
-  // Preparar los datos a actualizar o crear
+
+
+  // Antes de hacer el upsert, podrías (opcionalmente) actualizar el rol del usuario
+  // await this.prisma.user.update({
+  //   where: { id: userId },
+  //   data: {
+  //     role: 'EMPRESA',
+  //   },
+  // });
+
   const updateData: Prisma.EmpresaUncheckedUpdateInput = {
     name: data.name,
-    giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL', 
-    subscription: data.subscription, 
-    updatedAt: new Date(), 
+    giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
+    subscription: data.subscription,
+    webUrl: data.webUrl,          
+    updatedAt: new Date(),
+    bannerImage: data.bannerImage,
+    logo: data.logo,
+    title: data.title,
+    profileImage: data.profileImage,
+    ceo: data.ceo,
+    ceoRole: data.ceoRole,
+    location: data.location,
+    followers: data.followers,
   };
 
   const createData: Prisma.EmpresaUncheckedCreateInput = {
@@ -76,17 +96,26 @@ async createOrUpdateEmpresa(
     name: data.name,
     giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
     subscription: data.subscription,
+    webUrl: data.webUrl,        
     createdAt: new Date(),
     updatedAt: new Date(),
+    bannerImage: data.bannerImage,
+    logo: data.logo,
+    title: data.title,
+    profileImage: data.profileImage,
+    ceo: data.ceo,
+    ceoRole: data.ceoRole,
+    location: data.location,
+    followers: data.followers,
   };
 
-  // Upsert para actualizar o crear la empresa
   return this.prisma.empresa.upsert({
     where: { userId },
     update: updateData,
     create: createData,
   });
 }
+
 
 
   // Crear o actualizar información de Instructor
