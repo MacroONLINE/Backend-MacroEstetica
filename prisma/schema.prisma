@@ -45,6 +45,7 @@ model Medico {
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+
 model Empresa {
   id                     String                  @id @default(cuid())
   dni                    String?
