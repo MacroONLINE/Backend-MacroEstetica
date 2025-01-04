@@ -39,6 +39,7 @@ import {
       }
       return banner;
     }
+    
   
     @ApiOperation({ summary: 'Obtener banner aleatorio' })
     @ApiResponse({ status: 200, description: 'Banner aleatorio encontrado.' })
