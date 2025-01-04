@@ -10,13 +10,16 @@ export declare class PaymentService {
     constructor(configService: ConfigService, prisma: PrismaService);
     createCheckoutSession(courseId: string, userId: string, email: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
     createCompanySubscriptionCheckoutSession(empresaId: string, userId: string, subscriptionType: SubscriptionType, email: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
-    private validateSubscriptionType;
-    private getSubscriptionPrice;
+    createUserUpgradeCheckoutSession(userId: string, email: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
     handleWebhookEvent(signature: string, payload: Buffer): Promise<{
         received: boolean;
     }>;
     private processTransaction;
+    private isValidCompanySubscription;
     private createEmpresaSubscription;
     private enrollUserInCourse;
+    private upgradeUserSubscription;
     renewSubscriptions(): Promise<void>;
+    private validateSubscriptionType;
+    private getSubscriptionPrice;
 }

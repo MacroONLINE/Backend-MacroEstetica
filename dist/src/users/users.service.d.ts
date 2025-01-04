@@ -37,5 +37,6 @@ export declare class UsersService {
         createdAt: Date;
         updatedAt: Date;
         newsletter: boolean;
+        userSubscription: string | null;
     }>;
 }

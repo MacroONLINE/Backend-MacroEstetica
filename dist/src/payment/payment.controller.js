@@ -54,6 +54,14 @@ let PaymentController = PaymentController_1 = class PaymentController {
             res.status(400).send(`Error en Webhook: ${error.message}`);
         }
     }
+    async createUserUpgradeCheckoutSession(userId, email) {
+        if (!userId || !email) {
+            throw new common_1.HttpException('userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const session = await this.paymentService.createUserUpgradeCheckoutSession(userId, email);
+        this.logger.log(`Sesión de checkout creada para userId: ${userId}, suscripción: "update", email: ${email}`);
+        return { url: session.url };
+    }
 };
 exports.PaymentController = PaymentController;
 __decorate([
@@ -112,6 +120,25 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "handleWebhook", null);
+__decorate([
+    (0, common_1.Post)('user-upgrade-checkout'),
+    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout de Stripe para la suscripción "update" de un usuario' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                userId: { type: 'string', description: 'ID del usuario' },
+                email: { type: 'string', description: 'Email del usuario' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en los parámetros proporcionados.' }),
+    __param(0, (0, common_1.Body)('userId')),
+    __param(1, (0, common_1.Body)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "createUserUpgradeCheckoutSession", null);
 exports.PaymentController = PaymentController = PaymentController_1 = __decorate([
     (0, swagger_1.ApiTags)('payment'),
     (0, common_1.Controller)('payment'),

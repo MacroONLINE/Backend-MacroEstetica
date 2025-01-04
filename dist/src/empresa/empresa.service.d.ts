@@ -23,6 +23,7 @@ export declare class EmpresaService {
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
+            userSubscription: string | null;
         };
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -64,6 +65,7 @@ export declare class EmpresaService {
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
+            userSubscription: string | null;
         };
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -105,6 +107,7 @@ export declare class EmpresaService {
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
+            userSubscription: string | null;
         };
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -146,6 +149,7 @@ export declare class EmpresaService {
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
+            userSubscription: string | null;
         };
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;

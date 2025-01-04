@@ -99,4 +99,38 @@ export class PaymentController {
       res.status(400).send(`Error en Webhook: ${error.message}`);
     }
   }
+
+  @Post('user-upgrade-checkout')
+@ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para la suscripción "update" de un usuario' })
+@ApiBody({
+  schema: {
+    properties: {
+      userId: { type: 'string', description: 'ID del usuario' },
+      email: { type: 'string', description: 'Email del usuario' },
+    },
+  },
+})
+@ApiResponse({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' })
+@ApiResponse({ status: 400, description: 'Error en los parámetros proporcionados.' })
+async createUserUpgradeCheckoutSession(
+  @Body('userId') userId: string,
+  @Body('email') email: string,
+) {
+  if (!userId || !email) {
+    throw new HttpException('userId y email son requeridos', HttpStatus.BAD_REQUEST);
+  }
+
+  // Llamamos al servicio para crear la sesión
+  const session = await this.paymentService.createUserUpgradeCheckoutSession(
+    userId,
+    email,
+  );
+
+  this.logger.log(
+    `Sesión de checkout creada para userId: ${userId}, suscripción: "update", email: ${email}`,
+  );
+
+  return { url: session.url };
+}
+
 }

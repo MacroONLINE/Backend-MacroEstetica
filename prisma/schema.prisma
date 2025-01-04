@@ -32,6 +32,7 @@ model User {
   instructor    Instructor?
   medico        Medico?
   Session       Session[]
+  userSubscription String?
 }
 
 model Medico {

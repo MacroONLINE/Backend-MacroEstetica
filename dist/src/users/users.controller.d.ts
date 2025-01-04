@@ -26,30 +26,30 @@ export declare class UsersController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        type: import(".prisma/client").$Enums.ProfessionType;
-        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
+        type: import(".prisma/client").$Enums.ProfessionType;
         verification: string;
+        userId: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        type: import(".prisma/client").$Enums.ProfessionType;
-        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
+        type: import(".prisma/client").$Enums.ProfessionType;
         verification: string;
+        userId: string;
     }>;
     updateEmpresa(data: CreateEmpresaDto): Promise<{
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -61,15 +61,15 @@ export declare class UsersController {
         webUrl: string | null;
     }>;
     getEmpresa(req: any): Promise<{
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -85,9 +85,9 @@ export declare class UsersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
         userId: string;
-        profession: import(".prisma/client").$Enums.Profession;
         description: string;
         experienceYears: number;
         certificationsUrl: string;
@@ -98,9 +98,9 @@ export declare class UsersController {
         status: string;
         createdAt: Date;
         updatedAt: Date;
+        profession: import(".prisma/client").$Enums.Profession;
         type: import(".prisma/client").$Enums.ProfessionType;
         userId: string;
-        profession: import(".prisma/client").$Enums.Profession;
         description: string;
         experienceYears: number;
         certificationsUrl: string;
@@ -124,5 +124,6 @@ export declare class UsersController {
         createdAt: Date;
         updatedAt: Date;
         newsletter: boolean;
+        userSubscription: string | null;
     }>;
 }

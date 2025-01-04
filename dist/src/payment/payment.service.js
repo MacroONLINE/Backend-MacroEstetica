@@ -25,7 +25,9 @@ let PaymentService = PaymentService_1 = class PaymentService {
         });
     }
     async createCheckoutSession(courseId, userId, email) {
-        const course = await this.prisma.course.findUnique({ where: { id: courseId } });
+        const course = await this.prisma.course.findUnique({
+            where: { id: courseId },
+        });
         if (!course) {
             throw new common_1.HttpException('El curso no existe', common_1.HttpStatus.BAD_REQUEST);
         }
@@ -106,19 +108,49 @@ let PaymentService = PaymentService_1 = class PaymentService {
         this.logger.log(`Sesión de suscripción creada: ${JSON.stringify(session)}`);
         return session;
     }
-    validateSubscriptionType(subscriptionType) {
-        const validSubscriptionTypes = ['ORO', 'PLATA', 'BRONCE'];
-        if (!validSubscriptionTypes.includes(subscriptionType)) {
-            throw new common_1.HttpException(`Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
+    async createUserUpgradeCheckoutSession(userId, email) {
+        const userExists = await this.prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if (!userExists) {
+            throw new common_1.HttpException('El usuario no existe', common_1.HttpStatus.BAD_REQUEST);
         }
-    }
-    getSubscriptionPrice(subscriptionType) {
-        const subscriptionPrices = {
-            ORO: 2000,
-            PLATA: 1200,
-            BRONCE: 800,
-        };
-        return subscriptionPrices[subscriptionType];
+        const unitAmount = 2000;
+        const session = await this.stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'subscription',
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        recurring: { interval: 'month' },
+                        unit_amount: unitAmount,
+                        product_data: {
+                            name: 'Suscripción de usuario: update',
+                            description: 'Suscripción "update" para este usuario',
+                        },
+                    },
+                    quantity: 1,
+                },
+            ],
+            customer_email: email,
+            metadata: {
+                userId,
+                subscriptionType: 'update',
+                checkoutSessionId: '',
+            },
+            success_url: `${this.configService.get('APP_URL')}/user-subscription/success`,
+            cancel_url: `${this.configService.get('APP_URL')}/user-subscription/cancel`,
+        });
+        await this.stripe.checkout.sessions.update(session.id, {
+            metadata: {
+                userId,
+                subscriptionType: 'update',
+                checkoutSessionId: session.id,
+            },
+        });
+        this.logger.log(`Sesión de suscripción (usuario - update) creada: ${JSON.stringify(session)}`);
+        return session;
     }
     async handleWebhookEvent(signature, payload) {
         const webhookSecret = 'whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW';
@@ -178,7 +210,12 @@ let PaymentService = PaymentService_1 = class PaymentService {
                         },
                     });
                     if (empresaId && subscriptionType) {
-                        await this.createEmpresaSubscription(empresaId, subscriptionType, transaction.id);
+                        if (this.isValidCompanySubscription(subscriptionType)) {
+                            await this.createEmpresaSubscription(empresaId, subscriptionType, transaction.id);
+                        }
+                        else {
+                            this.logger.warn(`Tipo de suscripción inválido para empresa: ${subscriptionType}`);
+                        }
                     }
                     else {
                         this.logger.warn('No se encontró empresaId o subscriptionType en la metadata de la suscripción.');
@@ -196,16 +233,9 @@ let PaymentService = PaymentService_1 = class PaymentService {
         return { received: true };
     }
     async processTransaction(session) {
-        const { metadata, payment_intent, amount_total, currency, status } = session;
+        const { metadata, payment_intent, amount_total, currency, status, } = session;
+        const { userId, courseId, empresaId, subscriptionType } = metadata;
         this.logger.debug(`Procesando transacción con metadata: ${JSON.stringify(metadata)}`);
-        const userId = metadata.userId;
-        const courseId = metadata.courseId;
-        const empresaId = metadata.empresaId;
-        const subscriptionType = metadata.subscriptionType;
-        if (!userId && !empresaId) {
-            this.logger.error('El ID del usuario o empresa no está presente en los metadatos.');
-            throw new common_1.HttpException('El ID del usuario o empresa no está presente en los metadatos.', common_1.HttpStatus.BAD_REQUEST);
-        }
         const transaction = await this.prisma.transaction.create({
             data: {
                 stripePaymentIntentId: payment_intent,
@@ -218,13 +248,25 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 responseData: session,
             },
         });
-        if (empresaId && subscriptionType) {
+        if (empresaId &&
+            subscriptionType &&
+            this.isValidCompanySubscription(subscriptionType)) {
             await this.createEmpresaSubscription(empresaId, subscriptionType, transaction.id);
         }
-        else if (courseId) {
+        else if (userId && subscriptionType === 'update') {
+            await this.upgradeUserSubscription(userId);
+        }
+        else if (userId && courseId) {
             await this.enrollUserInCourse(userId, courseId, transaction.id);
         }
+        else {
+            this.logger.warn('No se pudo determinar el tipo de transacción a procesar.');
+        }
         this.logger.log(`Transacción procesada con éxito para sesión ${session.id}`);
+    }
+    isValidCompanySubscription(subscriptionType) {
+        const validValues = ['ORO', 'PLATA', 'BRONCE'];
+        return validValues.includes(subscriptionType);
     }
     async createEmpresaSubscription(empresaId, subscriptionType, transactionId) {
         const subscription = await this.prisma.subscription.findUnique({
@@ -253,6 +295,13 @@ let PaymentService = PaymentService_1 = class PaymentService {
         });
         this.logger.log(`Usuario ${userId} inscrito en el curso ${courseId}`);
     }
+    async upgradeUserSubscription(userId) {
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: { userSubscription: 'update' },
+        });
+        this.logger.log(`Usuario ${userId} se ha actualizado al plan "update".`);
+    }
     async renewSubscriptions() {
         const now = new Date();
         const expiredSubscriptions = await this.prisma.empresaSubscription.findMany({
@@ -270,6 +319,24 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 },
             });
         }
+    }
+    validateSubscriptionType(subscriptionType) {
+        const validSubscriptionTypes = ['ORO', 'PLATA', 'BRONCE'];
+        if (!validSubscriptionTypes.includes(subscriptionType)) {
+            throw new common_1.HttpException(`Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
+        }
+    }
+    getSubscriptionPrice(subscriptionType) {
+        const subscriptionPrices = {
+            ORO: 2000,
+            PLATA: 1200,
+            BRONCE: 800,
+        };
+        const price = subscriptionPrices[subscriptionType];
+        if (!price) {
+            throw new common_1.HttpException(`Tipo de suscripción no reconocido: ${subscriptionType}`, common_1.HttpStatus.BAD_REQUEST);
+        }
+        return price;
     }
 };
 exports.PaymentService = PaymentService;
