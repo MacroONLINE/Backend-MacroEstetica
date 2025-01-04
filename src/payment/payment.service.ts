@@ -185,7 +185,7 @@ export class PaymentService {
       customer_email: email,
       metadata: {
         userId,
-        subscriptionType: 'update', // <--- OJO: "update" no es del enum, es una string libre
+        subscriptionType: 'update', // <--- "update" es una string libre
         checkoutSessionId: '',
       },
       success_url: `${this.configService.get<string>('APP_URL')}/user-subscription/success`,
@@ -261,7 +261,7 @@ export class PaymentService {
         break;
       }
 
-      // CUANDO SE COBRA UNA FACTURA DE SUSCRIPCIÓN (RENOVACIONES)
+      // CUANDO SE COBRA UNA FACTURA DE SUSCRIPCIÓN (RENOVACIONES) ÉXITOSA
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         try {
@@ -272,7 +272,7 @@ export class PaymentService {
             break;
           }
 
-          // Recuperamos info de la suscripción
+          // Recuperamos la información de la suscripción
           const subscription = await this.stripe.subscriptions.retrieve(
             invoice.subscription as string,
           );
@@ -281,14 +281,11 @@ export class PaymentService {
             `Metadata de la suscripción: ${JSON.stringify(subscription.metadata)}`,
           );
 
-          // Extraemos la metadata
           const { empresaId, userId, subscriptionType } = subscription.metadata;
 
-          // Creamos la transacción
+          // Creamos la transacción en la DB
           const paymentIntentId = invoice.payment_intent as string;
-          const paymentIntent = await this.stripe.paymentIntents.retrieve(
-            paymentIntentId,
-          );
+          const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
           const transaction = await this.prisma.transaction.create({
             data: {
@@ -303,9 +300,8 @@ export class PaymentService {
             },
           });
 
-          // Si es suscripción de empresa
+          // Si es suscripción de empresa (ORO, PLATA, BRONCE)
           if (empresaId && subscriptionType) {
-            // Asegúrate de que sea un SubscriptionType válido
             if (this.isValidCompanySubscription(subscriptionType)) {
               await this.createEmpresaSubscription(
                 empresaId,
@@ -328,6 +324,68 @@ export class PaymentService {
           );
           throw new HttpException(
             `Error procesando invoice: ${error.message}`,
+            HttpStatus.INTERNAL_SERVER_ERROR,
+          );
+        }
+        break;
+      }
+
+      // CUANDO FALLA EL COBRO DE UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN FALLIDA)
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        try {
+          if (!invoice.subscription) {
+            this.logger.warn('El invoice no tiene suscripción asociada.');
+            break;
+          }
+
+          // Recuperar la info de la suscripción
+          const subscription = await this.stripe.subscriptions.retrieve(
+            invoice.subscription as string,
+          );
+
+          this.logger.debug(
+            `Metadata de la suscripción (FAILED): ${JSON.stringify(subscription.metadata)}`,
+          );
+
+          const { empresaId, userId, subscriptionType } = subscription.metadata;
+
+          // Crear la transacción con estado fallido
+          const paymentIntentId = invoice.payment_intent as string;
+          const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+
+          // A veces el status puede ser 'failed' o 'unpaid'
+          const transaction = await this.prisma.transaction.create({
+            data: {
+              stripePaymentIntentId: paymentIntentId,
+              stripeCheckoutSessionId: null,
+              amount: invoice.amount_paid / 100, // Esto será 0 si no pagó nada
+              currency: invoice.currency,
+              status: invoice.status ?? paymentIntent.status, // Normalmente 'unpaid' o 'failed'
+              userId: userId || null,
+              courseId: null,
+              responseData: invoice as unknown as Prisma.JsonValue,
+            },
+          });
+
+          // Si es suscripción de empresa, la cancelamos o marcamos inactiva
+          if (empresaId && subscriptionType) {
+            if (this.isValidCompanySubscription(subscriptionType)) {
+              await this.cancelEmpresaSubscription(empresaId);
+            } else {
+              this.logger.warn(
+                `Tipo de suscripción inválido para empresa (FAILED): ${subscriptionType}`,
+              );
+            }
+          } 
+          // Si es suscripción de usuario con "update", la quitamos
+          else if (userId && subscriptionType === 'update') {
+            await this.downgradeUserSubscription(userId);
+          }
+        } catch (error) {
+          this.logger.error(`Error procesando invoice.payment_failed: ${error.message}`);
+          throw new HttpException(
+            `Error procesando invoice (failed): ${error.message}`,
             HttpStatus.INTERNAL_SERVER_ERROR,
           );
         }
@@ -411,7 +469,7 @@ export class PaymentService {
   }
 
   /**
-   * CREA O RENUEVA LA SUSCRIPCIÓN DE EMPRESA EN LA DB
+   * CREA O RENUEVA LA SUSCRIPCIÓN DE EMPRESA EN LA DB (pago exitoso)
    */
   private async createEmpresaSubscription(
     empresaId: string,
@@ -429,7 +487,7 @@ export class PaymentService {
       );
     }
 
-    // Crear un registro en EmpresaSubscription
+    // Crear o renovar la suscripción de empresa
     await this.prisma.empresaSubscription.create({
       data: {
         empresaId,
@@ -444,6 +502,27 @@ export class PaymentService {
 
     this.logger.log(
       `Suscripción ${subscriptionType} creada/renovada para empresa ${empresaId}`,
+    );
+  }
+
+  /**
+   * CANCELA LA SUSCRIPCIÓN DE EMPRESA EN LA DB (pago fallido)
+   */
+  private async cancelEmpresaSubscription(empresaId: string) {
+    // Por simplicidad, marcamos TODAS las suscripciones activas como 'canceled'
+    // (podrías buscar la más reciente si lo prefieres).
+    await this.prisma.empresaSubscription.updateMany({
+      where: {
+        empresaId,
+        status: 'active',
+      },
+      data: {
+        status: 'canceled',
+      },
+    });
+
+    this.logger.log(
+      `Suscripción de empresa ${empresaId} cancelada (status = "canceled").`,
     );
   }
 
@@ -467,7 +546,7 @@ export class PaymentService {
   }
 
   /**
-   * MARCA EN LA DB QUE EL USUARIO TIENE LA SUSCRIPCIÓN "update"
+   * MARCA EN LA DB QUE EL USUARIO TIENE LA SUSCRIPCIÓN "update" (pago exitoso)
    */
   private async upgradeUserSubscription(userId: string) {
     await this.prisma.user.update({
@@ -476,6 +555,19 @@ export class PaymentService {
     });
     this.logger.log(
       `Usuario ${userId} se ha actualizado al plan "update".`,
+    );
+  }
+
+  /**
+   * QUITA LA SUSCRIPCIÓN DE USUARIO "update" (pago fallido)
+   */
+  private async downgradeUserSubscription(userId: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { userSubscription: null },
+    });
+    this.logger.log(
+      `Usuario ${userId} -> suscripción "update" eliminada (pago fallido).`,
     );
   }
 
@@ -503,40 +595,38 @@ export class PaymentService {
     }
   }
 
-
-/**
- * Verifica si la suscripción de empresa es válida (ORO, PLATA, BRONCE).
- */
-private validateSubscriptionType(subscriptionType: SubscriptionType) {
-  const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
-  if (!validSubscriptionTypes.includes(subscriptionType)) {
-    throw new HttpException(
-      `Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`,
-      HttpStatus.BAD_REQUEST,
-    );
-  }
-}
-
-/**
- * Retorna el precio (en centavos) según el tipo de suscripción de empresa.
- */
-private getSubscriptionPrice(subscriptionType: SubscriptionType): number {
-  // Precios en centavos
-  const subscriptionPrices: { [key in SubscriptionType]?: number } = {
-    ORO: 2000,   // $20.00
-    PLATA: 1200, // $12.00
-    BRONCE: 800, // $8.00
-  };
-
-  const price = subscriptionPrices[subscriptionType];
-  if (!price) {
-    throw new HttpException(
-      `Tipo de suscripción no reconocido: ${subscriptionType}`,
-      HttpStatus.BAD_REQUEST,
-    );
+  /**
+   * Verifica si la suscripción de empresa es válida (ORO, PLATA, BRONCE).
+   */
+  private validateSubscriptionType(subscriptionType: SubscriptionType) {
+    const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
+    if (!validSubscriptionTypes.includes(subscriptionType)) {
+      throw new HttpException(
+        `Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
-  return price;
-}
+  /**
+   * Retorna el precio (en centavos) según el tipo de suscripción de empresa.
+   */
+  private getSubscriptionPrice(subscriptionType: SubscriptionType): number {
+    // Precios en centavos
+    const subscriptionPrices: { [key in SubscriptionType]?: number } = {
+      ORO: 2000,   // $20.00
+      PLATA: 1200, // $12.00
+      BRONCE: 800, // $8.00
+    };
 
+    const price = subscriptionPrices[subscriptionType];
+    if (!price) {
+      throw new HttpException(
+        `Tipo de suscripción no reconocido: ${subscriptionType}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return price;
+  }
 }

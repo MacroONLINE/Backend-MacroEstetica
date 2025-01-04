@@ -227,6 +227,48 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 }
                 break;
             }
+            case 'invoice.payment_failed': {
+                const invoice = event.data.object;
+                try {
+                    if (!invoice.subscription) {
+                        this.logger.warn('El invoice no tiene suscripción asociada.');
+                        break;
+                    }
+                    const subscription = await this.stripe.subscriptions.retrieve(invoice.subscription);
+                    this.logger.debug(`Metadata de la suscripción (FAILED): ${JSON.stringify(subscription.metadata)}`);
+                    const { empresaId, userId, subscriptionType } = subscription.metadata;
+                    const paymentIntentId = invoice.payment_intent;
+                    const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+                    const transaction = await this.prisma.transaction.create({
+                        data: {
+                            stripePaymentIntentId: paymentIntentId,
+                            stripeCheckoutSessionId: null,
+                            amount: invoice.amount_paid / 100,
+                            currency: invoice.currency,
+                            status: invoice.status ?? paymentIntent.status,
+                            userId: userId || null,
+                            courseId: null,
+                            responseData: invoice,
+                        },
+                    });
+                    if (empresaId && subscriptionType) {
+                        if (this.isValidCompanySubscription(subscriptionType)) {
+                            await this.cancelEmpresaSubscription(empresaId);
+                        }
+                        else {
+                            this.logger.warn(`Tipo de suscripción inválido para empresa (FAILED): ${subscriptionType}`);
+                        }
+                    }
+                    else if (userId && subscriptionType === 'update') {
+                        await this.downgradeUserSubscription(userId);
+                    }
+                }
+                catch (error) {
+                    this.logger.error(`Error procesando invoice.payment_failed: ${error.message}`);
+                    throw new common_1.HttpException(`Error procesando invoice (failed): ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                break;
+            }
             default:
                 this.logger.warn(`Evento no manejado: ${event.type}`);
         }
@@ -286,6 +328,18 @@ let PaymentService = PaymentService_1 = class PaymentService {
         });
         this.logger.log(`Suscripción ${subscriptionType} creada/renovada para empresa ${empresaId}`);
     }
+    async cancelEmpresaSubscription(empresaId) {
+        await this.prisma.empresaSubscription.updateMany({
+            where: {
+                empresaId,
+                status: 'active',
+            },
+            data: {
+                status: 'canceled',
+            },
+        });
+        this.logger.log(`Suscripción de empresa ${empresaId} cancelada (status = "canceled").`);
+    }
     async enrollUserInCourse(userId, courseId, transactionId) {
         await this.prisma.courseEnrollment.create({
             data: {
@@ -301,6 +355,13 @@ let PaymentService = PaymentService_1 = class PaymentService {
             data: { userSubscription: 'update' },
         });
         this.logger.log(`Usuario ${userId} se ha actualizado al plan "update".`);
+    }
+    async downgradeUserSubscription(userId) {
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: { userSubscription: null },
+        });
+        this.logger.log(`Usuario ${userId} -> suscripción "update" eliminada (pago fallido).`);
     }
     async renewSubscriptions() {
         const now = new Date();

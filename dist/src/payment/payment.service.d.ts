@@ -17,8 +17,10 @@ export declare class PaymentService {
     private processTransaction;
     private isValidCompanySubscription;
     private createEmpresaSubscription;
+    private cancelEmpresaSubscription;
     private enrollUserInCourse;
     private upgradeUserSubscription;
+    private downgradeUserSubscription;
     renewSubscriptions(): Promise<void>;
     private validateSubscriptionType;
     private getSubscriptionPrice;
