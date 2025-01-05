@@ -275,7 +275,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         return { received: true };
     }
     async processTransaction(session) {
-        const { metadata, payment_intent, amount_total, currency, status, } = session;
+        const { metadata, payment_intent, amount_total, currency, status } = session;
         const { userId, courseId, empresaId, subscriptionType } = metadata;
         this.logger.debug(`Procesando transacción con metadata: ${JSON.stringify(metadata)}`);
         const transaction = await this.prisma.transaction.create({
@@ -307,7 +307,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         this.logger.log(`Transacción procesada con éxito para sesión ${session.id}`);
     }
     isValidCompanySubscription(subscriptionType) {
-        const validValues = ['ORO', 'PLATA', 'BRONCE'];
+        const validValues = ['BASIC', 'INTERMIDIATE', 'PREMIUM'];
         return validValues.includes(subscriptionType);
     }
     async createEmpresaSubscription(empresaId, subscriptionType, transactionId) {
@@ -382,16 +382,20 @@ let PaymentService = PaymentService_1 = class PaymentService {
         }
     }
     validateSubscriptionType(subscriptionType) {
-        const validSubscriptionTypes = ['ORO', 'PLATA', 'BRONCE'];
+        const validSubscriptionTypes = [
+            'BASIC',
+            'INTERMIDIATE',
+            'PREMIUM',
+        ];
         if (!validSubscriptionTypes.includes(subscriptionType)) {
             throw new common_1.HttpException(`Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`, common_1.HttpStatus.BAD_REQUEST);
         }
     }
     getSubscriptionPrice(subscriptionType) {
         const subscriptionPrices = {
-            ORO: 2000,
-            PLATA: 1200,
-            BRONCE: 800,
+            BASIC: 1000,
+            INTERMIDIATE: 1500,
+            PREMIUM: 3000,
         };
         const price = subscriptionPrices[subscriptionType];
         if (!price) {

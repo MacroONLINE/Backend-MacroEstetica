@@ -1,4 +1,14 @@
-import { Controller, Post, Body, Headers, Req, Res, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Headers,
+  Req,
+  Res,
+  HttpException,
+  HttpStatus,
+  Logger
+} from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { ApiTags, ApiOperation, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Request, Response } from 'express';
@@ -45,7 +55,7 @@ export class PaymentController {
       properties: {
         empresaId: { type: 'string', description: 'ID de la empresa' },
         userId: { type: 'string', description: 'ID del usuario' },
-        subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
+        subscriptionType: { type: 'string', description: 'Tipo de suscripción (BASIC, INTERMIDIATE, PREMIUM)' },
         email: { type: 'string', description: 'Email del administrador de la empresa' },
       },
     },
@@ -55,7 +65,7 @@ export class PaymentController {
   async createCompanySubscriptionCheckoutSession(
     @Body('empresaId') empresaId: string,
     @Body('userId') userId: string,
-    @Body('subscriptionType') subscriptionType: 'ORO' | 'PLATA' | 'BRONCE',
+    @Body('subscriptionType') subscriptionType: 'BASIC' | 'INTERMIDIATE' | 'PREMIUM',
     @Body('email') email: string,
   ) {
     if (!empresaId || !userId || !subscriptionType || !email) {
@@ -132,5 +142,4 @@ export class PaymentController {
 
     return { url: session.url };
   }
-
 }

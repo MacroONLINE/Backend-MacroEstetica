@@ -93,7 +93,7 @@ __decorate([
             properties: {
                 empresaId: { type: 'string', description: 'ID de la empresa' },
                 userId: { type: 'string', description: 'ID del usuario' },
-                subscriptionType: { type: 'string', description: 'Tipo de suscripción (ORO, PLATA, BRONCE)' },
+                subscriptionType: { type: 'string', description: 'Tipo de suscripción (BASIC, INTERMIDIATE, PREMIUM)' },
                 email: { type: 'string', description: 'Email del administrador de la empresa' },
             },
         },

@@ -94,10 +94,11 @@ export class PaymentService {
     subscriptionType: SubscriptionType, // enum
     email: string,
   ) {
-    // Validamos que sea un plan reconocido (ORO, PLATA, BRONCE)
+    // Validamos que sea un plan reconocido (BASIC, INTERMIDIATE, PREMIUM).
+    // OJO: ORO, PLATA, BRONCE siguen en el enum, pero no los aceptamos más.
     this.validateSubscriptionType(subscriptionType);
 
-    // Precio en centavos
+    // Precio en centavos según el plan (BASIC, INTERMIDIATE, PREMIUM)
     const unitAmount = this.getSubscriptionPrice(subscriptionType);
 
     const session = await this.stripe.checkout.sessions.create({
@@ -121,7 +122,7 @@ export class PaymentService {
       metadata: {
         empresaId,
         userId,
-        subscriptionType, // Esto llegará como "ORO", "PLATA" o "BRONCE"
+        subscriptionType, // Solo BASIC, INTERMIDIATE o PREMIUM
         checkoutSessionId: '',
       },
       success_url: `${this.configService.get<string>('APP_URL')}/subscription/success`,
@@ -146,12 +147,13 @@ export class PaymentService {
 
   /**
    * CREA CHECKOUT SESSION PARA LA SUSCRIPCIÓN DE USUARIO ("update")
+   * (Ejemplo de plan personal de usuario)
    */
   async createUserUpgradeCheckoutSession(
     userId: string,
     email: string,
   ) {
-    // Validar que el usuario exista (opcional pero recomendado)
+    // Validar que el usuario exista
     const userExists = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -162,7 +164,7 @@ export class PaymentService {
       );
     }
 
-    // Definir el precio en centavos (ejemplo: $20)
+    // Por ejemplo, costará $20
     const unitAmount = 2000;
 
     const session = await this.stripe.checkout.sessions.create({
@@ -185,14 +187,14 @@ export class PaymentService {
       customer_email: email,
       metadata: {
         userId,
-        subscriptionType: 'update', // <--- "update" es una string libre
+        subscriptionType: 'update', 
         checkoutSessionId: '',
       },
       success_url: `${this.configService.get<string>('APP_URL')}/user-subscription/success`,
       cancel_url: `${this.configService.get<string>('APP_URL')}/user-subscription/cancel`,
     });
 
-    // Actualizar metadata con session.id
+    // Actualizar la metadata
     await this.stripe.checkout.sessions.update(session.id, {
       metadata: {
         userId,
@@ -235,7 +237,7 @@ export class PaymentService {
     }
 
     switch (event.type) {
-      // CUANDO SE COMPLETA EL CHECKOUT (PRIMER PAGO ÚNICO O SUSCRIPCIÓN)
+      // 1) CUANDO SE COMPLETA EL CHECKOUT (PRIMER PAGO)
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
         this.logger.debug(`Metadata de la sesión: ${JSON.stringify(session.metadata)}`);
@@ -243,10 +245,9 @@ export class PaymentService {
         break;
       }
 
-      // CUANDO SE REALIZA UN PAGO ÚNICO (payment_intent.succeeded)
+      // 2) CUANDO SE REALIZA UN PAGO ÚNICO (payment_intent.succeeded)
       case 'payment_intent.succeeded': {
         const intent = event.data.object as Stripe.PaymentIntent;
-
         if (intent.metadata?.checkoutSessionId) {
           this.logger.debug(`Metadata del intent: ${JSON.stringify(intent.metadata)}`);
           const session = await this.stripe.checkout.sessions.retrieve(
@@ -261,36 +262,31 @@ export class PaymentService {
         break;
       }
 
-      // CUANDO SE COBRA UNA FACTURA DE SUSCRIPCIÓN (RENOVACIONES) ÉXITOSA
+      // 3) CUANDO SE COBRA UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN) EXITOSA
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
         try {
           if (!invoice.subscription) {
-            this.logger.warn(
-              'El invoice no tiene suscripción asociada.',
-            );
+            this.logger.warn('El invoice no tiene suscripción asociada.');
             break;
           }
 
-          // Recuperamos la información de la suscripción
           const subscription = await this.stripe.subscriptions.retrieve(
             invoice.subscription as string,
           );
-
           this.logger.debug(
             `Metadata de la suscripción: ${JSON.stringify(subscription.metadata)}`,
           );
 
           const { empresaId, userId, subscriptionType } = subscription.metadata;
-
-          // Creamos la transacción en la DB
           const paymentIntentId = invoice.payment_intent as string;
           const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
+          // Creamos la transacción
           const transaction = await this.prisma.transaction.create({
             data: {
               stripePaymentIntentId: paymentIntentId,
-              stripeCheckoutSessionId: null, // no hay session en renovaciones
+              stripeCheckoutSessionId: null,
               amount: invoice.amount_paid / 100,
               currency: invoice.currency,
               status: invoice.status ?? paymentIntent.status,
@@ -300,8 +296,9 @@ export class PaymentService {
             },
           });
 
-          // Si es suscripción de empresa (ORO, PLATA, BRONCE)
+          // Suscripción de empresa
           if (empresaId && subscriptionType) {
+            // Aceptamos solo BASIC, INTERMIDIATE, PREMIUM
             if (this.isValidCompanySubscription(subscriptionType)) {
               await this.createEmpresaSubscription(
                 empresaId,
@@ -330,7 +327,7 @@ export class PaymentService {
         break;
       }
 
-      // CUANDO FALLA EL COBRO DE UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN FALLIDA)
+      // 4) CUANDO FALLA EL COBRO DE UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN FALLIDA)
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
         try {
@@ -339,36 +336,32 @@ export class PaymentService {
             break;
           }
 
-          // Recuperar la info de la suscripción
           const subscription = await this.stripe.subscriptions.retrieve(
             invoice.subscription as string,
           );
-
           this.logger.debug(
             `Metadata de la suscripción (FAILED): ${JSON.stringify(subscription.metadata)}`,
           );
 
           const { empresaId, userId, subscriptionType } = subscription.metadata;
-
-          // Crear la transacción con estado fallido
           const paymentIntentId = invoice.payment_intent as string;
           const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
-          // A veces el status puede ser 'failed' o 'unpaid'
+          // Creamos la transacción con estado fallido
           const transaction = await this.prisma.transaction.create({
             data: {
               stripePaymentIntentId: paymentIntentId,
               stripeCheckoutSessionId: null,
-              amount: invoice.amount_paid / 100, // Esto será 0 si no pagó nada
+              amount: invoice.amount_paid / 100, // usualmente 0
               currency: invoice.currency,
-              status: invoice.status ?? paymentIntent.status, // Normalmente 'unpaid' o 'failed'
+              status: invoice.status ?? paymentIntent.status, // "failed" o "unpaid"
               userId: userId || null,
               courseId: null,
               responseData: invoice as unknown as Prisma.JsonValue,
             },
           });
 
-          // Si es suscripción de empresa, la cancelamos o marcamos inactiva
+          // Si es suscripción de empresa, la cancelamos
           if (empresaId && subscriptionType) {
             if (this.isValidCompanySubscription(subscriptionType)) {
               await this.cancelEmpresaSubscription(empresaId);
@@ -378,7 +371,7 @@ export class PaymentService {
               );
             }
           } 
-          // Si es suscripción de usuario con "update", la quitamos
+          // Si es suscripción de usuario con "update", se la quitamos
           else if (userId && subscriptionType === 'update') {
             await this.downgradeUserSubscription(userId);
           }
@@ -403,20 +396,12 @@ export class PaymentService {
    * PROCESA TRANSACCIONES PARA PAGOS ÚNICOS O PRIMER PAGO DE SUSCRIPCIÓN
    */
   private async processTransaction(session: Stripe.Checkout.Session) {
-    const {
-      metadata,
-      payment_intent,
-      amount_total,
-      currency,
-      status,
-    } = session;
+    const { metadata, payment_intent, amount_total, currency, status } = session;
     const { userId, courseId, empresaId, subscriptionType } = metadata;
 
-    this.logger.debug(
-      `Procesando transacción con metadata: ${JSON.stringify(metadata)}`,
-    );
+    this.logger.debug(`Procesando transacción con metadata: ${JSON.stringify(metadata)}`);
 
-    // Creación de la transacción en la DB
+    // Registrar transacción
     const transaction = await this.prisma.transaction.create({
       data: {
         stripePaymentIntentId: payment_intent as string,
@@ -430,10 +415,10 @@ export class PaymentService {
       },
     });
 
-    // 1) Suscripción de empresa (ORO, PLATA, BRONCE, etc.)
+    // 1) Suscripción de empresa (BASIC, INTERMIDIATE, PREMIUM)
     if (
       empresaId &&
-      subscriptionType && 
+      subscriptionType &&
       this.isValidCompanySubscription(subscriptionType)
     ) {
       await this.createEmpresaSubscription(
@@ -446,36 +431,36 @@ export class PaymentService {
     else if (userId && subscriptionType === 'update') {
       await this.upgradeUserSubscription(userId);
     }
-    // 3) Compra de curso (pago único)
+    // 3) Compra de curso
     else if (userId && courseId) {
       await this.enrollUserInCourse(userId, courseId, transaction.id);
     }
     // 4) No se pudo determinar el tipo
     else {
-      this.logger.warn(
-        'No se pudo determinar el tipo de transacción a procesar.',
-      );
+      this.logger.warn('No se pudo determinar el tipo de transacción a procesar.');
     }
 
     this.logger.log(`Transacción procesada con éxito para sesión ${session.id}`);
   }
 
   /**
-   * Valida que subscriptionType sea uno de ORO, PLATA, BRONCE, etc.
+   * Valida que subscriptionType sea uno de (BASIC, INTERMIDIATE, PREMIUM).
+   * Se ignoran ORO, PLATA, BRONCE aunque existan en el enum.
    */
   private isValidCompanySubscription(subscriptionType: string): boolean {
-    const validValues: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
+    const validValues: SubscriptionType[] = ['BASIC', 'INTERMIDIATE', 'PREMIUM'];
     return validValues.includes(subscriptionType as SubscriptionType);
   }
 
   /**
-   * CREA O RENUEVA LA SUSCRIPCIÓN DE EMPRESA EN LA DB (pago exitoso)
+   * CREA O RENUEVA LA SUSCRIPCIÓN DE EMPRESA (pago exitoso)
    */
   private async createEmpresaSubscription(
     empresaId: string,
     subscriptionType: SubscriptionType,
     transactionId: string,
   ) {
+    // Debe existir un registro en la tabla Subscription con type = BASIC,INTERMIDIATE,PREMIUM
     const subscription = await this.prisma.subscription.findUnique({
       where: { type: subscriptionType },
     });
@@ -487,7 +472,7 @@ export class PaymentService {
       );
     }
 
-    // Crear o renovar la suscripción de empresa
+    // Crea un registro en EmpresaSubscription
     await this.prisma.empresaSubscription.create({
       data: {
         empresaId,
@@ -506,11 +491,10 @@ export class PaymentService {
   }
 
   /**
-   * CANCELA LA SUSCRIPCIÓN DE EMPRESA EN LA DB (pago fallido)
+   * CANCELA LA SUSCRIPCIÓN DE EMPRESA (pago fallido)
    */
   private async cancelEmpresaSubscription(empresaId: string) {
-    // Por simplicidad, marcamos TODAS las suscripciones activas como 'canceled'
-    // (podrías buscar la más reciente si lo prefieres).
+    // Marcamos todas las suscripciones activas como 'canceled'
     await this.prisma.empresaSubscription.updateMany({
       where: {
         empresaId,
@@ -527,7 +511,7 @@ export class PaymentService {
   }
 
   /**
-   * INSCRIBE AL USUARIO EN EL CURSO (COMPRA ÚNICA)
+   * INSCRIBE AL USUARIO EN EL CURSO (compra única)
    */
   private async enrollUserInCourse(
     userId: string,
@@ -540,26 +524,22 @@ export class PaymentService {
         courseId,
       },
     });
-    this.logger.log(
-      `Usuario ${userId} inscrito en el curso ${courseId}`,
-    );
+    this.logger.log(`Usuario ${userId} inscrito en el curso ${courseId}`);
   }
 
   /**
-   * MARCA EN LA DB QUE EL USUARIO TIENE LA SUSCRIPCIÓN "update" (pago exitoso)
+   * MARCA AL USUARIO CON LA SUSCRIPCIÓN "update" (pago exitoso)
    */
   private async upgradeUserSubscription(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
       data: { userSubscription: 'update' },
     });
-    this.logger.log(
-      `Usuario ${userId} se ha actualizado al plan "update".`,
-    );
+    this.logger.log(`Usuario ${userId} se ha actualizado al plan "update".`);
   }
 
   /**
-   * QUITA LA SUSCRIPCIÓN DE USUARIO "update" (pago fallido)
+   * QUITA LA SUSCRIPCIÓN DEL USUARIO (pago fallido)
    */
   private async downgradeUserSubscription(userId: string) {
     await this.prisma.user.update({
@@ -572,7 +552,7 @@ export class PaymentService {
   }
 
   /**
-   * EJEMPLO DE LÓGICA PARA RENOVAR SUSCRIPCIONES (CRON)
+   * RENOVAR SUSCRIPCIONES (CRON) - Ejemplo
    */
   async renewSubscriptions() {
     const now = new Date();
@@ -596,10 +576,15 @@ export class PaymentService {
   }
 
   /**
-   * Verifica si la suscripción de empresa es válida (ORO, PLATA, BRONCE).
+   * Acepta solo (BASIC, INTERMIDIATE, PREMIUM).
+   * Si alguien envía (ORO, PLATA, BRONCE) -> error
    */
   private validateSubscriptionType(subscriptionType: SubscriptionType) {
-    const validSubscriptionTypes: SubscriptionType[] = ['ORO', 'PLATA', 'BRONCE'];
+    const validSubscriptionTypes: SubscriptionType[] = [
+      'BASIC',
+      'INTERMIDIATE',
+      'PREMIUM',
+    ];
     if (!validSubscriptionTypes.includes(subscriptionType)) {
       throw new HttpException(
         `Tipo de suscripción inválido. Valores permitidos: ${validSubscriptionTypes.join(', ')}`,
@@ -609,14 +594,14 @@ export class PaymentService {
   }
 
   /**
-   * Retorna el precio (en centavos) según el tipo de suscripción de empresa.
+   * Precio en centavos según el nuevo plan (BASIC, INTERMIDIATE, PREMIUM).
    */
   private getSubscriptionPrice(subscriptionType: SubscriptionType): number {
     // Precios en centavos
     const subscriptionPrices: { [key in SubscriptionType]?: number } = {
-      ORO: 2000,   // $20.00
-      PLATA: 1200, // $12.00
-      BRONCE: 800, // $8.00
+      BASIC: 1000,        // $10.00
+      INTERMIDIATE: 1500, // $15.00
+      PREMIUM: 3000,      // $30.00
     };
 
     const price = subscriptionPrices[subscriptionType];
