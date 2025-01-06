@@ -278,6 +278,13 @@ let PaymentService = PaymentService_1 = class PaymentService {
         const { metadata, payment_intent, amount_total, currency, status } = session;
         const { userId, courseId, empresaId, subscriptionType } = metadata;
         this.logger.debug(`Procesando transacción con metadata: ${JSON.stringify(metadata)}`);
+        const existingTransaction = await this.prisma.transaction.findUnique({
+            where: { stripeCheckoutSessionId: session.id },
+        });
+        if (existingTransaction) {
+            this.logger.warn(`La transacción para stripeCheckoutSessionId ${session.id} ya existe.`);
+            return existingTransaction;
+        }
         const transaction = await this.prisma.transaction.create({
             data: {
                 stripePaymentIntentId: payment_intent,
@@ -290,9 +297,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 responseData: session,
             },
         });
-        if (empresaId &&
-            subscriptionType &&
-            this.isValidCompanySubscription(subscriptionType)) {
+        if (empresaId && subscriptionType && this.isValidCompanySubscription(subscriptionType)) {
             await this.createEmpresaSubscription(empresaId, subscriptionType, transaction.id);
         }
         else if (userId && subscriptionType === 'update') {
@@ -305,6 +310,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
             this.logger.warn('No se pudo determinar el tipo de transacción a procesar.');
         }
         this.logger.log(`Transacción procesada con éxito para sesión ${session.id}`);
+        return transaction;
     }
     isValidCompanySubscription(subscriptionType) {
         const validValues = ['BASICO', 'INTERMEDIO', 'PREMIUM'];
