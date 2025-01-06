@@ -17,6 +17,7 @@ export declare class CoursesService {
         title: string;
         description: string;
         bannerUrl: string;
+        instructorId: string | null;
         level: string;
         commentsCount: number;
         averageRating: number;
@@ -32,7 +33,6 @@ export declare class CoursesService {
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
         categoryId: string;
-        instructorId: string | null;
     }>;
     getCourseById(courseId: string): Promise<CourseResponseDto>;
     getAllCourses(): Promise<CourseResponseDto[]>;

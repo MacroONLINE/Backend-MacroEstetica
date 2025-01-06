@@ -307,7 +307,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         this.logger.log(`Transacción procesada con éxito para sesión ${session.id}`);
     }
     isValidCompanySubscription(subscriptionType) {
-        const validValues = ['BASIC', 'INTERMIDIATE', 'PREMIUM'];
+        const validValues = ['BASICO', 'INTERMEDIO', 'PREMIUM'];
         return validValues.includes(subscriptionType);
     }
     async createEmpresaSubscription(empresaId, subscriptionType, transactionId) {
@@ -383,8 +383,8 @@ let PaymentService = PaymentService_1 = class PaymentService {
     }
     validateSubscriptionType(subscriptionType) {
         const validSubscriptionTypes = [
-            'BASIC',
-            'INTERMIDIATE',
+            'BASICO',
+            'INTERMEDIO',
             'PREMIUM',
         ];
         if (!validSubscriptionTypes.includes(subscriptionType)) {
@@ -393,8 +393,8 @@ let PaymentService = PaymentService_1 = class PaymentService {
     }
     getSubscriptionPrice(subscriptionType) {
         const subscriptionPrices = {
-            BASIC: 1000,
-            INTERMIDIATE: 1500,
+            BASICO: 1000,
+            INTERMEDIO: 1500,
             PREMIUM: 3000,
         };
         const price = subscriptionPrices[subscriptionType];

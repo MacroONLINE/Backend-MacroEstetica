@@ -448,7 +448,7 @@ export class PaymentService {
    * Se ignoran ORO, PLATA, BRONCE aunque existan en el enum.
    */
   private isValidCompanySubscription(subscriptionType: string): boolean {
-    const validValues: SubscriptionType[] = ['BASIC', 'INTERMIDIATE', 'PREMIUM'];
+    const validValues: SubscriptionType[] = ['BASICO', 'INTERMEDIO', 'PREMIUM'];
     return validValues.includes(subscriptionType as SubscriptionType);
   }
 
@@ -581,8 +581,8 @@ export class PaymentService {
    */
   private validateSubscriptionType(subscriptionType: SubscriptionType) {
     const validSubscriptionTypes: SubscriptionType[] = [
-      'BASIC',
-      'INTERMIDIATE',
+      'BASICO',
+      'INTERMEDIO',
       'PREMIUM',
     ];
     if (!validSubscriptionTypes.includes(subscriptionType)) {
@@ -599,8 +599,8 @@ export class PaymentService {
   private getSubscriptionPrice(subscriptionType: SubscriptionType): number {
     // Precios en centavos
     const subscriptionPrices: { [key in SubscriptionType]?: number } = {
-      BASIC: 1000,        // $10.00
-      INTERMIDIATE: 1500, // $15.00
+      BASICO: 1000,        // $10.00
+      INTERMEDIO: 1500, // $15.00
       PREMIUM: 3000,      // $30.00
     };
 

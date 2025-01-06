@@ -17,6 +17,7 @@ export declare class CoursesController {
         title: string;
         description: string;
         bannerUrl: string;
+        instructorId: string | null;
         level: string;
         commentsCount: number;
         averageRating: number;
@@ -32,7 +33,6 @@ export declare class CoursesController {
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
         categoryId: string;
-        instructorId: string | null;
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;

@@ -7,7 +7,7 @@ export declare class PaymentController {
     createCheckoutSession(courseId: string, userId: string, email: string): Promise<{
         url: string;
     }>;
-    createCompanySubscriptionCheckoutSession(empresaId: string, userId: string, subscriptionType: 'BASIC' | 'INTERMIDIATE' | 'PREMIUM', email: string): Promise<{
+    createCompanySubscriptionCheckoutSession(empresaId: string, userId: string, subscriptionType: 'BASICO' | 'INTERMEDIO' | 'PREMIUM', email: string): Promise<{
         url: string;
     }>;
     handleWebhook(signature: string, req: Request, res: Response): Promise<Response<any, Record<string, any>>>;

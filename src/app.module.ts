@@ -14,6 +14,7 @@ import { PaymentModule } from './payment/payment.module';
 import { ResetPasswordModule } from './reset-password/reset-password.module';
 import { EmpresaModule } from './empresa/empresa.module';
 import { BannerModule } from './banner/banner.module';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { BannerModule } from './banner/banner.module';
     PaymentModule,
     ResetPasswordModule,
     EmpresaModule,
-    BannerModule
+    BannerModule,
+    EventsModule
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],

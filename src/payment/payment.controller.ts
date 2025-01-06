@@ -65,7 +65,7 @@ export class PaymentController {
   async createCompanySubscriptionCheckoutSession(
     @Body('empresaId') empresaId: string,
     @Body('userId') userId: string,
-    @Body('subscriptionType') subscriptionType: 'BASIC' | 'INTERMIDIATE' | 'PREMIUM',
+    @Body('subscriptionType') subscriptionType: 'BASICO' | 'INTERMEDIO' | 'PREMIUM',
     @Body('email') email: string,
   ) {
     if (!empresaId || !userId || !subscriptionType || !email) {
