@@ -210,187 +210,181 @@ export class PaymentService {
   }
 
   /**
-   * WEBHOOK: RECIBE TODOS LOS EVENTOS DE STRIPE
-   */
-  async handleWebhookEvent(signature: string, payload: Buffer) {
-    const webhookSecret = 'whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW';
-    this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
-    this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
+ * WEBHOOK: RECIBE TODOS LOS EVENTOS DE STRIPE
+ */
+async handleWebhookEvent(signature: string, payload: Buffer) {
+  const webhookSecret = 'whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW';
+  this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
+  this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
 
-    let event: Stripe.Event;
-    try {
-      event = this.stripe.webhooks.constructEvent(
-        payload, 
-        signature, 
-        webhookSecret,
-      );
-      this.logger.log(`Evento recibido: ${event.type}`);
-      this.logger.debug(`Evento completo: ${JSON.stringify(event)}`);
-    } catch (err) {
-      this.logger.error(
-        `Error al verificar la firma del webhook: ${err.message}`,
-      );
-      throw new HttpException(
-        'Webhook signature verification failed',
-        HttpStatus.BAD_REQUEST,
-      );
+  let event: Stripe.Event;
+  try {
+    event = this.stripe.webhooks.constructEvent(
+      payload,
+      signature,
+      webhookSecret,
+    );
+    this.logger.log(`Evento recibido: ${event.type}`);
+    this.logger.debug(`Evento completo: ${JSON.stringify(event)}`);
+  } catch (err) {
+    this.logger.error(
+      `Error al verificar la firma del webhook: ${err.message}`,
+    );
+    throw new HttpException(
+      'Webhook signature verification failed',
+      HttpStatus.BAD_REQUEST,
+    );
+  }
+
+  switch (event.type) {
+    // 1) CUANDO SE COMPLETA EL CHECKOUT (PRIMER PAGO)
+    case 'checkout.session.completed': {
+      const session = event.data.object as Stripe.Checkout.Session;
+      this.logger.debug(`Metadata de la sesión: ${JSON.stringify(session.metadata)}`);
+      await this.processTransaction(session);
+      break;
     }
 
-    switch (event.type) {
-      // 1) CUANDO SE COMPLETA EL CHECKOUT (PRIMER PAGO)
-      case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
-        this.logger.debug(`Metadata de la sesión: ${JSON.stringify(session.metadata)}`);
+    // 2) CUANDO SE REALIZA UN PAGO ÚNICO (payment_intent.succeeded)
+    case 'payment_intent.succeeded': {
+      const intent = event.data.object as Stripe.PaymentIntent;
+      if (intent.metadata?.checkoutSessionId) {
+        this.logger.debug(`Metadata del intent: ${JSON.stringify(intent.metadata)}`);
+        const session = await this.stripe.checkout.sessions.retrieve(
+          intent.metadata.checkoutSessionId,
+        );
         await this.processTransaction(session);
-        break;
+      } else {
+        this.logger.warn(
+          'No se encontró checkoutSessionId en los metadatos del intent.',
+        );
       }
+      break;
+    }
 
-      // 2) CUANDO SE REALIZA UN PAGO ÚNICO (payment_intent.succeeded)
-      case 'payment_intent.succeeded': {
-        const intent = event.data.object as Stripe.PaymentIntent;
-        if (intent.metadata?.checkoutSessionId) {
-          this.logger.debug(`Metadata del intent: ${JSON.stringify(intent.metadata)}`);
-          const session = await this.stripe.checkout.sessions.retrieve(
-            intent.metadata.checkoutSessionId,
-          );
-          await this.processTransaction(session);
-        } else {
-          this.logger.warn(
-            'No se encontró checkoutSessionId en los metadatos del intent.',
-          );
+    // 3) CUANDO SE COBRA UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN EXITOSA)
+    case 'invoice.payment_succeeded': {
+      const invoice = event.data.object as Stripe.Invoice;
+      try {
+        if (!invoice.subscription) {
+          this.logger.warn('El invoice no tiene suscripción asociada.');
+          break;
         }
-        break;
+
+        const subscription = await this.stripe.subscriptions.retrieve(
+          invoice.subscription as string,
+        );
+        this.logger.debug(
+          `Metadata de la suscripción: ${JSON.stringify(subscription.metadata)}`,
+        );
+
+        const { empresaId, userId, subscriptionType } = subscription.metadata;
+
+        if (!empresaId || !subscriptionType) {
+          this.logger.warn('Faltan datos en los metadatos: empresaId o subscriptionType.');
+          break;
+        }
+
+        const paymentIntentId = invoice.payment_intent as string;
+        const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+
+        const transaction = await this.prisma.transaction.create({
+          data: {
+            stripePaymentIntentId: paymentIntentId,
+            stripeCheckoutSessionId: null,
+            amount: invoice.amount_paid / 100,
+            currency: invoice.currency,
+            status: invoice.status ?? paymentIntent.status,
+            userId: userId || null,
+            courseId: null,
+            responseData: invoice as unknown as Prisma.JsonValue,
+          },
+        });
+
+        if (this.isValidCompanySubscription(subscriptionType)) {
+          await this.createEmpresaSubscription(
+            empresaId,
+            subscriptionType as SubscriptionType,
+            transaction.id,
+          );
+        } else {
+          this.logger.warn(`Tipo de suscripción inválido: ${subscriptionType}`);
+        }
+      } catch (error) {
+        this.logger.error(
+          `Error procesando invoice.payment_succeeded: ${error.message}`,
+        );
+        throw new HttpException(
+          `Error procesando invoice: ${error.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
+      break;
+    }
 
-      // 3) CUANDO SE COBRA UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN) EXITOSA
-      case 'invoice.payment_succeeded': {
-        const invoice = event.data.object as Stripe.Invoice;
-        try {
-          if (!invoice.subscription) {
-            this.logger.warn('El invoice no tiene suscripción asociada.');
-            break;
-          }
+    // 4) CUANDO FALLA EL COBRO DE UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN FALLIDA)
+    case 'invoice.payment_failed': {
+      const invoice = event.data.object as Stripe.Invoice;
+      try {
+        if (!invoice.subscription) {
+          this.logger.warn('El invoice no tiene suscripción asociada.');
+          break;
+        }
 
-          const subscription = await this.stripe.subscriptions.retrieve(
-            invoice.subscription as string,
-          );
-          this.logger.debug(
-            `Metadata de la suscripción: ${JSON.stringify(subscription.metadata)}`,
-          );
+        const subscription = await this.stripe.subscriptions.retrieve(
+          invoice.subscription as string,
+        );
+        this.logger.debug(
+          `Metadata de la suscripción (FAILED): ${JSON.stringify(subscription.metadata)}`,
+        );
 
-          const { empresaId, userId, subscriptionType } = subscription.metadata;
-          const paymentIntentId = invoice.payment_intent as string;
-          const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+        const { empresaId, userId, subscriptionType } = subscription.metadata;
+        const paymentIntentId = invoice.payment_intent as string;
+        const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
 
-          // Creamos la transacción
-          const transaction = await this.prisma.transaction.create({
-            data: {
-              stripePaymentIntentId: paymentIntentId,
-              stripeCheckoutSessionId: null,
-              amount: invoice.amount_paid / 100,
-              currency: invoice.currency,
-              status: invoice.status ?? paymentIntent.status,
-              userId: userId || null,
-              courseId: null,
-              responseData: invoice as unknown as Prisma.JsonValue,
-            },
-          });
+        const transaction = await this.prisma.transaction.create({
+          data: {
+            stripePaymentIntentId: paymentIntentId,
+            stripeCheckoutSessionId: null,
+            amount: invoice.amount_paid / 100, // usualmente 0
+            currency: invoice.currency,
+            status: invoice.status ?? paymentIntent.status, // "failed" o "unpaid"
+            userId: userId || null,
+            courseId: null,
+            responseData: invoice as unknown as Prisma.JsonValue,
+          },
+        });
 
-          // Suscripción de empresa
-          if (empresaId && subscriptionType) {
-            // Aceptamos solo BASIC, INTERMIDIATE, PREMIUM
-            if (this.isValidCompanySubscription(subscriptionType)) {
-              await this.createEmpresaSubscription(
-                empresaId,
-                subscriptionType as SubscriptionType,
-                transaction.id,
-              );
-            } else {
-              this.logger.warn(
-                `Tipo de suscripción inválido para empresa: ${subscriptionType}`,
-              );
-            }
+        if (empresaId && subscriptionType) {
+          if (this.isValidCompanySubscription(subscriptionType)) {
+            await this.cancelEmpresaSubscription(empresaId);
           } else {
             this.logger.warn(
-              'No se encontró empresaId o subscriptionType en la metadata de la suscripción.',
+              `Tipo de suscripción inválido para empresa (FAILED): ${subscriptionType}`,
             );
           }
-        } catch (error) {
-          this.logger.error(
-            `Error procesando invoice.payment_succeeded: ${error.message}`,
-          );
-          throw new HttpException(
-            `Error procesando invoice: ${error.message}`,
-            HttpStatus.INTERNAL_SERVER_ERROR,
+        } else {
+          this.logger.warn(
+            'No se encontró empresaId o subscriptionType en los metadatos del intent.',
           );
         }
-        break;
+      } catch (error) {
+        this.logger.error(`Error procesando invoice.payment_failed: ${error.message}`);
+        throw new HttpException(
+          `Error procesando invoice: ${error.message}`,
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
       }
-
-      // 4) CUANDO FALLA EL COBRO DE UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN FALLIDA)
-      case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice;
-        try {
-          if (!invoice.subscription) {
-            this.logger.warn('El invoice no tiene suscripción asociada.');
-            break;
-          }
-
-          const subscription = await this.stripe.subscriptions.retrieve(
-            invoice.subscription as string,
-          );
-          this.logger.debug(
-            `Metadata de la suscripción (FAILED): ${JSON.stringify(subscription.metadata)}`,
-          );
-
-          const { empresaId, userId, subscriptionType } = subscription.metadata;
-          const paymentIntentId = invoice.payment_intent as string;
-          const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
-
-          // Creamos la transacción con estado fallido
-          const transaction = await this.prisma.transaction.create({
-            data: {
-              stripePaymentIntentId: paymentIntentId,
-              stripeCheckoutSessionId: null,
-              amount: invoice.amount_paid / 100, // usualmente 0
-              currency: invoice.currency,
-              status: invoice.status ?? paymentIntent.status, // "failed" o "unpaid"
-              userId: userId || null,
-              courseId: null,
-              responseData: invoice as unknown as Prisma.JsonValue,
-            },
-          });
-
-          // Si es suscripción de empresa, la cancelamos
-          if (empresaId && subscriptionType) {
-            if (this.isValidCompanySubscription(subscriptionType)) {
-              await this.cancelEmpresaSubscription(empresaId);
-            } else {
-              this.logger.warn(
-                `Tipo de suscripción inválido para empresa (FAILED): ${subscriptionType}`,
-              );
-            }
-          } 
-          // Si es suscripción de usuario con "update", se la quitamos
-          else if (userId && subscriptionType === 'update') {
-            await this.downgradeUserSubscription(userId);
-          }
-        } catch (error) {
-          this.logger.error(`Error procesando invoice.payment_failed: ${error.message}`);
-          throw new HttpException(
-            `Error procesando invoice (failed): ${error.message}`,
-            HttpStatus.INTERNAL_SERVER_ERROR,
-          );
-        }
-        break;
-      }
-
-      default:
-        this.logger.warn(`Evento no manejado: ${event.type}`);
+      break;
     }
 
-    return { received: true };
+    default:
+      this.logger.warn(`Evento no manejado: ${event.type}`);
   }
+
+  return { received: true };
+}
+
 
   /**
    * PROCESA TRANSACCIONES PARA PAGOS ÚNICOS O PRIMER PAGO DE SUSCRIPCIÓN

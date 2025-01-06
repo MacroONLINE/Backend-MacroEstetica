@@ -195,6 +195,10 @@ let PaymentService = PaymentService_1 = class PaymentService {
                     const subscription = await this.stripe.subscriptions.retrieve(invoice.subscription);
                     this.logger.debug(`Metadata de la suscripción: ${JSON.stringify(subscription.metadata)}`);
                     const { empresaId, userId, subscriptionType } = subscription.metadata;
+                    if (!empresaId || !subscriptionType) {
+                        this.logger.warn('Faltan datos en los metadatos: empresaId o subscriptionType.');
+                        break;
+                    }
                     const paymentIntentId = invoice.payment_intent;
                     const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
                     const transaction = await this.prisma.transaction.create({
@@ -209,16 +213,11 @@ let PaymentService = PaymentService_1 = class PaymentService {
                             responseData: invoice,
                         },
                     });
-                    if (empresaId && subscriptionType) {
-                        if (this.isValidCompanySubscription(subscriptionType)) {
-                            await this.createEmpresaSubscription(empresaId, subscriptionType, transaction.id);
-                        }
-                        else {
-                            this.logger.warn(`Tipo de suscripción inválido para empresa: ${subscriptionType}`);
-                        }
+                    if (this.isValidCompanySubscription(subscriptionType)) {
+                        await this.createEmpresaSubscription(empresaId, subscriptionType, transaction.id);
                     }
                     else {
-                        this.logger.warn('No se encontró empresaId o subscriptionType en la metadata de la suscripción.');
+                        this.logger.warn(`Tipo de suscripción inválido: ${subscriptionType}`);
                     }
                 }
                 catch (error) {
@@ -259,13 +258,13 @@ let PaymentService = PaymentService_1 = class PaymentService {
                             this.logger.warn(`Tipo de suscripción inválido para empresa (FAILED): ${subscriptionType}`);
                         }
                     }
-                    else if (userId && subscriptionType === 'update') {
-                        await this.downgradeUserSubscription(userId);
+                    else {
+                        this.logger.warn('No se encontró empresaId o subscriptionType en los metadatos del intent.');
                     }
                 }
                 catch (error) {
                     this.logger.error(`Error procesando invoice.payment_failed: ${error.message}`);
-                    throw new common_1.HttpException(`Error procesando invoice (failed): ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+                    throw new common_1.HttpException(`Error procesando invoice: ${error.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
                 }
                 break;
             }
