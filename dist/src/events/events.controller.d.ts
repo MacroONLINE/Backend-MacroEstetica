@@ -3,32 +3,29 @@ export declare class EventsController {
     private readonly eventsService;
     constructor(eventsService: EventsService);
     getEventsByEmpresa(empresaId: string): Promise<({
+        instructor: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            userId: string;
+            profession: import(".prisma/client").$Enums.Profession;
+            description: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            empresaId: string | null;
+        };
         categories: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             urlIcon: string;
             colorHex: string;
         }[];
-        instructor: {
-            id: string;
-            description: string;
-            createdAt: Date;
-            updatedAt: Date;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            userId: string;
-            empresaId: string | null;
-        };
         attendees: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            status: boolean;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -42,23 +39,26 @@ export declare class EventsController {
             zipCode: string | null;
             role: import(".prisma/client").$Enums.Role;
             password: string;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
+        location: string;
         description: string;
         date: Date;
         time: string;
-        location: string;
         bannerUrl: string | null;
         companyId: string | null;
-        instructorId: string;
         ctaUrl: string | null;
         ctaButtonText: string;
         logoUrl: string | null;
-        createdAt: Date;
-        updatedAt: Date;
+        instructorId: string;
     })[]>;
 }

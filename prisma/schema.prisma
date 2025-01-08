@@ -70,6 +70,7 @@ model Empresa {
   instructores         Instructor[]            @relation("EmpresaInstructors")
 
   productos            Product[]
+  categorias           ProductCompanyCategory[] 
   empresaSubscriptions EmpresaSubscription[]
   bannerImage          String?
   logo                 String?
@@ -234,21 +235,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-model Product {
-  id                Int      @id @default(autoincrement())
-  name              String   @db.VarChar(200)
-  description       String?
-  cost              Decimal  @db.Decimal(10, 2)
-  discount          Decimal? @db.Decimal(10, 2)
-  productCode       String   @unique @db.VarChar(100)
-  availableQuantity Int
-  companyId         String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @default(now())
-  isFeatured        Boolean  @default(false)
 
-  company           Empresa  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-}
 
 model CourseEnrollment {
   id         String   @id @default(cuid())
@@ -414,3 +401,66 @@ enum CommentType {
   TEXT
   RATING
 }
+
+
+enum Unit {
+  ML
+  G
+  KG
+  OZ
+  L
+  FL_OZ
+  MG
+}
+
+model ProductCompanyCategory {
+  id        Int       @id @default(autoincrement())
+  name      String    @db.VarChar(100)
+  companyId String
+  company   Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  products  Product[] @relation("CategoryProducts")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now())
+
+  @@unique([name, companyId])
+  @@index([companyId])
+}
+
+model Product {
+  id                Int       @id @default(autoincrement())
+  name              String    @db.VarChar(200)
+  description       String    @db.Text
+  lab               String?
+  activeIngredients String[]
+  features          String[]
+  benefits          String[]
+  problemAddressed  String?
+  imageMain         String?
+  imageGallery      String[]
+  isFeatured        Boolean?  @default(false)
+  isBestSeller      Boolean?  @default(false)
+  isOnSale          Boolean?  @default(false)
+  companyId         String
+  company           Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  categoryId        Int
+  category          ProductCompanyCategory @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
+  presentations     Presentation[] @relation("ProductPresentations")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @default(now())
+
+  @@unique([categoryId, name])
+}
+
+model Presentation {
+  id          Int       @id @default(autoincrement())
+  productId   Int
+  product     Product   @relation("ProductPresentations", fields: [productId], references: [id], onDelete: Cascade)
+  size        Decimal
+  unit        Unit
+  description String?
+  price       Float?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+
+  @@index([productId])
+}<
