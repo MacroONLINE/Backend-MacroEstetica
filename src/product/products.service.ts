@@ -17,17 +17,19 @@ export class ProductService {
     return this.prisma.product.findMany();
   }
 
-  async findById(id: number) {
+  async findById(id: string) {
     return this.prisma.product.findUnique({
       where: { id },
     });
   }
 
   async findByCategory(categoryId: number) {
+    console.log('Buscando productos con categoryId:', categoryId);
     return this.prisma.product.findMany({
       where: { categoryId },
     });
   }
+  
 
   async findByCompany(companyId: string) {
     return this.prisma.product.findMany({
@@ -35,20 +37,23 @@ export class ProductService {
     });
   }
 
-  async findFeatured() {
+  async findFeaturedByCompany(companyId: string) {
     return this.prisma.product.findMany({
-      where: { isFeatured: true },
+      where: {
+        companyId,
+        isFeatured: true,
+      },
     });
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
+  async update(id: string, updateProductDto: UpdateProductDto) {
     return this.prisma.product.update({
       where: { id },
       data: updateProductDto,
     });
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     return this.prisma.product.delete({
       where: { id },
     });

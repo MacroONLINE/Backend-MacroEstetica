@@ -18,13 +18,13 @@ export class ProductController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: number) {
-    return this.productService.findById(+id);
+  async findById(@Param('id') id: string) {
+    return this.productService.findById(id);
   }
 
   @Get('by-category')
   async findByCategory(@Query('categoryId') categoryId: number) {
-    return this.productService.findByCategory(+categoryId);
+    return this.productService.findByCategory(categoryId);
   }
 
   @Get('by-company')
@@ -32,18 +32,18 @@ export class ProductController {
     return this.productService.findByCompany(companyId);
   }
 
-  @Get('featured')
-  async findFeatured() {
-    return this.productService.findFeatured();
+  @Get('featured/by-company')
+  async findFeaturedByCompany(@Query('companyId') companyId: string) {
+    return this.productService.findFeaturedByCompany(companyId);
   }
 
   @Patch(':id')
-  async update(@Param('id') id: number, @Body() updateProductDto: UpdateProductDto) {
-    return this.productService.update(+id, updateProductDto);
+  async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+    return this.productService.update(id, updateProductDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number) {
-    return this.productService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return this.productService.remove(id);
   }
 }

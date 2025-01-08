@@ -5,7 +5,7 @@ export declare class ProductController {
     private readonly productService;
     constructor(productService: ProductService);
     create(createProductDto: CreateProductDto): Promise<{
-        id: number;
+        id: string;
         name: string;
         description: string;
         lab: string | null;
@@ -24,7 +24,7 @@ export declare class ProductController {
         updatedAt: Date;
     }>;
     findAll(): Promise<{
-        id: number;
+        id: string;
         name: string;
         description: string;
         lab: string | null;
@@ -42,8 +42,8 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
     }[]>;
-    findById(id: number): Promise<{
-        id: number;
+    findById(id: string): Promise<{
+        id: string;
         name: string;
         description: string;
         lab: string | null;
@@ -62,7 +62,7 @@ export declare class ProductController {
         updatedAt: Date;
     }>;
     findByCategory(categoryId: number): Promise<{
-        id: number;
+        id: string;
         name: string;
         description: string;
         lab: string | null;
@@ -81,7 +81,7 @@ export declare class ProductController {
         updatedAt: Date;
     }[]>;
     findByCompany(companyId: string): Promise<{
-        id: number;
+        id: string;
         name: string;
         description: string;
         lab: string | null;
@@ -99,8 +99,8 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
     }[]>;
-    findFeatured(): Promise<{
-        id: number;
+    findFeaturedByCompany(companyId: string): Promise<{
+        id: string;
         name: string;
         description: string;
         lab: string | null;
@@ -118,8 +118,8 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
     }[]>;
-    update(id: number, updateProductDto: UpdateProductDto): Promise<{
-        id: number;
+    update(id: string, updateProductDto: UpdateProductDto): Promise<{
+        id: string;
         name: string;
         description: string;
         lab: string | null;
@@ -137,8 +137,8 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
     }>;
-    remove(id: number): Promise<{
-        id: number;
+    remove(id: string): Promise<{
+        id: string;
         name: string;
         description: string;
         lab: string | null;

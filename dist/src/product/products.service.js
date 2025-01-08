@@ -30,6 +30,7 @@ let ProductService = class ProductService {
         });
     }
     async findByCategory(categoryId) {
+        console.log('Buscando productos con categoryId:', categoryId);
         return this.prisma.product.findMany({
             where: { categoryId },
         });
@@ -39,9 +40,12 @@ let ProductService = class ProductService {
             where: { companyId },
         });
     }
-    async findFeatured() {
+    async findFeaturedByCompany(companyId) {
         return this.prisma.product.findMany({
-            where: { isFeatured: true },
+            where: {
+                companyId,
+                isFeatured: true,
+            },
         });
     }
     async update(id, updateProductDto) {

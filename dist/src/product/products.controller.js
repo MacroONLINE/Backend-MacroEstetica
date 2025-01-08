@@ -28,22 +28,22 @@ let ProductController = class ProductController {
         return this.productService.findAll();
     }
     async findById(id) {
-        return this.productService.findById(+id);
+        return this.productService.findById(id);
     }
     async findByCategory(categoryId) {
-        return this.productService.findByCategory(+categoryId);
+        return this.productService.findByCategory(categoryId);
     }
     async findByCompany(companyId) {
         return this.productService.findByCompany(companyId);
     }
-    async findFeatured() {
-        return this.productService.findFeatured();
+    async findFeaturedByCompany(companyId) {
+        return this.productService.findFeaturedByCompany(companyId);
     }
     async update(id, updateProductDto) {
-        return this.productService.update(+id, updateProductDto);
+        return this.productService.update(id, updateProductDto);
     }
     async remove(id) {
-        return this.productService.remove(+id);
+        return this.productService.remove(id);
     }
 };
 exports.ProductController = ProductController;
@@ -64,7 +64,7 @@ __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findById", null);
 __decorate([
@@ -82,24 +82,25 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findByCompany", null);
 __decorate([
-    (0, common_1.Get)('featured'),
+    (0, common_1.Get)('featured/by-company'),
+    __param(0, (0, common_1.Query)('companyId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], ProductController.prototype, "findFeatured", null);
+], ProductController.prototype, "findFeaturedByCompany", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number, update_product_dto_1.UpdateProductDto]),
+    __metadata("design:paramtypes", [String, update_product_dto_1.UpdateProductDto]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "remove", null);
 exports.ProductController = ProductController = __decorate([

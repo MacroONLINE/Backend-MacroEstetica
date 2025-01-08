@@ -427,9 +427,9 @@ model ProductCompanyCategory {
 }
 
 model Product {
-  id                Int       @id @default(autoincrement())
-  name              String    @db.VarChar(200)
-  description       String    @db.Text
+  id                String               @id @default(cuid()) // Cambiado a String con cuid()
+  name              String               @db.VarChar(200)
+  description       String               @db.Text
   lab               String?
   activeIngredients String[]
   features          String[]
@@ -437,23 +437,24 @@ model Product {
   problemAddressed  String?
   imageMain         String?
   imageGallery      String[]
-  isFeatured        Boolean?  @default(false)
-  isBestSeller      Boolean?  @default(false)
-  isOnSale          Boolean?  @default(false)
+  isFeatured        Boolean?             @default(false)
+  isBestSeller      Boolean?             @default(false)
+  isOnSale          Boolean?             @default(false)
   companyId         String
-  company           Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company           Empresa              @relation(fields: [companyId], references: [id], onDelete: Cascade)
   categoryId        Int
   category          ProductCompanyCategory @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
-  presentations     Presentation[] @relation("ProductPresentations")
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @default(now())
+  presentations     Presentation[]       @relation("ProductPresentations")
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @default(now())
 
   @@unique([categoryId, name])
 }
 
+
 model Presentation {
   id          Int       @id @default(autoincrement())
-  productId   Int
+  productId   String
   product     Product   @relation("ProductPresentations", fields: [productId], references: [id], onDelete: Cascade)
   size        Decimal
   unit        Unit
