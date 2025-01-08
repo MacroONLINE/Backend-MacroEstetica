@@ -8,7 +8,7 @@ import { UsersController } from './users/users.controller';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CoursesModule } from './courses/courses.module';
-import { ProductsModule } from './products/products.module';
+import { ProductModule } from './product/products.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { PaymentModule } from './payment/payment.module';
 import { ResetPasswordModule } from './reset-password/reset-password.module';
@@ -22,7 +22,7 @@ import { EventsModule } from './events/events.module';
     UsersModule, 
     AuthModule,
     CoursesModule,
-    ProductsModule,
+    ProductModule,
     CloudinaryModule,
     PaymentModule,
     ResetPasswordModule,

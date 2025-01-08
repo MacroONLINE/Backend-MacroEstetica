@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const client_1 = require("@prisma/client");
 let UsersService = class UsersService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -27,9 +28,13 @@ let UsersService = class UsersService {
         });
     }
     async updateUser(id, data) {
+        const updatedData = {
+            ...data,
+            role: client_1.Role.COSMETOLOGO,
+        };
         return this.prisma.user.update({
             where: { id },
-            data,
+            data: updatedData,
             include: {
                 medico: true,
                 empresa: true,

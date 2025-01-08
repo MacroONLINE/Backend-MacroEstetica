@@ -3,6 +3,8 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User, Medico, Empresa, Instructor } from '@prisma/client';
+import { Role } from '@prisma/client';
+
 
 @Injectable()
 export class UsersService {
@@ -20,12 +22,15 @@ export class UsersService {
     });
   }
 
-  // Actualizar perfil de usuario (Paso 2)
   async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
-    // Solo actualiza el perfil básico del usuario sin manejar datos específicos de roles
+    const updatedData = {
+      ...data,
+      role: Role.COSMETOLOGO, // Usa el enum Role en lugar de un string
+    };
+  
     return this.prisma.user.update({
       where: { id },
-      data,
+      data: updatedData,
       include: {
         medico: true,
         empresa: true,
@@ -33,6 +38,8 @@ export class UsersService {
       },
     });
   }
+  
+  
 
   // Crear o actualizar información de Medico
   async createOrUpdateMedico(

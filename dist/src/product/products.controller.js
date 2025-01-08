@@ -11,11 +11,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductController = void 0;
 const common_1 = require("@nestjs/common");
-const product_service_1 = require("./product.service");
+const products_service_1 = require("./products.service");
 const create_product_dto_1 = require("./dto/create-product.dto");
 const update_product_dto_1 = require("./dto/update-product.dto");
 let ProductController = class ProductController {
@@ -105,6 +104,6 @@ __decorate([
 ], ProductController.prototype, "remove", null);
 exports.ProductController = ProductController = __decorate([
     (0, common_1.Controller)('product'),
-    __metadata("design:paramtypes", [typeof (_a = typeof product_service_1.ProductService !== "undefined" && product_service_1.ProductService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [products_service_1.ProductService])
 ], ProductController);
 //# sourceMappingURL=products.controller.js.map

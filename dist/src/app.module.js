@@ -16,7 +16,7 @@ const users_controller_1 = require("./users/users.controller");
 const users_module_1 = require("./users/users.module");
 const auth_module_1 = require("./auth/auth.module");
 const courses_module_1 = require("./courses/courses.module");
-const products_module_1 = require("./products/products.module");
+const products_module_1 = require("./product/products.module");
 const cloudinary_module_1 = require("./cloudinary/cloudinary.module");
 const payment_module_1 = require("./payment/payment.module");
 const reset_password_module_1 = require("./reset-password/reset-password.module");
@@ -33,7 +33,7 @@ exports.AppModule = AppModule = __decorate([
             users_module_1.UsersModule,
             auth_module_1.AuthModule,
             courses_module_1.CoursesModule,
-            products_module_1.ProductsModule,
+            products_module_1.ProductModule,
             cloudinary_module_1.CloudinaryModule,
             payment_module_1.PaymentModule,
             reset_password_module_1.ResetPasswordModule,
