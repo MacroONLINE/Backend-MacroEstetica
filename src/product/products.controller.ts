@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query, BadRequestException } from '@nestjs/common';
 import { ProductService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -23,9 +23,15 @@ export class ProductController {
   }
 
   @Get('by-category')
-  async findByCategory(@Query('categoryId') categoryId: number) {
-    return this.productService.findByCategory(categoryId);
+  async findByCategory(@Query('categoryId') categoryId: string) {
+    const id = parseInt(categoryId, 10);
+      if (isNaN(id)) {
+      throw new BadRequestException('El categoryId debe ser un número entero');
+    }
+  
+      return this.productService.findByCategory(id);
   }
+  
 
   @Get('by-company')
   async findByCompany(@Query('companyId') companyId: string) {

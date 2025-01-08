@@ -19,25 +19,44 @@ let ProductService = class ProductService {
     async create(createProductDto) {
         return this.prisma.product.create({
             data: createProductDto,
+            include: {
+                presentations: true,
+            },
         });
     }
     async findAll() {
-        return this.prisma.product.findMany();
-    }
-    async findById(id) {
-        return this.prisma.product.findUnique({
-            where: { id },
+        return this.prisma.product.findMany({
+            include: {
+                presentations: true,
+            },
         });
     }
+    async findById(id) {
+        const product = await this.prisma.product.findUnique({
+            where: { id },
+            include: {
+                presentations: true,
+            },
+        });
+        if (!product) {
+            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
+        }
+        return product;
+    }
     async findByCategory(categoryId) {
-        console.log('Buscando productos con categoryId:', categoryId);
         return this.prisma.product.findMany({
             where: { categoryId },
+            include: {
+                presentations: true,
+            },
         });
     }
     async findByCompany(companyId) {
         return this.prisma.product.findMany({
             where: { companyId },
+            include: {
+                presentations: true,
+            },
         });
     }
     async findFeaturedByCompany(companyId) {
@@ -46,17 +65,26 @@ let ProductService = class ProductService {
                 companyId,
                 isFeatured: true,
             },
+            include: {
+                presentations: true,
+            },
         });
     }
     async update(id, updateProductDto) {
         return this.prisma.product.update({
             where: { id },
             data: updateProductDto,
+            include: {
+                presentations: true,
+            },
         });
     }
     async remove(id) {
         return this.prisma.product.delete({
             where: { id },
+            include: {
+                presentations: true,
+            },
         });
     }
 };

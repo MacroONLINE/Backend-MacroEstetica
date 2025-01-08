@@ -31,7 +31,11 @@ let ProductController = class ProductController {
         return this.productService.findById(id);
     }
     async findByCategory(categoryId) {
-        return this.productService.findByCategory(categoryId);
+        const id = parseInt(categoryId, 10);
+        if (isNaN(id)) {
+            throw new common_1.BadRequestException('El categoryId debe ser un número entero');
+        }
+        return this.productService.findByCategory(id);
     }
     async findByCompany(companyId) {
         return this.productService.findByCompany(companyId);
@@ -71,7 +75,7 @@ __decorate([
     (0, common_1.Get)('by-category'),
     __param(0, (0, common_1.Query)('categoryId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Number]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findByCategory", null);
 __decorate([

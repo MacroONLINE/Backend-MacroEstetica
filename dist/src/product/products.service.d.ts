@@ -5,6 +5,17 @@ export declare class ProductService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(createProductDto: CreateProductDto): Promise<{
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
         id: string;
         name: string;
         description: string;
@@ -23,7 +34,18 @@ export declare class ProductService {
         createdAt: Date;
         updatedAt: Date;
     }>;
-    findAll(): Promise<{
+    findAll(): Promise<({
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
         id: string;
         name: string;
         description: string;
@@ -41,8 +63,19 @@ export declare class ProductService {
         categoryId: number;
         createdAt: Date;
         updatedAt: Date;
-    }[]>;
+    })[]>;
     findById(id: string): Promise<{
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
         id: string;
         name: string;
         description: string;
@@ -61,7 +94,18 @@ export declare class ProductService {
         createdAt: Date;
         updatedAt: Date;
     }>;
-    findByCategory(categoryId: number): Promise<{
+    findByCategory(categoryId: number): Promise<({
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
         id: string;
         name: string;
         description: string;
@@ -79,8 +123,19 @@ export declare class ProductService {
         categoryId: number;
         createdAt: Date;
         updatedAt: Date;
-    }[]>;
-    findByCompany(companyId: string): Promise<{
+    })[]>;
+    findByCompany(companyId: string): Promise<({
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
         id: string;
         name: string;
         description: string;
@@ -98,8 +153,19 @@ export declare class ProductService {
         categoryId: number;
         createdAt: Date;
         updatedAt: Date;
-    }[]>;
-    findFeaturedByCompany(companyId: string): Promise<{
+    })[]>;
+    findFeaturedByCompany(companyId: string): Promise<({
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
         id: string;
         name: string;
         description: string;
@@ -117,8 +183,19 @@ export declare class ProductService {
         categoryId: number;
         createdAt: Date;
         updatedAt: Date;
-    }[]>;
+    })[]>;
     update(id: string, updateProductDto: UpdateProductDto): Promise<{
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
         id: string;
         name: string;
         description: string;
@@ -138,6 +215,17 @@ export declare class ProductService {
         updatedAt: Date;
     }>;
     remove(id: string): Promise<{
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
         id: string;
         name: string;
         description: string;
