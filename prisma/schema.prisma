@@ -463,4 +463,4 @@ model Presentation {
   updatedAt   DateTime  @default(now())
 
   @@index([productId])
-}<
+}
