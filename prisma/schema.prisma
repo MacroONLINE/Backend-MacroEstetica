@@ -465,3 +465,25 @@ model Presentation {
 
   @@index([productId])
 }
+
+model Message {
+  id          String    @id @default(cuid())
+  name        String
+  phone       String
+  email       String
+  description String
+  userId      String    // ID del usuario que envía el mensaje
+  empresaId   String    // ID de la empresa receptora
+  productId   String?   // ID opcional del producto relacionado
+  type        MessageType // Enum para el tipo de mensaje
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+}
+
+enum MessageType {
+  direct
+  product
+}
+
+
+
