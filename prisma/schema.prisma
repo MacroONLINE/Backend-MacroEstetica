@@ -56,6 +56,7 @@ model Medico {
 model Empresa {
   id                   String                  @id @default(cuid())
   dni                  String?
+  legalName            String?  
   name                 String
   giro                 Giro                    @default(EMPRESA_PROFESIONAL_PERFIL)
   categoria            EmpresaCategory         @default(EMPRESA_PERFIL)

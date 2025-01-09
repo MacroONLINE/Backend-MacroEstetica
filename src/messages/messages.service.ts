@@ -10,17 +10,15 @@ export class MessagesService {
   async createMessage(createMessageDto: CreateMessageDto) {
     const { name, phone, email, description, userId, empresaId, productId, type } = createMessageDto;
 
-    // Verificar si la empresa existe
     const empresa = await this.prisma.empresa.findUnique({
       where: { id: empresaId },
-      include: { user: true }, // Incluye la relación con el usuario de la empresa
+      include: { user: true }, 
     });
 
     if (!empresa) {
       throw new NotFoundException('La empresa no fue encontrada.');
     }
 
-    // Verificar si el usuario existe
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -29,7 +27,6 @@ export class MessagesService {
       throw new NotFoundException('El usuario no fue encontrado.');
     }
 
-    // Guardar el mensaje en la base de datos
     const message = await this.prisma.message.create({
       data: {
         name,
@@ -47,14 +44,14 @@ export class MessagesService {
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT, 10),
-      secure: process.env.SMTP_SECURE === 'true', // true para 465, false para otros puertos
+      secure: process.env.SMTP_SECURE === 'true', 
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
     });
 
-    const empresaEmail = empresa.user.email; // Supongamos que el correo está en el usuario relacionado con la empresa.
+    const empresaEmail = empresa.user.email; 
 
     await transporter.sendMail({
       from: `"Plataforma" <${process.env.SMTP_USER}>`,

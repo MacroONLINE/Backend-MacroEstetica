@@ -7,20 +7,20 @@ export declare class ProductController {
     create(createProductDto: CreateProductDto): Promise<{
         presentations: {
             id: number;
+            description: string | null;
+            productId: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             price: number | null;
-            productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         companyId: string;
         isFeatured: boolean | null;
         categoryId: number;
@@ -37,20 +37,20 @@ export declare class ProductController {
     findAll(): Promise<({
         presentations: {
             id: number;
+            description: string | null;
+            productId: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             price: number | null;
-            productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         companyId: string;
         isFeatured: boolean | null;
         categoryId: number;
@@ -67,20 +67,20 @@ export declare class ProductController {
     findById(id: string): Promise<{
         presentations: {
             id: number;
+            description: string | null;
+            productId: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             price: number | null;
-            productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         companyId: string;
         isFeatured: boolean | null;
         categoryId: number;
@@ -97,20 +97,20 @@ export declare class ProductController {
     findByCategory(categoryId: string): Promise<({
         presentations: {
             id: number;
+            description: string | null;
+            productId: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             price: number | null;
-            productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         companyId: string;
         isFeatured: boolean | null;
         categoryId: number;
@@ -127,20 +127,20 @@ export declare class ProductController {
     findByCompany(companyId: string): Promise<({
         presentations: {
             id: number;
+            description: string | null;
+            productId: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             price: number | null;
-            productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         companyId: string;
         isFeatured: boolean | null;
         categoryId: number;
@@ -157,20 +157,20 @@ export declare class ProductController {
     findFeaturedByCompany(companyId: string): Promise<({
         presentations: {
             id: number;
+            description: string | null;
+            productId: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             price: number | null;
-            productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         companyId: string;
         isFeatured: boolean | null;
         categoryId: number;
@@ -187,20 +187,20 @@ export declare class ProductController {
     update(id: string, updateProductDto: UpdateProductDto): Promise<{
         presentations: {
             id: number;
+            description: string | null;
+            productId: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             price: number | null;
-            productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         companyId: string;
         isFeatured: boolean | null;
         categoryId: number;
@@ -217,20 +217,20 @@ export declare class ProductController {
     remove(id: string): Promise<{
         presentations: {
             id: number;
+            description: string | null;
+            productId: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
             price: number | null;
-            productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
+        name: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         companyId: string;
         isFeatured: boolean | null;
         categoryId: number;

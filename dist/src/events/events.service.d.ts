@@ -5,20 +5,20 @@ export declare class EventsService {
     getEventsByEmpresaId(empresaId: string): Promise<({
         instructor: {
             id: string;
-            status: string;
+            description: string;
+            userId: string;
+            empresaId: string | null;
+            type: import(".prisma/client").$Enums.ProfessionType;
             createdAt: Date;
             updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
+            status: string;
             profession: import(".prisma/client").$Enums.Profession;
-            description: string;
             experienceYears: number;
             certificationsUrl: string;
-            empresaId: string | null;
         };
         categories: {
-            name: string;
             id: string;
+            name: string;
             createdAt: Date;
             updatedAt: Date;
             urlIcon: string;
@@ -26,10 +26,12 @@ export declare class EventsService {
         }[];
         attendees: {
             id: string;
-            firstName: string | null;
-            lastName: string | null;
             phone: string | null;
             email: string;
+            createdAt: Date;
+            updatedAt: Date;
+            firstName: string | null;
+            lastName: string | null;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -40,18 +42,16 @@ export declare class EventsService {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
     } & {
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
         title: string;
         location: string;
-        description: string;
         date: Date;
         time: string;
         bannerUrl: string | null;

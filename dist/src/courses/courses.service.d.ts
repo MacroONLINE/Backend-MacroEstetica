@@ -11,11 +11,11 @@ export declare class CoursesService {
     private mapToCourseResponseDto;
     createCourse(data: CreateCourseDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        rating: number;
         title: string;
-        description: string;
+        rating: number;
         bannerUrl: string;
         instructorId: string | null;
         level: string;
@@ -42,32 +42,32 @@ export declare class CoursesService {
     getCoursesByTarget(target: string): Promise<CourseResponseDto[]>;
     createModule(data: CreateModuleDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
-        description: string;
     }>;
     createClass(data: CreateClassDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         moduleId: string | null;
     }>;
     createComment(data: CreateCommentDto): Promise<{
         id: string;
+        userId: string;
+        type: import(".prisma/client").$Enums.CommentType;
         createdAt: Date;
         updatedAt: Date;
-        type: import(".prisma/client").$Enums.CommentType;
-        rating: number;
         content: string;
+        rating: number;
         classId: string | null;
         courseId: string | null;
-        userId: string;
     }>;
     createCategory(data: CreateCategoryDto): Promise<{
-        name: string;
         id: string;
+        name: string;
         createdAt: Date;
         updatedAt: Date;
         urlIcon: string;

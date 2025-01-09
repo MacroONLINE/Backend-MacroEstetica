@@ -11,11 +11,11 @@ export declare class CoursesController {
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        rating: number;
         title: string;
-        description: string;
+        rating: number;
         bannerUrl: string;
         instructorId: string | null;
         level: string;
@@ -36,32 +36,32 @@ export declare class CoursesController {
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
-        description: string;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         moduleId: string | null;
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
         id: string;
+        userId: string;
+        type: import(".prisma/client").$Enums.CommentType;
         createdAt: Date;
         updatedAt: Date;
-        type: import(".prisma/client").$Enums.CommentType;
-        rating: number;
         content: string;
+        rating: number;
         classId: string | null;
         courseId: string | null;
-        userId: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
-        name: string;
         id: string;
+        name: string;
         createdAt: Date;
         updatedAt: Date;
         urlIcon: string;
