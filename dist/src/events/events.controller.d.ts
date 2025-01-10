@@ -5,16 +5,16 @@ export declare class EventsController {
     getEventsByEmpresa(empresaId: string): Promise<({
         instructor: {
             id: string;
-            description: string;
-            userId: string;
-            empresaId: string | null;
-            type: import(".prisma/client").$Enums.ProfessionType;
+            status: string;
             createdAt: Date;
             updatedAt: Date;
-            status: string;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            userId: string;
             profession: import(".prisma/client").$Enums.Profession;
+            description: string;
             experienceYears: number;
             certificationsUrl: string;
+            empresaId: string | null;
         };
         categories: {
             id: string;
@@ -26,12 +26,10 @@ export declare class EventsController {
         }[];
         attendees: {
             id: string;
-            phone: string | null;
-            email: string;
-            createdAt: Date;
-            updatedAt: Date;
             firstName: string | null;
             lastName: string | null;
+            phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -42,20 +40,22 @@ export declare class EventsController {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
     } & {
+        companyId: string | null;
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
         title: string;
         location: string;
+        description: string;
         date: Date;
         time: string;
         bannerUrl: string | null;
-        companyId: string | null;
         ctaUrl: string | null;
         ctaButtonText: string;
         logoUrl: string | null;

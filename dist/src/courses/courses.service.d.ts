@@ -10,12 +10,13 @@ export declare class CoursesService {
     constructor(prisma: PrismaService);
     private mapToCourseResponseDto;
     createCourse(data: CreateCourseDto): Promise<{
+        categoryId: string;
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         rating: number;
+        title: string;
+        description: string;
         bannerUrl: string;
         instructorId: string | null;
         level: string;
@@ -32,7 +33,6 @@ export declare class CoursesService {
         totalHours: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
-        categoryId: string;
     }>;
     getCourseById(courseId: string): Promise<CourseResponseDto>;
     getAllCourses(): Promise<CourseResponseDto[]>;
@@ -42,28 +42,28 @@ export declare class CoursesService {
     getCoursesByTarget(target: string): Promise<CourseResponseDto[]>;
     createModule(data: CreateModuleDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
+        description: string;
     }>;
     createClass(data: CreateClassDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         moduleId: string | null;
     }>;
     createComment(data: CreateCommentDto): Promise<{
         id: string;
-        userId: string;
-        type: import(".prisma/client").$Enums.CommentType;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
+        type: import(".prisma/client").$Enums.CommentType;
         rating: number;
+        content: string;
         classId: string | null;
         courseId: string | null;
+        userId: string;
     }>;
     createCategory(data: CreateCategoryDto): Promise<{
         id: string;

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Message" ALTER COLUMN "userId" DROP NOT NULL,
+ALTER COLUMN "empresaId" DROP NOT NULL;

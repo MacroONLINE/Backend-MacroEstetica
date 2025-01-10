@@ -24,24 +24,34 @@ let ProductController = class ProductController {
     async create(createProductDto) {
         return this.productService.create(createProductDto);
     }
-    async findAll() {
-        return this.productService.findAll();
+    async findAll(companyId) {
+        if (!companyId) {
+            throw new common_1.NotFoundException('Debe especificar un ID de empresa');
+        }
+        return this.productService.findAll(companyId);
+    }
+    async findByCategory(companyId, categoryId) {
+        if (!companyId) {
+            throw new common_1.NotFoundException('Debe especificar un ID de empresa');
+        }
+        const products = await this.productService.findByCategory(companyId, Number(categoryId));
+        if (!products || products.length === 0) {
+            throw new common_1.NotFoundException(`No se encontraron productos para la categoría ${categoryId} en la empresa ${companyId}`);
+        }
+        return products;
+    }
+    async findFeatured(companyId) {
+        if (!companyId) {
+            throw new common_1.NotFoundException('Debe especificar un ID de empresa');
+        }
+        return this.productService.findFeaturedByCompany(companyId);
     }
     async findById(id) {
-        return this.productService.findById(id);
-    }
-    async findByCategory(categoryId) {
-        const id = parseInt(categoryId, 10);
-        if (isNaN(id)) {
-            throw new common_1.BadRequestException('El categoryId debe ser un número entero');
+        const product = await this.productService.findById(id);
+        if (!product) {
+            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
         }
-        return this.productService.findByCategory(id);
-    }
-    async findByCompany(companyId) {
-        return this.productService.findByCompany(companyId);
-    }
-    async findFeaturedByCompany(companyId) {
-        return this.productService.findFeaturedByCompany(companyId);
+        return product;
     }
     async update(id, updateProductDto) {
         return this.productService.update(id, updateProductDto);
@@ -60,10 +70,26 @@ __decorate([
 ], ProductController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('companyId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('by-category'),
+    __param(0, (0, common_1.Query)('companyId')),
+    __param(1, (0, common_1.Query)('categoryId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "findByCategory", null);
+__decorate([
+    (0, common_1.Get)('featured'),
+    __param(0, (0, common_1.Query)('companyId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "findFeatured", null);
 __decorate([
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -71,27 +97,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findById", null);
-__decorate([
-    (0, common_1.Get)('by-category'),
-    __param(0, (0, common_1.Query)('categoryId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ProductController.prototype, "findByCategory", null);
-__decorate([
-    (0, common_1.Get)('by-company'),
-    __param(0, (0, common_1.Query)('companyId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ProductController.prototype, "findByCompany", null);
-__decorate([
-    (0, common_1.Get)('featured/by-company'),
-    __param(0, (0, common_1.Query)('companyId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ProductController.prototype, "findFeaturedByCompany", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),

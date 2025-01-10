@@ -8,12 +8,12 @@ export declare class MessagesController {
         name: string;
         phone: string;
         email: string;
-        description: string;
-        userId: string;
-        empresaId: string;
-        productId: string | null;
-        type: import(".prisma/client").$Enums.MessageType;
         createdAt: Date;
         updatedAt: Date;
+        type: import(".prisma/client").$Enums.MessageType;
+        userId: string | null;
+        description: string;
+        empresaId: string | null;
+        productId: string | null;
     }>;
 }

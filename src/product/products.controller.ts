@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, Query, NotFoundException } from '@nestjs/common';
 import { ProductService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -13,34 +13,44 @@ export class ProductController {
   }
 
   @Get()
-  async findAll() {
-    return this.productService.findAll();
+  async findAll(@Query('companyId') companyId: string) {
+    if (!companyId) {
+      throw new NotFoundException('Debe especificar un ID de empresa');
+    }
+    return this.productService.findAll(companyId);
+  }
+
+  @Get('by-category')
+  async findByCategory(
+    @Query('companyId') companyId: string,
+    @Query('categoryId') categoryId: string, // Recibido como string desde la query
+  ) {
+    if (!companyId) {
+      throw new NotFoundException('Debe especificar un ID de empresa');
+    }
+    const products = await this.productService.findByCategory(companyId, Number(categoryId)); // Convertir a número
+    if (!products || products.length === 0) {
+      throw new NotFoundException(`No se encontraron productos para la categoría ${categoryId} en la empresa ${companyId}`);
+    }
+    return products;
+  }
+  
+
+  @Get('featured')
+  async findFeatured(@Query('companyId') companyId: string) {
+    if (!companyId) {
+      throw new NotFoundException('Debe especificar un ID de empresa');
+    }
+    return this.productService.findFeaturedByCompany(companyId);
   }
 
   @Get(':id')
   async findById(@Param('id') id: string) {
-    return this.productService.findById(id);
-  }
-
-  @Get('by-category')
-  async findByCategory(@Query('categoryId') categoryId: string) {
-    const id = parseInt(categoryId, 10);
-      if (isNaN(id)) {
-      throw new BadRequestException('El categoryId debe ser un número entero');
+    const product = await this.productService.findById(id);
+    if (!product) {
+      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
     }
-  
-      return this.productService.findByCategory(id);
-  }
-  
-
-  @Get('by-company')
-  async findByCompany(@Query('companyId') companyId: string) {
-    return this.productService.findByCompany(companyId);
-  }
-
-  @Get('featured/by-company')
-  async findFeaturedByCompany(@Query('companyId') companyId: string) {
-    return this.productService.findFeaturedByCompany(companyId);
+    return product;
   }
 
   @Patch(':id')

@@ -20,12 +20,10 @@ export declare class UsersService {
     }>;
     checkEmail(email: string): Promise<{
         id: string;
-        phone: string | null;
-        email: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string | null;
         lastName: string | null;
+        phone: string | null;
+        email: string;
         emailVerified: Date | null;
         address: string | null;
         province: string | null;
@@ -36,6 +34,8 @@ export declare class UsersService {
         role: import(".prisma/client").$Enums.Role;
         password: string;
         status: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         newsletter: boolean;
         userSubscription: string | null;
     }>;

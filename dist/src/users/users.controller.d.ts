@@ -24,33 +24,33 @@ export declare class UsersController {
     }>;
     updateMedico(req: any, file: Express.Multer.File, data: UpdateMedicoDto): Promise<{
         id: string;
-        userId: string;
-        type: import(".prisma/client").$Enums.ProfessionType;
         createdAt: Date;
         updatedAt: Date;
+        type: import(".prisma/client").$Enums.ProfessionType;
+        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
         verification: string;
     }>;
     getMedico(req: any): Promise<{
         id: string;
-        userId: string;
-        type: import(".prisma/client").$Enums.ProfessionType;
         createdAt: Date;
         updatedAt: Date;
+        type: import(".prisma/client").$Enums.ProfessionType;
+        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
         verification: string;
     }>;
     updateEmpresa(data: CreateEmpresaDto): Promise<{
         id: string;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         dni: string | null;
         legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -63,15 +63,15 @@ export declare class UsersController {
     }>;
     getEmpresa(req: any): Promise<{
         id: string;
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
-        userId: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         dni: string | null;
         legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -84,38 +84,36 @@ export declare class UsersController {
     }>;
     updateInstructor(data: UpdateInstructorDto): Promise<{
         id: string;
-        description: string;
-        userId: string;
-        empresaId: string | null;
-        type: import(".prisma/client").$Enums.ProfessionType;
+        status: string;
         createdAt: Date;
         updatedAt: Date;
-        status: string;
+        type: import(".prisma/client").$Enums.ProfessionType;
+        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
+        description: string;
         experienceYears: number;
         certificationsUrl: string;
+        empresaId: string | null;
     }>;
     getInstructor(req: any): Promise<{
         id: string;
-        description: string;
-        userId: string;
-        empresaId: string | null;
-        type: import(".prisma/client").$Enums.ProfessionType;
+        status: string;
         createdAt: Date;
         updatedAt: Date;
-        status: string;
+        type: import(".prisma/client").$Enums.ProfessionType;
+        userId: string;
         profession: import(".prisma/client").$Enums.Profession;
+        description: string;
         experienceYears: number;
         certificationsUrl: string;
+        empresaId: string | null;
     }>;
     findUserById(id: string): Promise<{
         id: string;
-        phone: string | null;
-        email: string;
-        createdAt: Date;
-        updatedAt: Date;
         firstName: string | null;
         lastName: string | null;
+        phone: string | null;
+        email: string;
         emailVerified: Date | null;
         address: string | null;
         province: string | null;
@@ -125,6 +123,8 @@ export declare class UsersController {
         zipCode: string | null;
         role: import(".prisma/client").$Enums.Role;
         status: boolean;
+        createdAt: Date;
+        updatedAt: Date;
         newsletter: boolean;
         userSubscription: string | null;
     }>;

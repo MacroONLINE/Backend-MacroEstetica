@@ -19,41 +19,22 @@ let ProductService = class ProductService {
     async create(createProductDto) {
         return this.prisma.product.create({
             data: createProductDto,
-            include: {
-                presentations: true,
-            },
         });
     }
-    async findAll() {
-        return this.prisma.product.findMany({
-            include: {
-                presentations: true,
-            },
-        });
-    }
-    async findById(id) {
-        const product = await this.prisma.product.findUnique({
-            where: { id },
-            include: {
-                presentations: true,
-            },
-        });
-        if (!product) {
-            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
-        }
-        return product;
-    }
-    async findByCategory(categoryId) {
-        return this.prisma.product.findMany({
-            where: { categoryId },
-            include: {
-                presentations: true,
-            },
-        });
-    }
-    async findByCompany(companyId) {
+    async findAll(companyId) {
         return this.prisma.product.findMany({
             where: { companyId },
+            include: {
+                presentations: true,
+            },
+        });
+    }
+    async findByCategory(companyId, categoryId) {
+        return this.prisma.product.findMany({
+            where: {
+                companyId,
+                categoryId: Number(categoryId),
+            },
             include: {
                 presentations: true,
             },
@@ -70,22 +51,45 @@ let ProductService = class ProductService {
             },
         });
     }
+    async findById(id) {
+        const product = await this.prisma.product.findUnique({
+            where: {
+                id,
+            },
+            include: {
+                presentations: true,
+            },
+        });
+        if (!product) {
+            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
+        }
+        return product;
+    }
     async update(id, updateProductDto) {
-        return this.prisma.product.update({
-            where: { id },
+        const product = await this.prisma.product.update({
+            where: {
+                id,
+            },
             data: updateProductDto,
             include: {
                 presentations: true,
             },
         });
+        if (!product) {
+            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
+        }
+        return product;
     }
     async remove(id) {
-        return this.prisma.product.delete({
-            where: { id },
-            include: {
-                presentations: true,
+        const product = await this.prisma.product.delete({
+            where: {
+                id,
             },
         });
+        if (!product) {
+            throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
+        }
+        return { message: 'Producto eliminado correctamente' };
     }
 };
 exports.ProductService = ProductService;

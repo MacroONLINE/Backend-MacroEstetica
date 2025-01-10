@@ -10,12 +10,13 @@ export declare class CoursesController {
     private readonly coursesService;
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
+        categoryId: string;
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
         rating: number;
+        title: string;
+        description: string;
         bannerUrl: string;
         instructorId: string | null;
         level: string;
@@ -32,32 +33,31 @@ export declare class CoursesController {
         totalHours: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
-        categoryId: string;
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
+        description: string;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         moduleId: string | null;
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
         id: string;
-        userId: string;
-        type: import(".prisma/client").$Enums.CommentType;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
+        type: import(".prisma/client").$Enums.CommentType;
         rating: number;
+        content: string;
         classId: string | null;
         courseId: string | null;
+        userId: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
         id: string;

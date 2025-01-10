@@ -10,45 +10,10 @@ export class ProductService {
   async create(createProductDto: CreateProductDto) {
     return this.prisma.product.create({
       data: createProductDto,
-      include: {
-        presentations: true, // Incluir presentaciones al crear
-      },
     });
   }
 
-  async findAll() {
-    return this.prisma.product.findMany({
-      include: {
-        presentations: true,
-      },
-    });
-  }
-
-  async findById(id: string) {
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-      include: {
-        presentations: true,
-      },
-    });
-
-    if (!product) {
-      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
-    }
-
-    return product;
-  }
-
-  async findByCategory(categoryId: number) {
-    return this.prisma.product.findMany({
-      where: { categoryId },
-      include: {
-        presentations: true,
-      },
-    });
-  }
-
-  async findByCompany(companyId: string) {
+  async findAll(companyId: string) {
     return this.prisma.product.findMany({
       where: { companyId },
       include: {
@@ -56,6 +21,19 @@ export class ProductService {
       },
     });
   }
+
+  async findByCategory(companyId: string, categoryId: number) {
+    return this.prisma.product.findMany({
+      where: {
+        companyId,
+        categoryId: Number(categoryId), // Asegúrate de que sea un número
+      },
+      include: {
+        presentations: true,
+      },
+    });
+  }
+  
 
   async findFeaturedByCompany(companyId: string) {
     return this.prisma.product.findMany({
@@ -69,22 +47,52 @@ export class ProductService {
     });
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
-    return this.prisma.product.update({
-      where: { id },
-      data: updateProductDto,
+  async findById(id: string) {
+    const product = await this.prisma.product.findUnique({
+      where: {
+        id,
+      },
       include: {
-        presentations: true, // Incluir presentaciones al actualizar
+        presentations: true,
       },
     });
+
+    if (!product) {
+      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
+    }
+
+    return product;
+  }
+
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    const product = await this.prisma.product.update({
+      where: {
+        id,
+      },
+      data: updateProductDto,
+      include: {
+        presentations: true,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
+    }
+
+    return product;
   }
 
   async remove(id: string) {
-    return this.prisma.product.delete({
-      where: { id },
-      include: {
-        presentations: true, // Opcional: incluir presentaciones al eliminar
+    const product = await this.prisma.product.delete({
+      where: {
+        id,
       },
     });
+
+    if (!product) {
+      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
+    }
+
+    return { message: 'Producto eliminado correctamente' };
   }
 }
