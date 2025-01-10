@@ -1,8 +1,11 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { ConfigService } from '@nestjs/config';
 export declare class MessagesService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly configService;
+    private readonly logger;
+    constructor(prisma: PrismaService, configService: ConfigService);
     createMessage(createMessageDto: CreateMessageDto): Promise<{
         id: string;
         name: string;

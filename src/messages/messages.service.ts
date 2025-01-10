@@ -1,22 +1,35 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import * as nodemailer from 'nodemailer';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MessagesService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(MessagesService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async createMessage(createMessageDto: CreateMessageDto) {
+    // Obtener las variables de entorno desde ConfigService
+    const smtpHost = this.configService.get<string>('SMTP_HOST');
+    const smtpPort = this.configService.get<string>('SMTP_PORT');
+    const smtpUser = this.configService.get<string>('SMTP_USER');
+    const smtpPass = this.configService.get<string>('SMTP_PASS');
+    const smtpSecure = this.configService.get<string>('SMTP_SECURE');
 
-    console.log('Environment Variables:', {
-        SMTP_HOST: process.env.SMTP_HOST,
-        SMTP_PORT: process.env.SMTP_PORT,
-        SMTP_USER: process.env.SMTP_USER,
-        SMTP_PASS: process.env.SMTP_PASS,
-        SMTP_SECURE: process.env.SMTP_SECURE,
-      });
-      
+    // Imprimir las variables de entorno para corroborar
+    this.logger.debug('Environment Variables from ConfigService:', {
+      SMTP_HOST: smtpHost,
+      SMTP_PORT: smtpPort,
+      SMTP_USER: smtpUser,
+      SMTP_PASS: smtpPass,
+      SMTP_SECURE: smtpSecure,
+    });
+
     const {
       name,
       phone,
@@ -25,7 +38,7 @@ export class MessagesService {
       userId,
       empresaId,
       productId,
-      type
+      type,
     } = createMessageDto;
 
     // Verificar si la empresa existe
@@ -37,14 +50,15 @@ export class MessagesService {
       throw new NotFoundException('La empresa no fue encontrada.');
     }
 
-    // Verificar si el usuario que está enviando el mensaje existe
-    // (si es que viene un userId en el dto)
+    // Verificar si el usuario que está enviando el mensaje existe (si viene userId)
     if (userId) {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
       });
       if (!user) {
-        throw new NotFoundException('El usuario que envía el mensaje no fue encontrado.');
+        throw new NotFoundException(
+          'El usuario que envía el mensaje no fue encontrado.',
+        );
       }
     }
 
@@ -58,7 +72,7 @@ export class MessagesService {
         userId,
         empresaId,
         productId,
-        type, // Importante: agregar el tipo al crear el mensaje
+        type, // Se incluye el tipo al crear el registro
       },
     });
 
@@ -69,24 +83,24 @@ export class MessagesService {
 
     if (!empresaUser) {
       throw new NotFoundException(
-        'No se encontró el usuario administrador de la empresa.'
+        'No se encontró el usuario administrador de la empresa.',
       );
     }
 
-    // Configurar nodemailer
+    // Configurar Nodemailer usando las variables de entorno
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT, 10),
-      secure: process.env.SMTP_SECURE === 'true', // true para 465, false para otros puertos
+      host: smtpHost,
+      port: parseInt(smtpPort, 10),
+      secure: smtpSecure === 'true', // true para 465, false para otros puertos
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: smtpUser,
+        pass: smtpPass,
       },
     });
 
     // Enviar el mensaje por correo al email del usuario que maneja la empresa
     await transporter.sendMail({
-      from: `"Plataforma" <${process.env.SMTP_USER}>`,
+      from: `"Plataforma" <${smtpUser}>`,
       to: empresaUser.email,
       subject: `Nuevo mensaje de ${name}`,
       html: `

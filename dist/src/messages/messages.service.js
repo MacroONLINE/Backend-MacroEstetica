@@ -8,24 +8,33 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var MessagesService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessagesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const nodemailer = require("nodemailer");
-let MessagesService = class MessagesService {
-    constructor(prisma) {
+const config_1 = require("@nestjs/config");
+let MessagesService = MessagesService_1 = class MessagesService {
+    constructor(prisma, configService) {
         this.prisma = prisma;
+        this.configService = configService;
+        this.logger = new common_1.Logger(MessagesService_1.name);
     }
     async createMessage(createMessageDto) {
-        console.log('Environment Variables:', {
-            SMTP_HOST: process.env.SMTP_HOST,
-            SMTP_PORT: process.env.SMTP_PORT,
-            SMTP_USER: process.env.SMTP_USER,
-            SMTP_PASS: process.env.SMTP_PASS,
-            SMTP_SECURE: process.env.SMTP_SECURE,
+        const smtpHost = this.configService.get('SMTP_HOST');
+        const smtpPort = this.configService.get('SMTP_PORT');
+        const smtpUser = this.configService.get('SMTP_USER');
+        const smtpPass = this.configService.get('SMTP_PASS');
+        const smtpSecure = this.configService.get('SMTP_SECURE');
+        this.logger.debug('Environment Variables from ConfigService:', {
+            SMTP_HOST: smtpHost,
+            SMTP_PORT: smtpPort,
+            SMTP_USER: smtpUser,
+            SMTP_PASS: smtpPass,
+            SMTP_SECURE: smtpSecure,
         });
-        const { name, phone, email, description, userId, empresaId, productId, type } = createMessageDto;
+        const { name, phone, email, description, userId, empresaId, productId, type, } = createMessageDto;
         const empresa = await this.prisma.empresa.findUnique({
             where: { id: empresaId },
         });
@@ -59,16 +68,16 @@ let MessagesService = class MessagesService {
             throw new common_1.NotFoundException('No se encontró el usuario administrador de la empresa.');
         }
         const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT, 10),
-            secure: process.env.SMTP_SECURE === 'true',
+            host: smtpHost,
+            port: parseInt(smtpPort, 10),
+            secure: smtpSecure === 'true',
             auth: {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS,
+                user: smtpUser,
+                pass: smtpPass,
             },
         });
         await transporter.sendMail({
-            from: `"Plataforma" <${process.env.SMTP_USER}>`,
+            from: `"Plataforma" <${smtpUser}>`,
             to: empresaUser.email,
             subject: `Nuevo mensaje de ${name}`,
             html: `
@@ -83,8 +92,9 @@ let MessagesService = class MessagesService {
     }
 };
 exports.MessagesService = MessagesService;
-exports.MessagesService = MessagesService = __decorate([
+exports.MessagesService = MessagesService = MessagesService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        config_1.ConfigService])
 ], MessagesService);
 //# sourceMappingURL=messages.service.js.map
