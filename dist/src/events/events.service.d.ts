@@ -17,8 +17,8 @@ export declare class EventsService {
             empresaId: string | null;
         };
         categories: {
-            id: string;
             name: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             urlIcon: string;
@@ -46,7 +46,6 @@ export declare class EventsService {
             userSubscription: string | null;
         }[];
     } & {
-        companyId: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -56,6 +55,7 @@ export declare class EventsService {
         date: Date;
         time: string;
         bannerUrl: string | null;
+        companyId: string | null;
         ctaUrl: string | null;
         ctaButtonText: string;
         logoUrl: string | null;

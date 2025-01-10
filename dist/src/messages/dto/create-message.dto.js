@@ -37,21 +37,18 @@ __decorate([
     (0, swagger_1.ApiProperty)({ description: 'Descripción del mensaje' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateMessageDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'ID del usuario que envía el mensaje' }),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateMessageDto.prototype, "userId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ description: 'ID de la empresa destinataria del mensaje' }),
     (0, class_validator_1.IsUUID)(),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateMessageDto.prototype, "empresaId", void 0);
 __decorate([

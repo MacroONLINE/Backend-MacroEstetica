@@ -4,8 +4,8 @@ export declare class BannerController {
     private readonly bannerService;
     constructor(bannerService: BannerService);
     createBanner(body: CreateBannerDto): Promise<{
-        id: string;
         banner: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         logo: string;
@@ -17,8 +17,8 @@ export declare class BannerController {
         cta_button_text: string;
     }>;
     getBannerById(id: string): Promise<{
-        id: string;
         banner: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         logo: string;
@@ -30,8 +30,8 @@ export declare class BannerController {
         cta_button_text: string;
     }>;
     getRandomBanner(): Promise<{
-        id: string;
         banner: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         logo: string;

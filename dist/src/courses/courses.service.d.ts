@@ -10,7 +10,6 @@ export declare class CoursesService {
     constructor(prisma: PrismaService);
     private mapToCourseResponseDto;
     createCourse(data: CreateCourseDto): Promise<{
-        categoryId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -33,6 +32,7 @@ export declare class CoursesService {
         totalHours: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
+        categoryId: string;
     }>;
     getCourseById(courseId: string): Promise<CourseResponseDto>;
     getAllCourses(): Promise<CourseResponseDto[]>;
@@ -66,8 +66,8 @@ export declare class CoursesService {
         userId: string;
     }>;
     createCategory(data: CreateCategoryDto): Promise<{
-        id: string;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         urlIcon: string;

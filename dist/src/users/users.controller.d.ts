@@ -41,9 +41,9 @@ export declare class UsersController {
         verification: string;
     }>;
     updateEmpresa(data: CreateEmpresaDto): Promise<{
-        id: string;
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
@@ -62,9 +62,9 @@ export declare class UsersController {
         webUrl: string | null;
     }>;
     getEmpresa(req: any): Promise<{
-        id: string;
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;

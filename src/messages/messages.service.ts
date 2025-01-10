@@ -10,20 +10,24 @@ export class MessagesService {
   async createMessage(createMessageDto: CreateMessageDto) {
     const { name, phone, email, description, userId, empresaId, productId, type } = createMessageDto;
 
-    const empresa = await this.prisma.empresa.findUnique({
-      where: { id: empresaId },
-      include: { user: true }, 
-    });
+    const empresa = empresaId
+      ? await this.prisma.empresa.findUnique({
+          where: { id: empresaId },
+          include: { user: true },
+        })
+      : null;
 
-    if (!empresa) {
+    if (empresaId && !empresa) {
       throw new NotFoundException('La empresa no fue encontrada.');
     }
 
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
+    const user = userId
+      ? await this.prisma.user.findUnique({
+          where: { id: userId },
+        })
+      : null;
 
-    if (!user) {
+    if (userId && !user) {
       throw new NotFoundException('El usuario no fue encontrado.');
     }
 
@@ -40,32 +44,33 @@ export class MessagesService {
       },
     });
 
-    // Enviar el mensaje por correo a la empresa
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT, 10),
-      secure: process.env.SMTP_SECURE === 'true', 
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    if (empresa) {
+      const transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT, 10),
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
 
-    const empresaEmail = empresa.user.email; 
+      const empresaEmail = empresa.user.email;
 
-    await transporter.sendMail({
-      from: `"Plataforma" <${process.env.SMTP_USER}>`,
-      to: empresaEmail,
-      subject: `Nuevo mensaje de ${name}`,
-      html: `
-        <h3>Has recibido un nuevo mensaje</h3>
-        <p><strong>Enviado por:</strong> ${name}</p>
-        <p><strong>Teléfono:</strong> ${phone}</p>
-        <p><strong>Correo:</strong> ${email}</p>
-        <p><strong>Mensaje:</strong> ${description}</p>
-        ${type === 'product' && productId ? `<p><strong>ID del Producto:</strong> ${productId}</p>` : ''}
-      `,
-    });
+      await transporter.sendMail({
+        from: `"Plataforma" <${process.env.SMTP_USER}>`,
+        to: empresaEmail,
+        subject: `Nuevo mensaje de ${name}`,
+        html: `
+          <h3>Has recibido un nuevo mensaje</h3>
+          <p><strong>Enviado por:</strong> ${name}</p>
+          <p><strong>Teléfono:</strong> ${phone}</p>
+          <p><strong>Correo:</strong> ${email}</p>
+          <p><strong>Mensaje:</strong> ${description}</p>
+          ${type === 'product' && productId ? `<p><strong>ID del Producto:</strong> ${productId}</p>` : ''}
+        `,
+      });
+    }
 
     return message;
   }

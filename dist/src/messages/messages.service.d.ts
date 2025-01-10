@@ -8,12 +8,12 @@ export declare class MessagesService {
         name: string;
         phone: string;
         email: string;
-        createdAt: Date;
-        updatedAt: Date;
-        type: import(".prisma/client").$Enums.MessageType;
-        userId: string | null;
         description: string;
+        userId: string | null;
         empresaId: string | null;
         productId: string | null;
+        type: import(".prisma/client").$Enums.MessageType;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
 }

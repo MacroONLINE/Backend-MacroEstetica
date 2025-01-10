@@ -25,9 +25,9 @@ export declare class EmpresaController {
             userSubscription: string | null;
         };
     } & {
-        id: string;
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
@@ -68,9 +68,9 @@ export declare class EmpresaController {
             userSubscription: string | null;
         };
     } & {
-        id: string;
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
@@ -111,9 +111,9 @@ export declare class EmpresaController {
             userSubscription: string | null;
         };
     } & {
-        id: string;
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
@@ -154,9 +154,9 @@ export declare class EmpresaController {
             userSubscription: string | null;
         };
     } & {
-        id: string;
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
