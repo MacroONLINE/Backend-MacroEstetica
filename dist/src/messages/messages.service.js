@@ -18,13 +18,6 @@ let MessagesService = class MessagesService {
         this.prisma = prisma;
     }
     async createMessage(createMessageDto) {
-        console.log('Environment Variables:', {
-            SMTP_HOST: process.env.SMTP_HOST,
-            SMTP_PORT: process.env.SMTP_PORT,
-            SMTP_USER: process.env.SMTP_USER,
-            SMTP_PASS: process.env.SMTP_PASS,
-            SMTP_SECURE: process.env.SMTP_SECURE,
-        });
         const { name, phone, email, description, userId, empresaId } = createMessageDto;
         const empresa = await this.prisma.empresa.findUnique({
             where: { id: empresaId },
@@ -47,6 +40,13 @@ let MessagesService = class MessagesService {
                 userId,
                 empresaId,
             },
+        });
+        console.log('Environment Variables:', {
+            SMTP_HOST: process.env.SMTP_HOST,
+            SMTP_PORT: process.env.SMTP_PORT,
+            SMTP_USER: process.env.SMTP_USER,
+            SMTP_PASS: process.env.SMTP_PASS,
+            SMTP_SECURE: process.env.SMTP_SECURE,
         });
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,

@@ -8,14 +8,6 @@ export class MessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createMessage(createMessageDto: CreateMessageDto) {
-    console.log('Environment Variables:', {
-      SMTP_HOST: process.env.SMTP_HOST,
-      SMTP_PORT: process.env.SMTP_PORT,
-      SMTP_USER: process.env.SMTP_USER,
-      SMTP_PASS: process.env.SMTP_PASS,
-      SMTP_SECURE: process.env.SMTP_SECURE,
-    });
-
     const { name, phone, email, description, userId, empresaId } = createMessageDto;
 
     // Verificar si la empresa existe
@@ -47,6 +39,13 @@ export class MessagesService {
         empresaId,
       },
     });
+    console.log('Environment Variables:', {
+        SMTP_HOST: process.env.SMTP_HOST,
+        SMTP_PORT: process.env.SMTP_PORT,
+        SMTP_USER: process.env.SMTP_USER,
+        SMTP_PASS: process.env.SMTP_PASS,
+        SMTP_SECURE: process.env.SMTP_SECURE,
+      });
 
     // Enviar el mensaje por correo a la empresa
     const transporter = nodemailer.createTransport({
