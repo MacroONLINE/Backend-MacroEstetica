@@ -19,16 +19,20 @@ export class CreateMessageDto {
 
   @ApiProperty({ description: 'Descripción del mensaje' })
   @IsString()
+  @IsOptional()
   @IsNotEmpty()
   description: string;
 
   @ApiProperty({ description: 'ID del usuario que envía el mensaje' })
   @IsUUID()
+  @IsOptional()
   @IsNotEmpty()
   userId: string;
 
   @ApiProperty({ description: 'ID de la empresa destinataria del mensaje' })
   @IsUUID()
+  @IsOptional()
+
   @IsNotEmpty()
   empresaId: string;
 
