@@ -5,14 +5,9 @@ export declare class ProductService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(createProductDto: CreateProductDto): Promise<{
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string;
-        companyId: string;
-        isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -20,29 +15,29 @@ export declare class ProductService {
         problemAddressed: string | null;
         imageMain: string | null;
         imageGallery: string[];
+        isFeatured: boolean | null;
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
+        companyId: string;
+        categoryId: number;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     findAll(companyId: string): Promise<({
         presentations: {
             id: number;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            price: number | null;
             productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
         }[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string;
-        companyId: string;
-        isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -50,29 +45,29 @@ export declare class ProductService {
         problemAddressed: string | null;
         imageMain: string | null;
         imageGallery: string[];
+        isFeatured: boolean | null;
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
+        companyId: string;
+        categoryId: number;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     findByCategory(companyId: string, categoryId: number): Promise<({
         presentations: {
             id: number;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            price: number | null;
             productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
         }[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string;
-        companyId: string;
-        isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -80,29 +75,29 @@ export declare class ProductService {
         problemAddressed: string | null;
         imageMain: string | null;
         imageGallery: string[];
+        isFeatured: boolean | null;
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
+        companyId: string;
+        categoryId: number;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     findFeaturedByCompany(companyId: string): Promise<({
         presentations: {
             id: number;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            price: number | null;
             productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
         }[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string;
-        companyId: string;
-        isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -110,29 +105,29 @@ export declare class ProductService {
         problemAddressed: string | null;
         imageMain: string | null;
         imageGallery: string[];
+        isFeatured: boolean | null;
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
+        companyId: string;
+        categoryId: number;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
     findById(id: string): Promise<{
         presentations: {
             id: number;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            price: number | null;
             productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
         }[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string;
-        companyId: string;
-        isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -140,29 +135,29 @@ export declare class ProductService {
         problemAddressed: string | null;
         imageMain: string | null;
         imageGallery: string[];
+        isFeatured: boolean | null;
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
+        companyId: string;
+        categoryId: number;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     update(id: string, updateProductDto: UpdateProductDto): Promise<{
         presentations: {
             id: number;
+            description: string | null;
             createdAt: Date;
             updatedAt: Date;
-            description: string | null;
-            price: number | null;
             productId: string;
             size: import("@prisma/client/runtime/library").Decimal;
             unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
         }[];
     } & {
-        name: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
+        name: string;
         description: string;
-        companyId: string;
-        isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -170,8 +165,13 @@ export declare class ProductService {
         problemAddressed: string | null;
         imageMain: string | null;
         imageGallery: string[];
+        isFeatured: boolean | null;
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
+        companyId: string;
+        categoryId: number;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     remove(id: string): Promise<{
         message: string;

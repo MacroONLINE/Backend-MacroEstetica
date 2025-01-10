@@ -34,7 +34,6 @@ export class ProductService {
     });
   }
   
-
   async findFeaturedByCompany(companyId: string) {
     return this.prisma.product.findMany({
       where: {
