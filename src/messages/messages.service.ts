@@ -8,29 +8,35 @@ export class MessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createMessage(createMessageDto: CreateMessageDto) {
-    const { name, phone, email, description, userId, empresaId, productId, type } = createMessageDto;
+    console.log('Environment Variables:', {
+      SMTP_HOST: process.env.SMTP_HOST,
+      SMTP_PORT: process.env.SMTP_PORT,
+      SMTP_USER: process.env.SMTP_USER,
+      SMTP_PASS: process.env.SMTP_PASS,
+      SMTP_SECURE: process.env.SMTP_SECURE,
+    });
 
-    const empresa = empresaId
-      ? await this.prisma.empresa.findUnique({
-          where: { id: empresaId },
-          include: { user: true },
-        })
-      : null;
+    const { name, phone, email, description, userId, empresaId } = createMessageDto;
 
-    if (empresaId && !empresa) {
+    // Verificar si la empresa existe
+    const empresa = await this.prisma.empresa.findUnique({
+      where: { id: empresaId },
+    });
+
+    if (!empresa) {
       throw new NotFoundException('La empresa no fue encontrada.');
     }
 
-    const user = userId
-      ? await this.prisma.user.findUnique({
-          where: { id: userId },
-        })
-      : null;
+    // Verificar si el usuario existe
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
 
-    if (userId && !user) {
+    if (!user) {
       throw new NotFoundException('El usuario no fue encontrado.');
     }
 
+    // Guardar el mensaje en la base de datos
     const message = await this.prisma.message.create({
       data: {
         name,
@@ -39,38 +45,34 @@ export class MessagesService {
         description,
         userId,
         empresaId,
-        productId,
-        type,
       },
     });
 
-    if (empresa) {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT, 10),
-        secure: process.env.SMTP_SECURE === 'true',
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
+    // Enviar el mensaje por correo a la empresa
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT, 10),
+      secure: process.env.SMTP_SECURE === 'true', // true para 465, false para otros puertos
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
 
-      const empresaEmail = empresa.user.email;
+    const empresaEmail = empresa.user.email; // Supongamos que el correo está en el usuario asociado a la empresa.
 
-      await transporter.sendMail({
-        from: `"Plataforma" <${process.env.SMTP_USER}>`,
-        to: empresaEmail,
-        subject: `Nuevo mensaje de ${name}`,
-        html: `
-          <h3>Has recibido un nuevo mensaje</h3>
-          <p><strong>Enviado por:</strong> ${name}</p>
-          <p><strong>Teléfono:</strong> ${phone}</p>
-          <p><strong>Correo:</strong> ${email}</p>
-          <p><strong>Mensaje:</strong> ${description}</p>
-          ${type === 'product' && productId ? `<p><strong>ID del Producto:</strong> ${productId}</p>` : ''}
-        `,
-      });
-    }
+    await transporter.sendMail({
+      from: `"Plataforma" <${process.env.SMTP_USER}>`,
+      to: empresaEmail,
+      subject: `Nuevo mensaje de ${name}`,
+      html: `
+        <h3>Has recibido un nuevo mensaje</h3>
+        <p><strong>Enviado por:</strong> ${name}</p>
+        <p><strong>Teléfono:</strong> ${phone}</p>
+        <p><strong>Correo:</strong> ${email}</p>
+        <p><strong>Mensaje:</strong> ${description}</p>
+      `,
+    });
 
     return message;
   }
