@@ -8,7 +8,25 @@ export class MessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createMessage(createMessageDto: CreateMessageDto) {
-    const { name, phone, email, description, userId, empresaId } = createMessageDto;
+
+    console.log('Environment Variables:', {
+        SMTP_HOST: process.env.SMTP_HOST,
+        SMTP_PORT: process.env.SMTP_PORT,
+        SMTP_USER: process.env.SMTP_USER,
+        SMTP_PASS: process.env.SMTP_PASS,
+        SMTP_SECURE: process.env.SMTP_SECURE,
+      });
+      
+    const {
+      name,
+      phone,
+      email,
+      description,
+      userId,
+      empresaId,
+      productId,
+      type
+    } = createMessageDto;
 
     // Verificar si la empresa existe
     const empresa = await this.prisma.empresa.findUnique({
@@ -19,13 +37,15 @@ export class MessagesService {
       throw new NotFoundException('La empresa no fue encontrada.');
     }
 
-    // Verificar si el usuario existe
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new NotFoundException('El usuario no fue encontrado.');
+    // Verificar si el usuario que está enviando el mensaje existe
+    // (si es que viene un userId en el dto)
+    if (userId) {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new NotFoundException('El usuario que envía el mensaje no fue encontrado.');
+      }
     }
 
     // Guardar el mensaje en la base de datos
@@ -37,17 +57,23 @@ export class MessagesService {
         description,
         userId,
         empresaId,
+        productId,
+        type, // Importante: agregar el tipo al crear el mensaje
       },
     });
-    console.log('Environment Variables:', {
-        SMTP_HOST: process.env.SMTP_HOST,
-        SMTP_PORT: process.env.SMTP_PORT,
-        SMTP_USER: process.env.SMTP_USER,
-        SMTP_PASS: process.env.SMTP_PASS,
-        SMTP_SECURE: process.env.SMTP_SECURE,
-      });
 
-    // Enviar el mensaje por correo a la empresa
+    // Obtener el usuario que maneja la empresa, para obtener su correo
+    const empresaUser = await this.prisma.user.findUnique({
+      where: { id: empresa.userId },
+    });
+
+    if (!empresaUser) {
+      throw new NotFoundException(
+        'No se encontró el usuario administrador de la empresa.'
+      );
+    }
+
+    // Configurar nodemailer
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: parseInt(process.env.SMTP_PORT, 10),
@@ -58,11 +84,10 @@ export class MessagesService {
       },
     });
 
-    const empresaEmail = empresa.user.email; // Supongamos que el correo está en el usuario asociado a la empresa.
-
+    // Enviar el mensaje por correo al email del usuario que maneja la empresa
     await transporter.sendMail({
       from: `"Plataforma" <${process.env.SMTP_USER}>`,
-      to: empresaEmail,
+      to: empresaUser.email,
       subject: `Nuevo mensaje de ${name}`,
       html: `
         <h3>Has recibido un nuevo mensaje</h3>

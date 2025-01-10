@@ -18,18 +18,27 @@ let MessagesService = class MessagesService {
         this.prisma = prisma;
     }
     async createMessage(createMessageDto) {
-        const { name, phone, email, description, userId, empresaId } = createMessageDto;
+        console.log('Environment Variables:', {
+            SMTP_HOST: process.env.SMTP_HOST,
+            SMTP_PORT: process.env.SMTP_PORT,
+            SMTP_USER: process.env.SMTP_USER,
+            SMTP_PASS: process.env.SMTP_PASS,
+            SMTP_SECURE: process.env.SMTP_SECURE,
+        });
+        const { name, phone, email, description, userId, empresaId, productId, type } = createMessageDto;
         const empresa = await this.prisma.empresa.findUnique({
             where: { id: empresaId },
         });
         if (!empresa) {
             throw new common_1.NotFoundException('La empresa no fue encontrada.');
         }
-        const user = await this.prisma.user.findUnique({
-            where: { id: userId },
-        });
-        if (!user) {
-            throw new common_1.NotFoundException('El usuario no fue encontrado.');
+        if (userId) {
+            const user = await this.prisma.user.findUnique({
+                where: { id: userId },
+            });
+            if (!user) {
+                throw new common_1.NotFoundException('El usuario que envía el mensaje no fue encontrado.');
+            }
         }
         const message = await this.prisma.message.create({
             data: {
@@ -39,15 +48,16 @@ let MessagesService = class MessagesService {
                 description,
                 userId,
                 empresaId,
+                productId,
+                type,
             },
         });
-        console.log('Environment Variables:', {
-            SMTP_HOST: process.env.SMTP_HOST,
-            SMTP_PORT: process.env.SMTP_PORT,
-            SMTP_USER: process.env.SMTP_USER,
-            SMTP_PASS: process.env.SMTP_PASS,
-            SMTP_SECURE: process.env.SMTP_SECURE,
+        const empresaUser = await this.prisma.user.findUnique({
+            where: { id: empresa.userId },
         });
+        if (!empresaUser) {
+            throw new common_1.NotFoundException('No se encontró el usuario administrador de la empresa.');
+        }
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT, 10),
@@ -57,10 +67,9 @@ let MessagesService = class MessagesService {
                 pass: process.env.SMTP_PASS,
             },
         });
-        const empresaEmail = empresa.user.email;
         await transporter.sendMail({
             from: `"Plataforma" <${process.env.SMTP_USER}>`,
-            to: empresaEmail,
+            to: empresaUser.email,
             subject: `Nuevo mensaje de ${name}`,
             html: `
         <h3>Has recibido un nuevo mensaje</h3>
