@@ -7,10 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// -------------------------------------
-//               MODELS
-// -------------------------------------
-
 model User {
   id               String             @id @default(cuid())
   firstName        String?
@@ -37,8 +33,6 @@ model User {
   medico           Medico?
   Session          Session[]
   userSubscription String?
-
-  // Relación para los asistentes a eventos
   attendedEvents   Event[]            @relation("EventAttendees")
 }
 
@@ -54,24 +48,20 @@ model Medico {
 }
 
 model Empresa {
-  id                   String                  @id @default(cuid())
+  id                   String                   @id @default(cuid())
   dni                  String?
-  legalName            String?  
+  legalName            String?
   name                 String
-  giro                 Giro                    @default(EMPRESA_PROFESIONAL_PERFIL)
-  categoria            EmpresaCategory         @default(EMPRESA_PERFIL)
-  userId               String                  @unique
-  createdAt            DateTime                @default(now())
-  updatedAt            DateTime                @default(now())
+  giro                 Giro                     @default(EMPRESA_PROFESIONAL_PERFIL)
+  categoria            EmpresaCategory          @default(EMPRESA_PERFIL)
+  userId               String                   @unique
+  createdAt            DateTime                 @default(now())
+  updatedAt            DateTime                 @default(now())
   subscription         SubscriptionType?
-  user                 User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Relación con Instructor
-  // (Campo en plural; cada Instructor tiene un campo `empresa` en su modelo)
-  instructores         Instructor[]            @relation("EmpresaInstructors")
-
+  user                 User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  instructores         Instructor[]             @relation("EmpresaInstructors")
   productos            Product[]
-  categorias           ProductCompanyCategory[] 
+  categorias           ProductCompanyCategory[]
   empresaSubscriptions EmpresaSubscription[]
   bannerImage          String?
   logo                 String?
@@ -80,31 +70,31 @@ model Empresa {
   ceo                  String?
   ceoRole              String?
   location             String?
-  followers            Int                     @default(0)
+  followers            Int                      @default(0)
   webUrl               String?
   banners              Banner[]
+  minisite             Minisite?
 }
 
 model Subscription {
-  id            String             @id @default(cuid())
-  type          SubscriptionType   @unique
+  id            String                @id @default(cuid())
+  type          SubscriptionType      @unique
   description   String
   price         Float
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
   subscriptions EmpresaSubscription[]
 }
 
 model EmpresaSubscription {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   empresaId      String
   subscriptionId String
-  startDate      DateTime @default(now())
+  startDate      DateTime     @default(now())
   endDate        DateTime
-  status         String   @default("active")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
+  status         String       @default("active")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   empresa        Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
   subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 }
@@ -119,45 +109,41 @@ model Comment {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @default(now())
   courseId  String?
-
-  class   Class?   @relation(fields: [classId], references: [id], onDelete: Cascade)
-  course  Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  // Relación con Usuario
-  user    User     @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
+  class     Class?      @relation(fields: [classId], references: [id], onDelete: Cascade)
+  course    Course?     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user      User        @relation("UserComments", fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Course {
-  id                 String             @id @default(cuid())
-  title              String
-  bannerUrl          String
-  description        String
-  level              String
-  rating             Float              @default(0)
-  commentsCount      Int                @default(0)
-  averageRating      Float              @default(0)
-  instructorId       String?
-  price              Float
-  discountPercentage Float?
-  participantsCount  Int                @default(0)
-  target             Target             @default(MEDICO)
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @default(now())
-  categoryId         String
-  isFeatured         Boolean?
-  courseImageUrl     String             @default("")
-  aboutDescription   String?
-  requirements       Json?
-  totalHours         Int                @default(1)
-  whatYouWillLearn   Json?
+  id                   String             @id @default(cuid())
+  title                String
+  bannerUrl            String
+  description          String
+  level                String
+  rating               Float              @default(0)
+  commentsCount        Int                @default(0)
+  averageRating        Float              @default(0)
+  instructorId         String?
+  price                Float
+  discountPercentage   Float?
+  participantsCount    Int                @default(0)
+  target               Target             @default(MEDICO)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @default(now())
+  categoryId           String
+  isFeatured           Boolean?
+  courseImageUrl       String             @default("")
+  aboutDescription     String?
+  requirements         Json?
+  totalHours           Int                @default(1)
+  whatYouWillLearn     Json?
   introductoryVideoUrl String?
-  
-  comments     Comment[]
-  category     Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  instructor   Instructor? @relation(fields: [instructorId], references: [id])
-  enrollments  CourseEnrollment[]
-  modules      Module[]
-  resources    Resource[]
+  comments             Comment[]
+  category             Category           @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  instructor           Instructor?        @relation(fields: [instructorId], references: [id])
+  enrollments          CourseEnrollment[]
+  modules              Module[]
+  resources            Resource[]
 }
 
 model Resource {
@@ -170,27 +156,21 @@ model Resource {
 }
 
 model Instructor {
-  id                String        @id @default(cuid())
+  id                String         @id @default(cuid())
   profession        Profession
   type              ProfessionType
   description       String
   experienceYears   Int
   certificationsUrl String
   status            String
-  userId            String        @unique
-  
-  // Relación con Empresa
+  userId            String         @unique
   empresaId         String?
-  empresa           Empresa?      @relation("EmpresaInstructors", fields: [empresaId], references: [id], onDelete: Cascade)
-
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  empresa           Empresa?       @relation("EmpresaInstructors", fields: [empresaId], references: [id], onDelete: Cascade)
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   courses           Course[]
-
-  // Relación con Event
-  events            Event[]       @relation("InstructorEvents")
-
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  events            Event[]        @relation("InstructorEvents")
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 model Category {
@@ -200,10 +180,8 @@ model Category {
   colorHex  String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
-
-  // Relación many-to-many con Event
   courses   Course[]
-  events    Event[]   @relation("EventCategories")
+  events    Event[]  @relation("EventCategories")
 }
 
 model Module {
@@ -232,18 +210,15 @@ model Session {
   userId       String
   expires      DateTime
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  updatedAt    DateTime @default(now())
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
-
-
 
 model CourseEnrollment {
   id         String   @id @default(cuid())
   courseId   String
   userId     String
   enrolledAt DateTime @default(now())
-
   course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -268,7 +243,7 @@ model Transaction {
   courseId                String?
   description             String?
   createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  updatedAt               DateTime @default(now())
   responseData            Json
 }
 
@@ -282,10 +257,8 @@ model Banner {
   cta_button_text String    @default("¡Clic aquí!")
   logo            String
   empresaId       String?
-
   createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
+  updatedAt       DateTime  @default(now())
   empresa         Empresa?  @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 }
 
@@ -297,30 +270,17 @@ model Event {
   time          String
   location      String
   bannerUrl     String?
-
-  // Relación many-to-many con Category
   categories    Category[] @relation("EventCategories")
-
   companyId     String?
   instructorId  String
-
-  // Relación con Instructor
   instructor    Instructor @relation("InstructorEvents", fields: [instructorId], references: [id], onDelete: Cascade)
-
   ctaUrl        String?
-  ctaButtonText String      @default("Learn More")
+  ctaButtonText String     @default("Learn More")
   logoUrl       String?
-
-  // Relación many-to-many con User (asistentes)
-  attendees     User[]      @relation("EventAttendees")
-
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  attendees     User[]     @relation("EventAttendees")
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now())
 }
-
-// -------------------------------------
-//               ENUMS
-// -------------------------------------
 
 enum SubscriptionType {
   ORO
@@ -403,7 +363,6 @@ enum CommentType {
   RATING
 }
 
-
 enum Unit {
   ML
   G
@@ -428,9 +387,9 @@ model ProductCompanyCategory {
 }
 
 model Product {
-  id                String               @id @default(cuid()) // Cambiado a String con cuid()
-  name              String               @db.VarChar(200)
-  description       String               @db.Text
+  id                String                   @id @default(cuid())
+  name              String                   @db.VarChar(200)
+  description       String                   @db.Text
   lab               String?
   activeIngredients String[]
   features          String[]
@@ -438,47 +397,47 @@ model Product {
   problemAddressed  String?
   imageMain         String?
   imageGallery      String[]
-  isFeatured        Boolean?             @default(false)
-  isBestSeller      Boolean?             @default(false)
-  isOnSale          Boolean?             @default(false)
+  isFeatured        Boolean?                 @default(false)
+  isBestSeller      Boolean?                 @default(false)
+  isOnSale          Boolean?                 @default(false)
   companyId         String
-  company           Empresa              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company           Empresa                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  featured          MinisiteFeaturedProduct? @relation("FeaturedRelation")
   categoryId        Int
-  category          ProductCompanyCategory @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
-  presentations     Presentation[]       @relation("ProductPresentations")
-  createdAt         DateTime             @default(now())
-  updatedAt         DateTime             @default(now())
+  category          ProductCompanyCategory   @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
+  presentations     Presentation[]           @relation("ProductPresentations")
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @default(now())
 
   @@unique([categoryId, name])
 }
 
-
 model Presentation {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   productId   String
-  product     Product   @relation("ProductPresentations", fields: [productId], references: [id], onDelete: Cascade)
+  product     Product  @relation("ProductPresentations", fields: [productId], references: [id], onDelete: Cascade)
   size        Decimal
   unit        Unit
   description String?
   price       Float?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
 
   @@index([productId])
 }
 
 model Message {
-  id          String    @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   phone       String
   email       String
   description String
-  userId      String?    // ID del usuario que envía el mensaje
-  empresaId   String?    // ID de la empresa receptora
-  productId   String?   // ID opcional del producto relacionado
-  type        MessageType // Enum para el tipo de mensaje
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
+  userId      String?
+  empresaId   String?
+  productId   String?
+  type        MessageType
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now())
 }
 
 enum MessageType {
@@ -486,5 +445,76 @@ enum MessageType {
   product
 }
 
+model Minisite {
+  id                   String                    @id @default(cuid())
+  empresaId            String                    @unique
+  empresa              Empresa                   @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  highlightTitle       String?
+  highlightDescription String?
+  videoUrl             String?
+  aboutDescription     Json?
+  followersCount       Int?                      @default(0)
+  coursesCount         Int?                      @default(0)
+  productsCount        Int?                      @default(0)
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @default(now())
+  slides               MinisiteSlide[]
+  benefits             MinisiteBenefit[]
+  offers               MinisiteOffer[]
+  featuredProducts     MinisiteFeaturedProduct[]
+}
 
+model MinisiteSlide {
+  id          String   @id @default(cuid())
+  minisiteId  String
+  minisite    Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  cta         String?
+  imageSrc    String?
+  order       Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+}
 
+model MinisiteBenefit {
+  id          String   @id @default(cuid())
+  minisiteId  String
+  minisite    Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+}
+
+model MinisiteOffer {
+  id           String                 @id @default(cuid())
+  minisiteId   String
+  minisite     Minisite               @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
+  sectionTitle String?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @default(now())
+  products     MinisiteOfferProduct[]
+}
+
+model MinisiteOfferProduct {
+  id          String        @id @default(cuid())
+  offerId     String
+  offer       MinisiteOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
+}
+
+model MinisiteFeaturedProduct {
+  id         String   @id @default(cuid())
+  minisiteId String
+  minisite   Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
+  productId  String   @unique
+  product    Product? @relation("FeaturedRelation", fields: [productId], references: [id], onDelete: Cascade)
+  order      Int?
+  tagline    String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+}

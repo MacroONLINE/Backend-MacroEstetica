@@ -174,4 +174,197 @@ export declare class EmpresaController {
         followers: number;
         webUrl: string | null;
     })[]>;
+    getMinisiteByEmpresaId(empresaId: string): Promise<{
+        user: {
+            id: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: import(".prisma/client").$Enums.Role;
+            password: string;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            newsletter: boolean;
+            userSubscription: string | null;
+        };
+        minisite: {
+            benefits: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                title: string;
+                description: string;
+                minisiteId: string;
+            }[];
+            slides: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                title: string;
+                description: string;
+                minisiteId: string;
+                cta: string | null;
+                imageSrc: string | null;
+                order: number | null;
+            }[];
+            offers: ({
+                products: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    title: string;
+                    description: string;
+                    offerId: string;
+                }[];
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                minisiteId: string;
+                sectionTitle: string | null;
+            })[];
+            featuredProducts: ({
+                product: {
+                    name: string;
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    description: string;
+                    companyId: string;
+                    isFeatured: boolean | null;
+                    categoryId: number;
+                    lab: string | null;
+                    activeIngredients: string[];
+                    features: string[];
+                    benefits: string[];
+                    problemAddressed: string | null;
+                    imageMain: string | null;
+                    imageGallery: string[];
+                    isBestSeller: boolean | null;
+                    isOnSale: boolean | null;
+                };
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                productId: string;
+                minisiteId: string;
+                order: number | null;
+                tagline: string | null;
+            })[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            empresaId: string;
+            aboutDescription: import("@prisma/client/runtime/library").JsonValue | null;
+            highlightTitle: string | null;
+            highlightDescription: string | null;
+            videoUrl: string | null;
+            followersCount: number | null;
+            coursesCount: number | null;
+            productsCount: number | null;
+        };
+        instructores: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            userId: string;
+            profession: import(".prisma/client").$Enums.Profession;
+            description: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            empresaId: string | null;
+        }[];
+        productos: {
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            companyId: string;
+            isFeatured: boolean | null;
+            categoryId: number;
+            lab: string | null;
+            activeIngredients: string[];
+            features: string[];
+            benefits: string[];
+            problemAddressed: string | null;
+            imageMain: string | null;
+            imageGallery: string[];
+            isBestSeller: boolean | null;
+            isOnSale: boolean | null;
+        }[];
+        categorias: ({
+            products: {
+                name: string;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                description: string;
+                companyId: string;
+                isFeatured: boolean | null;
+                categoryId: number;
+                lab: string | null;
+                activeIngredients: string[];
+                features: string[];
+                benefits: string[];
+                problemAddressed: string | null;
+                imageMain: string | null;
+                imageGallery: string[];
+                isBestSeller: boolean | null;
+                isOnSale: boolean | null;
+            }[];
+        } & {
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            companyId: string;
+        })[];
+        banners: {
+            banner: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            logo: string;
+            title: string;
+            description: string;
+            empresaId: string | null;
+            date: Date | null;
+            cta_url: string | null;
+            cta_button_text: string;
+        }[];
+    } & {
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        name: string;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        userId: string;
+        dni: string | null;
+        legalName: string | null;
+        giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
+        bannerImage: string | null;
+        logo: string | null;
+        title: string | null;
+        profileImage: string | null;
+        ceo: string | null;
+        ceoRole: string | null;
+        location: string | null;
+        followers: number;
+        webUrl: string | null;
+    }>;
 }

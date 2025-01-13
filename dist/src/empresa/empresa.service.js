@@ -61,6 +61,38 @@ let EmpresaService = class EmpresaService {
             },
         });
     }
+    async getEmpresaConMinisite(empresaId) {
+        return this.prisma.empresa.findUnique({
+            where: { id: empresaId },
+            include: {
+                user: true,
+                instructores: true,
+                productos: true,
+                banners: true,
+                categorias: {
+                    include: {
+                        products: true,
+                    },
+                },
+                minisite: {
+                    include: {
+                        slides: true,
+                        benefits: true,
+                        offers: {
+                            include: {
+                                products: true,
+                            },
+                        },
+                        featuredProducts: {
+                            include: {
+                                product: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
 };
 exports.EmpresaService = EmpresaService;
 exports.EmpresaService = EmpresaService = __decorate([

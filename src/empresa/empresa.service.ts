@@ -12,7 +12,7 @@ export class EmpresaService {
         giro: category,
       },
       include: {
-        user: true, 
+        user: true,
       },
     });
   }
@@ -23,7 +23,7 @@ export class EmpresaService {
         giro,
       },
       include: {
-        user: true, // Incluye información del usuario relacionado, si es necesario
+        user: true,
       },
     });
   }
@@ -36,7 +36,7 @@ export class EmpresaService {
         },
       },
       include: {
-        user: true, 
+        user: true,
       },
     });
   }
@@ -50,7 +50,40 @@ export class EmpresaService {
         },
       },
       include: {
-        user: true, 
+        user: true,
+      },
+    });
+  }
+
+  async getEmpresaConMinisite(empresaId: string) {
+    return this.prisma.empresa.findUnique({
+      where: { id: empresaId },
+      include: {
+        user: true,
+        instructores: true,
+        productos: true,
+        banners: true,
+        categorias: {
+          include: {
+            products: true,
+          },
+        },
+        minisite: {
+          include: {
+            slides: true,
+            benefits: true,
+            offers: {
+              include: {
+                products: true,
+              },
+            },
+            featuredProducts: {
+              include: {
+                product: true,
+              },
+            },
+          },
+        },
       },
     });
   }

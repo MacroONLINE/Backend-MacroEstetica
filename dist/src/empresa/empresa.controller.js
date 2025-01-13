@@ -14,8 +14,8 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmpresaController = void 0;
 const common_1 = require("@nestjs/common");
-const empresa_service_1 = require("./empresa.service");
 const swagger_1 = require("@nestjs/swagger");
+const empresa_service_1 = require("./empresa.service");
 const client_1 = require("@prisma/client");
 let EmpresaController = class EmpresaController {
     constructor(empresaService) {
@@ -47,6 +47,13 @@ let EmpresaController = class EmpresaController {
             throw new common_1.HttpException('Target inválido', common_1.HttpStatus.BAD_REQUEST);
         }
         return this.empresaService.getAllByGiroAndTarget(giro, target);
+    }
+    async getMinisiteByEmpresaId(empresaId) {
+        const data = await this.empresaService.getEmpresaConMinisite(empresaId);
+        if (!data) {
+            throw new common_1.HttpException('Empresa o minisitio no encontrado', common_1.HttpStatus.NOT_FOUND);
+        }
+        return data;
     }
 };
 exports.EmpresaController = EmpresaController;
@@ -83,6 +90,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "getAllByGiroAndTarget", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener minisitio de una empresa' }),
+    (0, common_1.Get)(':empresaId/minisite'),
+    __param(0, (0, common_1.Param)('empresaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EmpresaController.prototype, "getMinisiteByEmpresaId", null);
 exports.EmpresaController = EmpresaController = __decorate([
     (0, swagger_1.ApiTags)('empresa'),
     (0, common_1.Controller)('empresa'),

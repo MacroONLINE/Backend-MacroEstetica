@@ -1,6 +1,13 @@
-import { Controller, Get, Query, HttpException, HttpStatus } from '@nestjs/common';
-import { EmpresaService } from './empresa.service';
+import {
+  Controller,
+  Get,
+  Query,
+  HttpException,
+  HttpStatus,
+  Param,
+} from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { EmpresaService } from './empresa.service';
 import { Giro, Target } from '@prisma/client';
 
 @ApiTags('empresa')
@@ -47,6 +54,22 @@ export class EmpresaController {
     if (!target || !(target in Target)) {
       throw new HttpException('Target inválido', HttpStatus.BAD_REQUEST);
     }
-    return this.empresaService.getAllByGiroAndTarget(giro as Giro, target as Target);
+    return this.empresaService.getAllByGiroAndTarget(
+      giro as Giro,
+      target as Target,
+    );
+  }
+
+  @ApiOperation({ summary: 'Obtener minisitio de una empresa' })
+  @Get(':empresaId/minisite')
+  async getMinisiteByEmpresaId(@Param('empresaId') empresaId: string) {
+    const data = await this.empresaService.getEmpresaConMinisite(empresaId);
+    if (!data) {
+      throw new HttpException(
+        'Empresa o minisitio no encontrado',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return data;
   }
 }

@@ -4,16 +4,16 @@ export declare class MessagesController {
     private readonly messagesService;
     constructor(messagesService: MessagesService);
     createMessage(createMessageDto: CreateMessageDto): Promise<{
-        id: string;
         name: string;
+        id: string;
         phone: string;
         email: string;
-        description: string;
-        userId: string | null;
-        empresaId: string | null;
-        productId: string | null;
-        type: import(".prisma/client").$Enums.MessageType;
         createdAt: Date;
         updatedAt: Date;
+        type: import(".prisma/client").$Enums.MessageType;
+        userId: string | null;
+        description: string;
+        empresaId: string | null;
+        productId: string | null;
     }>;
 }
