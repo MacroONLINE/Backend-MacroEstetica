@@ -11,20 +11,21 @@ export declare class CoursesService {
     private mapToCourseResponseDto;
     createCourse(data: CreateCourseDto): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        rating: number;
         title: string;
-        description: string;
         bannerUrl: string;
-        instructorId: string | null;
+        description: string;
         level: string;
+        rating: number;
         commentsCount: number;
         averageRating: number;
+        instructorId: string | null;
         price: number;
         discountPercentage: number | null;
         participantsCount: number;
         target: import(".prisma/client").$Enums.Target;
+        createdAt: Date;
+        updatedAt: Date;
+        categoryId: string;
         isFeatured: boolean | null;
         courseImageUrl: string;
         aboutDescription: string | null;
@@ -32,7 +33,6 @@ export declare class CoursesService {
         totalHours: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
-        categoryId: string;
     }>;
     getCourseById(courseId: string): Promise<CourseResponseDto>;
     getAllCourses(): Promise<CourseResponseDto[]>;
@@ -42,34 +42,34 @@ export declare class CoursesService {
     getCoursesByTarget(target: string): Promise<CourseResponseDto[]>;
     createModule(data: CreateModuleDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
-        description: string;
     }>;
     createClass(data: CreateClassDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         moduleId: string | null;
     }>;
     createComment(data: CreateCommentDto): Promise<{
         id: string;
+        rating: number;
         createdAt: Date;
         updatedAt: Date;
-        type: import(".prisma/client").$Enums.CommentType;
-        rating: number;
-        content: string;
-        classId: string | null;
-        courseId: string | null;
         userId: string;
+        type: import(".prisma/client").$Enums.CommentType;
+        courseId: string | null;
+        classId: string | null;
+        content: string;
     }>;
     createCategory(data: CreateCategoryDto): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         urlIcon: string;
         colorHex: string;
     }>;

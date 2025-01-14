@@ -94,6 +94,7 @@ export declare class UsersController {
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
+        categoryId: string | null;
     }>;
     getInstructor(req: any): Promise<{
         id: string;
@@ -107,6 +108,7 @@ export declare class UsersController {
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
+        categoryId: string | null;
     }>;
     findUserById(id: string): Promise<{
         id: string;

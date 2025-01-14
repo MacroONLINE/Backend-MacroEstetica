@@ -169,20 +169,26 @@ model Instructor {
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   courses           Course[]
   events            Event[]        @relation("InstructorEvents")
+  categoryId        String?        
+  category          Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  updatedAt         DateTime       @default(now())
 }
 
+
+
 model Category {
-  id        String   @id @default(cuid())
-  name      String
-  urlIcon   String
-  colorHex  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-  courses   Course[]
-  events    Event[]  @relation("EventCategories")
+  id          String        @id @default(cuid())
+  name        String
+  urlIcon     String
+  colorHex    String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @default(now())
+  courses     Course[]
+  events      Event[]        @relation("EventCategories")
+  instructors Instructor[]   // Relación inversa hacia múltiples instructores
 }
+
 
 model Module {
   id          String   @id @default(cuid())

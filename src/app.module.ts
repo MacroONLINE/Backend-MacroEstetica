@@ -16,6 +16,7 @@ import { EmpresaModule } from './empresa/empresa.module';
 import { BannerModule } from './banner/banner.module';
 import { EventsModule } from './events/events.module';
 import { MessagesModule } from './messages/messages.module';
+import { InstructorModule } from './instructor/instructor.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { MessagesModule } from './messages/messages.module';
     EmpresaModule,
     BannerModule,
     EventsModule,
-    MessagesModule
+    MessagesModule,
+    InstructorModule
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],

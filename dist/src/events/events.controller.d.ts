@@ -15,6 +15,7 @@ export declare class EventsController {
             experienceYears: number;
             certificationsUrl: string;
             empresaId: string | null;
+            categoryId: string | null;
         };
         categories: {
             name: string;

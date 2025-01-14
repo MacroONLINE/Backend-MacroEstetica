@@ -10,9 +10,9 @@ export declare class ProductService {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        categoryId: number;
         companyId: string;
         isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -40,9 +40,9 @@ export declare class ProductService {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        categoryId: number;
         companyId: string;
         isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -70,9 +70,9 @@ export declare class ProductService {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        categoryId: number;
         companyId: string;
         isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -100,9 +100,9 @@ export declare class ProductService {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        categoryId: number;
         companyId: string;
         isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -130,9 +130,9 @@ export declare class ProductService {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        categoryId: number;
         companyId: string;
         isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
@@ -160,9 +160,9 @@ export declare class ProductService {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        categoryId: number;
         companyId: string;
         isFeatured: boolean | null;
-        categoryId: number;
         lab: string | null;
         activeIngredients: string[];
         features: string[];
