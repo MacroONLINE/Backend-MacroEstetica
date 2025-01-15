@@ -92,4 +92,32 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], CreateInstructorDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Título personalizado para el instructor',
+        required: false,
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateInstructorDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'URL para la imagen de banner del instructor',
+        required: false,
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], CreateInstructorDto.prototype, "bannerImage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Número de seguidores del instructor',
+        required: false,
+        example: 100,
+    }),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], CreateInstructorDto.prototype, "followers", void 0);
 //# sourceMappingURL=create-instructor.dto.js.map

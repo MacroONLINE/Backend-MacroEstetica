@@ -10,6 +10,9 @@ export declare class EventsController {
             updatedAt: Date;
             type: import(".prisma/client").$Enums.ProfessionType;
             userId: string;
+            bannerImage: string | null;
+            title: string | null;
+            followers: number | null;
             profession: import(".prisma/client").$Enums.Profession;
             description: string;
             experienceYears: number;
@@ -18,10 +21,10 @@ export declare class EventsController {
             categoryId: string | null;
         };
         categories: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             urlIcon: string;
             colorHex: string;
         }[];

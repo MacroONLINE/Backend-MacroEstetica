@@ -17,6 +17,18 @@ let InstructorService = class InstructorService {
         this.prisma = prisma;
     }
     async createInstructor(data) {
+        let computedTitle = data.title;
+        if (!computedTitle) {
+            const user = await this.prisma.user.findUnique({
+                where: { id: data.userId },
+                select: { firstName: true, lastName: true },
+            });
+            if (user) {
+                const firstName = user.firstName || '';
+                const lastName = user.lastName || '';
+                computedTitle = `${firstName} ${lastName}`.trim();
+            }
+        }
         return this.prisma.instructor.create({
             data: {
                 profession: data.profession,
@@ -28,6 +40,23 @@ let InstructorService = class InstructorService {
                 userId: data.userId,
                 empresaId: data.empresaId,
                 categoryId: data.categoryId,
+                bannerImage: data.bannerImage,
+                followers: data.followers ?? 0,
+                title: computedTitle,
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
+                category: true,
+                empresa: true,
+                courses: true,
+                events: true,
             },
         });
     }
@@ -35,6 +64,14 @@ let InstructorService = class InstructorService {
         return this.prisma.instructor.findUnique({
             where: { id },
             include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
                 category: true,
                 empresa: true,
                 courses: true,
@@ -46,6 +83,14 @@ let InstructorService = class InstructorService {
         return this.prisma.instructor.findMany({
             where: { categoryId },
             include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
                 category: true,
                 empresa: true,
                 courses: true,
@@ -57,6 +102,14 @@ let InstructorService = class InstructorService {
         return this.prisma.instructor.findMany({
             where: { empresaId },
             include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
                 category: true,
                 empresa: true,
                 courses: true,
@@ -67,6 +120,14 @@ let InstructorService = class InstructorService {
     async getAllInstructors() {
         return this.prisma.instructor.findMany({
             include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
                 category: true,
                 empresa: true,
                 courses: true,
@@ -78,11 +139,39 @@ let InstructorService = class InstructorService {
         return this.prisma.instructor.update({
             where: { id },
             data,
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
+                category: true,
+                empresa: true,
+                courses: true,
+                events: true,
+            },
         });
     }
     async deleteInstructor(id) {
         return this.prisma.instructor.delete({
             where: { id },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
+                category: true,
+                empresa: true,
+                courses: true,
+                events: true,
+            },
         });
     }
 };

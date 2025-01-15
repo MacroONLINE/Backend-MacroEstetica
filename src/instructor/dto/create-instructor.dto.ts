@@ -69,4 +69,30 @@ export class CreateInstructorDto {
   @IsString()
   @IsOptional()
   categoryId?: string;
+
+  // Nuevos campos:
+  @ApiProperty({
+    description: 'Título personalizado para el instructor',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  title?: string;
+
+  @ApiProperty({
+    description: 'URL para la imagen de banner del instructor',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  bannerImage?: string;
+
+  @ApiProperty({
+    description: 'Número de seguidores del instructor',
+    required: false,
+    example: 100,
+  })
+  @IsNumber()
+  @IsOptional()
+  followers?: number;
 }

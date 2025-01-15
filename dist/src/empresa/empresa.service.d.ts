@@ -26,16 +26,16 @@ export declare class EmpresaService {
             userSubscription: string | null;
         };
     } & {
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         userId: string;
         dni: string | null;
         legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -69,16 +69,16 @@ export declare class EmpresaService {
             userSubscription: string | null;
         };
     } & {
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         userId: string;
         dni: string | null;
         legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -112,16 +112,16 @@ export declare class EmpresaService {
             userSubscription: string | null;
         };
     } & {
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         userId: string;
         dni: string | null;
         legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -155,16 +155,16 @@ export declare class EmpresaService {
             userSubscription: string | null;
         };
     } & {
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         userId: string;
         dni: string | null;
         legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;
@@ -176,81 +176,6 @@ export declare class EmpresaService {
         webUrl: string | null;
     })[]>;
     getEmpresaConMinisite(empresaId: string): Promise<{
-        instructores: {
-            id: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            description: string;
-            experienceYears: number;
-            certificationsUrl: string;
-            empresaId: string | null;
-            categoryId: string | null;
-        }[];
-        productos: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            description: string;
-            categoryId: number;
-            companyId: string;
-            isFeatured: boolean | null;
-            lab: string | null;
-            activeIngredients: string[];
-            features: string[];
-            benefits: string[];
-            problemAddressed: string | null;
-            imageMain: string | null;
-            imageGallery: string[];
-            isBestSeller: boolean | null;
-            isOnSale: boolean | null;
-        }[];
-        categorias: ({
-            products: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                name: string;
-                description: string;
-                categoryId: number;
-                companyId: string;
-                isFeatured: boolean | null;
-                lab: string | null;
-                activeIngredients: string[];
-                features: string[];
-                benefits: string[];
-                problemAddressed: string | null;
-                imageMain: string | null;
-                imageGallery: string[];
-                isBestSeller: boolean | null;
-                isOnSale: boolean | null;
-            }[];
-        } & {
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            companyId: string;
-            bannerImageUrl: string | null;
-            miniSiteImageUrl: string | null;
-        })[];
-        banners: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            logo: string;
-            title: string;
-            description: string;
-            empresaId: string | null;
-            date: Date | null;
-            banner: string;
-            cta_url: string | null;
-            cta_button_text: string;
-        }[];
         minisite: {
             benefits: {
                 id: string;
@@ -289,10 +214,10 @@ export declare class EmpresaService {
             })[];
             featuredProducts: ({
                 product: {
+                    name: string;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    name: string;
                     description: string;
                     categoryId: number;
                     companyId: string;
@@ -330,17 +255,95 @@ export declare class EmpresaService {
             productsCount: number | null;
             minisiteColor: string | null;
         };
+        instructores: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            userId: string;
+            bannerImage: string | null;
+            title: string | null;
+            followers: number | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            description: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            empresaId: string | null;
+            categoryId: string | null;
+        }[];
+        productos: {
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            categoryId: number;
+            companyId: string;
+            isFeatured: boolean | null;
+            lab: string | null;
+            activeIngredients: string[];
+            features: string[];
+            benefits: string[];
+            problemAddressed: string | null;
+            imageMain: string | null;
+            imageGallery: string[];
+            isBestSeller: boolean | null;
+            isOnSale: boolean | null;
+        }[];
+        categorias: ({
+            products: {
+                name: string;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                description: string;
+                categoryId: number;
+                companyId: string;
+                isFeatured: boolean | null;
+                lab: string | null;
+                activeIngredients: string[];
+                features: string[];
+                benefits: string[];
+                problemAddressed: string | null;
+                imageMain: string | null;
+                imageGallery: string[];
+                isBestSeller: boolean | null;
+                isOnSale: boolean | null;
+            }[];
+        } & {
+            name: string;
+            id: number;
+            createdAt: Date;
+            updatedAt: Date;
+            companyId: string;
+            bannerImageUrl: string | null;
+            miniSiteImageUrl: string | null;
+        })[];
+        banners: {
+            banner: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            logo: string;
+            title: string;
+            description: string;
+            empresaId: string | null;
+            date: Date | null;
+            cta_url: string | null;
+            cta_button_text: string;
+        }[];
     } & {
+        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         userId: string;
         dni: string | null;
         legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         bannerImage: string | null;
         logo: string | null;
         title: string | null;

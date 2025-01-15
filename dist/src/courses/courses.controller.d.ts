@@ -60,10 +60,10 @@ export declare class CoursesController {
         userId: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         urlIcon: string;
         colorHex: string;
     }>;

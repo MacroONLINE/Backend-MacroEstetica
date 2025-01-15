@@ -9,4 +9,7 @@ export declare class CreateInstructorDto {
     userId: string;
     empresaId?: string;
     categoryId?: string;
+    title?: string;
+    bannerImage?: string;
+    followers?: number;
 }

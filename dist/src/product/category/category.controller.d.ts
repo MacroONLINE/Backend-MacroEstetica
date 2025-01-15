@@ -5,56 +5,56 @@ export declare class CategoryController {
     private readonly categoryService;
     constructor(categoryService: CategoryService);
     create(dto: CreateCategoryDto): Promise<{
+        name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
     }>;
     findAll(): Promise<{
+        name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
     }[]>;
     findOne(id: string): Promise<{
+        name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
     }>;
     update(id: string, data: Prisma.ProductCompanyCategoryUpdateInput): Promise<{
+        name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
     }>;
     remove(id: string): Promise<{
+        name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
     }>;
     findAllByEmpresa(empresaId: string): Promise<({
         products: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
             description: string;
             categoryId: number;
             companyId: string;
@@ -70,10 +70,10 @@ export declare class CategoryController {
             isOnSale: boolean | null;
         }[];
     } & {
+        name: string;
         id: number;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
