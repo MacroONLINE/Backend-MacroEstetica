@@ -11,21 +11,21 @@ export declare class CoursesController {
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
         id: string;
-        title: string;
-        bannerUrl: string;
-        description: string;
-        level: string;
+        createdAt: Date;
+        updatedAt: Date;
         rating: number;
+        title: string;
+        description: string;
+        categoryId: string;
+        bannerUrl: string;
+        instructorId: string | null;
+        level: string;
         commentsCount: number;
         averageRating: number;
-        instructorId: string | null;
         price: number;
         discountPercentage: number | null;
         participantsCount: number;
         target: import(".prisma/client").$Enums.Target;
-        createdAt: Date;
-        updatedAt: Date;
-        categoryId: string;
         isFeatured: boolean | null;
         courseImageUrl: string;
         aboutDescription: string | null;
@@ -36,34 +36,34 @@ export declare class CoursesController {
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
+        description: string;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         moduleId: string | null;
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
         id: string;
-        rating: number;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         type: import(".prisma/client").$Enums.CommentType;
-        courseId: string | null;
-        classId: string | null;
+        rating: number;
         content: string;
+        classId: string | null;
+        courseId: string | null;
+        userId: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         urlIcon: string;
         colorHex: string;
     }>;

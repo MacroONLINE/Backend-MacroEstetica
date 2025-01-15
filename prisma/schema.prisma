@@ -380,17 +380,19 @@ enum Unit {
 }
 
 model ProductCompanyCategory {
-  id        Int       @id @default(autoincrement())
-  name      String    @db.VarChar(100)
-  companyId String
-  company   Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  products  Product[] @relation("CategoryProducts")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now())
-
+  id             Int       @id @default(autoincrement())
+  name           String    @db.VarChar(100)
+  companyId      String
+  company        Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  products       Product[] @relation("CategoryProducts")
+  bannerImageUrl String?   
+  miniSiteImageUrl String? 
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
   @@unique([name, companyId])
   @@index([companyId])
 }
+
 
 model Product {
   id                String                   @id @default(cuid())
@@ -468,6 +470,7 @@ model Minisite {
   benefits             MinisiteBenefit[]
   offers               MinisiteOffer[]
   featuredProducts     MinisiteFeaturedProduct[]
+   minisiteColor        String?    
 }
 
 model MinisiteSlide {

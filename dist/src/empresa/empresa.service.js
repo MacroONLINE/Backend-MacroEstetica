@@ -65,7 +65,6 @@ let EmpresaService = class EmpresaService {
         return this.prisma.empresa.findUnique({
             where: { id: empresaId },
             include: {
-                user: true,
                 instructores: true,
                 productos: true,
                 banners: true,
