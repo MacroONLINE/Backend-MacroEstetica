@@ -18,10 +18,10 @@ export declare class EventsController {
             categoryId: string | null;
         };
         categories: {
-            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             urlIcon: string;
             colorHex: string;
         }[];

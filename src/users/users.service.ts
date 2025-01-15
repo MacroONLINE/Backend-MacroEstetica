@@ -5,7 +5,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, User, Medico, Empresa, Instructor } from '@prisma/client';
 import { Role } from '@prisma/client';
 
-
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
@@ -25,7 +24,7 @@ export class UsersService {
   async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
     const updatedData = {
       ...data,
-      role: Role.COSMETOLOGO, // Usa el enum Role en lugar de un string
+      role: Role.COSMETOLOGO, 
     };
   
     return this.prisma.user.update({
@@ -39,9 +38,6 @@ export class UsersService {
     });
   }
   
-  
-
-  // Crear o actualizar información de Medico
   async createOrUpdateMedico(
     userId: string,
     data: Partial<Prisma.MedicoUncheckedCreateInput>,
@@ -61,71 +57,73 @@ export class UsersService {
   }
 
   // Crear o actualizar información de Empresa
-  // Crear o actualizar información de Empresa
-// src/users/users.service.ts
+  async createOrUpdateEmpresa(
+    userId: string,
+    data: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>,
+  ): Promise<Empresa> {
+    if (!data.name) {
+      throw new Error("El campo 'name' es obligatorio.");
+    }
 
-async createOrUpdateEmpresa(
-  userId: string,
-  data: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>,
-): Promise<Empresa> {
-  if (!data.name) {
-    throw new Error("El campo 'name' es obligatorio.");
+    // VALIDACIÓN DE DNI DUPLICADO
+    if (data.dni) {
+      const existing = await this.prisma.empresa.findFirst({
+        where: {
+          dni: data.dni,
+        },
+      });
+
+      if (existing) {
+        throw new HttpException(
+          'Registro duplicado: El DNI ya está en uso.',
+          HttpStatus.CONFLICT,
+        );
+      }
+    }
+
+    const updateData: Prisma.EmpresaUncheckedUpdateInput = {
+      name: data.name,
+      giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
+      subscription: data.subscription,
+      webUrl: data.webUrl,          
+      updatedAt: new Date(),
+      bannerImage: data.bannerImage,
+      logo: data.logo,
+      title: data.title,
+      profileImage: data.profileImage,
+      ceo: data.ceo,
+      ceoRole: data.ceoRole,
+      location: data.location,
+      followers: data.followers,
+      dni: data.dni,
+    };
+
+    const createData: Prisma.EmpresaUncheckedCreateInput = {
+      userId,
+      name: data.name,
+      giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
+      subscription: data.subscription,
+      webUrl: data.webUrl,        
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      bannerImage: data.bannerImage,
+      logo: data.logo,
+      title: data.title,
+      profileImage: data.profileImage,
+      ceo: data.ceo,
+      ceoRole: data.ceoRole,
+      location: data.location,
+      followers: data.followers,
+      dni: data.dni,
+    };
+
+    return this.prisma.empresa.upsert({
+      where: { userId },
+      update: updateData,
+      create: createData,
+    });
   }
 
-
-
-  // Antes de hacer el upsert, podrías (opcionalmente) actualizar el rol del usuario
-  // await this.prisma.user.update({
-  //   where: { id: userId },
-  //   data: {
-  //     role: 'EMPRESA',
-  //   },
-  // });
-
-  const updateData: Prisma.EmpresaUncheckedUpdateInput = {
-    name: data.name,
-    giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
-    subscription: data.subscription,
-    webUrl: data.webUrl,          
-    updatedAt: new Date(),
-    bannerImage: data.bannerImage,
-    logo: data.logo,
-    title: data.title,
-    profileImage: data.profileImage,
-    ceo: data.ceo,
-    ceoRole: data.ceoRole,
-    location: data.location,
-    followers: data.followers,
-  };
-
-  const createData: Prisma.EmpresaUncheckedCreateInput = {
-    userId,
-    name: data.name,
-    giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
-    subscription: data.subscription,
-    webUrl: data.webUrl,        
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    bannerImage: data.bannerImage,
-    logo: data.logo,
-    title: data.title,
-    profileImage: data.profileImage,
-    ceo: data.ceo,
-    ceoRole: data.ceoRole,
-    location: data.location,
-    followers: data.followers,
-  };
-
-  return this.prisma.empresa.upsert({
-    where: { userId },
-    update: updateData,
-    create: createData,
-  });
-}
-
-
-
-  // Crear o actualizar información de Instructor
   async createOrUpdateInstructor(
     userId: string,
     data: Omit<Prisma.InstructorUncheckedCreateInput, 'userId'>,
@@ -140,29 +138,24 @@ async createOrUpdateEmpresa(
     });
   }
 
-  // Obtener Medico por ID de usuario
   async getMedicoByUserId(userId: string): Promise<Medico | null> {
     return this.prisma.medico.findUnique({
       where: { userId },
     });
   }
 
-  // Obtener Empresa por ID de usuario
   async getEmpresaByUserId(userId: string): Promise<Empresa | null> {
     return this.prisma.empresa.findUnique({
       where: { userId },
     });
   }
 
-  // Obtener Instructor por ID de usuario
   async getInstructorByUserId(userId: string): Promise<Instructor | null> {
     return this.prisma.instructor.findUnique({
       where: { userId },
     });
   }
 
-
-  // Encontrar usuario por ID
   async findUserById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { id },
@@ -194,7 +187,6 @@ async createOrUpdateEmpresa(
       prismaResult: null,
     };
   
-    // Intentamos encontrar el usuario con findFirst
     const user = await this.prisma.user.findFirst({
       where: { email: standardizedEmail },
     });
@@ -219,7 +211,6 @@ async createOrUpdateEmpresa(
     }
   }
   
-  
   async checkEmail(email: string) {
     const user = await this.prisma.user.findUnique({
       where: { email },
@@ -229,7 +220,4 @@ async createOrUpdateEmpresa(
     }
     return user;
   }
-
-  
-  
 }

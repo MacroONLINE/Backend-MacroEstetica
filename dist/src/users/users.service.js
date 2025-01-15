@@ -59,6 +59,16 @@ let UsersService = class UsersService {
         if (!data.name) {
             throw new Error("El campo 'name' es obligatorio.");
         }
+        if (data.dni) {
+            const existing = await this.prisma.empresa.findFirst({
+                where: {
+                    dni: data.dni,
+                },
+            });
+            if (existing) {
+                throw new common_1.HttpException('Registro duplicado: El DNI ya está en uso.', common_1.HttpStatus.CONFLICT);
+            }
+        }
         const updateData = {
             name: data.name,
             giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
@@ -73,6 +83,7 @@ let UsersService = class UsersService {
             ceoRole: data.ceoRole,
             location: data.location,
             followers: data.followers,
+            dni: data.dni,
         };
         const createData = {
             userId,
@@ -90,6 +101,7 @@ let UsersService = class UsersService {
             ceoRole: data.ceoRole,
             location: data.location,
             followers: data.followers,
+            dni: data.dni,
         };
         return this.prisma.empresa.upsert({
             where: { userId },

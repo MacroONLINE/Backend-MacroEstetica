@@ -7,12 +7,12 @@ export declare class MessagesService {
     private readonly logger;
     constructor(prisma: PrismaService, configService: ConfigService);
     createMessage(createMessageDto: CreateMessageDto): Promise<{
-        name: string;
         id: string;
         phone: string;
         email: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         type: import(".prisma/client").$Enums.MessageType;
         userId: string | null;
         description: string;

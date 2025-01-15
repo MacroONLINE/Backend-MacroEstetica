@@ -20,16 +20,16 @@ export declare class InstructorService {
     }>;
     getInstructorById(id: string): Promise<{
         empresa: {
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             userId: string;
             dni: string | null;
             legalName: string | null;
             giro: import(".prisma/client").$Enums.Giro;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
             bannerImage: string | null;
             logo: string | null;
             title: string | null;
@@ -39,14 +39,6 @@ export declare class InstructorService {
             location: string | null;
             followers: number;
             webUrl: string | null;
-        };
-        category: {
-            name: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            urlIcon: string;
-            colorHex: string;
         };
         courses: {
             id: string;
@@ -89,6 +81,14 @@ export declare class InstructorService {
             logoUrl: string | null;
             instructorId: string;
         }[];
+        category: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            urlIcon: string;
+            colorHex: string;
+        };
     } & {
         id: string;
         status: string;
@@ -105,16 +105,16 @@ export declare class InstructorService {
     }>;
     getInstructorsByCategory(categoryId: string): Promise<({
         empresa: {
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             userId: string;
             dni: string | null;
             legalName: string | null;
             giro: import(".prisma/client").$Enums.Giro;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
             bannerImage: string | null;
             logo: string | null;
             title: string | null;
@@ -124,14 +124,6 @@ export declare class InstructorService {
             location: string | null;
             followers: number;
             webUrl: string | null;
-        };
-        category: {
-            name: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            urlIcon: string;
-            colorHex: string;
         };
         courses: {
             id: string;
@@ -174,6 +166,14 @@ export declare class InstructorService {
             logoUrl: string | null;
             instructorId: string;
         }[];
+        category: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            urlIcon: string;
+            colorHex: string;
+        };
     } & {
         id: string;
         status: string;
@@ -190,16 +190,16 @@ export declare class InstructorService {
     })[]>;
     getInstructorsByEmpresa(empresaId: string): Promise<({
         empresa: {
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             userId: string;
             dni: string | null;
             legalName: string | null;
             giro: import(".prisma/client").$Enums.Giro;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
             bannerImage: string | null;
             logo: string | null;
             title: string | null;
@@ -209,14 +209,6 @@ export declare class InstructorService {
             location: string | null;
             followers: number;
             webUrl: string | null;
-        };
-        category: {
-            name: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            urlIcon: string;
-            colorHex: string;
         };
         courses: {
             id: string;
@@ -259,6 +251,14 @@ export declare class InstructorService {
             logoUrl: string | null;
             instructorId: string;
         }[];
+        category: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            urlIcon: string;
+            colorHex: string;
+        };
     } & {
         id: string;
         status: string;
@@ -275,16 +275,16 @@ export declare class InstructorService {
     })[]>;
     getAllInstructors(): Promise<({
         empresa: {
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             userId: string;
             dni: string | null;
             legalName: string | null;
             giro: import(".prisma/client").$Enums.Giro;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
             bannerImage: string | null;
             logo: string | null;
             title: string | null;
@@ -294,14 +294,6 @@ export declare class InstructorService {
             location: string | null;
             followers: number;
             webUrl: string | null;
-        };
-        category: {
-            name: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            urlIcon: string;
-            colorHex: string;
         };
         courses: {
             id: string;
@@ -344,6 +336,14 @@ export declare class InstructorService {
             logoUrl: string | null;
             instructorId: string;
         }[];
+        category: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
+            urlIcon: string;
+            colorHex: string;
+        };
     } & {
         id: string;
         status: string;

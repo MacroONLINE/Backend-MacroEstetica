@@ -66,10 +66,10 @@ export declare class CoursesService {
         userId: string;
     }>;
     createCategory(data: CreateCategoryDto): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         urlIcon: string;
         colorHex: string;
     }>;

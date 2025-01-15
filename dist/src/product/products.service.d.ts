@@ -5,10 +5,10 @@ export declare class ProductService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(createProductDto: CreateProductDto): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string;
         categoryId: number;
         companyId: string;
@@ -35,10 +35,10 @@ export declare class ProductService {
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string;
         categoryId: number;
         companyId: string;
@@ -65,10 +65,10 @@ export declare class ProductService {
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string;
         categoryId: number;
         companyId: string;
@@ -95,10 +95,10 @@ export declare class ProductService {
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string;
         categoryId: number;
         companyId: string;
@@ -125,10 +125,10 @@ export declare class ProductService {
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string;
         categoryId: number;
         companyId: string;
@@ -155,10 +155,10 @@ export declare class ProductService {
             unit: import(".prisma/client").$Enums.Unit;
         }[];
     } & {
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         description: string;
         categoryId: number;
         companyId: string;
