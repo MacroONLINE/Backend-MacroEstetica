@@ -420,6 +420,7 @@ model Product {
   categoryId        Int
   category          ProductCompanyCategory   @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
   presentations     Presentation[]           @relation("ProductPresentations")
+  highlightProducts MinisiteHighlightProduct[]
   createdAt         DateTime                 @default(now())
   updatedAt         DateTime                 @default(now())
 
@@ -476,7 +477,9 @@ model Minisite {
   benefits             MinisiteBenefit[]
   offers               MinisiteOffer[]
   featuredProducts     MinisiteFeaturedProduct[]
-   minisiteColor        String?    
+  highlightProducts    MinisiteHighlightProduct[]
+  minisiteColor        String? 
+  slogan               String?   
 }
 
 model MinisiteSlide {
@@ -532,4 +535,20 @@ model MinisiteFeaturedProduct {
   tagline    String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now())
+}
+
+
+model MinisiteHighlightProduct {
+  id                  String   @id @default(cuid())
+  minisiteId          String
+  productId           String
+  minisite            Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
+  product             Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  highlightFeatures   String[]
+  highlightDescription String?
+  hoghlightImageUrl   String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@unique([minisiteId, productId])
 }

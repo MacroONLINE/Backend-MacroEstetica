@@ -254,6 +254,7 @@ export declare class EmpresaService {
             coursesCount: number | null;
             productsCount: number | null;
             minisiteColor: string | null;
+            slogan: string | null;
         };
         instructores: {
             id: string;
