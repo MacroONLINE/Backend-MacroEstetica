@@ -87,6 +87,11 @@ let EmpresaService = class EmpresaService {
                                 product: true,
                             },
                         },
+                        highlightProducts: {
+                            include: {
+                                product: true,
+                            },
+                        },
                     },
                 },
             },

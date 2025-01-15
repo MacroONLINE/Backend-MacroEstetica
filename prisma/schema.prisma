@@ -464,8 +464,6 @@ model Minisite {
   id                   String                    @id @default(cuid())
   empresaId            String                    @unique
   empresa              Empresa                   @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  highlightTitle       String?
-  highlightDescription String?
   videoUrl             String?
   aboutDescription     Json?
   followersCount       Int?                      @default(0)
