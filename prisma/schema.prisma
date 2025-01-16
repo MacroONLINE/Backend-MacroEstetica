@@ -475,6 +475,7 @@ model Minisite {
   highlightProducts    MinisiteHighlightProduct[]
   minisiteColor        String?
   slogan               String?
+  catalogueUrl      String?
   specialities         MinisiteSpeciality[]
 }
 

@@ -5,10 +5,14 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  Put,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { EmpresaService } from './empresa.service';
 import { Giro, Target } from '@prisma/client';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('empresa')
 @Controller('empresa')
@@ -71,5 +75,38 @@ export class EmpresaController {
       );
     }
     return data;
+  }
+
+
+  @ApiOperation({ summary: 'Subir catálogo (PDF) al minisitio de la empresa' })
+
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          description: 'PDF a subir como catálogo',
+        },
+      },
+    },
+  })
+  @Put(':empresaId/minisite/catalogue')
+  @UseInterceptors(FileInterceptor('file')) 
+  async uploadCatalogueFile(
+    @Param('empresaId') empresaId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new HttpException('No se recibió ningún archivo', HttpStatus.BAD_REQUEST);
+    }
+
+    if (file.mimetype !== 'application/pdf') {
+      throw new HttpException('El archivo debe ser un PDF', HttpStatus.BAD_REQUEST);
+    }
+
+    return this.empresaService.uploadCatalogue(empresaId, file);
   }
 }

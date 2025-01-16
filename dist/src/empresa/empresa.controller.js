@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const empresa_service_1 = require("./empresa.service");
 const client_1 = require("@prisma/client");
+const platform_express_1 = require("@nestjs/platform-express");
 let EmpresaController = class EmpresaController {
     constructor(empresaService) {
         this.empresaService = empresaService;
@@ -54,6 +55,15 @@ let EmpresaController = class EmpresaController {
             throw new common_1.HttpException('Empresa o minisitio no encontrado', common_1.HttpStatus.NOT_FOUND);
         }
         return data;
+    }
+    async uploadCatalogueFile(empresaId, file) {
+        if (!file) {
+            throw new common_1.HttpException('No se recibió ningún archivo', common_1.HttpStatus.BAD_REQUEST);
+        }
+        if (file.mimetype !== 'application/pdf') {
+            throw new common_1.HttpException('El archivo debe ser un PDF', common_1.HttpStatus.BAD_REQUEST);
+        }
+        return this.empresaService.uploadCatalogue(empresaId, file);
     }
 };
 exports.EmpresaController = EmpresaController;
@@ -98,6 +108,29 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "getMinisiteByEmpresaId", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Subir catálogo (PDF) al minisitio de la empresa' }),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            properties: {
+                file: {
+                    type: 'string',
+                    format: 'binary',
+                    description: 'PDF a subir como catálogo',
+                },
+            },
+        },
+    }),
+    (0, common_1.Put)(':empresaId/minisite/catalogue'),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
+    __param(0, (0, common_1.Param)('empresaId')),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], EmpresaController.prototype, "uploadCatalogueFile", null);
 exports.EmpresaController = EmpresaController = __decorate([
     (0, swagger_1.ApiTags)('empresa'),
     (0, common_1.Controller)('empresa'),

@@ -270,6 +270,14 @@ export declare class EmpresaController {
                 order: number | null;
                 tagline: string | null;
             })[];
+            specialities: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                title: string;
+                minisiteId: string;
+                imageUrl: string;
+            }[];
         } & {
             id: string;
             createdAt: Date;
@@ -282,6 +290,7 @@ export declare class EmpresaController {
             productsCount: number | null;
             minisiteColor: string | null;
             slogan: string | null;
+            catalogueUrl: string | null;
         };
         instructores: {
             id: string;
@@ -383,5 +392,9 @@ export declare class EmpresaController {
         location: string | null;
         followers: number;
         webUrl: string | null;
+    }>;
+    uploadCatalogueFile(empresaId: string, file: Express.Multer.File): Promise<{
+        message: string;
+        catalogueUrl: string;
     }>;
 }

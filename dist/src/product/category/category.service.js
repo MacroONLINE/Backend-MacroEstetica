@@ -26,25 +26,61 @@ let CategoryService = class CategoryService {
                     connect: { id: data.companyId },
                 },
             },
+            include: {
+                company: {
+                    select: {
+                        logo: true,
+                    },
+                },
+            },
         });
     }
     async findAll() {
-        return this.prisma.productCompanyCategory.findMany();
+        return this.prisma.productCompanyCategory.findMany({
+            include: {
+                company: {
+                    select: {
+                        logo: true,
+                    },
+                },
+            },
+        });
     }
     async findOne(id) {
         return this.prisma.productCompanyCategory.findUnique({
             where: { id },
+            include: {
+                company: {
+                    select: {
+                        logo: true,
+                    },
+                },
+            },
         });
     }
     async update(id, data) {
         return this.prisma.productCompanyCategory.update({
             where: { id },
             data,
+            include: {
+                company: {
+                    select: {
+                        logo: true,
+                    },
+                },
+            },
         });
     }
     async remove(id) {
         return this.prisma.productCompanyCategory.delete({
             where: { id },
+            include: {
+                company: {
+                    select: {
+                        logo: true,
+                    },
+                },
+            },
         });
     }
     async findAllByEmpresa(empresaId) {
@@ -52,6 +88,11 @@ let CategoryService = class CategoryService {
             where: { companyId: empresaId },
             include: {
                 products: true,
+                company: {
+                    select: {
+                        logo: true,
+                    },
+                },
             },
         });
     }

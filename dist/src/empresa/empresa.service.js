@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmpresaService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 let EmpresaService = class EmpresaService {
-    constructor(prisma) {
+    constructor(prisma, cloudinaryService) {
         this.prisma = prisma;
+        this.cloudinaryService = cloudinaryService;
     }
     async getAllByCategory(category) {
         return this.prisma.empresa.findMany({
@@ -92,15 +94,51 @@ let EmpresaService = class EmpresaService {
                                 product: true,
                             },
                         },
+                        specialities: true,
                     },
                 },
             },
         });
     }
+    async uploadCatalogue(empresaId, file) {
+        const empresa = await this.prisma.empresa.findUnique({
+            where: { id: empresaId },
+            include: { minisite: true },
+        });
+        if (!empresa) {
+            throw new common_1.HttpException('Empresa no encontrada', common_1.HttpStatus.NOT_FOUND);
+        }
+        if (!empresa.minisite) {
+            throw new common_1.HttpException('La Empresa no tiene Minisite asignado', common_1.HttpStatus.NOT_FOUND);
+        }
+        let uploadResult;
+        try {
+            uploadResult = await this.cloudinaryService.uploadImage(file);
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al subir el catálogo a Cloudinary', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        try {
+            const updatedMinisite = await this.prisma.minisite.update({
+                where: { empresaId: empresa.id },
+                data: {
+                    catalogueUrl: uploadResult.secure_url,
+                },
+            });
+            return {
+                message: 'Catálogo subido correctamente',
+                catalogueUrl: updatedMinisite.catalogueUrl,
+            };
+        }
+        catch (error) {
+            throw new common_1.HttpException('Error al actualizar la URL del catálogo en el Minisite', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 };
 exports.EmpresaService = EmpresaService;
 exports.EmpresaService = EmpresaService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        cloudinary_service_1.CloudinaryService])
 ], EmpresaService);
 //# sourceMappingURL=empresa.service.js.map

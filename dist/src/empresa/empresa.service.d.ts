@@ -1,8 +1,10 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { Giro, Target } from '@prisma/client';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 export declare class EmpresaService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
+    private readonly cloudinaryService;
+    constructor(prisma: PrismaService, cloudinaryService: CloudinaryService);
     getAllByCategory(category: Giro): Promise<({
         user: {
             id: string;
@@ -271,6 +273,14 @@ export declare class EmpresaService {
                 order: number | null;
                 tagline: string | null;
             })[];
+            specialities: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                title: string;
+                minisiteId: string;
+                imageUrl: string;
+            }[];
         } & {
             id: string;
             createdAt: Date;
@@ -283,6 +293,7 @@ export declare class EmpresaService {
             productsCount: number | null;
             minisiteColor: string | null;
             slogan: string | null;
+            catalogueUrl: string | null;
         };
         instructores: {
             id: string;
@@ -384,5 +395,9 @@ export declare class EmpresaService {
         location: string | null;
         followers: number;
         webUrl: string | null;
+    }>;
+    uploadCatalogue(empresaId: string, file: Express.Multer.File): Promise<{
+        message: string;
+        catalogueUrl: string;
     }>;
 }

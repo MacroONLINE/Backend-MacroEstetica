@@ -5,6 +5,10 @@ export declare class CategoryService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(data: CreateCategoryDto): Promise<{
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -15,7 +19,11 @@ export declare class CategoryService {
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
-    findAll(): Promise<{
+    findAll(): Promise<({
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -25,8 +33,12 @@ export declare class CategoryService {
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
-    }[]>;
+    })[]>;
     findOne(id: number): Promise<{
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -38,6 +50,10 @@ export declare class CategoryService {
         iconUrl: string | null;
     }>;
     update(id: number, data: Prisma.ProductCompanyCategoryUpdateInput): Promise<{
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -49,6 +65,10 @@ export declare class CategoryService {
         iconUrl: string | null;
     }>;
     remove(id: number): Promise<{
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -60,6 +80,9 @@ export declare class CategoryService {
         iconUrl: string | null;
     }>;
     findAllByEmpresa(empresaId: string): Promise<({
+        company: {
+            logo: string;
+        };
         products: {
             name: string;
             id: string;

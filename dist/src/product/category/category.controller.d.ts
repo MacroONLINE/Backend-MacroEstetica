@@ -5,6 +5,10 @@ export declare class CategoryController {
     private readonly categoryService;
     constructor(categoryService: CategoryService);
     create(dto: CreateCategoryDto): Promise<{
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -15,7 +19,11 @@ export declare class CategoryController {
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
-    findAll(): Promise<{
+    findAll(): Promise<({
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -25,8 +33,12 @@ export declare class CategoryController {
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
-    }[]>;
+    })[]>;
     findOne(id: string): Promise<{
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -38,6 +50,10 @@ export declare class CategoryController {
         iconUrl: string | null;
     }>;
     update(id: string, data: Prisma.ProductCompanyCategoryUpdateInput): Promise<{
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -49,6 +65,10 @@ export declare class CategoryController {
         iconUrl: string | null;
     }>;
     remove(id: string): Promise<{
+        company: {
+            logo: string;
+        };
+    } & {
         name: string;
         id: number;
         createdAt: Date;
@@ -60,6 +80,9 @@ export declare class CategoryController {
         iconUrl: string | null;
     }>;
     findAllByEmpresa(empresaId: string): Promise<({
+        company: {
+            logo: string;
+        };
         products: {
             name: string;
             id: string;
