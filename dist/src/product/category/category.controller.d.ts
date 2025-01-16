@@ -12,6 +12,8 @@ export declare class CategoryController {
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
+        footerBanner: string | null;
+        iconUrl: string | null;
     }>;
     findAll(): Promise<{
         name: string;
@@ -21,6 +23,8 @@ export declare class CategoryController {
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
+        footerBanner: string | null;
+        iconUrl: string | null;
     }[]>;
     findOne(id: string): Promise<{
         name: string;
@@ -30,6 +34,8 @@ export declare class CategoryController {
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
+        footerBanner: string | null;
+        iconUrl: string | null;
     }>;
     update(id: string, data: Prisma.ProductCompanyCategoryUpdateInput): Promise<{
         name: string;
@@ -39,6 +45,8 @@ export declare class CategoryController {
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
+        footerBanner: string | null;
+        iconUrl: string | null;
     }>;
     remove(id: string): Promise<{
         name: string;
@@ -48,6 +56,8 @@ export declare class CategoryController {
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
+        footerBanner: string | null;
+        iconUrl: string | null;
     }>;
     findAllByEmpresa(empresaId: string): Promise<({
         products: {
@@ -77,5 +87,7 @@ export declare class CategoryController {
         companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
+        footerBanner: string | null;
+        iconUrl: string | null;
     })[]>;
 }

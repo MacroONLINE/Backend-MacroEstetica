@@ -94,7 +94,7 @@ model EmpresaSubscription {
   endDate        DateTime
   status         String       @default("active")
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  updatedAt      DateTime     @default(now())
   empresa        Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
   subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 }
@@ -173,14 +173,10 @@ model Instructor {
   category          Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @default(now())
-
   bannerImage       String?        
   followers         Int?          
   title             String?       
 }
-
-
-
 
 model Category {
   id          String        @id @default(cuid())
@@ -193,7 +189,6 @@ model Category {
   events      Event[]        @relation("EventCategories")
   instructors Instructor[]   // Relación inversa hacia múltiples instructores
 }
-
 
 model Module {
   id          String   @id @default(cuid())
@@ -386,19 +381,21 @@ enum Unit {
 }
 
 model ProductCompanyCategory {
-  id             Int       @id @default(autoincrement())
-  name           String    @db.VarChar(100)
-  companyId      String
-  company        Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  products       Product[] @relation("CategoryProducts")
-  bannerImageUrl String?   
-  miniSiteImageUrl String? 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @default(now())
+  id               Int       @id @default(autoincrement())
+  name             String    @db.VarChar(100)
+  companyId        String
+  company          Empresa   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  products         Product[] @relation("CategoryProducts")
+  bannerImageUrl   String?
+  miniSiteImageUrl String?
+  footerBanner     String?   
+  iconUrl          String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @default(now())
+
   @@unique([name, companyId])
   @@index([companyId])
 }
-
 
 model Product {
   id                String                   @id @default(cuid())
@@ -476,8 +473,9 @@ model Minisite {
   offers               MinisiteOffer[]
   featuredProducts     MinisiteFeaturedProduct[]
   highlightProducts    MinisiteHighlightProduct[]
-  minisiteColor        String? 
-  slogan               String?   
+  minisiteColor        String?
+  slogan               String?
+  specialities         MinisiteSpeciality[]
 }
 
 model MinisiteSlide {
@@ -535,18 +533,27 @@ model MinisiteFeaturedProduct {
   updatedAt  DateTime @default(now())
 }
 
-
 model MinisiteHighlightProduct {
-  id                  String   @id @default(cuid())
-  minisiteId          String
-  productId           String
-  minisite            Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
-  product             Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  highlightFeatures   String[]
+  id                   String   @id @default(cuid())
+  minisiteId           String
+  productId            String
+  minisite             Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
+  product              Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  highlightFeatures    String[]
   highlightDescription String?
-  hoghlightImageUrl   String?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  hoghlightImageUrl    String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 
   @@unique([minisiteId, productId])
+}
+
+model MinisiteSpeciality {
+  id         String   @id @default(cuid())
+  minisiteId String
+  minisite   Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
+  imageUrl   String
+  title      String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
 }
