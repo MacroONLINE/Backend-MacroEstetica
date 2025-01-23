@@ -1,8 +1,8 @@
 # Usa una imagen de Node.js basada en Alpine
 FROM node:18-alpine
 
-# Instala OpenSSL y OpenSSH
-RUN apk update && apk add --no-cache openssl openssh
+# Instala OpenSSL, OpenSSH y OpenRC
+RUN apk update && apk add --no-cache openssl openssh openrc
 
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /app
@@ -19,6 +19,9 @@ RUN mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPiQuJwmyw2M1Sv
 
 # Establece los permisos adecuados para el archivo authorized_keys y el directorio .ssh
 RUN chmod 600 ~/.ssh/authorized_keys && chmod 700 ~/.ssh
+
+# Habilita el servicio SSH
+RUN rc-update add sshd default
 
 # Genera el cliente de Prisma
 RUN npx prisma generate
