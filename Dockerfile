@@ -17,12 +17,17 @@ COPY . .
 # Copia la clave pública SSH directamente en el Dockerfile
 RUN mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPiQuJwmyw2M1Sv7TO95qDyQjKHxkoRZdFTrMe6JVS15 mac@MacBook-Pro-de-MAC.local" > ~/.ssh/authorized_keys
 
+# Establece los permisos adecuados para el archivo authorized_keys y el directorio .ssh
+RUN chmod 600 ~/.ssh/authorized_keys && chmod 700 ~/.ssh
+
 # Genera el cliente de Prisma
 RUN npx prisma generate
 
 # Compila el proyecto de NestJS
 RUN npm run build
 
+# Expone el puerto que usará la aplicación
 EXPOSE 3001
 
-CMD npx prisma migrate deploy && node dist/src/main
+# Comando para iniciar el servidor SSH, ejecutar migraciones y iniciar la aplicación
+CMD ["sh", "-c", "rc-service sshd start && npx prisma migrate deploy && node dist/src/main"]
