@@ -23,8 +23,6 @@ RUN npx prisma generate
 # Compila el proyecto de NestJS
 RUN npm run build
 
-# Expone el puerto que usará la aplicación
 EXPOSE 3001
 
-# Comando para iniciar la aplicación en producción y ejecutar migraciones
 CMD npx prisma migrate deploy && node dist/src/main
