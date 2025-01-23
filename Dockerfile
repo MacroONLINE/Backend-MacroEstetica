@@ -14,8 +14,8 @@ RUN npm install
 # Copia el resto de los archivos de la aplicación
 COPY . .
 
-# Copia la clave pública SSH desde las variables de entorno
-RUN mkdir -p ~/.ssh && echo "$SSH_PUBLIC_KEY" > ~/.ssh/authorized_keys
+# Copia la clave pública SSH directamente en el Dockerfile
+RUN mkdir -p ~/.ssh && echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPiQuJwmyw2M1Sv7TO95qDyQjKHxkoRZdFTrMe6JVS15 mac@MacBook-Pro-de-MAC.local" > ~/.ssh/authorized_keys
 
 # Genera el cliente de Prisma
 RUN npx prisma generate
