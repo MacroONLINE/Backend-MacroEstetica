@@ -1,8 +1,8 @@
 # Usa una imagen de Node.js basada en Alpine
 FROM node:18-alpine
 
-# Instala OpenSSL, necesario para Prisma en entornos Alpine
-RUN apk update && apk add --no-cache openssl
+# Instala OpenSSL y OpenSSH
+RUN apk update && apk add --no-cache openssl openssh
 
 # Establece el directorio de trabajo en el contenedor
 WORKDIR /app
@@ -13,6 +13,9 @@ RUN npm install
 
 # Copia el resto de los archivos de la aplicación
 COPY . .
+
+# Copia la clave pública SSH desde las variables de entorno
+RUN mkdir -p ~/.ssh && echo "$SSH_PUBLIC_KEY" > ~/.ssh/authorized_keys
 
 # Genera el cliente de Prisma
 RUN npx prisma generate
