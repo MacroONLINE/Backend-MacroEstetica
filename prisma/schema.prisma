@@ -82,7 +82,7 @@ model Subscription {
   description   String
   price         Float
   createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
+  updatedAt     DateTime              @default(now())
   subscriptions EmpresaSubscription[]
 }
 
@@ -169,13 +169,13 @@ model Instructor {
   user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   courses           Course[]
   events            Event[]        @relation("InstructorEvents")
-  categoryId        String?        
+  categoryId        String?
   category          Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   createdAt         DateTime       @default(now())
   updatedAt         DateTime       @default(now())
-  bannerImage       String?        
-  followers         Int?          
-  title             String?       
+  bannerImage       String?
+  followers         Int?
+  title             String?
 }
 
 model Category {
@@ -187,7 +187,7 @@ model Category {
   updatedAt   DateTime       @default(now())
   courses     Course[]
   events      Event[]        @relation("EventCategories")
-  instructors Instructor[]   // Relación inversa hacia múltiples instructores
+  instructors Instructor[]
 }
 
 model Module {
@@ -274,18 +274,32 @@ model Event {
   description   String
   date          DateTime
   time          String
+  startDateTime DateTime   @default(now())
+  endDateTime   DateTime   @default(now())
   location      String
   bannerUrl     String?
   categories    Category[] @relation("EventCategories")
   companyId     String?
   instructorId  String
   instructor    Instructor @relation("InstructorEvents", fields: [instructorId], references: [id], onDelete: Cascade)
-  ctaUrl        String?
-  ctaButtonText String     @default("Learn More")
+  ctaUrl        String?     @default("")
+  ctaButtonText String      @default("Learn More")
   logoUrl       String?
-  attendees     User[]     @relation("EventAttendees")
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @default(now())
+  attendees     User[]      @relation("EventAttendees")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @default(now())
+  streams       EventStream[]
+}
+
+model EventStream {
+  id            String   @id @default(cuid())
+  eventId       String
+  channelName   String   @unique
+  startDateTime DateTime
+  endDateTime   DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now())
+  event         Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }
 
 enum SubscriptionType {
@@ -388,7 +402,7 @@ model ProductCompanyCategory {
   products         Product[] @relation("CategoryProducts")
   bannerImageUrl   String?
   miniSiteImageUrl String?
-  footerBanner     String?   
+  footerBanner     String?
   iconUrl          String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @default(now())

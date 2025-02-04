@@ -17,6 +17,7 @@ import { BannerModule } from './banner/banner.module';
 import { EventsModule } from './events/events.module';
 import { MessagesModule } from './messages/messages.module';
 import { InstructorModule } from './instructor/instructor.module';
+import { AgoraModule } from './agora/agora.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { InstructorModule } from './instructor/instructor.module';
     BannerModule,
     EventsModule,
     MessagesModule,
-    InstructorModule
+    InstructorModule,
+    AgoraModule
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],

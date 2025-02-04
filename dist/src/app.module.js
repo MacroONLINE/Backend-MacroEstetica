@@ -25,6 +25,7 @@ const banner_module_1 = require("./banner/banner.module");
 const events_module_1 = require("./events/events.module");
 const messages_module_1 = require("./messages/messages.module");
 const instructor_module_1 = require("./instructor/instructor.module");
+const agora_module_1 = require("./agora/agora.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -43,7 +44,8 @@ exports.AppModule = AppModule = __decorate([
             banner_module_1.BannerModule,
             events_module_1.EventsModule,
             messages_module_1.MessagesModule,
-            instructor_module_1.InstructorModule
+            instructor_module_1.InstructorModule,
+            agora_module_1.AgoraModule
         ],
         controllers: [app_controller_1.AppController, users_controller_1.UsersController],
         providers: [app_service_1.AppService, users_service_1.UsersService],

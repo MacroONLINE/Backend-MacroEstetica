@@ -16,6 +16,48 @@ let EventsService = class EventsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    async createEvent(data) {
+        return this.prisma.event.create({
+            data: {
+                title: data.title,
+                description: data.description,
+                date: data.date,
+                time: data.time,
+                startDateTime: data.startDateTime,
+                endDateTime: data.endDateTime,
+                location: data.location,
+                bannerUrl: data.bannerUrl,
+                companyId: data.companyId,
+                instructorId: data.instructorId,
+                ctaUrl: data.ctaUrl,
+                ctaButtonText: data.ctaButtonText,
+                logoUrl: data.logoUrl,
+            },
+        });
+    }
+    async registerAttendee(eventId, userId) {
+        const event = await this.prisma.event.findUnique({
+            where: { id: eventId },
+            include: {
+                attendees: true,
+            },
+        });
+        if (!event)
+            throw new common_1.NotFoundException('Evento no encontrado');
+        const isAlreadyAttendee = event.attendees.some((u) => u.id === userId);
+        if (isAlreadyAttendee) {
+            throw new common_1.ForbiddenException('El usuario ya está inscrito en este evento');
+        }
+        await this.prisma.event.update({
+            where: { id: eventId },
+            data: {
+                attendees: {
+                    connect: { id: userId },
+                },
+            },
+        });
+        return { message: `Usuario ${userId} registrado con éxito en el evento ${eventId}` };
+    }
     async getEventsByEmpresaId(empresaId) {
         return this.prisma.event.findMany({
             where: { companyId: empresaId },
@@ -23,8 +65,23 @@ let EventsService = class EventsService {
                 instructor: true,
                 categories: true,
                 attendees: true,
+                streams: true
             },
         });
+    }
+    async getEventById(eventId) {
+        const event = await this.prisma.event.findUnique({
+            where: { id: eventId },
+            include: {
+                instructor: true,
+                attendees: true,
+                categories: true,
+                streams: true
+            },
+        });
+        if (!event)
+            throw new common_1.NotFoundException('Evento no encontrado');
+        return event;
     }
 };
 exports.EventsService = EventsService;

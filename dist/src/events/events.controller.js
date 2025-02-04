@@ -19,11 +19,38 @@ let EventsController = class EventsController {
     constructor(eventsService) {
         this.eventsService = eventsService;
     }
+    async createEvent(body) {
+        return this.eventsService.createEvent(body);
+    }
+    async registerAttendee(eventId, body) {
+        return this.eventsService.registerAttendee(eventId, body.userId);
+    }
     async getEventsByEmpresa(empresaId) {
         return this.eventsService.getEventsByEmpresaId(empresaId);
     }
+    async getEventById(eventId) {
+        const event = await this.eventsService.getEventById(eventId);
+        if (!event)
+            throw new common_1.NotFoundException('Evento no encontrado');
+        return event;
+    }
 };
 exports.EventsController = EventsController;
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "createEvent", null);
+__decorate([
+    (0, common_1.Post)(':eventId/register'),
+    __param(0, (0, common_1.Param)('eventId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "registerAttendee", null);
 __decorate([
     (0, common_1.Get)('empresa/:empresaId'),
     __param(0, (0, common_1.Param)('empresaId')),
@@ -31,6 +58,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getEventsByEmpresa", null);
+__decorate([
+    (0, common_1.Get)(':eventId'),
+    __param(0, (0, common_1.Param)('eventId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getEventById", null);
 exports.EventsController = EventsController = __decorate([
     (0, common_1.Controller)('events'),
     __metadata("design:paramtypes", [events_service_1.EventsService])

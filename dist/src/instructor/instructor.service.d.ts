@@ -74,6 +74,8 @@ export declare class InstructorService {
             description: string;
             date: Date;
             time: string;
+            startDateTime: Date;
+            endDateTime: Date;
             bannerUrl: string | null;
             companyId: string | null;
             ctaUrl: string | null;
@@ -168,6 +170,8 @@ export declare class InstructorService {
             description: string;
             date: Date;
             time: string;
+            startDateTime: Date;
+            endDateTime: Date;
             bannerUrl: string | null;
             companyId: string | null;
             ctaUrl: string | null;
@@ -262,6 +266,8 @@ export declare class InstructorService {
             description: string;
             date: Date;
             time: string;
+            startDateTime: Date;
+            endDateTime: Date;
             bannerUrl: string | null;
             companyId: string | null;
             ctaUrl: string | null;
@@ -356,6 +362,8 @@ export declare class InstructorService {
             description: string;
             date: Date;
             time: string;
+            startDateTime: Date;
+            endDateTime: Date;
             bannerUrl: string | null;
             companyId: string | null;
             ctaUrl: string | null;
@@ -450,6 +458,8 @@ export declare class InstructorService {
             description: string;
             date: Date;
             time: string;
+            startDateTime: Date;
+            endDateTime: Date;
             bannerUrl: string | null;
             companyId: string | null;
             ctaUrl: string | null;
@@ -544,6 +554,8 @@ export declare class InstructorService {
             description: string;
             date: Date;
             time: string;
+            startDateTime: Date;
+            endDateTime: Date;
             bannerUrl: string | null;
             companyId: string | null;
             ctaUrl: string | null;
@@ -638,6 +650,8 @@ export declare class InstructorService {
             description: string;
             date: Date;
             time: string;
+            startDateTime: Date;
+            endDateTime: Date;
             bannerUrl: string | null;
             companyId: string | null;
             ctaUrl: string | null;
