@@ -17,8 +17,8 @@ let AgoraService = class AgoraService {
         const expirationTimeInSeconds = 3600;
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const privilegeExpireTime = currentTimestamp + expirationTimeInSeconds;
-        const rtcToken = agora_access_token_1.RtcTokenBuilder.buildTokenWithAccount(appId, appCertificate, channelName, uid, agoraRole, privilegeExpireTime);
-        const rtmToken = agora_access_token_1.RtmTokenBuilder.buildToken(appId, appCertificate, uid, agora_access_token_1.RtmRole.Rtm_User, privilegeExpireTime);
+        const rtmToken = agora_access_token_1.RtcTokenBuilder.buildTokenWithAccount(appId, appCertificate, channelName, uid, agoraRole, privilegeExpireTime);
+        const rtcToken = agora_access_token_1.RtmTokenBuilder.buildToken(appId, appCertificate, uid, agora_access_token_1.RtmRole.Rtm_User, privilegeExpireTime);
         return {
             rtcToken,
             rtmToken,
