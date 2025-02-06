@@ -68,7 +68,7 @@ __decorate([
             example1: {
                 summary: 'Ejemplo de solicitud',
                 value: {
-                    channelName: 'live-channel-dermatology',
+                    channelName: '006c9be6c6b3e5f4c3',
                     uid: 'user-12345'
                 }
             }
