@@ -12,7 +12,7 @@ const agora_access_token_1 = require("agora-access-token");
 let AgoraService = class AgoraService {
     generateTokens(channelName, uid, role) {
         const appId = "30eeedb05a31430eac4d19dbe1b73ab7";
-        const appCertificate = "TU_APP_CERTIFICATE_AQUI";
+        const appCertificate = "31724ea95d98465baa793ed09a3c68f5;;
         const agoraRole = role === 'host' ? agora_access_token_1.RtcRole.PUBLISHER : agora_access_token_1.RtcRole.SUBSCRIBER;
         const expirationTimeInSeconds = 3600;
         const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -20,7 +20,6 @@ let AgoraService = class AgoraService {
         const rtcToken = agora_access_token_1.RtcTokenBuilder.buildTokenWithAccount(appId, appCertificate, channelName, uid, agoraRole, privilegeExpireTime);
         const rtmToken = agora_access_token_1.RtmTokenBuilder.buildToken(appId, appCertificate, uid, agora_access_token_1.RtmRole.Rtm_User, privilegeExpireTime);
         return {
-            appId,
             rtcToken,
             rtmToken,
             channelName,
