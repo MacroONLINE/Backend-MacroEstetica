@@ -176,6 +176,22 @@ export declare class EmpresaController {
     })[]>;
     getMinisiteByEmpresaId(empresaId: string): Promise<{
         minisite: {
+            offers: ({
+                products: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    title: string;
+                    description: string;
+                    offerId: string;
+                }[];
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                minisiteId: string;
+                sectionTitle: string | null;
+            })[];
             benefits: {
                 id: string;
                 createdAt: Date;
@@ -192,7 +208,6 @@ export declare class EmpresaController {
                     updatedAt: Date;
                     description: string;
                     categoryId: number;
-                    companyId: string;
                     isFeatured: boolean | null;
                     lab: string | null;
                     activeIngredients: string[];
@@ -203,6 +218,7 @@ export declare class EmpresaController {
                     imageGallery: string[];
                     isBestSeller: boolean | null;
                     isOnSale: boolean | null;
+                    companyId: string;
                 };
             } & {
                 id: string;
@@ -225,22 +241,6 @@ export declare class EmpresaController {
                 imageSrc: string | null;
                 order: number | null;
             }[];
-            offers: ({
-                products: {
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    title: string;
-                    description: string;
-                    offerId: string;
-                }[];
-            } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                minisiteId: string;
-                sectionTitle: string | null;
-            })[];
             featuredProducts: ({
                 product: {
                     name: string;
@@ -249,7 +249,6 @@ export declare class EmpresaController {
                     updatedAt: Date;
                     description: string;
                     categoryId: number;
-                    companyId: string;
                     isFeatured: boolean | null;
                     lab: string | null;
                     activeIngredients: string[];
@@ -260,6 +259,7 @@ export declare class EmpresaController {
                     imageGallery: string[];
                     isBestSeller: boolean | null;
                     isOnSale: boolean | null;
+                    companyId: string;
                 };
             } & {
                 id: string;
@@ -316,7 +316,6 @@ export declare class EmpresaController {
             updatedAt: Date;
             description: string;
             categoryId: number;
-            companyId: string;
             isFeatured: boolean | null;
             lab: string | null;
             activeIngredients: string[];
@@ -327,6 +326,7 @@ export declare class EmpresaController {
             imageGallery: string[];
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
+            companyId: string;
         }[];
         categorias: ({
             products: {
@@ -336,7 +336,6 @@ export declare class EmpresaController {
                 updatedAt: Date;
                 description: string;
                 categoryId: number;
-                companyId: string;
                 isFeatured: boolean | null;
                 lab: string | null;
                 activeIngredients: string[];
@@ -347,6 +346,7 @@ export declare class EmpresaController {
                 imageGallery: string[];
                 isBestSeller: boolean | null;
                 isOnSale: boolean | null;
+                companyId: string;
             }[];
         } & {
             name: string;

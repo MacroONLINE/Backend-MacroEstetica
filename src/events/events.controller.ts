@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Post, NotFoundException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 
 @Controller('events')
@@ -11,13 +19,23 @@ export class EventsController {
   }
 
   @Post(':eventId/register')
-  async registerAttendee(@Param('eventId') eventId: string, @Body() body: { userId: string }) {
-    return this.eventsService.registerAttendee(eventId, body.userId);
+  async registerAttendee(
+    @Param('eventId') eventId: string,
+    @Body() body: { userId: string },
+  ) {
+    const { userId } = body;
+    const isRegistered = await this.eventsService.registerAttendee(eventId, userId);
+    if (!isRegistered) {
+      throw new ForbiddenException(
+        'El usuario ya está inscrito o no se pudo inscribir en este evento',
+      );
+    }
+    return { message: `Usuario ${userId} registrado con éxito en el evento ${eventId}` };
   }
 
   @Get('empresa/:empresaId')
   async getEventsByEmpresa(@Param('empresaId') empresaId: string) {
-    return this.eventsService.getEventsByEmpresaId(empresaId);
+    return this.eventsService.getEventsByLeadingCompany(empresaId);
   }
 
   @Get(':eventId')

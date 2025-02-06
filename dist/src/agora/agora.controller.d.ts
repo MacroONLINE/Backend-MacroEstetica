@@ -6,7 +6,9 @@ export declare class AgoraController {
     private readonly prisma;
     constructor(agoraService: AgoraService, prisma: PrismaService);
     generateToken(dto: GenerateTokenDto): Promise<{
-        token: string;
+        appId: string;
+        rtcToken: string;
+        rtmToken: string;
         channelName: string;
         uid: string;
         role: "host" | "audience";

@@ -11,31 +11,36 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventStreamsService = void 0;
 const common_1 = require("@nestjs/common");
-const prisma_service_1 = require("../prisma/prisma.service");
+const prisma_service_1 = require("../../prisma/prisma.service");
+const crypto_1 = require("crypto");
 let EventStreamsService = class EventStreamsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
     async createStream(data) {
+        const channelName = data.channelName || (0, crypto_1.randomUUID)();
         return this.prisma.eventStream.create({
             data: {
                 eventId: data.eventId,
-                channelName: data.channelName,
+                channelName,
                 startDateTime: data.startDateTime,
                 endDateTime: data.endDateTime,
             },
         });
     }
-    async getStreamByChannelName(channelName) {
+    async getStreamById(id) {
         return this.prisma.eventStream.findUnique({
-            where: { channelName },
+            where: { id },
             include: {
                 event: {
                     include: {
-                        instructor: { select: { userId: true } },
-                        attendees: { select: { id: true } },
+                        leadingCompany: true,
+                        attendees: true,
+                        organizers: true,
+                        workshops: true,
                     },
                 },
+                orators: true,
             },
         });
     }

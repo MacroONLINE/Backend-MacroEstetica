@@ -23,10 +23,15 @@ let EventsController = class EventsController {
         return this.eventsService.createEvent(body);
     }
     async registerAttendee(eventId, body) {
-        return this.eventsService.registerAttendee(eventId, body.userId);
+        const { userId } = body;
+        const isRegistered = await this.eventsService.registerAttendee(eventId, userId);
+        if (!isRegistered) {
+            throw new common_1.ForbiddenException('El usuario ya está inscrito o no se pudo inscribir en este evento');
+        }
+        return { message: `Usuario ${userId} registrado con éxito en el evento ${eventId}` };
     }
     async getEventsByEmpresa(empresaId) {
-        return this.eventsService.getEventsByEmpresaId(empresaId);
+        return this.eventsService.getEventsByLeadingCompany(empresaId);
     }
     async getEventById(eventId) {
         const event = await this.eventsService.getEventById(eventId);

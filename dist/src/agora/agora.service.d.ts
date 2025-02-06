@@ -1,10 +1,11 @@
-import { GenerateTokenDto } from './dto/generate-token.dto';
 export declare class AgoraService {
-    generateRtcToken(dto: GenerateTokenDto): {
-        token: string;
+    generateTokens(channelName: string, uid: string, role: 'host' | 'audience'): {
+        appId: string;
+        rtcToken: string;
+        rtmToken: string;
         channelName: string;
         uid: string;
-        role: "host" | "audience";
+        role: "audience" | "host";
         expiresAt: number;
     };
 }

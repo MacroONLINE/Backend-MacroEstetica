@@ -8,8 +8,4 @@ export class GenerateTokenDto {
   @IsString()
   @IsNotEmpty()
   uid: string;
-
-  @IsString()
-  @IsNotEmpty()
-  role: 'host' | 'audience';
 }

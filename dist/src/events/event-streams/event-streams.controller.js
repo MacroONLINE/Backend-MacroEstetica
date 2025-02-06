@@ -22,8 +22,8 @@ let EventStreamsController = class EventStreamsController {
     async createStream(body) {
         return this.eventStreamsService.createStream(body);
     }
-    async getStreamByChannelName(channelName) {
-        const stream = await this.eventStreamsService.getStreamByChannelName(channelName);
+    async getStreamById(id) {
+        const stream = await this.eventStreamsService.getStreamById(id);
         if (!stream)
             throw new common_1.NotFoundException('Stream no encontrado');
         return stream;
@@ -38,14 +38,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EventStreamsController.prototype, "createStream", null);
 __decorate([
-    (0, common_1.Get)(':channelName'),
-    __param(0, (0, common_1.Param)('channelName')),
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], EventStreamsController.prototype, "getStreamByChannelName", null);
+], EventStreamsController.prototype, "getStreamById", null);
 exports.EventStreamsController = EventStreamsController = __decorate([
     (0, common_1.Controller)('event-streams'),
     __metadata("design:paramtypes", [event_streams_service_1.EventStreamsService])
 ], EventStreamsController);
-//# sourceMappingURL=event-stream.controller.js.map
+//# sourceMappingURL=event-streams.controller.js.map

@@ -4,21 +4,19 @@ export declare class EventsController {
     constructor(eventsService: EventsService);
     createEvent(body: any): Promise<{
         id: string;
-        title: string;
-        description: string;
-        date: Date;
-        time: string;
-        startDateTime: Date;
-        endDateTime: Date;
-        location: string;
-        bannerUrl: string | null;
-        companyId: string | null;
-        instructorId: string;
-        ctaUrl: string | null;
-        ctaButtonText: string;
-        logoUrl: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        longDescription: string | null;
+        mainBannerUrl: string | null;
+        mainImageUrl: string | null;
+        physicalLocation: string | null;
+        startDateTime: Date;
+        endDateTime: Date;
+        mapUrl: string | null;
+        target: import(".prisma/client").$Enums.Target | null;
+        leadingCompanyId: string | null;
+        instructorId: string | null;
     }>;
     registerAttendee(eventId: string, body: {
         userId: string;
@@ -26,36 +24,77 @@ export declare class EventsController {
         message: string;
     }>;
     getEventsByEmpresa(empresaId: string): Promise<({
-        categories: {
+        streams: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
-            urlIcon: string;
-            colorHex: string;
+            startDateTime: Date;
+            endDateTime: Date;
+            eventId: string;
+            channelName: string | null;
         }[];
-        instructor: {
+        workshops: {
             id: string;
-            title: string | null;
-            description: string;
             createdAt: Date;
             updatedAt: Date;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
+            title: string;
+            description: string;
+            startDateTime: Date;
+            endDateTime: Date;
+            eventId: string | null;
+            price: number | null;
+            whatYouWillLearn: string | null;
+            channelName: string | null;
+            classroomId: string | null;
+        }[];
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             userId: string;
-            empresaId: string | null;
-            categoryId: string | null;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             bannerImage: string | null;
-            followers: number | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
         };
+        organizers: {
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            eventId: string;
+            career: string | null;
+            photoUrl: string | null;
+        }[];
+        offers: ({
+            products: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                title: string;
+                description: string;
+                offerId: string;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            eventId: string;
+            sectionTitle: string | null;
+        })[];
         attendees: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            status: boolean;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -69,67 +108,100 @@ export declare class EventsController {
             zipCode: string | null;
             role: import(".prisma/client").$Enums.Role;
             password: string;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
-        streams: {
-            id: string;
-            startDateTime: Date;
-            endDateTime: Date;
-            createdAt: Date;
-            updatedAt: Date;
-            eventId: string;
-            channelName: string;
-        }[];
     } & {
         id: string;
-        title: string;
-        description: string;
-        date: Date;
-        time: string;
-        startDateTime: Date;
-        endDateTime: Date;
-        location: string;
-        bannerUrl: string | null;
-        companyId: string | null;
-        instructorId: string;
-        ctaUrl: string | null;
-        ctaButtonText: string;
-        logoUrl: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        longDescription: string | null;
+        mainBannerUrl: string | null;
+        mainImageUrl: string | null;
+        physicalLocation: string | null;
+        startDateTime: Date;
+        endDateTime: Date;
+        mapUrl: string | null;
+        target: import(".prisma/client").$Enums.Target | null;
+        leadingCompanyId: string | null;
+        instructorId: string | null;
     })[]>;
     getEventById(eventId: string): Promise<{
-        categories: {
+        streams: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            name: string;
-            urlIcon: string;
-            colorHex: string;
+            startDateTime: Date;
+            endDateTime: Date;
+            eventId: string;
+            channelName: string | null;
         }[];
-        instructor: {
+        workshops: {
             id: string;
-            title: string | null;
-            description: string;
             createdAt: Date;
             updatedAt: Date;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
+            title: string;
+            description: string;
+            startDateTime: Date;
+            endDateTime: Date;
+            eventId: string | null;
+            price: number | null;
+            whatYouWillLearn: string | null;
+            channelName: string | null;
+            classroomId: string | null;
+        }[];
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             userId: string;
-            empresaId: string | null;
-            categoryId: string | null;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             bannerImage: string | null;
-            followers: number | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
         };
+        organizers: {
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            eventId: string;
+            career: string | null;
+            photoUrl: string | null;
+        }[];
+        offers: ({
+            products: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                title: string;
+                description: string;
+                offerId: string;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            eventId: string;
+            sectionTitle: string | null;
+        })[];
         attendees: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            status: boolean;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -143,34 +215,26 @@ export declare class EventsController {
             zipCode: string | null;
             role: import(".prisma/client").$Enums.Role;
             password: string;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
-        streams: {
-            id: string;
-            startDateTime: Date;
-            endDateTime: Date;
-            createdAt: Date;
-            updatedAt: Date;
-            eventId: string;
-            channelName: string;
-        }[];
     } & {
         id: string;
-        title: string;
-        description: string;
-        date: Date;
-        time: string;
-        startDateTime: Date;
-        endDateTime: Date;
-        location: string;
-        bannerUrl: string | null;
-        companyId: string | null;
-        instructorId: string;
-        ctaUrl: string | null;
-        ctaButtonText: string;
-        logoUrl: string | null;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        longDescription: string | null;
+        mainBannerUrl: string | null;
+        mainImageUrl: string | null;
+        physicalLocation: string | null;
+        startDateTime: Date;
+        endDateTime: Date;
+        mapUrl: string | null;
+        target: import(".prisma/client").$Enums.Target | null;
+        leadingCompanyId: string | null;
+        instructorId: string | null;
     }>;
 }

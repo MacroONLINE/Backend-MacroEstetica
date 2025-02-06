@@ -17,15 +17,15 @@ export declare class CoursesService {
         title: string;
         description: string;
         categoryId: string;
-        bannerUrl: string;
+        target: import(".prisma/client").$Enums.Target;
         instructorId: string | null;
+        bannerUrl: string;
         level: string;
         commentsCount: number;
         averageRating: number;
         price: number;
         discountPercentage: number | null;
         participantsCount: number;
-        target: import(".prisma/client").$Enums.Target;
         isFeatured: boolean | null;
         courseImageUrl: string;
         aboutDescription: string | null;

@@ -10,24 +10,19 @@ exports.AgoraService = void 0;
 const common_1 = require("@nestjs/common");
 const agora_access_token_1 = require("agora-access-token");
 let AgoraService = class AgoraService {
-    generateRtcToken(dto) {
-        const { channelName, uid, role } = dto;
-        const appId = process.env.AGORA_APP_ID;
-        const appCertificate = process.env.AGORA_APP_CERTIFICATE;
-        if (!appId || !appCertificate) {
-            throw new Error('Faltan AGORA_APP_ID o AGORA_APP_CERTIFICATE en variables de entorno');
-        }
+    generateTokens(channelName, uid, role) {
+        const appId = "30eeedb05a31430eac4d19dbe1b73ab7";
+        const appCertificate = "TU_APP_CERTIFICATE_AQUI";
         const agoraRole = role === 'host' ? agora_access_token_1.RtcRole.PUBLISHER : agora_access_token_1.RtcRole.SUBSCRIBER;
         const expirationTimeInSeconds = 3600;
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const privilegeExpireTime = currentTimestamp + expirationTimeInSeconds;
-        const numericUid = parseInt(uid, 10);
-        if (Number.isNaN(numericUid)) {
-            throw new Error(`UID "${uid}" no es un número válido`);
-        }
-        const token = agora_access_token_1.RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channelName, numericUid, agoraRole, privilegeExpireTime);
+        const rtcToken = agora_access_token_1.RtcTokenBuilder.buildTokenWithAccount(appId, appCertificate, channelName, uid, agoraRole, privilegeExpireTime);
+        const rtmToken = agora_access_token_1.RtmTokenBuilder.buildToken(appId, appCertificate, uid, agora_access_token_1.RtmRole.Rtm_User, privilegeExpireTime);
         return {
-            token,
+            appId,
+            rtcToken,
+            rtmToken,
             channelName,
             uid,
             role,

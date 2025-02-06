@@ -90,7 +90,6 @@ export declare class CategoryController {
             updatedAt: Date;
             description: string;
             categoryId: number;
-            companyId: string;
             isFeatured: boolean | null;
             lab: string | null;
             activeIngredients: string[];
@@ -101,6 +100,7 @@ export declare class CategoryController {
             imageGallery: string[];
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
+            companyId: string;
         }[];
     } & {
         name: string;

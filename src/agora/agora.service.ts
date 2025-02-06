@@ -1,34 +1,34 @@
 import { Injectable } from '@nestjs/common';
-import { RtcRole, RtcTokenBuilder } from 'agora-access-token';
-import { GenerateTokenDto } from './dto/generate-token.dto';
+import { RtcTokenBuilder, RtcRole, RtmTokenBuilder, RtmRole } from 'agora-access-token';
 
 @Injectable()
 export class AgoraService {
-  generateRtcToken(dto: GenerateTokenDto) {
-    const { channelName, uid, role } = dto;
-    const appId = process.env.AGORA_APP_ID;
-    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
-    if (!appId || !appCertificate) {
-      throw new Error('Faltan AGORA_APP_ID o AGORA_APP_CERTIFICATE en variables de entorno');
-    }
+  generateTokens(channelName: string, uid: string, role: 'host' | 'audience') {
+    const appId = "30eeedb05a31430eac4d19dbe1b73ab7";
+    const appCertificate = "TU_APP_CERTIFICATE_AQUI";
     const agoraRole = role === 'host' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
     const expirationTimeInSeconds = 3600;
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const privilegeExpireTime = currentTimestamp + expirationTimeInSeconds;
-    const numericUid = parseInt(uid, 10);
-    if (Number.isNaN(numericUid)) {
-      throw new Error(`UID "${uid}" no es un número válido`);
-    }
-    const token = RtcTokenBuilder.buildTokenWithUid(
+    const rtcToken = RtcTokenBuilder.buildTokenWithAccount(
       appId,
       appCertificate,
       channelName,
-      numericUid,
+      uid,
       agoraRole,
-      privilegeExpireTime,
+      privilegeExpireTime
+    );
+    const rtmToken = RtmTokenBuilder.buildToken(
+      appId,
+      appCertificate,
+      uid,
+      RtmRole.Rtm_User,
+      privilegeExpireTime
     );
     return {
-      token,
+      appId,
+      rtcToken,
+      rtmToken,
       channelName,
       uid,
       role,
