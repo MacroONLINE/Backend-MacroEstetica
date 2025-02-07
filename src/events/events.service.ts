@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -48,7 +44,6 @@ export class EventsService {
         },
       },
     });
-
     return true;
   }
 
@@ -71,7 +66,7 @@ export class EventsService {
   }
 
   async getEventById(eventId: string) {
-    const event = await this.prisma.event.findUnique({
+    return this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
         leadingCompany: true,
@@ -86,6 +81,58 @@ export class EventsService {
         },
       },
     });
-    return event;
+  }
+
+  /**
+   * Retorna los streams y workshops asociados a un evento
+   */
+  async getStreamsAndWorkshopsByEvent(eventId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        streams: true,
+        workshops: true,
+      },
+    });
+    return event
+      ? {
+          eventId: event.id,
+          streams: event.streams,
+          workshops: event.workshops,
+        }
+      : null;
+  }
+
+  /**
+   * Retorna los workshops de un classroom específico
+   */
+  async getWorkshopsByClassroom(classroomId: string) {
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id: classroomId },
+      include: {
+        workshops: true,
+      },
+    });
+
+    return classroom?.workshops || null;
+  }
+
+  /**
+   * Retorna un workshop por su ID
+   */
+  async getWorkshopById(workshopId: string) {
+    return this.prisma.workshop.findUnique({
+      where: { id: workshopId },
+      include: {
+        event: true,
+        classroom: true,
+        orators: true,
+        enrollments: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
   }
 }

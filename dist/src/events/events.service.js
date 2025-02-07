@@ -72,7 +72,7 @@ let EventsService = class EventsService {
         });
     }
     async getEventById(eventId) {
-        const event = await this.prisma.event.findUnique({
+        return this.prisma.event.findUnique({
             where: { id: eventId },
             include: {
                 leadingCompany: true,
@@ -87,7 +87,46 @@ let EventsService = class EventsService {
                 },
             },
         });
-        return event;
+    }
+    async getStreamsAndWorkshopsByEvent(eventId) {
+        const event = await this.prisma.event.findUnique({
+            where: { id: eventId },
+            include: {
+                streams: true,
+                workshops: true,
+            },
+        });
+        return event
+            ? {
+                eventId: event.id,
+                streams: event.streams,
+                workshops: event.workshops,
+            }
+            : null;
+    }
+    async getWorkshopsByClassroom(classroomId) {
+        const classroom = await this.prisma.classroom.findUnique({
+            where: { id: classroomId },
+            include: {
+                workshops: true,
+            },
+        });
+        return classroom?.workshops || null;
+    }
+    async getWorkshopById(workshopId) {
+        return this.prisma.workshop.findUnique({
+            where: { id: workshopId },
+            include: {
+                event: true,
+                classroom: true,
+                orators: true,
+                enrollments: {
+                    include: {
+                        user: true,
+                    },
+                },
+            },
+        });
     }
 };
 exports.EventsService = EventsService;
