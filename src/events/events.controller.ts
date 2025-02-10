@@ -6,6 +6,7 @@ import {
   Post,
   NotFoundException,
   ForbiddenException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { EventsService } from './events.service';
@@ -165,6 +166,37 @@ export class ClassroomController {
   })
   async getUpcomingEvents() {
     const events = await this.eventsService.getUpcomingEvents();
+    return events;
+  }
+
+  @Get('upcoming/:year')
+  @ApiOperation({
+    summary: 'Obtiene todos los eventos futuros de un año específico',
+    description:
+      'Si el año es el actual, se filtra desde hoy. Si es distinto, se filtra desde el 1 de enero de ese año.',
+  })
+  @ApiParam({
+    name: 'year',
+    required: true,
+    description:
+      'Año para el cual se obtendrán los eventos futuros. Puede ser el año actual o uno futuro.',
+    type: Number,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de eventos futuros para el año especificado',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontraron eventos para el rango indicado (opcional)',
+  })
+  async getUpcomingEventsByYear(@Param('year', ParseIntPipe) year: number) {
+    const events = await this.eventsService.getUpcomingEventsByYear(year);
+    if (!events || events.length === 0) {
+      throw new NotFoundException(
+        `No se encontraron eventos futuros para el año ${year}`,
+      );
+    }
     return events;
   }
 }

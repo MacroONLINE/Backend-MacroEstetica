@@ -161,4 +161,42 @@ export class EventsService {
       },
     });
   }
+
+  async getUpcomingEventsByYear(year: number) {
+    const currentYear = new Date().getFullYear();
+
+    // Determinamos la fecha base (startDateTime debe ser >= esta fecha)
+    let startDate: Date;
+    if (year === currentYear) {
+      // Año actual -> filtrar desde hoy
+      startDate = new Date();
+    } else {
+      // Año distinto al actual -> filtrar desde 1 de enero de ese año
+      // OJO: Esto incluye también años pasados, pero en la práctica
+      // si la fecha ya pasó, no habrá eventos "futuros".
+      startDate = new Date(year, 0, 1); // 0 = enero, día 1
+    }
+
+    return this.prisma.event.findMany({
+      where: {
+        startDateTime: {
+          gte: startDate,
+        },
+      },
+      orderBy: {
+        startDateTime: 'asc',
+      },
+      include: {
+        leadingCompany: true,
+        attendees: true,
+        streams: true,
+        workshops: true,
+        organizers: true,
+        offers: {
+          include: {
+            products: true,
+          },
+        },},
+    });
+  }
 }
