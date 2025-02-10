@@ -135,4 +135,30 @@ export class EventsService {
       },
     });
   }
+
+  async getUpcomingEvents() {
+    const now = new Date();
+    return this.prisma.event.findMany({
+      where: {
+        startDateTime: {
+          gte: now,
+        },
+      },
+      orderBy: {
+        startDateTime: 'asc',
+      },
+      include: {
+        leadingCompany: true,
+        attendees: true,
+        streams: true,
+        workshops: true,
+        organizers: true,
+        offers: {
+          include: {
+            products: true,
+          },
+        },
+      },
+    });
+  }
 }

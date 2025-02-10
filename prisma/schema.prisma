@@ -163,6 +163,7 @@ model Instructor {
   profession        Profession
   type              ProfessionType
   description       String
+  experienceDescription       String @default("")
   experienceYears   Int
   certificationsUrl String
   status            String

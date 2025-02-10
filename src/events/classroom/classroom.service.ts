@@ -43,4 +43,42 @@ export class ClassroomService {
     await this.prisma.classroom.delete({ where: { id } });
     return { message: 'Classroom eliminado correctamente' };
   }
+
+  /**
+   * Retorna los Workshops futuros (startDateTime >= fecha/hora actual) para un Classroom dado.
+   */
+  async getUpcomingWorkshopsForClassroom(classroomId: string) {
+    const now = new Date();
+    return this.prisma.workshop.findMany({
+      where: {
+        classroomId,
+        startDateTime: {
+          gte: now, // Podrías usar 'gt' si quieres que inicie estrictamente en el futuro
+        },
+      },
+      orderBy: {
+        startDateTime: 'asc',
+      },
+    });
+  }
+
+  /**
+   * Retorna los Classrooms que tienen al menos un Workshop próximo.
+   */
+  async getUpcomingClassrooms() {
+    const now = new Date();
+    return this.prisma.classroom.findMany({
+      where: {
+        workshops: {
+          some: {
+            startDateTime: { gte: now },
+          },
+        },
+      },
+      include: {
+        // Incluye los workshops para ver cuáles están próximos
+        workshops: true,
+      },
+    });
+  }
 }

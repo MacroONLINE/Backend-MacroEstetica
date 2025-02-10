@@ -156,4 +156,15 @@ export class ClassroomController {
     if (!workshops) throw new NotFoundException('No se encontraron workshops o classroom inexistente');
     return workshops;
   }
+
+  @Get('upcoming')
+  @ApiOperation({ summary: 'Obtiene todos los eventos próximos a partir de la fecha/hora actual' })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de eventos próximos',
+  })
+  async getUpcomingEvents() {
+    const events = await this.eventsService.getUpcomingEvents();
+    return events;
+  }
 }
