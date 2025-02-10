@@ -128,6 +128,63 @@ let EventsService = class EventsService {
             },
         });
     }
+    async getUpcomingEvents() {
+        const now = new Date();
+        return this.prisma.event.findMany({
+            where: {
+                startDateTime: {
+                    gte: now,
+                },
+            },
+            orderBy: {
+                startDateTime: 'asc',
+            },
+            include: {
+                leadingCompany: true,
+                attendees: true,
+                streams: true,
+                workshops: true,
+                organizers: true,
+                offers: {
+                    include: {
+                        products: true,
+                    },
+                },
+            },
+        });
+    }
+    async getUpcomingEventsByYear(year) {
+        const currentYear = new Date().getFullYear();
+        let startDate;
+        if (year === currentYear) {
+            startDate = new Date();
+        }
+        else {
+            startDate = new Date(year, 0, 1);
+        }
+        return this.prisma.event.findMany({
+            where: {
+                startDateTime: {
+                    gte: startDate,
+                },
+            },
+            orderBy: {
+                startDateTime: 'asc',
+            },
+            include: {
+                leadingCompany: true,
+                attendees: true,
+                streams: true,
+                workshops: true,
+                organizers: true,
+                offers: {
+                    include: {
+                        products: true,
+                    },
+                },
+            },
+        });
+    }
 };
 exports.EventsService = EventsService;
 exports.EventsService = EventsService = __decorate([

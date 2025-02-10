@@ -51,6 +51,35 @@ let ClassroomService = class ClassroomService {
         await this.prisma.classroom.delete({ where: { id } });
         return { message: 'Classroom eliminado correctamente' };
     }
+    async getUpcomingWorkshopsForClassroom(classroomId) {
+        const now = new Date();
+        return this.prisma.workshop.findMany({
+            where: {
+                classroomId,
+                startDateTime: {
+                    gte: now,
+                },
+            },
+            orderBy: {
+                startDateTime: 'asc',
+            },
+        });
+    }
+    async getUpcomingClassrooms() {
+        const now = new Date();
+        return this.prisma.classroom.findMany({
+            where: {
+                workshops: {
+                    some: {
+                        startDateTime: { gte: now },
+                    },
+                },
+            },
+            include: {
+                workshops: true,
+            },
+        });
+    }
 };
 exports.ClassroomService = ClassroomService;
 exports.ClassroomService = ClassroomService = __decorate([

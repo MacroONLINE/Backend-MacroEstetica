@@ -41,4 +41,40 @@ export declare class ClassroomService {
     deleteClassroom(id: string): Promise<{
         message: string;
     }>;
+    getUpcomingWorkshopsForClassroom(classroomId: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
+        description: string;
+        startDateTime: Date;
+        endDateTime: Date;
+        eventId: string | null;
+        price: number | null;
+        whatYouWillLearn: string | null;
+        channelName: string | null;
+        classroomId: string | null;
+    }[]>;
+    getUpcomingClassrooms(): Promise<({
+        workshops: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            title: string;
+            description: string;
+            startDateTime: Date;
+            endDateTime: Date;
+            eventId: string | null;
+            price: number | null;
+            whatYouWillLearn: string | null;
+            channelName: string | null;
+            classroomId: string | null;
+        }[];
+    } & {
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
+        description: string | null;
+    })[]>;
 }

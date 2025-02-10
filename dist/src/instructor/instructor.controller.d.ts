@@ -93,6 +93,7 @@ export declare class InstructorController {
         followers: number | null;
         profession: import(".prisma/client").$Enums.Profession;
         description: string;
+        experienceDescription: string;
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
@@ -187,6 +188,7 @@ export declare class InstructorController {
         followers: number | null;
         profession: import(".prisma/client").$Enums.Profession;
         description: string;
+        experienceDescription: string;
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
@@ -281,6 +283,7 @@ export declare class InstructorController {
         followers: number | null;
         profession: import(".prisma/client").$Enums.Profession;
         description: string;
+        experienceDescription: string;
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
@@ -375,6 +378,7 @@ export declare class InstructorController {
         followers: number | null;
         profession: import(".prisma/client").$Enums.Profession;
         description: string;
+        experienceDescription: string;
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
@@ -469,6 +473,7 @@ export declare class InstructorController {
         followers: number | null;
         profession: import(".prisma/client").$Enums.Profession;
         description: string;
+        experienceDescription: string;
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
@@ -563,6 +568,7 @@ export declare class InstructorController {
         followers: number | null;
         profession: import(".prisma/client").$Enums.Profession;
         description: string;
+        experienceDescription: string;
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
@@ -657,6 +663,7 @@ export declare class InstructorController {
         followers: number | null;
         profession: import(".prisma/client").$Enums.Profession;
         description: string;
+        experienceDescription: string;
         experienceYears: number;
         certificationsUrl: string;
         empresaId: string | null;
