@@ -50,28 +50,11 @@ export class EventsController {
     return this.eventsService.getEventsByLeadingCompany(empresaId);
   }
 
-  @Get(':eventId')
-  @ApiOperation({ summary: 'Obtiene un evento por su ID' })
-  @ApiParam({ name: 'eventId', description: 'ID del evento' })
-  @ApiResponse({ status: 200, description: 'Retorna el evento si se encuentra' })
-  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
-  async getEventById(@Param('eventId') eventId: string) {
-    const event = await this.eventsService.getEventById(eventId);
-    if (!event) throw new NotFoundException('Evento no encontrado');
-    return event;
-  }
-
-  @Get(':eventId/streams-workshops')
-  @ApiOperation({ summary: 'Obtiene los streams y workshops de un evento' })
-  @ApiParam({ name: 'eventId', description: 'ID del evento' })
-  @ApiResponse({ status: 200, description: 'Retorna los streams y workshops asociados al evento' })
-  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
-  async getEventStreamsAndWorkshops(@Param('eventId') eventId: string) {
-    const data = await this.eventsService.getStreamsAndWorkshopsByEvent(eventId);
-    if (!data) throw new NotFoundException('Evento no encontrado');
-    return data;
-  }
-
+  /**
+   * IMPORTANTE:
+   * Se definen primero las rutas literales 'upcoming' y 'upcoming/:year',
+   * para evitar conflicto con la ruta ':eventId'.
+   */
   @Get('upcoming')
   @ApiOperation({ summary: 'Obtiene todos los eventos próximos a partir de la fecha/hora actual' })
   @ApiResponse({ status: 200, description: 'Lista de eventos próximos' })
@@ -98,5 +81,30 @@ export class EventsController {
       throw new NotFoundException(`No se encontraron eventos futuros para el año ${year}`);
     }
     return events;
+  }
+
+  /**
+   * Ahora definimos la ruta :eventId DESPUÉS de las rutas 'upcoming'.
+   */
+  @Get(':eventId')
+  @ApiOperation({ summary: 'Obtiene un evento por su ID' })
+  @ApiParam({ name: 'eventId', description: 'ID del evento' })
+  @ApiResponse({ status: 200, description: 'Retorna el evento si se encuentra' })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
+  async getEventById(@Param('eventId') eventId: string) {
+    const event = await this.eventsService.getEventById(eventId);
+    if (!event) throw new NotFoundException('Evento no encontrado');
+    return event;
+  }
+
+  @Get(':eventId/streams-workshops')
+  @ApiOperation({ summary: 'Obtiene los streams y workshops de un evento' })
+  @ApiParam({ name: 'eventId', description: 'ID del evento' })
+  @ApiResponse({ status: 200, description: 'Retorna los streams y workshops asociados al evento' })
+  @ApiResponse({ status: 404, description: 'Evento no encontrado' })
+  async getEventStreamsAndWorkshops(@Param('eventId') eventId: string) {
+    const data = await this.eventsService.getStreamsAndWorkshopsByEvent(eventId);
+    if (!data) throw new NotFoundException('Evento no encontrado');
+    return data;
   }
 }

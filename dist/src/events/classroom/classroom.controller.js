@@ -23,12 +23,6 @@ let ClassroomController = class ClassroomController {
     async createClassroom(body) {
         return this.classroomService.createClassroom(body);
     }
-    async getClassroomById(id) {
-        const classroom = await this.classroomService.getClassroomById(id);
-        if (!classroom)
-            throw new common_1.NotFoundException('Classroom no encontrado');
-        return classroom;
-    }
     async updateClassroom(id, body) {
         return this.classroomService.updateClassroom(id, body);
     }
@@ -41,6 +35,12 @@ let ClassroomController = class ClassroomController {
     }
     async getUpcomingClassrooms() {
         return this.classroomService.getUpcomingClassrooms();
+    }
+    async getClassroomById(id) {
+        const classroom = await this.classroomService.getClassroomById(id);
+        if (!classroom)
+            throw new common_1.NotFoundException('Classroom no encontrado');
+        return classroom;
     }
 };
 exports.ClassroomController = ClassroomController;
@@ -60,23 +60,6 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], ClassroomController.prototype, "createClassroom", null);
-__decorate([
-    (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene un Classroom por su ID' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom a buscar' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Retorna el Classroom si existe',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Classroom no encontrado',
-    }),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "getClassroomById", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Actualiza un Classroom existente' }),
@@ -140,6 +123,23 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ClassroomController.prototype, "getUpcomingClassrooms", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene un Classroom por su ID' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom a buscar' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Retorna el Classroom si existe',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'Classroom no encontrado',
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ClassroomController.prototype, "getClassroomById", null);
 exports.ClassroomController = ClassroomController = __decorate([
     (0, swagger_1.ApiTags)('Classrooms'),
     (0, common_1.Controller)('classroom'),

@@ -30,22 +30,7 @@ export class ClassroomController {
     return this.classroomService.createClassroom(body);
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Obtiene un Classroom por su ID' })
-  @ApiParam({ name: 'id', description: 'ID del Classroom a buscar' })
-  @ApiResponse({
-    status: 200,
-    description: 'Retorna el Classroom si existe',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Classroom no encontrado',
-  })
-  async getClassroomById(@Param('id') id: string) {
-    const classroom = await this.classroomService.getClassroomById(id);
-    if (!classroom) throw new NotFoundException('Classroom no encontrado');
-    return classroom;
-  }
+
 
   @Patch(':id')
   @ApiOperation({ summary: 'Actualiza un Classroom existente' })
@@ -102,5 +87,22 @@ export class ClassroomController {
   })
   async getUpcomingClassrooms() {
     return this.classroomService.getUpcomingClassrooms();
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtiene un Classroom por su ID' })
+  @ApiParam({ name: 'id', description: 'ID del Classroom a buscar' })
+  @ApiResponse({
+    status: 200,
+    description: 'Retorna el Classroom si existe',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Classroom no encontrado',
+  })
+  async getClassroomById(@Param('id') id: string) {
+    const classroom = await this.classroomService.getClassroomById(id);
+    if (!classroom) throw new NotFoundException('Classroom no encontrado');
+    return classroom;
   }
 }

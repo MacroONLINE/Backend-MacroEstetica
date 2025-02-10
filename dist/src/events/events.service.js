@@ -129,11 +129,12 @@ let EventsService = class EventsService {
         });
     }
     async getUpcomingEvents() {
-        const now = new Date();
+        const nowUtc = new Date(new Date().toISOString());
+        console.log("Fecha usada para el filtro (UTC):", nowUtc);
         return this.prisma.event.findMany({
             where: {
                 startDateTime: {
-                    gte: now,
+                    gte: nowUtc,
                 },
             },
             orderBy: {

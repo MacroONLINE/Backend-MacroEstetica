@@ -4,77 +4,77 @@ export declare class ClassroomController {
     constructor(classroomService: ClassroomService);
     createClassroom(body: any): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string | null;
-    }>;
-    getClassroomById(id: string): Promise<{
-        workshops: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            description: string;
-            startDateTime: Date;
-            endDateTime: Date;
-            eventId: string | null;
-            price: number | null;
-            whatYouWillLearn: string | null;
-            channelName: string | null;
-            classroomId: string | null;
-        }[];
-    } & {
-        id: string;
         createdAt: Date;
         updatedAt: Date;
-        title: string;
-        description: string | null;
     }>;
     updateClassroom(id: string, body: any): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }>;
     deleteClassroom(id: string): Promise<{
         message: string;
     }>;
     getUpcomingWorkshopsForClassroom(classroomId: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string;
+        createdAt: Date;
+        updatedAt: Date;
+        eventId: string | null;
+        classroomId: string | null;
+        whatYouWillLearn: string | null;
+        price: number | null;
         startDateTime: Date;
         endDateTime: Date;
-        eventId: string | null;
-        price: number | null;
-        whatYouWillLearn: string | null;
         channelName: string | null;
-        classroomId: string | null;
     }[]>;
     getUpcomingClassrooms(): Promise<({
         workshops: {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
             title: string;
             description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            eventId: string | null;
+            classroomId: string | null;
+            whatYouWillLearn: string | null;
+            price: number | null;
             startDateTime: Date;
             endDateTime: Date;
-            eventId: string | null;
-            price: number | null;
-            whatYouWillLearn: string | null;
             channelName: string | null;
-            classroomId: string | null;
         }[];
     } & {
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
         title: string;
         description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     })[]>;
+    getClassroomById(id: string): Promise<{
+        workshops: {
+            id: string;
+            title: string;
+            description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            eventId: string | null;
+            classroomId: string | null;
+            whatYouWillLearn: string | null;
+            price: number | null;
+            startDateTime: Date;
+            endDateTime: Date;
+            channelName: string | null;
+        }[];
+    } & {
+        id: string;
+        title: string;
+        description: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
 }

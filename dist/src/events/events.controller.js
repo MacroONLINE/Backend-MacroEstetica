@@ -34,6 +34,16 @@ let EventsController = class EventsController {
     async getEventsByEmpresa(empresaId) {
         return this.eventsService.getEventsByLeadingCompany(empresaId);
     }
+    async getUpcomingEvents() {
+        return this.eventsService.getUpcomingEvents();
+    }
+    async getUpcomingEventsByYear(year) {
+        const events = await this.eventsService.getUpcomingEventsByYear(year);
+        if (!events || events.length === 0) {
+            throw new common_1.NotFoundException(`No se encontraron eventos futuros para el año ${year}`);
+        }
+        return events;
+    }
     async getEventById(eventId) {
         const event = await this.eventsService.getEventById(eventId);
         if (!event)
@@ -45,16 +55,6 @@ let EventsController = class EventsController {
         if (!data)
             throw new common_1.NotFoundException('Evento no encontrado');
         return data;
-    }
-    async getUpcomingEvents() {
-        return this.eventsService.getUpcomingEvents();
-    }
-    async getUpcomingEventsByYear(year) {
-        const events = await this.eventsService.getUpcomingEventsByYear(year);
-        if (!events || events.length === 0) {
-            throw new common_1.NotFoundException(`No se encontraron eventos futuros para el año ${year}`);
-        }
-        return events;
     }
 };
 exports.EventsController = EventsController;
@@ -92,28 +92,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getEventsByEmpresa", null);
 __decorate([
-    (0, common_1.Get)(':eventId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene un evento por su ID' }),
-    (0, swagger_1.ApiParam)({ name: 'eventId', description: 'ID del evento' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna el evento si se encuentra' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Evento no encontrado' }),
-    __param(0, (0, common_1.Param)('eventId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], EventsController.prototype, "getEventById", null);
-__decorate([
-    (0, common_1.Get)(':eventId/streams-workshops'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene los streams y workshops de un evento' }),
-    (0, swagger_1.ApiParam)({ name: 'eventId', description: 'ID del evento' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna los streams y workshops asociados al evento' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Evento no encontrado' }),
-    __param(0, (0, common_1.Param)('eventId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], EventsController.prototype, "getEventStreamsAndWorkshops", null);
-__decorate([
     (0, common_1.Get)('upcoming'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos próximos a partir de la fecha/hora actual' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de eventos próximos' }),
@@ -140,6 +118,28 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getUpcomingEventsByYear", null);
+__decorate([
+    (0, common_1.Get)(':eventId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene un evento por su ID' }),
+    (0, swagger_1.ApiParam)({ name: 'eventId', description: 'ID del evento' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna el evento si se encuentra' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Evento no encontrado' }),
+    __param(0, (0, common_1.Param)('eventId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getEventById", null);
+__decorate([
+    (0, common_1.Get)(':eventId/streams-workshops'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene los streams y workshops de un evento' }),
+    (0, swagger_1.ApiParam)({ name: 'eventId', description: 'ID del evento' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna los streams y workshops asociados al evento' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Evento no encontrado' }),
+    __param(0, (0, common_1.Param)('eventId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getEventStreamsAndWorkshops", null);
 exports.EventsController = EventsController = __decorate([
     (0, swagger_1.ApiTags)('Events'),
     (0, common_1.Controller)('events'),
