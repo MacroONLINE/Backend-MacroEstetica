@@ -88,11 +88,12 @@ export class EventsService {
   /**
    * Obtiene un Event por ID,
    * incluyendo streams, workshops, orators, attendees, etc.
-   * También agrega un arreglo "allOrators" con todos los oradores
+   * Además, agrega un arreglo "allOrators" con todos los oradores
    * (sin duplicados) de streams y workshops.
-   * 
-   * Por otro lado, trae la empresa líder (leadingCompany), su minisite,
-   * sus offers y sus products. Si no existen, se devuelve un arreglo vacío.
+   *
+   * También trae la empresa líder (leadingCompany), su minisite,
+   * y de ahí todas las "offers", pero únicamente se devuelven
+   * los "products" aplanados en un único arreglo "offerProducts".
    */
   async getEventById(eventId: string) {
     const event = await this.prisma.event.findUnique({
@@ -137,26 +138,29 @@ export class EventsService {
       throw new NotFoundException(`No se encontró el evento con ID: ${eventId}`);
     }
 
-    // 1) Oradores de streams:
+    // Oradores de streams:
     const streamOrators = event.streams?.flatMap((stream) => stream.orators) ?? [];
-
-    // 2) Oradores de workshops:
+    // Oradores de workshops:
     const workshopOrators = event.workshops?.flatMap((workshop) => workshop.orators) ?? [];
 
-    // 3) Combinar ambos, evitando duplicados por su "id"
+    // Combinar ambos, evitando duplicados por su "id"
     const oratorsMap = new Map();
     streamOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
     workshopOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
     const allOrators = Array.from(oratorsMap.values());
 
-    // 4) Obtener las ofertas de la empresa líder (o [])
-    const companyOffers = event.leadingCompany?.minisite?.offers ?? [];
+    // Ofertas de la empresa líder
+    const offers = event.leadingCompany?.minisite?.offers ?? [];
+    // Aplana todos los productos de cada oferta en un solo arreglo
+    const offerProducts = offers.flatMap((offer) => offer.products ?? []);
 
-    // 5) Retornar el evento con un nuevo campo "allOrators" y "companyOffers"
+    // Retornar el evento con:
+    // - "allOrators": oradores combinados
+    // - "offerProducts": todos los MinisiteOfferProduct[] aplanados
     return {
       ...event,
       allOrators,
-      companyOffers,
+      offerProducts,
     };
   }
 

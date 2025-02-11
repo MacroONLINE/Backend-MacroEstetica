@@ -631,22 +631,14 @@ export declare class EventsController {
     })[]>;
     getEventById(eventId: string): Promise<{
         allOrators: any[];
-        companyOffers: ({
-            products: {
-                id: string;
-                title: string;
-                createdAt: Date;
-                updatedAt: Date;
-                description: string;
-                offerId: string;
-            }[];
-        } & {
+        offerProducts: {
             id: string;
+            title: string;
             createdAt: Date;
             updatedAt: Date;
-            minisiteId: string;
-            sectionTitle: string | null;
-        })[];
+            description: string;
+            offerId: string;
+        }[];
         leadingCompany: {
             minisite: {
                 offers: ({

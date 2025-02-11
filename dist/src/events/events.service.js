@@ -128,11 +128,12 @@ let EventsService = class EventsService {
         streamOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
         workshopOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
         const allOrators = Array.from(oratorsMap.values());
-        const companyOffers = event.leadingCompany?.minisite?.offers ?? [];
+        const offers = event.leadingCompany?.minisite?.offers ?? [];
+        const offerProducts = offers.flatMap((offer) => offer.products ?? []);
         return {
             ...event,
             allOrators,
-            companyOffers,
+            offerProducts,
         };
     }
     async getStreamsAndWorkshopsByEvent(eventId) {
