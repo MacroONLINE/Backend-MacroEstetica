@@ -60,38 +60,97 @@ let EventsService = class EventsService {
             include: {
                 leadingCompany: true,
                 attendees: true,
-                streams: true,
-                workshops: true,
                 organizers: true,
+                streams: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                    },
+                },
+                workshops: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                        enrollments: {
+                            include: {
+                                user: true,
+                            },
+                        },
+                    },
+                },
             },
         });
     }
     async getEventById(eventId) {
-        return this.prisma.event.findUnique({
+        const event = await this.prisma.event.findUnique({
             where: { id: eventId },
             include: {
                 leadingCompany: true,
                 attendees: true,
-                streams: true,
                 organizers: true,
+                streams: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                    },
+                },
+                workshops: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                        enrollments: {
+                            include: {
+                                user: true,
+                            },
+                        },
+                    },
+                },
             },
         });
+        if (!event) {
+            throw new common_1.NotFoundException(`No se encontró el evento con ID: ${eventId}`);
+        }
+        const streamOrators = event.streams?.flatMap((stream) => stream.orators) ?? [];
+        const workshopOrators = event.workshops?.flatMap((workshop) => workshop.orators) ?? [];
+        const oratorsMap = new Map();
+        streamOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
+        workshopOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
+        const allOrators = Array.from(oratorsMap.values());
+        return {
+            ...event,
+            allOrators,
+        };
     }
     async getStreamsAndWorkshopsByEvent(eventId) {
         const event = await this.prisma.event.findUnique({
             where: { id: eventId },
             include: {
-                streams: true,
-                workshops: true,
+                streams: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                    },
+                },
+                workshops: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                        enrollments: {
+                            include: {
+                                user: true,
+                            },
+                        },
+                    },
+                },
             },
         });
-        return event
-            ? {
-                eventId: event.id,
-                streams: event.streams,
-                workshops: event.workshops,
-            }
-            : null;
+        if (!event)
+            return null;
+        return {
+            eventId: event.id,
+            streams: event.streams,
+            workshops: event.workshops,
+        };
     }
     async getWorkshopById(workshopId) {
         return this.prisma.workshop.findUnique({
@@ -99,6 +158,7 @@ let EventsService = class EventsService {
             include: {
                 event: true,
                 orators: true,
+                attendees: true,
                 enrollments: {
                     include: {
                         user: true,
@@ -109,7 +169,7 @@ let EventsService = class EventsService {
     }
     async getUpcomingEvents() {
         const nowUtc = new Date(new Date().toISOString());
-        console.log("Fecha usada para el filtro (UTC):", nowUtc);
+        console.log('Fecha usada para el filtro (UTC):', nowUtc);
         return this.prisma.event.findMany({
             where: {
                 startDateTime: {
@@ -122,9 +182,22 @@ let EventsService = class EventsService {
             include: {
                 leadingCompany: true,
                 attendees: true,
-                streams: true,
-                workshops: true,
                 organizers: true,
+                streams: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                    },
+                },
+                workshops: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                        enrollments: {
+                            include: { user: true },
+                        },
+                    },
+                },
             },
         });
     }
@@ -149,9 +222,22 @@ let EventsService = class EventsService {
             include: {
                 leadingCompany: true,
                 attendees: true,
-                streams: true,
-                workshops: true,
                 organizers: true,
+                streams: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                    },
+                },
+                workshops: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                        enrollments: {
+                            include: { user: true },
+                        },
+                    },
+                },
             },
         });
     }
