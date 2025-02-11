@@ -64,7 +64,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 checkoutSessionId: session.id,
             },
         });
-        this.logger.log(`Sesión de checkout creada: ${JSON.stringify(session)}`);
+        this.logger.log(`Sesión de checkout (curso) creada: ${JSON.stringify(session)}`);
         return session;
     }
     async createCompanySubscriptionCheckoutSession(empresaId, userId, subscriptionType, email) {
@@ -105,7 +105,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 checkoutSessionId: session.id,
             },
         });
-        this.logger.log(`Sesión de suscripción creada: ${JSON.stringify(session)}`);
+        this.logger.log(`Sesión de suscripción de empresa creada: ${JSON.stringify(session)}`);
         return session;
     }
     async createUserUpgradeCheckoutSession(userId, email) {
@@ -150,6 +150,135 @@ let PaymentService = PaymentService_1 = class PaymentService {
             },
         });
         this.logger.log(`Sesión de suscripción (usuario - update) creada: ${JSON.stringify(session)}`);
+        return session;
+    }
+    async createEventCheckoutSession(eventId, userId, email) {
+        const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+        if (!event) {
+            throw new common_1.HttpException('El evento no existe', common_1.HttpStatus.BAD_REQUEST);
+        }
+        if (typeof event.price !== 'number') {
+            throw new common_1.HttpException('Este evento no tiene un precio definido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const priceInCents = Math.round(event.price * 100);
+        const session = await this.stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        unit_amount: priceInCents,
+                        product_data: {
+                            name: event.title,
+                            description: event.longDescription ?? 'Evento especial',
+                        },
+                    },
+                    quantity: 1,
+                },
+            ],
+            customer_email: email,
+            metadata: {
+                userId,
+                eventId,
+                checkoutSessionId: '',
+            },
+            success_url: `${this.configService.get('APP_URL')}/payment/success`,
+            cancel_url: `${this.configService.get('APP_URL')}/payment/cancel`,
+        });
+        await this.stripe.checkout.sessions.update(session.id, {
+            metadata: {
+                userId,
+                eventId,
+                checkoutSessionId: session.id,
+            },
+        });
+        return session;
+    }
+    async createWorkshopCheckoutSession(workshopId, userId, email) {
+        const workshop = await this.prisma.workshop.findUnique({ where: { id: workshopId } });
+        if (!workshop) {
+            throw new common_1.HttpException('El workshop no existe', common_1.HttpStatus.BAD_REQUEST);
+        }
+        if (typeof workshop.price !== 'number') {
+            throw new common_1.HttpException('Este workshop no tiene un precio definido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const priceInCents = Math.round(workshop.price * 100);
+        const session = await this.stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        unit_amount: priceInCents,
+                        product_data: {
+                            name: workshop.title,
+                            description: workshop.description,
+                        },
+                    },
+                    quantity: 1,
+                },
+            ],
+            customer_email: email,
+            metadata: {
+                userId,
+                workshopId,
+                checkoutSessionId: '',
+            },
+            success_url: `${this.configService.get('APP_URL')}/payment/success`,
+            cancel_url: `${this.configService.get('APP_URL')}/payment/cancel`,
+        });
+        await this.stripe.checkout.sessions.update(session.id, {
+            metadata: {
+                userId,
+                workshopId,
+                checkoutSessionId: session.id,
+            },
+        });
+        return session;
+    }
+    async createClassroomCheckoutSession(classroomId, userId, email) {
+        const classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
+        if (!classroom) {
+            throw new common_1.HttpException('El classroom no existe', common_1.HttpStatus.BAD_REQUEST);
+        }
+        if (typeof classroom.price !== 'number') {
+            throw new common_1.HttpException('Este classroom no tiene un precio definido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const priceInCents = Math.round(classroom.price * 100);
+        const session = await this.stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'usd',
+                        unit_amount: priceInCents,
+                        product_data: {
+                            name: classroom.title,
+                            description: classroom.description ?? '',
+                        },
+                    },
+                    quantity: 1,
+                },
+            ],
+            customer_email: email,
+            metadata: {
+                userId,
+                classroomId,
+                checkoutSessionId: '',
+            },
+            success_url: `${this.configService.get('APP_URL')}/payment/success`,
+            cancel_url: `${this.configService.get('APP_URL')}/payment/cancel`,
+        });
+        await this.stripe.checkout.sessions.update(session.id, {
+            metadata: {
+                userId,
+                classroomId,
+                checkoutSessionId: session.id,
+            },
+        });
         return session;
     }
     async handleWebhookEvent(signature, payload) {
@@ -275,7 +404,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
     }
     async processTransaction(session) {
         const { metadata, payment_intent, amount_total, currency, status } = session;
-        const { userId, courseId, empresaId, subscriptionType } = metadata;
+        const { userId, courseId, empresaId, subscriptionType, eventId, workshopId, classroomId } = metadata;
         this.logger.debug(`Procesando transacción con metadata: ${JSON.stringify(metadata)}`);
         const existingTransaction = await this.prisma.transaction.findUnique({
             where: { stripeCheckoutSessionId: session.id },
@@ -304,6 +433,15 @@ let PaymentService = PaymentService_1 = class PaymentService {
         }
         else if (userId && courseId) {
             await this.enrollUserInCourse(userId, courseId, transaction.id);
+        }
+        else if (userId && eventId) {
+            await this.enrollUserInEvent(userId, eventId, transaction.id);
+        }
+        else if (userId && workshopId) {
+            await this.enrollUserInWorkshop(userId, workshopId, transaction.id);
+        }
+        else if (userId && classroomId) {
+            await this.enrollUserInClassroom(userId, classroomId, transaction.id);
         }
         else {
             this.logger.warn('No se pudo determinar el tipo de transacción a procesar.');
@@ -339,20 +477,45 @@ let PaymentService = PaymentService_1 = class PaymentService {
                 empresaId,
                 status: 'active',
             },
-            data: {
-                status: 'canceled',
-            },
+            data: { status: 'canceled' },
         });
         this.logger.log(`Suscripción de empresa ${empresaId} cancelada (status = "canceled").`);
     }
     async enrollUserInCourse(userId, courseId, transactionId) {
         await this.prisma.courseEnrollment.create({
-            data: {
-                userId,
-                courseId,
-            },
+            data: { userId, courseId },
         });
         this.logger.log(`Usuario ${userId} inscrito en el curso ${courseId}`);
+    }
+    async enrollUserInEvent(userId, eventId, transactionId) {
+        await this.prisma.eventEnrollment.create({
+            data: {
+                userId,
+                eventId,
+                status: 'active',
+            },
+        });
+        this.logger.log(`Usuario ${userId} inscrito en el evento ${eventId}`);
+    }
+    async enrollUserInWorkshop(userId, workshopId, transactionId) {
+        await this.prisma.workshopEnrollment.create({
+            data: {
+                userId,
+                workshopId,
+                status: 'active',
+            },
+        });
+        this.logger.log(`Usuario ${userId} inscrito en el workshop ${workshopId}`);
+    }
+    async enrollUserInClassroom(userId, classroomId, transactionId) {
+        await this.prisma.classroomEnrollment.create({
+            data: {
+                userId,
+                classroomId,
+                status: 'active',
+            },
+        });
+        this.logger.log(`Usuario ${userId} inscrito en el classroom ${classroomId}`);
     }
     async upgradeUserSubscription(userId) {
         await this.prisma.user.update({

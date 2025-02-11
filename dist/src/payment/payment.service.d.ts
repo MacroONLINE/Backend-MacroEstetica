@@ -11,6 +11,9 @@ export declare class PaymentService {
     createCheckoutSession(courseId: string, userId: string, email: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
     createCompanySubscriptionCheckoutSession(empresaId: string, userId: string, subscriptionType: SubscriptionType, email: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
     createUserUpgradeCheckoutSession(userId: string, email: string): Promise<Stripe.Response<Stripe.Checkout.Session>>;
+    createEventCheckoutSession(eventId: string, userId: string, email: string): Promise<Stripe.Checkout.Session>;
+    createWorkshopCheckoutSession(workshopId: string, userId: string, email: string): Promise<Stripe.Checkout.Session>;
+    createClassroomCheckoutSession(classroomId: string, userId: string, email: string): Promise<Stripe.Checkout.Session>;
     handleWebhookEvent(signature: string, payload: Buffer): Promise<{
         received: boolean;
     }>;
@@ -19,6 +22,9 @@ export declare class PaymentService {
     private createEmpresaSubscription;
     private cancelEmpresaSubscription;
     private enrollUserInCourse;
+    private enrollUserInEvent;
+    private enrollUserInWorkshop;
+    private enrollUserInClassroom;
     private upgradeUserSubscription;
     private downgradeUserSubscription;
     renewSubscriptions(): Promise<void>;

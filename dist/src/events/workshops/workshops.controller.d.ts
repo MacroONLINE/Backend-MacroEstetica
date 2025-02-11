@@ -10,11 +10,11 @@ export declare class WorkshopsController {
         description: string;
         startDateTime: Date;
         endDateTime: Date;
-        eventId: string | null;
         price: number | null;
+        eventId: string | null;
         whatYouWillLearn: string | null;
+        imageUrl: string | null;
         channelName: string | null;
-        classroomId: string | null;
     }>;
     getWorkshop(id: string): Promise<{
         event: {
@@ -30,15 +30,8 @@ export declare class WorkshopsController {
             endDateTime: Date;
             mapUrl: string | null;
             target: import(".prisma/client").$Enums.Target | null;
+            price: number;
             leadingCompanyId: string | null;
-            instructorId: string | null;
-        };
-        classroom: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            description: string | null;
         };
         enrollments: ({
             user: {
@@ -96,11 +89,11 @@ export declare class WorkshopsController {
         description: string;
         startDateTime: Date;
         endDateTime: Date;
-        eventId: string | null;
         price: number | null;
+        eventId: string | null;
         whatYouWillLearn: string | null;
+        imageUrl: string | null;
         channelName: string | null;
-        classroomId: string | null;
     }>;
     updateWorkshop(id: string, data: any): Promise<{
         id: string;
@@ -110,11 +103,11 @@ export declare class WorkshopsController {
         description: string;
         startDateTime: Date;
         endDateTime: Date;
-        eventId: string | null;
         price: number | null;
+        eventId: string | null;
         whatYouWillLearn: string | null;
+        imageUrl: string | null;
         channelName: string | null;
-        classroomId: string | null;
     }>;
     deleteWorkshop(id: string): Promise<{
         message: string;
@@ -133,15 +126,8 @@ export declare class WorkshopsController {
             endDateTime: Date;
             mapUrl: string | null;
             target: import(".prisma/client").$Enums.Target | null;
+            price: number;
             leadingCompanyId: string | null;
-            instructorId: string | null;
-        };
-        classroom: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            description: string | null;
         };
         enrollments: ({
             user: {
@@ -199,10 +185,10 @@ export declare class WorkshopsController {
         description: string;
         startDateTime: Date;
         endDateTime: Date;
-        eventId: string | null;
         price: number | null;
+        eventId: string | null;
         whatYouWillLearn: string | null;
+        imageUrl: string | null;
         channelName: string | null;
-        classroomId: string | null;
     }>;
 }

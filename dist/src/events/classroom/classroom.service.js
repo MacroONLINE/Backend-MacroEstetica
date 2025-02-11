@@ -21,6 +21,11 @@ let ClassroomService = class ClassroomService {
             data: {
                 title: data.title,
                 description: data.description,
+                price: data.price,
+                startDateTime: data.startDateTime,
+                endDateTime: data.endDateTime,
+                imageUrl: data.imageUrl,
+                channelName: data.channelName,
             },
         });
     }
@@ -28,7 +33,9 @@ let ClassroomService = class ClassroomService {
         return this.prisma.classroom.findUnique({
             where: { id },
             include: {
-                workshops: true,
+                orators: true,
+                attendees: true,
+                enrollments: true,
             },
         });
     }
@@ -41,6 +48,11 @@ let ClassroomService = class ClassroomService {
             data: {
                 title: data.title,
                 description: data.description,
+                price: data.price,
+                startDateTime: data.startDateTime,
+                endDateTime: data.endDateTime,
+                imageUrl: data.imageUrl,
+                channelName: data.channelName,
             },
         });
     }
@@ -51,32 +63,18 @@ let ClassroomService = class ClassroomService {
         await this.prisma.classroom.delete({ where: { id } });
         return { message: 'Classroom eliminado correctamente' };
     }
-    async getUpcomingWorkshopsForClassroom(classroomId) {
-        const now = new Date();
-        return this.prisma.workshop.findMany({
-            where: {
-                classroomId,
-                startDateTime: {
-                    gte: now,
-                },
-            },
-            orderBy: {
-                startDateTime: 'asc',
-            },
-        });
-    }
     async getUpcomingClassrooms() {
         const now = new Date();
         return this.prisma.classroom.findMany({
             where: {
-                workshops: {
-                    some: {
-                        startDateTime: { gte: now },
-                    },
+                startDateTime: {
+                    gte: now,
                 },
             },
             include: {
-                workshops: true,
+                orators: true,
+                attendees: true,
+                enrollments: true,
             },
         });
     }

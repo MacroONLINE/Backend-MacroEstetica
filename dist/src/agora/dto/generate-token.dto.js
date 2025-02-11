@@ -10,18 +10,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.GenerateTokenDto = void 0;
+const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class GenerateTokenDto {
 }
 exports.GenerateTokenDto = GenerateTokenDto;
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c', description: 'UUID del evento' }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], GenerateTokenDto.prototype, "channelName", void 0);
+], GenerateTokenDto.prototype, "uuid", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ example: 'user-12345', description: 'ID del usuario solicitante' }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], GenerateTokenDto.prototype, "uid", void 0);
 //# sourceMappingURL=generate-token.dto.js.map

@@ -30,8 +30,6 @@ export class ClassroomController {
     return this.classroomService.createClassroom(body);
   }
 
-
-
   @Patch(':id')
   @ApiOperation({ summary: 'Actualiza un Classroom existente' })
   @ApiParam({ name: 'id', description: 'ID del Classroom a actualizar' })
@@ -62,33 +60,23 @@ export class ClassroomController {
     return this.classroomService.deleteClassroom(id);
   }
 
-  @Get(':id/upcoming-workshops')
-  @ApiOperation({ summary: 'Obtiene todos los Workshops próximos de un Classroom' })
-  @ApiParam({ name: 'id', description: 'ID del Classroom' })
-  @ApiResponse({
-    status: 200,
-    description: 'Lista de Workshops próximos',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Classroom no encontrado o sin workshops próximos',
-  })
-  async getUpcomingWorkshopsForClassroom(@Param('id') classroomId: string) {
-    const workshops =
-      await this.classroomService.getUpcomingWorkshopsForClassroom(classroomId);
-    return workshops;
-  }
-
+  /**
+   * ENDPOINT PARA OBTENER LOS CLASSROOMS PRÓXIMOS
+   * (Basado en su startDateTime >= now)
+   */
   @Get('upcoming')
-  @ApiOperation({ summary: 'Obtiene todos los Classrooms con Workshops próximos' })
+  @ApiOperation({ summary: 'Obtiene todos los Classrooms que aún no han iniciado' })
   @ApiResponse({
     status: 200,
-    description: 'Lista de Classrooms con al menos un Workshop futuro',
+    description: 'Lista de Classrooms futuros',
   })
   async getUpcomingClassrooms() {
     return this.classroomService.getUpcomingClassrooms();
   }
 
+  /**
+   * OBTIENE UN CLASSROOM POR ID
+   */
   @Get(':id')
   @ApiOperation({ summary: 'Obtiene un Classroom por su ID' })
   @ApiParam({ name: 'id', description: 'ID del Classroom a buscar' })

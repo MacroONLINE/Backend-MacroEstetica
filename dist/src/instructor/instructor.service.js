@@ -56,7 +56,6 @@ let InstructorService = class InstructorService {
                 category: true,
                 empresa: true,
                 courses: true,
-                events: true,
             },
         });
     }
@@ -75,7 +74,6 @@ let InstructorService = class InstructorService {
                 category: true,
                 empresa: true,
                 courses: true,
-                events: true,
             },
         });
     }
@@ -94,7 +92,6 @@ let InstructorService = class InstructorService {
                 category: true,
                 empresa: true,
                 courses: true,
-                events: true,
             },
         });
     }
@@ -113,7 +110,6 @@ let InstructorService = class InstructorService {
                 category: true,
                 empresa: true,
                 courses: true,
-                events: true,
             },
         });
     }
@@ -131,7 +127,6 @@ let InstructorService = class InstructorService {
                 category: true,
                 empresa: true,
                 courses: true,
-                events: true,
             },
         });
     }
@@ -151,7 +146,6 @@ let InstructorService = class InstructorService {
                 category: true,
                 empresa: true,
                 courses: true,
-                events: true,
             },
         });
     }
@@ -170,7 +164,6 @@ let InstructorService = class InstructorService {
                 category: true,
                 empresa: true,
                 courses: true,
-                events: true,
             },
         });
     }

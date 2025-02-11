@@ -49,12 +49,12 @@ export declare class InstructorService {
             description: string;
             categoryId: string;
             target: import(".prisma/client").$Enums.Target;
-            instructorId: string | null;
+            price: number;
+            whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             level: string;
             commentsCount: number;
             averageRating: number;
-            price: number;
             discountPercentage: number | null;
             participantsCount: number;
             isFeatured: boolean | null;
@@ -62,23 +62,7 @@ export declare class InstructorService {
             aboutDescription: string | null;
             requirements: Prisma.JsonValue | null;
             totalHours: number;
-            whatYouWillLearn: Prisma.JsonValue | null;
             introductoryVideoUrl: string | null;
-        }[];
-        events: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            longDescription: string | null;
-            mainBannerUrl: string | null;
-            mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
-            mapUrl: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
-            leadingCompanyId: string | null;
             instructorId: string | null;
         }[];
     } & {
@@ -144,12 +128,12 @@ export declare class InstructorService {
             description: string;
             categoryId: string;
             target: import(".prisma/client").$Enums.Target;
-            instructorId: string | null;
+            price: number;
+            whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             level: string;
             commentsCount: number;
             averageRating: number;
-            price: number;
             discountPercentage: number | null;
             participantsCount: number;
             isFeatured: boolean | null;
@@ -157,23 +141,7 @@ export declare class InstructorService {
             aboutDescription: string | null;
             requirements: Prisma.JsonValue | null;
             totalHours: number;
-            whatYouWillLearn: Prisma.JsonValue | null;
             introductoryVideoUrl: string | null;
-        }[];
-        events: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            longDescription: string | null;
-            mainBannerUrl: string | null;
-            mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
-            mapUrl: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
-            leadingCompanyId: string | null;
             instructorId: string | null;
         }[];
     } & {
@@ -239,12 +207,12 @@ export declare class InstructorService {
             description: string;
             categoryId: string;
             target: import(".prisma/client").$Enums.Target;
-            instructorId: string | null;
+            price: number;
+            whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             level: string;
             commentsCount: number;
             averageRating: number;
-            price: number;
             discountPercentage: number | null;
             participantsCount: number;
             isFeatured: boolean | null;
@@ -252,23 +220,7 @@ export declare class InstructorService {
             aboutDescription: string | null;
             requirements: Prisma.JsonValue | null;
             totalHours: number;
-            whatYouWillLearn: Prisma.JsonValue | null;
             introductoryVideoUrl: string | null;
-        }[];
-        events: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            longDescription: string | null;
-            mainBannerUrl: string | null;
-            mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
-            mapUrl: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
-            leadingCompanyId: string | null;
             instructorId: string | null;
         }[];
     } & {
@@ -334,12 +286,12 @@ export declare class InstructorService {
             description: string;
             categoryId: string;
             target: import(".prisma/client").$Enums.Target;
-            instructorId: string | null;
+            price: number;
+            whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             level: string;
             commentsCount: number;
             averageRating: number;
-            price: number;
             discountPercentage: number | null;
             participantsCount: number;
             isFeatured: boolean | null;
@@ -347,23 +299,7 @@ export declare class InstructorService {
             aboutDescription: string | null;
             requirements: Prisma.JsonValue | null;
             totalHours: number;
-            whatYouWillLearn: Prisma.JsonValue | null;
             introductoryVideoUrl: string | null;
-        }[];
-        events: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            longDescription: string | null;
-            mainBannerUrl: string | null;
-            mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
-            mapUrl: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
-            leadingCompanyId: string | null;
             instructorId: string | null;
         }[];
     } & {
@@ -429,12 +365,12 @@ export declare class InstructorService {
             description: string;
             categoryId: string;
             target: import(".prisma/client").$Enums.Target;
-            instructorId: string | null;
+            price: number;
+            whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             level: string;
             commentsCount: number;
             averageRating: number;
-            price: number;
             discountPercentage: number | null;
             participantsCount: number;
             isFeatured: boolean | null;
@@ -442,23 +378,7 @@ export declare class InstructorService {
             aboutDescription: string | null;
             requirements: Prisma.JsonValue | null;
             totalHours: number;
-            whatYouWillLearn: Prisma.JsonValue | null;
             introductoryVideoUrl: string | null;
-        }[];
-        events: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            longDescription: string | null;
-            mainBannerUrl: string | null;
-            mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
-            mapUrl: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
-            leadingCompanyId: string | null;
             instructorId: string | null;
         }[];
     } & {
@@ -524,12 +444,12 @@ export declare class InstructorService {
             description: string;
             categoryId: string;
             target: import(".prisma/client").$Enums.Target;
-            instructorId: string | null;
+            price: number;
+            whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             level: string;
             commentsCount: number;
             averageRating: number;
-            price: number;
             discountPercentage: number | null;
             participantsCount: number;
             isFeatured: boolean | null;
@@ -537,23 +457,7 @@ export declare class InstructorService {
             aboutDescription: string | null;
             requirements: Prisma.JsonValue | null;
             totalHours: number;
-            whatYouWillLearn: Prisma.JsonValue | null;
             introductoryVideoUrl: string | null;
-        }[];
-        events: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            longDescription: string | null;
-            mainBannerUrl: string | null;
-            mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
-            mapUrl: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
-            leadingCompanyId: string | null;
             instructorId: string | null;
         }[];
     } & {
@@ -619,12 +523,12 @@ export declare class InstructorService {
             description: string;
             categoryId: string;
             target: import(".prisma/client").$Enums.Target;
-            instructorId: string | null;
+            price: number;
+            whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             level: string;
             commentsCount: number;
             averageRating: number;
-            price: number;
             discountPercentage: number | null;
             participantsCount: number;
             isFeatured: boolean | null;
@@ -632,23 +536,7 @@ export declare class InstructorService {
             aboutDescription: string | null;
             requirements: Prisma.JsonValue | null;
             totalHours: number;
-            whatYouWillLearn: Prisma.JsonValue | null;
             introductoryVideoUrl: string | null;
-        }[];
-        events: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            title: string;
-            longDescription: string | null;
-            mainBannerUrl: string | null;
-            mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
-            mapUrl: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
-            leadingCompanyId: string | null;
             instructorId: string | null;
         }[];
     } & {

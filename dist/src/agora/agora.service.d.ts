@@ -1,8 +1,11 @@
 export declare class AgoraService {
-    generateTokens(channelName: string, uid: string, role: 'host' | 'audience'): {
+    private readonly appId;
+    private readonly appCertificate;
+    private readonly expirationTimeInSeconds;
+    generateTokens(uuid: string, uid: string, role: 'host' | 'audience'): {
         rtcToken: string;
         rtmToken: string;
-        channelName: string;
+        uuid: string;
         uid: string;
         role: "audience" | "host";
         expiresAt: number;

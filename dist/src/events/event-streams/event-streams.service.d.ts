@@ -9,6 +9,7 @@ export declare class EventStreamsService {
         startDateTime: Date;
         endDateTime: Date;
         eventId: string;
+        imageUrl: string | null;
         channelName: string | null;
     }>;
     getStreamById(id: string): Promise<{
@@ -21,11 +22,11 @@ export declare class EventStreamsService {
                 description: string;
                 startDateTime: Date;
                 endDateTime: Date;
-                eventId: string | null;
                 price: number | null;
+                eventId: string | null;
                 whatYouWillLearn: string | null;
+                imageUrl: string | null;
                 channelName: string | null;
-                classroomId: string | null;
             }[];
             leadingCompany: {
                 subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -91,8 +92,8 @@ export declare class EventStreamsService {
             endDateTime: Date;
             mapUrl: string | null;
             target: import(".prisma/client").$Enums.Target | null;
+            price: number;
             leadingCompanyId: string | null;
-            instructorId: string | null;
         };
         orators: {
             id: string;
@@ -119,6 +120,7 @@ export declare class EventStreamsService {
         startDateTime: Date;
         endDateTime: Date;
         eventId: string;
+        imageUrl: string | null;
         channelName: string | null;
     }>;
 }

@@ -63,11 +63,6 @@ let EventsService = class EventsService {
                 streams: true,
                 workshops: true,
                 organizers: true,
-                offers: {
-                    include: {
-                        products: true,
-                    },
-                },
             },
         });
     }
@@ -78,13 +73,7 @@ let EventsService = class EventsService {
                 leadingCompany: true,
                 attendees: true,
                 streams: true,
-                workshops: true,
                 organizers: true,
-                offers: {
-                    include: {
-                        products: true,
-                    },
-                },
             },
         });
     }
@@ -104,21 +93,11 @@ let EventsService = class EventsService {
             }
             : null;
     }
-    async getWorkshopsByClassroom(classroomId) {
-        const classroom = await this.prisma.classroom.findUnique({
-            where: { id: classroomId },
-            include: {
-                workshops: true,
-            },
-        });
-        return classroom?.workshops || null;
-    }
     async getWorkshopById(workshopId) {
         return this.prisma.workshop.findUnique({
             where: { id: workshopId },
             include: {
                 event: true,
-                classroom: true,
                 orators: true,
                 enrollments: {
                     include: {
@@ -146,11 +125,6 @@ let EventsService = class EventsService {
                 streams: true,
                 workshops: true,
                 organizers: true,
-                offers: {
-                    include: {
-                        products: true,
-                    },
-                },
             },
         });
     }
@@ -178,11 +152,6 @@ let EventsService = class EventsService {
                 streams: true,
                 workshops: true,
                 organizers: true,
-                offers: {
-                    include: {
-                        products: true,
-                    },
-                },
             },
         });
     }

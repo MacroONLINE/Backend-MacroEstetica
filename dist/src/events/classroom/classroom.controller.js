@@ -29,10 +29,6 @@ let ClassroomController = class ClassroomController {
     async deleteClassroom(id) {
         return this.classroomService.deleteClassroom(id);
     }
-    async getUpcomingWorkshopsForClassroom(classroomId) {
-        const workshops = await this.classroomService.getUpcomingWorkshopsForClassroom(classroomId);
-        return workshops;
-    }
     async getUpcomingClassrooms() {
         return this.classroomService.getUpcomingClassrooms();
     }
@@ -96,28 +92,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ClassroomController.prototype, "deleteClassroom", null);
 __decorate([
-    (0, common_1.Get)(':id/upcoming-workshops'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los Workshops próximos de un Classroom' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Lista de Workshops próximos',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Classroom no encontrado o sin workshops próximos',
-    }),
-    __param(0, (0, common_1.Param)('id')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "getUpcomingWorkshopsForClassroom", null);
-__decorate([
     (0, common_1.Get)('upcoming'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los Classrooms con Workshops próximos' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los Classrooms que aún no han iniciado' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Lista de Classrooms con al menos un Workshop futuro',
+        description: 'Lista de Classrooms futuros',
     }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),

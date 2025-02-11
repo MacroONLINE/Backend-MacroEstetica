@@ -36,6 +36,10 @@ model User {
   attendedEvents      Event[]              @relation("EventAttendees")
   eventEnrollments    EventEnrollment[]
   workshopEnrollments WorkshopEnrollment[]
+  attendedWorkshops   Workshop[]           @relation("WorkshopAttendees")
+  classroomEnrollments ClassroomEnrollment[]
+  attendedClassrooms  Classroom[]          @relation("ClassroomAttendees")
+  attendedStreams     EventStream[]        @relation("EventStreamAttendees")
 }
 
 model Medico {
@@ -163,7 +167,7 @@ model Instructor {
   profession        Profession
   type              ProfessionType
   description       String
-  experienceDescription       String @default("")
+  experienceDescription String     @default("")
   experienceYears   Int
   certificationsUrl String
   status            String
@@ -181,7 +185,7 @@ model Instructor {
   title             String?
   streams           EventStream[]  @relation("StreamOrators")
   workshops         Workshop[]     @relation("WorkshopInstructors")
-  events            Event[]        @relation("InstructorEvents")
+  classrooms        Classroom[]    @relation("ClassroomInstructors")
 }
 
 model Category {
@@ -285,14 +289,12 @@ model Event {
   mapUrl           String?
   leadingCompanyId String?
   leadingCompany   Empresa?          @relation("LeadingCompany", fields: [leadingCompanyId], references: [id], onDelete: Cascade)
-  instructorId     String?
-  instructor       Instructor?       @relation("InstructorEvents", fields: [instructorId], references: [id], onDelete: Cascade)
   target           Target?
+    price         Float   @default(0)
   enrollments      EventEnrollment[]
   streams          EventStream[]
   workshops        Workshop[]
   organizers       EventOrganizer[]
-  offers           EventOffer[]
   attendees        User[]            @relation("EventAttendees")
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now())
@@ -328,29 +330,31 @@ model EventStream {
   channelName   String?      @unique
   startDateTime DateTime
   endDateTime   DateTime
+  imageUrl      String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @default(now())
   event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   orators       Instructor[] @relation("StreamOrators")
+  attendees     User[]       @relation("EventStreamAttendees")
 }
 
 model Workshop {
   id               String               @id @default(cuid())
   eventId          String?
-  classroomId      String?
   title            String
   description      String
   whatYouWillLearn String?
   price            Float?
   startDateTime    DateTime
   endDateTime      DateTime
+  imageUrl         String?
   channelName      String?              @unique
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @default(now())
   event            Event?               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  classroom        Classroom?           @relation(fields: [classroomId], references: [id], onDelete: Cascade)
   orators          Instructor[]         @relation("WorkshopInstructors")
   enrollments      WorkshopEnrollment[]
+  attendees        User[]               @relation("WorkshopAttendees")
 }
 
 model WorkshopEnrollment {
@@ -366,25 +370,7 @@ model WorkshopEnrollment {
   @@unique([workshopId, userId])
 }
 
-model EventOffer {
-  id           String              @id @default(cuid())
-  eventId      String
-  sectionTitle String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @default(now())
-  event        Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  products     EventOfferProduct[]
-}
 
-model EventOfferProduct {
-  id          String     @id @default(cuid())
-  offerId     String
-  title       String
-  description String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @default(now())
-  offer       EventOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
-}
 
 enum SubscriptionType {
   ORO
@@ -658,10 +644,30 @@ model MinisiteSpeciality {
 }
 
 model Classroom {
+  id               String               @id @default(cuid())
+  title            String
+  description      String
+  price            Float?
+  startDateTime    DateTime  @default(now())
+  endDateTime      DateTime  @default(now())
+  imageUrl         String?
+  channelName      String?              @unique
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @default(now())
+  orators          Instructor[]         @relation("ClassroomInstructors")
+  enrollments      ClassroomEnrollment[]
+  attendees        User[]               @relation("ClassroomAttendees")
+}
+
+model ClassroomEnrollment {
   id          String     @id @default(cuid())
-  title       String
-  description String?
+  classroomId String
+  userId      String
+  status      String
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @default(now())
-  workshops   Workshop[]
+  classroom   Classroom  @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([classroomId, userId])
 }

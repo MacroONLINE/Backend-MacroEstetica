@@ -3,32 +3,36 @@ import { RtcTokenBuilder, RtcRole, RtmTokenBuilder, RtmRole } from 'agora-access
 
 @Injectable()
 export class AgoraService {
-  generateTokens(channelName: string, uid: string, role: 'host' | 'audience') {
-    const appId = "30eeedb05a31430eac4d19dbe1b73ab7";
-    const appCertificate = "31724ea95d98465baa793ed09a3c68f5";
+  private readonly appId = "30eeedb05a31430eac4d19dbe1b73ab7";
+  private readonly appCertificate = "31724ea95d98465baa793ed09a3c68f5";
+  private readonly expirationTimeInSeconds = 3600;
+
+  generateTokens(uuid: string, uid: string, role: 'host' | 'audience') {
     const agoraRole = role === 'host' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
-    const expirationTimeInSeconds = 3600;
     const currentTimestamp = Math.floor(Date.now() / 1000);
-    const privilegeExpireTime = currentTimestamp + expirationTimeInSeconds;
-    const rtmToken = RtcTokenBuilder.buildTokenWithAccount(
-      appId,
-      appCertificate,
-      channelName,
+    const privilegeExpireTime = currentTimestamp + this.expirationTimeInSeconds;
+
+    const rtcToken = RtcTokenBuilder.buildTokenWithAccount(
+      this.appId,
+      this.appCertificate,
+      uuid,
       uid,
       agoraRole,
       privilegeExpireTime
     );
-    const rtcToken = RtmTokenBuilder.buildToken(
-      appId,
-      appCertificate,
+
+    const rtmToken = RtmTokenBuilder.buildToken(
+      this.appId,
+      this.appCertificate,
       uid,
       RtmRole.Rtm_User,
       privilegeExpireTime
     );
+
     return {
       rtcToken,
       rtmToken,
-      channelName,
+      uuid,
       uid,
       role,
       expiresAt: privilegeExpireTime,

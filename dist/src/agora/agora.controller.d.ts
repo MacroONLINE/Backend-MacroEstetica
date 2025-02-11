@@ -8,7 +8,7 @@ export declare class AgoraController {
     generateToken(dto: GenerateTokenDto): Promise<{
         rtcToken: string;
         rtmToken: string;
-        channelName: string;
+        uuid: string;
         uid: string;
         role: "audience" | "host";
         expiresAt: number;

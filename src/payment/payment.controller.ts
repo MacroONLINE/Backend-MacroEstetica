@@ -21,6 +21,9 @@ export class PaymentController {
 
   constructor(private readonly paymentService: PaymentService) {}
 
+  /**
+   * CREA UNA SESIÓN DE CHECKOUT PARA LA COMPRA DE UN CURSO (PAGO ÚNICO)
+   */
   @Post('checkout')
   @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para un curso' })
   @ApiBody({
@@ -44,10 +47,13 @@ export class PaymentController {
     }
 
     const session = await this.paymentService.createCheckoutSession(courseId, userId, email);
-    this.logger.log(`Sesión de checkout creada: ${JSON.stringify(session)}`);
+    this.logger.log(`Sesión de checkout (curso) creada: ${JSON.stringify(session)}`);
     return { url: session.url };
   }
 
+  /**
+   * CREA UNA SESIÓN DE CHECKOUT PARA SUSCRIPCIONES EMPRESARIALES
+   */
   @Post('subscription-checkout')
   @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para suscripciones empresariales' })
   @ApiBody({
@@ -55,7 +61,7 @@ export class PaymentController {
       properties: {
         empresaId: { type: 'string', description: 'ID de la empresa' },
         userId: { type: 'string', description: 'ID del usuario' },
-        subscriptionType: { type: 'string', description: 'Tipo de suscripción (BASIC, INTERMIDIATE, PREMIUM)' },
+        subscriptionType: { type: 'string', description: 'Tipo de suscripción (BASICO, INTERMEDIO, PREMIUM)' },
         email: { type: 'string', description: 'Email del administrador de la empresa' },
       },
     },
@@ -79,11 +85,44 @@ export class PaymentController {
       email,
     );
     this.logger.log(
-      `Sesión de checkout creada para empresaId: ${empresaId}, userId: ${userId}, tipo: ${subscriptionType}, email: ${email}`,
+      `Sesión de checkout (suscripción empresa) creada para empresaId: ${empresaId}, userId: ${userId}, tipo: ${subscriptionType}, email: ${email}`,
     );
     return { url: session.url };
   }
 
+  /**
+   * CREA UNA SESIÓN DE CHECKOUT PARA LA SUSCRIPCIÓN "update" DE UN USUARIO
+   */
+  @Post('user-upgrade-checkout')
+  @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para la suscripción "update" de un usuario' })
+  @ApiBody({
+    schema: {
+      properties: {
+        userId: { type: 'string', description: 'ID del usuario' },
+        email: { type: 'string', description: 'Email del usuario' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' })
+  @ApiResponse({ status: 400, description: 'Error en los parámetros proporcionados.' })
+  async createUserUpgradeCheckoutSession(
+    @Body('userId') userId: string,
+    @Body('email') email: string,
+  ) {
+    if (!userId || !email) {
+      throw new HttpException('userId y email son requeridos', HttpStatus.BAD_REQUEST);
+    }
+
+    const session = await this.paymentService.createUserUpgradeCheckoutSession(userId, email);
+    this.logger.log(
+      `Sesión de checkout (usuario update) creada para userId: ${userId}, email: ${email}`,
+    );
+    return { url: session.url };
+  }
+
+  /**
+   * ENDPOINT PARA RECIBIR NOTIFICACIONES DE STRIPE (WEBHOOK)
+   */
   @Post('webhook')
   @ApiOperation({ summary: 'Endpoint para recibir notificaciones de Stripe' })
   @ApiResponse({ status: 200, description: 'Confirma que el webhook fue recibido.' })
@@ -110,36 +149,85 @@ export class PaymentController {
     }
   }
 
-  @Post('user-upgrade-checkout')
-  @ApiOperation({ summary: 'Crea una sesión de checkout de Stripe para la suscripción "update" de un usuario' })
+  // ---------------------------------------------------------------------
+  // NUEVOS ENDPOINTS PARA PAGAR EVENTOS, WORKSHOPS Y CLASSROOMS
+  // ---------------------------------------------------------------------
+
+  @Post('event-checkout')
+  @ApiOperation({ summary: 'Crea una sesión de checkout para inscribirse a un Event' })
   @ApiBody({
     schema: {
       properties: {
+        eventId: { type: 'string', description: 'ID del Event' },
         userId: { type: 'string', description: 'ID del usuario' },
         email: { type: 'string', description: 'Email del usuario' },
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Devuelve la URL de la sesión de Stripe.' })
-  @ApiResponse({ status: 400, description: 'Error en los parámetros proporcionados.' })
-  async createUserUpgradeCheckoutSession(
+  @ApiResponse({ status: 200, description: 'URL de la sesión de Stripe' })
+  @ApiResponse({ status: 400, description: 'Error en parámetros' })
+  async createEventCheckoutSession(
+    @Body('eventId') eventId: string,
     @Body('userId') userId: string,
     @Body('email') email: string,
   ) {
-    if (!userId || !email) {
-      throw new HttpException('userId y email son requeridos', HttpStatus.BAD_REQUEST);
+    if (!eventId || !userId || !email) {
+      throw new HttpException('eventId, userId y email son requeridos', HttpStatus.BAD_REQUEST);
     }
+    const session = await this.paymentService.createEventCheckoutSession(eventId, userId, email);
+    this.logger.log(`Sesión de checkout (evento) creada: ${JSON.stringify(session)}`);
+    return { url: session.url };
+  }
 
-    // Llamamos al servicio para crear la sesión
-    const session = await this.paymentService.createUserUpgradeCheckoutSession(
-      userId,
-      email,
-    );
+  @Post('workshop-checkout')
+  @ApiOperation({ summary: 'Crea una sesión de checkout para inscribirse a un Workshop' })
+  @ApiBody({
+    schema: {
+      properties: {
+        workshopId: { type: 'string', description: 'ID del Workshop' },
+        userId: { type: 'string', description: 'ID del usuario' },
+        email: { type: 'string', description: 'Email del usuario' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'URL de la sesión de Stripe' })
+  @ApiResponse({ status: 400, description: 'Error en parámetros' })
+  async createWorkshopCheckoutSession(
+    @Body('workshopId') workshopId: string,
+    @Body('userId') userId: string,
+    @Body('email') email: string,
+  ) {
+    if (!workshopId || !userId || !email) {
+      throw new HttpException('workshopId, userId y email son requeridos', HttpStatus.BAD_REQUEST);
+    }
+    const session = await this.paymentService.createWorkshopCheckoutSession(workshopId, userId, email);
+    this.logger.log(`Sesión de checkout (workshop) creada: ${JSON.stringify(session)}`);
+    return { url: session.url };
+  }
 
-    this.logger.log(
-      `Sesión de checkout creada para userId: ${userId}, suscripción: "update", email: ${email}`,
-    );
-
+  @Post('classroom-checkout')
+  @ApiOperation({ summary: 'Crea una sesión de checkout para inscribirse a un Classroom' })
+  @ApiBody({
+    schema: {
+      properties: {
+        classroomId: { type: 'string', description: 'ID del Classroom' },
+        userId: { type: 'string', description: 'ID del usuario' },
+        email: { type: 'string', description: 'Email del usuario' },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'URL de la sesión de Stripe' })
+  @ApiResponse({ status: 400, description: 'Error en parámetros' })
+  async createClassroomCheckoutSession(
+    @Body('classroomId') classroomId: string,
+    @Body('userId') userId: string,
+    @Body('email') email: string,
+  ) {
+    if (!classroomId || !userId || !email) {
+      throw new HttpException('classroomId, userId y email son requeridos', HttpStatus.BAD_REQUEST);
+    }
+    const session = await this.paymentService.createClassroomCheckoutSession(classroomId, userId, email);
+    this.logger.log(`Sesión de checkout (classroom) creada: ${JSON.stringify(session)}`);
     return { url: session.url };
   }
 }

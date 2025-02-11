@@ -56,11 +56,7 @@ export class EventsService {
         streams: true,
         workshops: true,
         organizers: true,
-        offers: {
-          include: {
-            products: true,
-          },
-        },
+      
       },
     });
   }
@@ -72,13 +68,8 @@ export class EventsService {
         leadingCompany: true,
         attendees: true,
         streams: true,
-        workshops: true,
         organizers: true,
-        offers: {
-          include: {
-            products: true,
-          },
-        },
+      
       },
     });
   }
@@ -103,19 +94,7 @@ export class EventsService {
       : null;
   }
 
-  /**
-   * Retorna los workshops de un classroom específico
-   */
-  async getWorkshopsByClassroom(classroomId: string) {
-    const classroom = await this.prisma.classroom.findUnique({
-      where: { id: classroomId },
-      include: {
-        workshops: true,
-      },
-    });
-
-    return classroom?.workshops || null;
-  }
+  
 
   /**
    * Retorna un workshop por su ID
@@ -125,7 +104,6 @@ export class EventsService {
       where: { id: workshopId },
       include: {
         event: true,
-        classroom: true,
         orators: true,
         enrollments: {
           include: {
@@ -155,11 +133,7 @@ export class EventsService {
         streams: true,
         workshops: true,
         organizers: true,
-        offers: {
-          include: {
-            products: true,
-          },
-        },
+        
       },
     });
   }
@@ -196,11 +170,7 @@ export class EventsService {
         streams: true,
         workshops: true,
         organizers: true,
-        offers: {
-          include: {
-            products: true,
-          },
-        },},
+        },
     });
   }
 }

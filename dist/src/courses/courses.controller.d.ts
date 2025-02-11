@@ -18,12 +18,12 @@ export declare class CoursesController {
         description: string;
         categoryId: string;
         target: import(".prisma/client").$Enums.Target;
-        instructorId: string | null;
+        price: number;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         bannerUrl: string;
         level: string;
         commentsCount: number;
         averageRating: number;
-        price: number;
         discountPercentage: number | null;
         participantsCount: number;
         isFeatured: boolean | null;
@@ -31,8 +31,8 @@ export declare class CoursesController {
         aboutDescription: string | null;
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
         totalHours: number;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
+        instructorId: string | null;
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;

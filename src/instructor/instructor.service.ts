@@ -48,13 +48,11 @@ export class InstructorService {
             firstName: true,
             lastName: true,
             email: true,
-            // ...otros campos que quieras exponer
           },
         },
         category: true,
         empresa: true,
         courses: true,
-        events: true,
       },
     });
   }
@@ -74,7 +72,6 @@ export class InstructorService {
         category: true,
         empresa: true,
         courses: true,
-        events: true,
       },
     });
   }
@@ -94,7 +91,6 @@ export class InstructorService {
         category: true,
         empresa: true,
         courses: true,
-        events: true,
       },
     });
   }
@@ -114,7 +110,6 @@ export class InstructorService {
         category: true,
         empresa: true,
         courses: true,
-        events: true,
       },
     });
   }
@@ -134,7 +129,6 @@ export class InstructorService {
         category: true,
         empresa: true,
         courses: true,
-        events: true,
       },
     });
   }
@@ -156,7 +150,6 @@ export class InstructorService {
         category: true,
         empresa: true,
         courses: true,
-        events: true,
       },
     });
   }
@@ -177,7 +170,6 @@ export class InstructorService {
         category: true,
         empresa: true,
         courses: true,
-        events: true,
       },
     });
   }

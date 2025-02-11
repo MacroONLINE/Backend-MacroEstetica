@@ -176,22 +176,6 @@ export declare class EmpresaController {
     })[]>;
     getMinisiteByEmpresaId(empresaId: string): Promise<{
         minisite: {
-            offers: ({
-                products: {
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    title: string;
-                    description: string;
-                    offerId: string;
-                }[];
-            } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                minisiteId: string;
-                sectionTitle: string | null;
-            })[];
             benefits: {
                 id: string;
                 createdAt: Date;
@@ -241,6 +225,22 @@ export declare class EmpresaController {
                 imageSrc: string | null;
                 order: number | null;
             }[];
+            offers: ({
+                products: {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    title: string;
+                    description: string;
+                    offerId: string;
+                }[];
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                minisiteId: string;
+                sectionTitle: string | null;
+            })[];
             featuredProducts: ({
                 product: {
                     name: string;
@@ -275,8 +275,8 @@ export declare class EmpresaController {
                 createdAt: Date;
                 updatedAt: Date;
                 title: string;
-                minisiteId: string;
                 imageUrl: string;
+                minisiteId: string;
             }[];
         } & {
             id: string;

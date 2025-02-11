@@ -13,7 +13,6 @@ export class WorkshopsService {
     return this.prisma.workshop.create({
       data: {
         eventId: data.eventId,
-        classroomId: data.classroomId,
         title: data.title,
         description: data.description,
         whatYouWillLearn: data.whatYouWillLearn,
@@ -30,7 +29,6 @@ export class WorkshopsService {
       where: { id },
       include: {
         event: true,
-        classroom: true,
         orators: true,
         enrollments: {
           include: {
@@ -70,7 +68,6 @@ export class WorkshopsService {
       where: { channelName },
       include: {
         event: true,
-        classroom: true,
         orators: true,
         enrollments: {
           include: {

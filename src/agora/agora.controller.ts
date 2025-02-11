@@ -11,7 +11,7 @@ import { AgoraService } from './agora.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { GenerateTokenDto } from './dto/generate-token.dto';
 
-@ApiTags('Agora') // Agrupa este controlador en Swagger bajo "Agora"
+@ApiTags('Agora')
 @Controller('agora')
 export class AgoraController {
   constructor(
@@ -20,9 +20,7 @@ export class AgoraController {
   ) {}
 
   @Post('generate-token')
-  @ApiOperation({ 
-    summary: 'Genera un token de Agora para un usuario en un stream' 
-  })
+  @ApiOperation({ summary: 'Genera un token de Agora para un usuario en un stream, workshop o classroom' })
   @ApiBody({
     description: 'Datos necesarios para generar el token',
     type: GenerateTokenDto,
@@ -30,82 +28,90 @@ export class AgoraController {
       example1: {
         summary: 'Ejemplo de solicitud',
         value: {
-          channelName: '006c9be6c6b3e5f4c3',
+          uuid: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c',
           uid: 'user-12345'
         }
       }
     }
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Token generado exitosamente',
     schema: {
       example: {
-        token: '006c9be6c6b3e5f4c3...',
-        channelName: '006c9be6c6b3e5f4c3',
+        rtcToken: '006c9be6c6b3e5f4c3...',
+        rtmToken: '007c9be6c6b3e5f4c3...',
+        uuid: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c',
         role: 'host'
       }
     }
   })
-  @ApiResponse({ 
-    status: 404, 
-    description: 'No se encontró un stream con ese channelName',
+  @ApiResponse({
+    status: 404,
+    description: 'No se encontró un stream, workshop o classroom con ese UUID',
     schema: {
-      example: { statusCode: 404, message: 'No se encontró un stream con ese channelName.', error: 'Not Found' }
+      example: { statusCode: 404, message: 'No se encontró una sesión con ese UUID.', error: 'Not Found' }
     }
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Errores relacionados con la fecha del stream',
+  @ApiResponse({
+    status: 400,
+    description: 'Errores relacionados con la fecha de la sesión',
     schema: {
-      example: { statusCode: 400, message: 'El stream aún no ha comenzado. Inicia a las 2025-03-01T09:00:00.000Z', error: 'Bad Request' }
+      example: { statusCode: 400, message: 'La sesión aún no ha comenzado. Inicia a las 2025-03-01T09:00:00.000Z', error: 'Bad Request' }
     }
   })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Usuario no autorizado para acceder al stream',
+  @ApiResponse({
+    status: 403,
+    description: 'Usuario no autorizado para acceder',
     schema: {
-      example: { statusCode: 403, message: 'No tienes acceso a este stream como instructor ni como asistente registrado', error: 'Forbidden' }
+      example: { statusCode: 403, message: 'No tienes acceso a esta sesión como instructor ni como asistente registrado', error: 'Forbidden' }
     }
   })
   async generateToken(@Body() dto: GenerateTokenDto) {
-    const { channelName, uid } = dto;
+    const { uuid, uid } = dto;
 
-    const stream = await this.prisma.eventStream.findUnique({
-      where: { channelName },
-      include: {
-        event: {
-          include: {
-            instructor: { select: { userId: true } },
-            attendees: { select: { id: true } },
-          },
-        },
-      },
-    });
+    // Buscar la sesión en `eventStream`, `workshop` o `classroom`
+    const [stream, workshop, classroom] = await this.prisma.$transaction([
+      this.prisma.eventStream.findUnique({
+        where: { id: uuid },
+        include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
+      }),
+      this.prisma.workshop.findUnique({
+        where: { id: uuid },
+        include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
+      }),
+      this.prisma.classroom.findUnique({
+        where: { id: uuid },
+        include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
+      }),
+    ]);
 
-    if (!stream) {
-      throw new NotFoundException('No se encontró un stream con ese channelName.');
+    // Determinar qué tipo de sesión es
+    const session = stream || workshop || classroom;
+
+    if (!session) {
+      throw new NotFoundException('No se encontró una sesión con ese UUID.');
     }
 
     const now = new Date();
-
-    if (now < stream.startDateTime) {
-      throw new BadRequestException(`El stream aún no ha comenzado. Inicia a las ${stream.startDateTime.toISOString()}`);
+    
+    if (now < session.startDateTime) {
+      throw new BadRequestException(`La sesión aún no ha comenzado. Inicia a las ${session.startDateTime.toISOString()}`);
     }
 
-    if (now > stream.endDateTime) {
-      throw new BadRequestException(`El stream ya finalizó. Terminó a las ${stream.endDateTime.toISOString()}`);
+    if (now > session.endDateTime) {
+      throw new BadRequestException(`La sesión ya finalizó. Terminó a las ${session.endDateTime.toISOString()}`);
     }
 
-    const isInstructor = stream.event.instructor?.userId === uid;
-    const isAttendee = stream.event.attendees.some((user) => user.id === uid);
+    const isInstructor = session.orators.some((orator) => orator.userId === uid);
+    const isAttendee = session.attendees.some((user) => user.id === uid);
 
     if (!isInstructor && !isAttendee) {
-      throw new ForbiddenException('No tienes acceso a este stream como instructor ni como asistente registrado');
+      throw new ForbiddenException('No tienes acceso a esta sesión como instructor ni como asistente registrado');
     }
 
     const role = isInstructor ? 'host' : 'audience';
 
-    return this.agoraService.generateTokens(channelName, uid, role);
+    return this.agoraService.generateTokens(uuid, uid, role);
   }
 }

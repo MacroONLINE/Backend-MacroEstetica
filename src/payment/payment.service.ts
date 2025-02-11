@@ -26,22 +26,19 @@ export class PaymentService {
     );
   }
 
+  // ---------------------------------------------------------------------
+  // MÉTODOS EXISTENTES PARA CURSOS, SUSCRIPCIONES, ETC.
+  // ---------------------------------------------------------------------
+
   /**
    * CREA CHECKOUT SESSION PARA COMPRA DE CURSO (PAGO ÚNICO)
    */
-  async createCheckoutSession(
-    courseId: string, 
-    userId: string, 
-    email: string
-  ) {
+  async createCheckoutSession(courseId: string, userId: string, email: string) {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
     });
     if (!course) {
-      throw new HttpException(
-        'El curso no existe',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('El curso no existe', HttpStatus.BAD_REQUEST);
     }
 
     const priceInCents = Math.round(course.price * 100);
@@ -81,7 +78,7 @@ export class PaymentService {
       },
     });
 
-    this.logger.log(`Sesión de checkout creada: ${JSON.stringify(session)}`);
+    this.logger.log(`Sesión de checkout (curso) creada: ${JSON.stringify(session)}`);
     return session;
   }
 
@@ -91,14 +88,10 @@ export class PaymentService {
   async createCompanySubscriptionCheckoutSession(
     empresaId: string,
     userId: string,
-    subscriptionType: SubscriptionType, // enum
+    subscriptionType: SubscriptionType,
     email: string,
   ) {
-    // Validamos que sea un plan reconocido (BASIC, INTERMIDIATE, PREMIUM).
-    // OJO: ORO, PLATA, BRONCE siguen en el enum, pero no los aceptamos más.
     this.validateSubscriptionType(subscriptionType);
-
-    // Precio en centavos según el plan (BASIC, INTERMIDIATE, PREMIUM)
     const unitAmount = this.getSubscriptionPrice(subscriptionType);
 
     const session = await this.stripe.checkout.sessions.create({
@@ -122,14 +115,13 @@ export class PaymentService {
       metadata: {
         empresaId,
         userId,
-        subscriptionType, // Solo BASIC, INTERMIDIATE o PREMIUM
+        subscriptionType,
         checkoutSessionId: '',
       },
       success_url: `${this.configService.get<string>('APP_URL')}/subscription/success`,
       cancel_url: `${this.configService.get<string>('APP_URL')}/subscription/cancel`,
     });
 
-    // Actualizar la metadata con el session.id
     await this.stripe.checkout.sessions.update(session.id, {
       metadata: {
         empresaId,
@@ -139,33 +131,25 @@ export class PaymentService {
       },
     });
 
-    this.logger.log(
-      `Sesión de suscripción creada: ${JSON.stringify(session)}`,
-    );
+    this.logger.log(`Sesión de suscripción de empresa creada: ${JSON.stringify(session)}`);
     return session;
   }
 
   /**
-   * CREA CHECKOUT SESSION PARA LA SUSCRIPCIÓN DE USUARIO ("update")
-   * (Ejemplo de plan personal de usuario)
+   * CREA CHECKOUT SESSION PARA LA SUSCRIPCIÓN "update" DE UN USUARIO
    */
   async createUserUpgradeCheckoutSession(
     userId: string,
     email: string,
   ) {
-    // Validar que el usuario exista
     const userExists = await this.prisma.user.findUnique({
       where: { id: userId },
     });
     if (!userExists) {
-      throw new HttpException(
-        'El usuario no existe',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('El usuario no existe', HttpStatus.BAD_REQUEST);
     }
 
-    // Por ejemplo, costará $20
-    const unitAmount = 2000;
+    const unitAmount = 2000; // $20
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -187,14 +171,13 @@ export class PaymentService {
       customer_email: email,
       metadata: {
         userId,
-        subscriptionType: 'update', 
+        subscriptionType: 'update',
         checkoutSessionId: '',
       },
       success_url: `${this.configService.get<string>('APP_URL')}/user-subscription/success`,
       cancel_url: `${this.configService.get<string>('APP_URL')}/user-subscription/cancel`,
     });
 
-    // Actualizar la metadata
     await this.stripe.checkout.sessions.update(session.id, {
       metadata: {
         userId,
@@ -209,204 +192,332 @@ export class PaymentService {
     return session;
   }
 
+  // ---------------------------------------------------------------------
+  // NUEVOS MÉTODOS PARA EVENT, WORKSHOP Y CLASSROOM
+  // ---------------------------------------------------------------------
+
   /**
- * WEBHOOK: RECIBE TODOS LOS EVENTOS DE STRIPE
- */
-async handleWebhookEvent(signature: string, payload: Buffer) {
-  const webhookSecret = 'whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW';
-  this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
-  this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
-
-  let event: Stripe.Event;
-  try {
-    event = this.stripe.webhooks.constructEvent(
-      payload,
-      signature,
-      webhookSecret,
-    );
-    this.logger.log(`Evento recibido: ${event.type}`);
-    this.logger.debug(`Evento completo: ${JSON.stringify(event)}`);
-  } catch (err) {
-    this.logger.error(
-      `Error al verificar la firma del webhook: ${err.message}`,
-    );
-    throw new HttpException(
-      'Webhook signature verification failed',
-      HttpStatus.BAD_REQUEST,
-    );
-  }
-
-  switch (event.type) {
-    // 1) CUANDO SE COMPLETA EL CHECKOUT (PRIMER PAGO)
-    case 'checkout.session.completed': {
-      const session = event.data.object as Stripe.Checkout.Session;
-      this.logger.debug(`Metadata de la sesión: ${JSON.stringify(session.metadata)}`);
-      await this.processTransaction(session);
-      break;
+   * CREA CHECKOUT SESSION PARA PAGAR UN EVENT
+   */
+  async createEventCheckoutSession(
+    eventId: string,
+    userId: string,
+    email: string,
+  ): Promise<Stripe.Checkout.Session> {
+    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+    if (!event) {
+      throw new HttpException('El evento no existe', HttpStatus.BAD_REQUEST);
+    }
+    if (typeof event.price !== 'number') {
+      throw new HttpException('Este evento no tiene un precio definido', HttpStatus.BAD_REQUEST);
     }
 
-    // 2) CUANDO SE REALIZA UN PAGO ÚNICO (payment_intent.succeeded)
-    case 'payment_intent.succeeded': {
-      const intent = event.data.object as Stripe.PaymentIntent;
-      if (intent.metadata?.checkoutSessionId) {
-        this.logger.debug(`Metadata del intent: ${JSON.stringify(intent.metadata)}`);
-        const session = await this.stripe.checkout.sessions.retrieve(
-          intent.metadata.checkoutSessionId,
-        );
+    const priceInCents = Math.round(event.price * 100);
+
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: priceInCents,
+            product_data: {
+              name: event.title,
+              description: event.longDescription ?? 'Evento especial',
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      customer_email: email,
+      metadata: {
+        userId,
+        eventId,
+        checkoutSessionId: '',
+      },
+      success_url: `${this.configService.get<string>('APP_URL')}/payment/success`,
+      cancel_url: `${this.configService.get<string>('APP_URL')}/payment/cancel`,
+    });
+
+    await this.stripe.checkout.sessions.update(session.id, {
+      metadata: {
+        userId,
+        eventId,
+        checkoutSessionId: session.id,
+      },
+    });
+
+    return session;
+  }
+
+  /**
+   * CREA CHECKOUT SESSION PARA PAGAR UN WORKSHOP
+   */
+  async createWorkshopCheckoutSession(
+    workshopId: string,
+    userId: string,
+    email: string,
+  ): Promise<Stripe.Checkout.Session> {
+    const workshop = await this.prisma.workshop.findUnique({ where: { id: workshopId } });
+    if (!workshop) {
+      throw new HttpException('El workshop no existe', HttpStatus.BAD_REQUEST);
+    }
+    if (typeof workshop.price !== 'number') {
+      throw new HttpException('Este workshop no tiene un precio definido', HttpStatus.BAD_REQUEST);
+    }
+
+    const priceInCents = Math.round(workshop.price * 100);
+
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: priceInCents,
+            product_data: {
+              name: workshop.title,
+              description: workshop.description,
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      customer_email: email,
+      metadata: {
+        userId,
+        workshopId,
+        checkoutSessionId: '',
+      },
+      success_url: `${this.configService.get<string>('APP_URL')}/payment/success`,
+      cancel_url: `${this.configService.get<string>('APP_URL')}/payment/cancel`,
+    });
+
+    await this.stripe.checkout.sessions.update(session.id, {
+      metadata: {
+        userId,
+        workshopId,
+        checkoutSessionId: session.id,
+      },
+    });
+
+    return session;
+  }
+
+  /**
+   * CREA CHECKOUT SESSION PARA PAGAR UN CLASSROOM
+   */
+  async createClassroomCheckoutSession(
+    classroomId: string,
+    userId: string,
+    email: string,
+  ): Promise<Stripe.Checkout.Session> {
+    const classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
+    if (!classroom) {
+      throw new HttpException('El classroom no existe', HttpStatus.BAD_REQUEST);
+    }
+    if (typeof classroom.price !== 'number') {
+      throw new HttpException('Este classroom no tiene un precio definido', HttpStatus.BAD_REQUEST);
+    }
+
+    const priceInCents = Math.round(classroom.price * 100);
+
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            unit_amount: priceInCents,
+            product_data: {
+              name: classroom.title,
+              description: classroom.description ?? '',
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      customer_email: email,
+      metadata: {
+        userId,
+        classroomId,
+        checkoutSessionId: '',
+      },
+      success_url: `${this.configService.get<string>('APP_URL')}/payment/success`,
+      cancel_url: `${this.configService.get<string>('APP_URL')}/payment/cancel`,
+    });
+
+    await this.stripe.checkout.sessions.update(session.id, {
+      metadata: {
+        userId,
+        classroomId,
+        checkoutSessionId: session.id,
+      },
+    });
+
+    return session;
+  }
+
+  // ---------------------------------------------------------------------
+  // WEBHOOK Y MANEJO DE TRANSACCIONES (SIN ALTERAR LO EXISTENTE)
+  // ---------------------------------------------------------------------
+  async handleWebhookEvent(signature: string, payload: Buffer) {
+    const webhookSecret = 'whsec_O31crSeRM1gXmwuFgrgEpvijVGDnpUqW';
+    this.logger.log(`Secreto del webhook usado: ${webhookSecret}`);
+    this.logger.debug(`Payload recibido: ${payload.toString('utf8')}`);
+
+    let event: Stripe.Event;
+    try {
+      event = this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      this.logger.log(`Evento recibido: ${event.type}`);
+      this.logger.debug(`Evento completo: ${JSON.stringify(event)}`);
+    } catch (err) {
+      this.logger.error(`Error al verificar la firma del webhook: ${err.message}`);
+      throw new HttpException('Webhook signature verification failed', HttpStatus.BAD_REQUEST);
+    }
+
+    switch (event.type) {
+      case 'checkout.session.completed': {
+        const session = event.data.object as Stripe.Checkout.Session;
+        this.logger.debug(`Metadata de la sesión: ${JSON.stringify(session.metadata)}`);
         await this.processTransaction(session);
-      } else {
-        this.logger.warn(
-          'No se encontró checkoutSessionId en los metadatos del intent.',
-        );
+        break;
       }
-      break;
-    }
 
-    // 3) CUANDO SE COBRA UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN EXITOSA)
-    case 'invoice.payment_succeeded': {
-      const invoice = event.data.object as Stripe.Invoice;
-      try {
-        if (!invoice.subscription) {
-          this.logger.warn('El invoice no tiene suscripción asociada.');
-          break;
-        }
-
-        const subscription = await this.stripe.subscriptions.retrieve(
-          invoice.subscription as string,
-        );
-        this.logger.debug(
-          `Metadata de la suscripción: ${JSON.stringify(subscription.metadata)}`,
-        );
-
-        const { empresaId, userId, subscriptionType } = subscription.metadata;
-
-        if (!empresaId || !subscriptionType) {
-          this.logger.warn('Faltan datos en los metadatos: empresaId o subscriptionType.');
-          break;
-        }
-
-        const paymentIntentId = invoice.payment_intent as string;
-        const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
-
-        const transaction = await this.prisma.transaction.create({
-          data: {
-            stripePaymentIntentId: paymentIntentId,
-            stripeCheckoutSessionId: null,
-            amount: invoice.amount_paid / 100,
-            currency: invoice.currency,
-            status: invoice.status ?? paymentIntent.status,
-            userId: userId || null,
-            courseId: null,
-            responseData: invoice as unknown as Prisma.JsonValue,
-          },
-        });
-
-        if (this.isValidCompanySubscription(subscriptionType)) {
-          await this.createEmpresaSubscription(
-            empresaId,
-            subscriptionType as SubscriptionType,
-            transaction.id,
-          );
+      case 'payment_intent.succeeded': {
+        const intent = event.data.object as Stripe.PaymentIntent;
+        if (intent.metadata?.checkoutSessionId) {
+          this.logger.debug(`Metadata del intent: ${JSON.stringify(intent.metadata)}`);
+          const session = await this.stripe.checkout.sessions.retrieve(intent.metadata.checkoutSessionId);
+          await this.processTransaction(session);
         } else {
-          this.logger.warn(`Tipo de suscripción inválido: ${subscriptionType}`);
+          this.logger.warn('No se encontró checkoutSessionId en los metadatos del intent.');
         }
-      } catch (error) {
-        this.logger.error(
-          `Error procesando invoice.payment_succeeded: ${error.message}`,
-        );
-        throw new HttpException(
-          `Error procesando invoice: ${error.message}`,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        break;
       }
-      break;
-    }
 
-    // 4) CUANDO FALLA EL COBRO DE UNA FACTURA DE SUSCRIPCIÓN (RENOVACIÓN FALLIDA)
-    case 'invoice.payment_failed': {
-      const invoice = event.data.object as Stripe.Invoice;
-      try {
-        if (!invoice.subscription) {
-          this.logger.warn('El invoice no tiene suscripción asociada.');
-          break;
-        }
-
-        const subscription = await this.stripe.subscriptions.retrieve(
-          invoice.subscription as string,
-        );
-        this.logger.debug(
-          `Metadata de la suscripción (FAILED): ${JSON.stringify(subscription.metadata)}`,
-        );
-
-        const { empresaId, userId, subscriptionType } = subscription.metadata;
-        const paymentIntentId = invoice.payment_intent as string;
-        const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
-
-        const transaction = await this.prisma.transaction.create({
-          data: {
-            stripePaymentIntentId: paymentIntentId,
-            stripeCheckoutSessionId: null,
-            amount: invoice.amount_paid / 100, // usualmente 0
-            currency: invoice.currency,
-            status: invoice.status ?? paymentIntent.status, // "failed" o "unpaid"
-            userId: userId || null,
-            courseId: null,
-            responseData: invoice as unknown as Prisma.JsonValue,
-          },
-        });
-
-        if (empresaId && subscriptionType) {
-          if (this.isValidCompanySubscription(subscriptionType)) {
-            await this.cancelEmpresaSubscription(empresaId);
-          } else {
-            this.logger.warn(
-              `Tipo de suscripción inválido para empresa (FAILED): ${subscriptionType}`,
-            );
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice;
+        try {
+          if (!invoice.subscription) {
+            this.logger.warn('El invoice no tiene suscripción asociada.');
+            break;
           }
-        } else {
-          this.logger.warn(
-            'No se encontró empresaId o subscriptionType en los metadatos del intent.',
-          );
+          const subscription = await this.stripe.subscriptions.retrieve(invoice.subscription as string);
+          this.logger.debug(`Metadata de la suscripción: ${JSON.stringify(subscription.metadata)}`);
+
+          const { empresaId, userId, subscriptionType } = subscription.metadata;
+
+          if (!empresaId || !subscriptionType) {
+            this.logger.warn('Faltan datos en los metadatos: empresaId o subscriptionType.');
+            break;
+          }
+
+          const paymentIntentId = invoice.payment_intent as string;
+          const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+
+          const transaction = await this.prisma.transaction.create({
+            data: {
+              stripePaymentIntentId: paymentIntentId,
+              stripeCheckoutSessionId: null,
+              amount: invoice.amount_paid / 100,
+              currency: invoice.currency,
+              status: invoice.status ?? paymentIntent.status,
+              userId: userId || null,
+              courseId: null,
+              responseData: invoice as unknown as Prisma.JsonValue,
+            },
+          });
+
+          if (this.isValidCompanySubscription(subscriptionType)) {
+            await this.createEmpresaSubscription(
+              empresaId,
+              subscriptionType as SubscriptionType,
+              transaction.id,
+            );
+          } else {
+            this.logger.warn(`Tipo de suscripción inválido: ${subscriptionType}`);
+          }
+        } catch (error) {
+          this.logger.error(`Error procesando invoice.payment_succeeded: ${error.message}`);
+          throw new HttpException(`Error procesando invoice: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-      } catch (error) {
-        this.logger.error(`Error procesando invoice.payment_failed: ${error.message}`);
-        throw new HttpException(
-          `Error procesando invoice: ${error.message}`,
-          HttpStatus.INTERNAL_SERVER_ERROR,
-        );
+        break;
       }
-      break;
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as Stripe.Invoice;
+        try {
+          if (!invoice.subscription) {
+            this.logger.warn('El invoice no tiene suscripción asociada.');
+            break;
+          }
+
+          const subscription = await this.stripe.subscriptions.retrieve(invoice.subscription as string);
+          this.logger.debug(`Metadata de la suscripción (FAILED): ${JSON.stringify(subscription.metadata)}`);
+
+          const { empresaId, userId, subscriptionType } = subscription.metadata;
+          const paymentIntentId = invoice.payment_intent as string;
+          const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
+
+          const transaction = await this.prisma.transaction.create({
+            data: {
+              stripePaymentIntentId: paymentIntentId,
+              stripeCheckoutSessionId: null,
+              amount: invoice.amount_paid / 100,
+              currency: invoice.currency,
+              status: invoice.status ?? paymentIntent.status,
+              userId: userId || null,
+              courseId: null,
+              responseData: invoice as unknown as Prisma.JsonValue,
+            },
+          });
+
+          if (empresaId && subscriptionType) {
+            if (this.isValidCompanySubscription(subscriptionType)) {
+              await this.cancelEmpresaSubscription(empresaId);
+            } else {
+              this.logger.warn(`Tipo de suscripción inválido para empresa (FAILED): ${subscriptionType}`);
+            }
+          } else {
+            this.logger.warn('No se encontró empresaId o subscriptionType en los metadatos del intent.');
+          }
+        } catch (error) {
+          this.logger.error(`Error procesando invoice.payment_failed: ${error.message}`);
+          throw new HttpException(`Error procesando invoice: ${error.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        break;
+      }
+
+      default:
+        this.logger.warn(`Evento no manejado: ${event.type}`);
     }
 
-    default:
-      this.logger.warn(`Evento no manejado: ${event.type}`);
+    return { received: true };
   }
-
-  return { received: true };
-}
-
 
   /**
    * PROCESA TRANSACCIONES PARA PAGOS ÚNICOS O PRIMER PAGO DE SUSCRIPCIÓN
    */
   private async processTransaction(session: Stripe.Checkout.Session) {
     const { metadata, payment_intent, amount_total, currency, status } = session;
-    const { userId, courseId, empresaId, subscriptionType } = metadata;
-  
+    const { userId, courseId, empresaId, subscriptionType, eventId, workshopId, classroomId } = metadata;
+
     this.logger.debug(`Procesando transacción con metadata: ${JSON.stringify(metadata)}`);
-  
+
     // Verificar si la transacción ya existe
     const existingTransaction = await this.prisma.transaction.findUnique({
       where: { stripeCheckoutSessionId: session.id },
     });
-  
+
     if (existingTransaction) {
-      this.logger.warn(
-        `La transacción para stripeCheckoutSessionId ${session.id} ya existe.`,
-      );
-      return existingTransaction; // Evita duplicados
+      this.logger.warn(`La transacción para stripeCheckoutSessionId ${session.id} ya existe.`);
+      return existingTransaction;
     }
-  
+
     // Crear la nueva transacción
     const transaction = await this.prisma.transaction.create({
       data: {
@@ -420,114 +531,127 @@ async handleWebhookEvent(signature: string, payload: Buffer) {
         responseData: session as unknown as Prisma.JsonValue,
       },
     });
-  
-    // Manejar la lógica de suscripción
+
+    // Lógica para determinar qué está comprando el usuario
     if (empresaId && subscriptionType && this.isValidCompanySubscription(subscriptionType)) {
-      await this.createEmpresaSubscription(
-        empresaId,
-        subscriptionType as SubscriptionType,
-        transaction.id,
-      );
+      // Suscripción de empresa
+      await this.createEmpresaSubscription(empresaId, subscriptionType as SubscriptionType, transaction.id);
+
     } else if (userId && subscriptionType === 'update') {
+      // Suscripción "update" de usuario
       await this.upgradeUserSubscription(userId);
+
     } else if (userId && courseId) {
+      // Compra de un curso
       await this.enrollUserInCourse(userId, courseId, transaction.id);
+
+    } else if (userId && eventId) {
+      // Compra de un evento
+      await this.enrollUserInEvent(userId, eventId, transaction.id);
+
+    } else if (userId && workshopId) {
+      // Compra de un workshop
+      await this.enrollUserInWorkshop(userId, workshopId, transaction.id);
+
+    } else if (userId && classroomId) {
+      // Compra de un classroom
+      await this.enrollUserInClassroom(userId, classroomId, transaction.id);
+
     } else {
       this.logger.warn('No se pudo determinar el tipo de transacción a procesar.');
     }
-  
+
     this.logger.log(`Transacción procesada con éxito para sesión ${session.id}`);
     return transaction;
   }
-  
 
-  /**
-   * Valida que subscriptionType sea uno de (BASIC, INTERMIDIATE, PREMIUM).
-   * Se ignoran ORO, PLATA, BRONCE aunque existan en el enum.
-   */
+  // ---------------------------------------------------------------------
+  // MÉTODOS AUXILIARES PARA CREAR/CANCELAR SUSCRIPCIONES, INSCRIBIR, ETC.
+  // ---------------------------------------------------------------------
+
   private isValidCompanySubscription(subscriptionType: string): boolean {
     const validValues: SubscriptionType[] = ['BASICO', 'INTERMEDIO', 'PREMIUM'];
     return validValues.includes(subscriptionType as SubscriptionType);
   }
 
-  /**
-   * CREA O RENUEVA LA SUSCRIPCIÓN DE EMPRESA (pago exitoso)
-   */
   private async createEmpresaSubscription(
     empresaId: string,
     subscriptionType: SubscriptionType,
     transactionId: string,
   ) {
-    // Debe existir un registro en la tabla Subscription con type = BASIC,INTERMIDIATE,PREMIUM
     const subscription = await this.prisma.subscription.findUnique({
       where: { type: subscriptionType },
     });
 
     if (!subscription) {
-      throw new HttpException(
-        'Tipo de suscripción no válido',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Tipo de suscripción no válido', HttpStatus.BAD_REQUEST);
     }
 
-    // Crea un registro en EmpresaSubscription
     await this.prisma.empresaSubscription.create({
       data: {
         empresaId,
         subscriptionId: subscription.id,
         startDate: new Date(),
-        endDate: new Date(
-          new Date().setMonth(new Date().getMonth() + 1),
-        ),
+        endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
         status: 'active',
       },
     });
 
-    this.logger.log(
-      `Suscripción ${subscriptionType} creada/renovada para empresa ${empresaId}`,
-    );
+    this.logger.log(`Suscripción ${subscriptionType} creada/renovada para empresa ${empresaId}`);
   }
 
-  /**
-   * CANCELA LA SUSCRIPCIÓN DE EMPRESA (pago fallido)
-   */
   private async cancelEmpresaSubscription(empresaId: string) {
-    // Marcamos todas las suscripciones activas como 'canceled'
     await this.prisma.empresaSubscription.updateMany({
       where: {
         empresaId,
         status: 'active',
       },
-      data: {
-        status: 'canceled',
-      },
+      data: { status: 'canceled' },
     });
 
-    this.logger.log(
-      `Suscripción de empresa ${empresaId} cancelada (status = "canceled").`,
-    );
+    this.logger.log(`Suscripción de empresa ${empresaId} cancelada (status = "canceled").`);
   }
 
-  /**
-   * INSCRIBE AL USUARIO EN EL CURSO (compra única)
-   */
-  private async enrollUserInCourse(
-    userId: string,
-    courseId: string,
-    transactionId: string,
-  ) {
+  private async enrollUserInCourse(userId: string, courseId: string, transactionId: string) {
     await this.prisma.courseEnrollment.create({
-      data: {
-        userId,
-        courseId,
-      },
+      data: { userId, courseId },
     });
     this.logger.log(`Usuario ${userId} inscrito en el curso ${courseId}`);
   }
 
-  /**
-   * MARCA AL USUARIO CON LA SUSCRIPCIÓN "update" (pago exitoso)
-   */
+  private async enrollUserInEvent(userId: string, eventId: string, transactionId: string) {
+    await this.prisma.eventEnrollment.create({
+      data: {
+        userId,
+        eventId,
+        status: 'active',
+      },
+    });
+    this.logger.log(`Usuario ${userId} inscrito en el evento ${eventId}`);
+  }
+
+  private async enrollUserInWorkshop(userId: string, workshopId: string, transactionId: string) {
+    await this.prisma.workshopEnrollment.create({
+      data: {
+        userId,
+        workshopId,
+        status: 'active',
+      },
+    });
+    this.logger.log(`Usuario ${userId} inscrito en el workshop ${workshopId}`);
+  }
+
+  private async enrollUserInClassroom(userId: string, classroomId: string, transactionId: string) {
+    await this.prisma.classroomEnrollment.create({
+      data: {
+        userId,
+        classroomId,
+        status: 'active',
+      },
+    });
+    this.logger.log(`Usuario ${userId} inscrito en el classroom ${classroomId}`);
+  }
+
   private async upgradeUserSubscription(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
@@ -536,31 +660,25 @@ async handleWebhookEvent(signature: string, payload: Buffer) {
     this.logger.log(`Usuario ${userId} se ha actualizado al plan "update".`);
   }
 
-  /**
-   * QUITA LA SUSCRIPCIÓN DEL USUARIO (pago fallido)
-   */
   private async downgradeUserSubscription(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
       data: { userSubscription: null },
     });
-    this.logger.log(
-      `Usuario ${userId} -> suscripción "update" eliminada (pago fallido).`,
-    );
+    this.logger.log(`Usuario ${userId} -> suscripción "update" eliminada (pago fallido).`);
   }
 
   /**
-   * RENOVAR SUSCRIPCIONES (CRON) - Ejemplo
+   * CRON DE EJEMPLO PARA RENOVAR SUSCRIPCIONES (OPCIONAL)
    */
   async renewSubscriptions() {
     const now = new Date();
-    const expiredSubscriptions =
-      await this.prisma.empresaSubscription.findMany({
-        where: {
-          endDate: { lte: now },
-          status: 'active',
-        },
-      });
+    const expiredSubscriptions = await this.prisma.empresaSubscription.findMany({
+      where: {
+        endDate: { lte: now },
+        status: 'active',
+      },
+    });
 
     for (const sub of expiredSubscriptions) {
       await this.prisma.empresaSubscription.update({
@@ -573,10 +691,6 @@ async handleWebhookEvent(signature: string, payload: Buffer) {
     }
   }
 
-  /**
-   * Acepta solo (BASIC, INTERMIDIATE, PREMIUM).
-   * Si alguien envía (ORO, PLATA, BRONCE) -> error
-   */
   private validateSubscriptionType(subscriptionType: SubscriptionType) {
     const validSubscriptionTypes: SubscriptionType[] = [
       'BASICO',
@@ -591,14 +705,10 @@ async handleWebhookEvent(signature: string, payload: Buffer) {
     }
   }
 
-  /**
-   * Precio en centavos según el nuevo plan (BASIC, INTERMIDIATE, PREMIUM).
-   */
   private getSubscriptionPrice(subscriptionType: SubscriptionType): number {
-    // Precios en centavos
     const subscriptionPrices: { [key in SubscriptionType]?: number } = {
-      BASICO: 1000,        // $10.00
-      INTERMEDIO: 1500, // $15.00
+      BASICO: 1000,       // $10.00
+      INTERMEDIO: 1500,   // $15.00
       PREMIUM: 3000,      // $30.00
     };
 

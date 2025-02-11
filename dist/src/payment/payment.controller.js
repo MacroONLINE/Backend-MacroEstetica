@@ -27,7 +27,7 @@ let PaymentController = PaymentController_1 = class PaymentController {
             throw new common_1.HttpException('courseId, userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
         const session = await this.paymentService.createCheckoutSession(courseId, userId, email);
-        this.logger.log(`Sesión de checkout creada: ${JSON.stringify(session)}`);
+        this.logger.log(`Sesión de checkout (curso) creada: ${JSON.stringify(session)}`);
         return { url: session.url };
     }
     async createCompanySubscriptionCheckoutSession(empresaId, userId, subscriptionType, email) {
@@ -35,7 +35,15 @@ let PaymentController = PaymentController_1 = class PaymentController {
             throw new common_1.HttpException('empresaId, userId, subscriptionType y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
         const session = await this.paymentService.createCompanySubscriptionCheckoutSession(empresaId, userId, subscriptionType, email);
-        this.logger.log(`Sesión de checkout creada para empresaId: ${empresaId}, userId: ${userId}, tipo: ${subscriptionType}, email: ${email}`);
+        this.logger.log(`Sesión de checkout (suscripción empresa) creada para empresaId: ${empresaId}, userId: ${userId}, tipo: ${subscriptionType}, email: ${email}`);
+        return { url: session.url };
+    }
+    async createUserUpgradeCheckoutSession(userId, email) {
+        if (!userId || !email) {
+            throw new common_1.HttpException('userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const session = await this.paymentService.createUserUpgradeCheckoutSession(userId, email);
+        this.logger.log(`Sesión de checkout (usuario update) creada para userId: ${userId}, email: ${email}`);
         return { url: session.url };
     }
     async handleWebhook(signature, req, res) {
@@ -54,12 +62,28 @@ let PaymentController = PaymentController_1 = class PaymentController {
             res.status(400).send(`Error en Webhook: ${error.message}`);
         }
     }
-    async createUserUpgradeCheckoutSession(userId, email) {
-        if (!userId || !email) {
-            throw new common_1.HttpException('userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
+    async createEventCheckoutSession(eventId, userId, email) {
+        if (!eventId || !userId || !email) {
+            throw new common_1.HttpException('eventId, userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
         }
-        const session = await this.paymentService.createUserUpgradeCheckoutSession(userId, email);
-        this.logger.log(`Sesión de checkout creada para userId: ${userId}, suscripción: "update", email: ${email}`);
+        const session = await this.paymentService.createEventCheckoutSession(eventId, userId, email);
+        this.logger.log(`Sesión de checkout (evento) creada: ${JSON.stringify(session)}`);
+        return { url: session.url };
+    }
+    async createWorkshopCheckoutSession(workshopId, userId, email) {
+        if (!workshopId || !userId || !email) {
+            throw new common_1.HttpException('workshopId, userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const session = await this.paymentService.createWorkshopCheckoutSession(workshopId, userId, email);
+        this.logger.log(`Sesión de checkout (workshop) creada: ${JSON.stringify(session)}`);
+        return { url: session.url };
+    }
+    async createClassroomCheckoutSession(classroomId, userId, email) {
+        if (!classroomId || !userId || !email) {
+            throw new common_1.HttpException('classroomId, userId y email son requeridos', common_1.HttpStatus.BAD_REQUEST);
+        }
+        const session = await this.paymentService.createClassroomCheckoutSession(classroomId, userId, email);
+        this.logger.log(`Sesión de checkout (classroom) creada: ${JSON.stringify(session)}`);
         return { url: session.url };
     }
 };
@@ -93,7 +117,7 @@ __decorate([
             properties: {
                 empresaId: { type: 'string', description: 'ID de la empresa' },
                 userId: { type: 'string', description: 'ID del usuario' },
-                subscriptionType: { type: 'string', description: 'Tipo de suscripción (BASIC, INTERMIDIATE, PREMIUM)' },
+                subscriptionType: { type: 'string', description: 'Tipo de suscripción (BASICO, INTERMEDIO, PREMIUM)' },
                 email: { type: 'string', description: 'Email del administrador de la empresa' },
             },
         },
@@ -108,18 +132,6 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String, String]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "createCompanySubscriptionCheckoutSession", null);
-__decorate([
-    (0, common_1.Post)('webhook'),
-    (0, swagger_1.ApiOperation)({ summary: 'Endpoint para recibir notificaciones de Stripe' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Confirma que el webhook fue recibido.' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error al procesar el webhook.' }),
-    __param(0, (0, common_1.Headers)('stripe-signature')),
-    __param(1, (0, common_1.Req)()),
-    __param(2, (0, common_1.Res)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object, Object]),
-    __metadata("design:returntype", Promise)
-], PaymentController.prototype, "handleWebhook", null);
 __decorate([
     (0, common_1.Post)('user-upgrade-checkout'),
     (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout de Stripe para la suscripción "update" de un usuario' }),
@@ -139,6 +151,81 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "createUserUpgradeCheckoutSession", null);
+__decorate([
+    (0, common_1.Post)('webhook'),
+    (0, swagger_1.ApiOperation)({ summary: 'Endpoint para recibir notificaciones de Stripe' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Confirma que el webhook fue recibido.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error al procesar el webhook.' }),
+    __param(0, (0, common_1.Headers)('stripe-signature')),
+    __param(1, (0, common_1.Req)()),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, Object]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "handleWebhook", null);
+__decorate([
+    (0, common_1.Post)('event-checkout'),
+    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout para inscribirse a un Event' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                eventId: { type: 'string', description: 'ID del Event' },
+                userId: { type: 'string', description: 'ID del usuario' },
+                email: { type: 'string', description: 'Email del usuario' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'URL de la sesión de Stripe' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en parámetros' }),
+    __param(0, (0, common_1.Body)('eventId')),
+    __param(1, (0, common_1.Body)('userId')),
+    __param(2, (0, common_1.Body)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "createEventCheckoutSession", null);
+__decorate([
+    (0, common_1.Post)('workshop-checkout'),
+    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout para inscribirse a un Workshop' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                workshopId: { type: 'string', description: 'ID del Workshop' },
+                userId: { type: 'string', description: 'ID del usuario' },
+                email: { type: 'string', description: 'Email del usuario' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'URL de la sesión de Stripe' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en parámetros' }),
+    __param(0, (0, common_1.Body)('workshopId')),
+    __param(1, (0, common_1.Body)('userId')),
+    __param(2, (0, common_1.Body)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "createWorkshopCheckoutSession", null);
+__decorate([
+    (0, common_1.Post)('classroom-checkout'),
+    (0, swagger_1.ApiOperation)({ summary: 'Crea una sesión de checkout para inscribirse a un Classroom' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                classroomId: { type: 'string', description: 'ID del Classroom' },
+                userId: { type: 'string', description: 'ID del usuario' },
+                email: { type: 'string', description: 'Email del usuario' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'URL de la sesión de Stripe' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Error en parámetros' }),
+    __param(0, (0, common_1.Body)('classroomId')),
+    __param(1, (0, common_1.Body)('userId')),
+    __param(2, (0, common_1.Body)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "createClassroomCheckoutSession", null);
 exports.PaymentController = PaymentController = PaymentController_1 = __decorate([
     (0, swagger_1.ApiTags)('payment'),
     (0, common_1.Controller)('payment'),

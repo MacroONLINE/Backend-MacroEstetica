@@ -7,41 +7,62 @@ export declare class ClassroomService {
         createdAt: Date;
         updatedAt: Date;
         title: string;
-        description: string | null;
+        description: string;
+        startDateTime: Date;
+        endDateTime: Date;
+        price: number | null;
+        imageUrl: string | null;
+        channelName: string | null;
     }>;
     getClassroomById(id: string): Promise<{
-        workshops: {
+        enrollments: {
             id: string;
+            status: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
+            userId: string;
+            classroomId: string;
+        }[];
+        attendees: {
+            id: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: import(".prisma/client").$Enums.Role;
+            password: string;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            newsletter: boolean;
+            userSubscription: string | null;
+        }[];
+        orators: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            userId: string;
+            bannerImage: string | null;
+            title: string | null;
+            followers: number | null;
+            profession: import(".prisma/client").$Enums.Profession;
             description: string;
-            startDateTime: Date;
-            endDateTime: Date;
-            eventId: string | null;
-            price: number | null;
-            whatYouWillLearn: string | null;
-            channelName: string | null;
-            classroomId: string | null;
+            experienceDescription: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            empresaId: string | null;
+            categoryId: string | null;
         }[];
     } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        description: string | null;
-    }>;
-    updateClassroom(id: string, data: any): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        description: string | null;
-    }>;
-    deleteClassroom(id: string): Promise<{
-        message: string;
-    }>;
-    getUpcomingWorkshopsForClassroom(classroomId: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -49,32 +70,83 @@ export declare class ClassroomService {
         description: string;
         startDateTime: Date;
         endDateTime: Date;
-        eventId: string | null;
         price: number | null;
-        whatYouWillLearn: string | null;
+        imageUrl: string | null;
         channelName: string | null;
-        classroomId: string | null;
-    }[]>;
+    }>;
+    updateClassroom(id: string, data: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        title: string;
+        description: string;
+        startDateTime: Date;
+        endDateTime: Date;
+        price: number | null;
+        imageUrl: string | null;
+        channelName: string | null;
+    }>;
+    deleteClassroom(id: string): Promise<{
+        message: string;
+    }>;
     getUpcomingClassrooms(): Promise<({
-        workshops: {
+        enrollments: {
             id: string;
+            status: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
+            userId: string;
+            classroomId: string;
+        }[];
+        attendees: {
+            id: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: import(".prisma/client").$Enums.Role;
+            password: string;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            newsletter: boolean;
+            userSubscription: string | null;
+        }[];
+        orators: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            userId: string;
+            bannerImage: string | null;
+            title: string | null;
+            followers: number | null;
+            profession: import(".prisma/client").$Enums.Profession;
             description: string;
-            startDateTime: Date;
-            endDateTime: Date;
-            eventId: string | null;
-            price: number | null;
-            whatYouWillLearn: string | null;
-            channelName: string | null;
-            classroomId: string | null;
+            experienceDescription: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            empresaId: string | null;
+            categoryId: string | null;
         }[];
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
         title: string;
-        description: string | null;
+        description: string;
+        startDateTime: Date;
+        endDateTime: Date;
+        price: number | null;
+        imageUrl: string | null;
+        channelName: string | null;
     })[]>;
 }
