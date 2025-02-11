@@ -85,7 +85,19 @@ let EventsService = class EventsService {
         const event = await this.prisma.event.findUnique({
             where: { id: eventId },
             include: {
-                leadingCompany: true,
+                leadingCompany: {
+                    include: {
+                        minisite: {
+                            include: {
+                                offers: {
+                                    include: {
+                                        products: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
                 attendees: true,
                 organizers: true,
                 streams: {
@@ -116,9 +128,11 @@ let EventsService = class EventsService {
         streamOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
         workshopOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
         const allOrators = Array.from(oratorsMap.values());
+        const companyOffers = event.leadingCompany?.minisite?.offers ?? [];
         return {
             ...event,
             allOrators,
+            companyOffers,
         };
     }
     async getStreamsAndWorkshopsByEvent(eventId) {

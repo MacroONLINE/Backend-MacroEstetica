@@ -88,14 +88,29 @@ export class EventsService {
   /**
    * Obtiene un Event por ID,
    * incluyendo streams, workshops, orators, attendees, etc.
-   * Además, agrega un arreglo "allOrators" con todos los oradores
+   * También agrega un arreglo "allOrators" con todos los oradores
    * (sin duplicados) de streams y workshops.
+   * 
+   * Por otro lado, trae la empresa líder (leadingCompany), su minisite,
+   * sus offers y sus products. Si no existen, se devuelve un arreglo vacío.
    */
   async getEventById(eventId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
-        leadingCompany: true,
+        leadingCompany: {
+          include: {
+            minisite: {
+              include: {
+                offers: {
+                  include: {
+                    products: true, // MinisiteOfferProduct[]
+                  },
+                },
+              },
+            },
+          },
+        },
         attendees: true,
         organizers: true,
         streams: {
@@ -134,10 +149,14 @@ export class EventsService {
     workshopOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
     const allOrators = Array.from(oratorsMap.values());
 
-    // 4) Retornar el evento con un nuevo campo "allOrators"
+    // 4) Obtener las ofertas de la empresa líder (o [])
+    const companyOffers = event.leadingCompany?.minisite?.offers ?? [];
+
+    // 5) Retornar el evento con un nuevo campo "allOrators" y "companyOffers"
     return {
       ...event,
       allOrators,
+      companyOffers,
     };
   }
 

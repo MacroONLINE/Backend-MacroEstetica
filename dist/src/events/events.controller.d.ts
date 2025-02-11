@@ -631,7 +631,55 @@ export declare class EventsController {
     })[]>;
     getEventById(eventId: string): Promise<{
         allOrators: any[];
+        companyOffers: ({
+            products: {
+                id: string;
+                title: string;
+                createdAt: Date;
+                updatedAt: Date;
+                description: string;
+                offerId: string;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            minisiteId: string;
+            sectionTitle: string | null;
+        })[];
         leadingCompany: {
+            minisite: {
+                offers: ({
+                    products: {
+                        id: string;
+                        title: string;
+                        createdAt: Date;
+                        updatedAt: Date;
+                        description: string;
+                        offerId: string;
+                    }[];
+                } & {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    minisiteId: string;
+                    sectionTitle: string | null;
+                })[];
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                empresaId: string;
+                videoUrl: string | null;
+                aboutDescription: import("@prisma/client/runtime/library").JsonValue | null;
+                followersCount: number | null;
+                coursesCount: number | null;
+                productsCount: number | null;
+                minisiteColor: string | null;
+                slogan: string | null;
+                catalogueUrl: string | null;
+            };
+        } & {
             id: string;
             title: string | null;
             createdAt: Date;
