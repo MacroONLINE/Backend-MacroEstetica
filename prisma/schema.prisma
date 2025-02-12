@@ -296,6 +296,7 @@ model Event {
   workshops        Workshop[]
   organizers       EventOrganizer[]
   attendees        User[]            @relation("EventAttendees")
+    brands           EventBrand[]      // Máx. 12 (se valida a nivel de lógica)
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now())
 }
@@ -670,4 +671,14 @@ model ClassroomEnrollment {
   user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([classroomId, userId])
+}
+
+model EventBrand {
+  id         String  @id @default(cuid())
+  name       String
+  imageUrl   String?
+  eventId    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+  event      Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 }

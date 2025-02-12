@@ -208,8 +208,8 @@ export declare class EmpresaController {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                productId: string;
                 minisiteId: string;
+                productId: string;
                 highlightFeatures: string[];
                 highlightDescription: string | null;
                 hoghlightImageUrl: string | null;
@@ -265,8 +265,8 @@ export declare class EmpresaController {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                productId: string;
                 minisiteId: string;
+                productId: string;
                 order: number | null;
                 tagline: string | null;
             })[];

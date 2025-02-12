@@ -35,7 +35,10 @@ let EventsService = class EventsService {
     async registerAttendee(eventId, userId) {
         const event = await this.prisma.event.findUnique({
             where: { id: eventId },
-            include: { attendees: true },
+            include: {
+                attendees: true,
+                brands: true,
+            },
         });
         if (!event) {
             throw new common_1.NotFoundException('Evento no encontrado');
@@ -61,6 +64,7 @@ let EventsService = class EventsService {
                 leadingCompany: true,
                 attendees: true,
                 organizers: true,
+                brands: true,
                 streams: {
                     include: {
                         orators: true,
@@ -72,9 +76,7 @@ let EventsService = class EventsService {
                         orators: true,
                         attendees: true,
                         enrollments: {
-                            include: {
-                                user: true,
-                            },
+                            include: { user: true },
                         },
                     },
                 },
@@ -100,6 +102,7 @@ let EventsService = class EventsService {
                 },
                 attendees: true,
                 organizers: true,
+                brands: true,
                 streams: {
                     include: {
                         orators: true,
@@ -111,9 +114,7 @@ let EventsService = class EventsService {
                         orators: true,
                         attendees: true,
                         enrollments: {
-                            include: {
-                                user: true,
-                            },
+                            include: { user: true },
                         },
                     },
                 },
@@ -125,8 +126,8 @@ let EventsService = class EventsService {
         const streamOrators = event.streams?.flatMap((stream) => stream.orators) ?? [];
         const workshopOrators = event.workshops?.flatMap((workshop) => workshop.orators) ?? [];
         const oratorsMap = new Map();
-        streamOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
-        workshopOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
+        streamOrators.forEach((o) => oratorsMap.set(o.id, o));
+        workshopOrators.forEach((o) => oratorsMap.set(o.id, o));
         const allOrators = Array.from(oratorsMap.values());
         const offers = event.leadingCompany?.minisite?.offers ?? [];
         const offerProducts = offers.flatMap((offer) => offer.products ?? []);
@@ -140,6 +141,7 @@ let EventsService = class EventsService {
         const event = await this.prisma.event.findUnique({
             where: { id: eventId },
             include: {
+                brands: true,
                 streams: {
                     include: {
                         orators: true,
@@ -151,9 +153,7 @@ let EventsService = class EventsService {
                         orators: true,
                         attendees: true,
                         enrollments: {
-                            include: {
-                                user: true,
-                            },
+                            include: { user: true },
                         },
                     },
                 },
@@ -165,31 +165,31 @@ let EventsService = class EventsService {
             eventId: event.id,
             streams: event.streams,
             workshops: event.workshops,
+            brands: event.brands,
         };
     }
     async getWorkshopById(workshopId) {
         return this.prisma.workshop.findUnique({
             where: { id: workshopId },
             include: {
-                event: true,
+                event: {
+                    include: {
+                        brands: true,
+                    },
+                },
                 orators: true,
                 attendees: true,
                 enrollments: {
-                    include: {
-                        user: true,
-                    },
+                    include: { user: true },
                 },
             },
         });
     }
     async getUpcomingEvents() {
         const nowUtc = new Date(new Date().toISOString());
-        console.log('Fecha usada para el filtro (UTC):', nowUtc);
         return this.prisma.event.findMany({
             where: {
-                startDateTime: {
-                    gte: nowUtc,
-                },
+                startDateTime: { gte: nowUtc },
             },
             orderBy: {
                 startDateTime: 'asc',
@@ -198,6 +198,7 @@ let EventsService = class EventsService {
                 leadingCompany: true,
                 attendees: true,
                 organizers: true,
+                brands: true,
                 streams: {
                     include: {
                         orators: true,
@@ -227,9 +228,7 @@ let EventsService = class EventsService {
         }
         return this.prisma.event.findMany({
             where: {
-                startDateTime: {
-                    gte: startDate,
-                },
+                startDateTime: { gte: startDate },
             },
             orderBy: {
                 startDateTime: 'asc',
@@ -238,6 +237,64 @@ let EventsService = class EventsService {
                 leadingCompany: true,
                 attendees: true,
                 organizers: true,
+                brands: true,
+                streams: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                    },
+                },
+                workshops: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                        enrollments: {
+                            include: { user: true },
+                        },
+                    },
+                },
+            },
+        });
+    }
+    async getPhysicalEvents() {
+        return this.prisma.event.findMany({
+            where: {
+                physicalLocation: { not: null },
+            },
+            include: {
+                leadingCompany: true,
+                attendees: true,
+                organizers: true,
+                brands: true,
+                streams: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                    },
+                },
+                workshops: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                        enrollments: {
+                            include: { user: true },
+                        },
+                    },
+                },
+            },
+        });
+    }
+    async getPhysicalEventsByEmpresa(empresaId) {
+        return this.prisma.event.findMany({
+            where: {
+                leadingCompanyId: empresaId,
+                physicalLocation: { not: null },
+            },
+            include: {
+                leadingCompany: true,
+                attendees: true,
+                organizers: true,
+                brands: true,
                 streams: {
                     include: {
                         orators: true,

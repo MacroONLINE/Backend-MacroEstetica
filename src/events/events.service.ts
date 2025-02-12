@@ -5,9 +5,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Crea un nuevo Event
-   */
   async createEvent(data: any) {
     return this.prisma.event.create({
       data: {
@@ -25,23 +22,21 @@ export class EventsService {
     });
   }
 
-  /**
-   * Registra a un usuario como "attendee" en un Event
-   */
   async registerAttendee(eventId: string, userId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
-      include: { attendees: true },
+      include: {
+        attendees: true,
+        brands: true,
+      },
     });
     if (!event) {
       throw new NotFoundException('Evento no encontrado');
     }
-
     const isAlreadyAttendee = event.attendees.some((u) => u.id === userId);
     if (isAlreadyAttendee) {
-      return false; // Ya estaba registrado
+      return false;
     }
-
     await this.prisma.event.update({
       where: { id: eventId },
       data: {
@@ -53,10 +48,6 @@ export class EventsService {
     return true;
   }
 
-  /**
-   * Obtiene todos los eventos liderados por una empresa en particular (leadingCompany)
-   * e incluye streams, workshops, orators, attendees, etc.
-   */
   async getEventsByLeadingCompany(empresaId: string) {
     return this.prisma.event.findMany({
       where: { leadingCompanyId: empresaId },
@@ -64,184 +55,7 @@ export class EventsService {
         leadingCompany: true,
         attendees: true,
         organizers: true,
-        streams: {
-          include: {
-            orators: true,
-            attendees: true,
-          },
-        },
-        workshops: {
-          include: {
-            orators: true,
-            attendees: true,
-            enrollments: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
-    });
-  }
-
-  /**
-   * Obtiene un Event por ID,
-   * incluyendo streams, workshops, orators, attendees, etc.
-   * Además, agrega un arreglo "allOrators" con todos los oradores
-   * (sin duplicados) de streams y workshops.
-   *
-   * También trae la empresa líder (leadingCompany), su minisite,
-   * y de ahí todas las "offers", pero únicamente se devuelven
-   * los "products" aplanados en un único arreglo "offerProducts".
-   */
-  async getEventById(eventId: string) {
-    const event = await this.prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        leadingCompany: {
-          include: {
-            minisite: {
-              include: {
-                offers: {
-                  include: {
-                    products: true, // MinisiteOfferProduct[]
-                  },
-                },
-              },
-            },
-          },
-        },
-        attendees: true,
-        organizers: true,
-        streams: {
-          include: {
-            orators: true,
-            attendees: true,
-          },
-        },
-        workshops: {
-          include: {
-            orators: true,
-            attendees: true,
-            enrollments: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!event) {
-      throw new NotFoundException(`No se encontró el evento con ID: ${eventId}`);
-    }
-
-    // Oradores de streams:
-    const streamOrators = event.streams?.flatMap((stream) => stream.orators) ?? [];
-    // Oradores de workshops:
-    const workshopOrators = event.workshops?.flatMap((workshop) => workshop.orators) ?? [];
-
-    // Combinar ambos, evitando duplicados por su "id"
-    const oratorsMap = new Map();
-    streamOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
-    workshopOrators.forEach((orator) => oratorsMap.set(orator.id, orator));
-    const allOrators = Array.from(oratorsMap.values());
-
-    // Ofertas de la empresa líder
-    const offers = event.leadingCompany?.minisite?.offers ?? [];
-    // Aplana todos los productos de cada oferta en un solo arreglo
-    const offerProducts = offers.flatMap((offer) => offer.products ?? []);
-
-    // Retornar el evento con:
-    // - "allOrators": oradores combinados
-    // - "offerProducts": todos los MinisiteOfferProduct[] aplanados
-    return {
-      ...event,
-      allOrators,
-      offerProducts,
-    };
-  }
-
-  /**
-   * Retorna los streams y workshops asociados a un evento,
-   * incluyendo orators, attendees, etc.
-   */
-  async getStreamsAndWorkshopsByEvent(eventId: string) {
-    const event = await this.prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        streams: {
-          include: {
-            orators: true,
-            attendees: true,
-          },
-        },
-        workshops: {
-          include: {
-            orators: true,
-            attendees: true,
-            enrollments: {
-              include: {
-                user: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!event) return null;
-
-    return {
-      eventId: event.id,
-      streams: event.streams,
-      workshops: event.workshops,
-    };
-  }
-
-  /**
-   * Obtiene un Workshop por su ID,
-   * incluyendo orators, attendees, enrollments, etc.
-   */
-  async getWorkshopById(workshopId: string) {
-    return this.prisma.workshop.findUnique({
-      where: { id: workshopId },
-      include: {
-        event: true,
-        orators: true,
-        attendees: true,
-        enrollments: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
-  }
-
-  /**
-   * Obtiene todos los eventos próximos (startDateTime >= now),
-   * incluyendo todos los submodelos de orators, attendees, etc.
-   */
-  async getUpcomingEvents() {
-    const nowUtc = new Date(new Date().toISOString());
-    console.log('Fecha usada para el filtro (UTC):', nowUtc);
-
-    return this.prisma.event.findMany({
-      where: {
-        startDateTime: {
-          gte: nowUtc,
-        },
-      },
-      orderBy: {
-        startDateTime: 'asc',
-      },
-      include: {
-        leadingCompany: true,
-        attendees: true,
-        organizers: true,
+        brands: true,
         streams: {
           include: {
             orators: true,
@@ -261,27 +75,118 @@ export class EventsService {
     });
   }
 
-  /**
-   * Obtiene todos los eventos futuros en un año dado,
-   * incluyendo orators, attendees, etc.
-   */
-  async getUpcomingEventsByYear(year: number) {
-    const currentYear = new Date().getFullYear();
-    let startDate: Date;
-
-    if (year === currentYear) {
-      // Si es el año actual, filtra desde hoy
-      startDate = new Date();
-    } else {
-      // Si es un año distinto, filtra desde el 1 de enero de ese año
-      startDate = new Date(year, 0, 1); 
+  async getEventById(eventId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        leadingCompany: {
+          include: {
+            minisite: {
+              include: {
+                offers: {
+                  include: {
+                    products: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        attendees: true,
+        organizers: true,
+        brands: true,
+        streams: {
+          include: {
+            orators: true,
+            attendees: true,
+          },
+        },
+        workshops: {
+          include: {
+            orators: true,
+            attendees: true,
+            enrollments: {
+              include: { user: true },
+            },
+          },
+        },
+      },
+    });
+    if (!event) {
+      throw new NotFoundException(`No se encontró el evento con ID: ${eventId}`);
     }
 
+    const streamOrators = event.streams?.flatMap((stream) => stream.orators) ?? [];
+    const workshopOrators = event.workshops?.flatMap((workshop) => workshop.orators) ?? [];
+    const oratorsMap = new Map();
+    streamOrators.forEach((o) => oratorsMap.set(o.id, o));
+    workshopOrators.forEach((o) => oratorsMap.set(o.id, o));
+    const allOrators = Array.from(oratorsMap.values());
+
+    const offers = event.leadingCompany?.minisite?.offers ?? [];
+    const offerProducts = offers.flatMap((offer) => offer.products ?? []);
+
+    return {
+      ...event,
+      allOrators,
+      offerProducts,
+    };
+  }
+
+  async getStreamsAndWorkshopsByEvent(eventId: string) {
+    const event = await this.prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        brands: true,
+        streams: {
+          include: {
+            orators: true,
+            attendees: true,
+          },
+        },
+        workshops: {
+          include: {
+            orators: true,
+            attendees: true,
+            enrollments: {
+              include: { user: true },
+            },
+          },
+        },
+      },
+    });
+    if (!event) return null;
+    return {
+      eventId: event.id,
+      streams: event.streams,
+      workshops: event.workshops,
+      brands: event.brands,
+    };
+  }
+
+  async getWorkshopById(workshopId: string) {
+    return this.prisma.workshop.findUnique({
+      where: { id: workshopId },
+      include: {
+        event: {
+          include: {
+            brands: true,
+          },
+        },
+        orators: true,
+        attendees: true,
+        enrollments: {
+          include: { user: true },
+        },
+      },
+    });
+  }
+
+  async getUpcomingEvents() {
+    const nowUtc = new Date(new Date().toISOString());
     return this.prisma.event.findMany({
       where: {
-        startDateTime: {
-          gte: startDate,
-        },
+        startDateTime: { gte: nowUtc },
       },
       orderBy: {
         startDateTime: 'asc',
@@ -290,6 +195,105 @@ export class EventsService {
         leadingCompany: true,
         attendees: true,
         organizers: true,
+        brands: true,
+        streams: {
+          include: {
+            orators: true,
+            attendees: true,
+          },
+        },
+        workshops: {
+          include: {
+            orators: true,
+            attendees: true,
+            enrollments: {
+              include: { user: true },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getUpcomingEventsByYear(year: number) {
+    const currentYear = new Date().getFullYear();
+    let startDate: Date;
+    if (year === currentYear) {
+      startDate = new Date();
+    } else {
+      startDate = new Date(year, 0, 1);
+    }
+    return this.prisma.event.findMany({
+      where: {
+        startDateTime: { gte: startDate },
+      },
+      orderBy: {
+        startDateTime: 'asc',
+      },
+      include: {
+        leadingCompany: true,
+        attendees: true,
+        organizers: true,
+        brands: true,
+        streams: {
+          include: {
+            orators: true,
+            attendees: true,
+          },
+        },
+        workshops: {
+          include: {
+            orators: true,
+            attendees: true,
+            enrollments: {
+              include: { user: true },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getPhysicalEvents() {
+    return this.prisma.event.findMany({
+      where: {
+        physicalLocation: { not: null },
+      },
+      include: {
+        leadingCompany: true,
+        attendees: true,
+        organizers: true,
+        brands: true,
+        streams: {
+          include: {
+            orators: true,
+            attendees: true,
+          },
+        },
+        workshops: {
+          include: {
+            orators: true,
+            attendees: true,
+            enrollments: {
+              include: { user: true },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getPhysicalEventsByEmpresa(empresaId: string) {
+    return this.prisma.event.findMany({
+      where: {
+        leadingCompanyId: empresaId,
+        physicalLocation: { not: null },
+      },
+      include: {
+        leadingCompany: true,
+        attendees: true,
+        organizers: true,
+        brands: true,
         streams: {
           include: {
             orators: true,

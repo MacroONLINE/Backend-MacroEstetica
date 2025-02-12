@@ -31,6 +31,12 @@ let EventsController = class EventsController {
         }
         return { message: `Usuario ${userId} registrado con éxito en el evento ${eventId}` };
     }
+    async getPhysicalEvents() {
+        return this.eventsService.getPhysicalEvents();
+    }
+    async getPhysicalEventsByEmpresa(empresaId) {
+        return this.eventsService.getPhysicalEventsByEmpresa(empresaId);
+    }
     async getEventsByEmpresa(empresaId) {
         return this.eventsService.getEventsByLeadingCompany(empresaId);
     }
@@ -81,6 +87,24 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "registerAttendee", null);
+__decorate([
+    (0, common_1.Get)('physical'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos presenciales (con location física) sin importar la empresa' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de eventos presenciales' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getPhysicalEvents", null);
+__decorate([
+    (0, common_1.Get)('physical/empresa/:empresaId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos presenciales de una empresa líder específica' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', description: 'ID de la empresa líder' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de eventos presenciales para la empresa indicada' }),
+    __param(0, (0, common_1.Param)('empresaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getPhysicalEventsByEmpresa", null);
 __decorate([
     (0, common_1.Get)('empresa/:empresaId'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos de una empresa líder' }),

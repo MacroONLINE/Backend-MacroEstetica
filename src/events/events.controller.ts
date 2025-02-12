@@ -42,6 +42,21 @@ export class EventsController {
     return { message: `Usuario ${userId} registrado con éxito en el evento ${eventId}` };
   }
 
+  @Get('physical')
+  @ApiOperation({ summary: 'Obtiene todos los eventos presenciales (con location física) sin importar la empresa' })
+  @ApiResponse({ status: 200, description: 'Lista de eventos presenciales' })
+  async getPhysicalEvents() {
+    return this.eventsService.getPhysicalEvents();
+  }
+
+  @Get('physical/empresa/:empresaId')
+  @ApiOperation({ summary: 'Obtiene todos los eventos presenciales de una empresa líder específica' })
+  @ApiParam({ name: 'empresaId', description: 'ID de la empresa líder' })
+  @ApiResponse({ status: 200, description: 'Lista de eventos presenciales para la empresa indicada' })
+  async getPhysicalEventsByEmpresa(@Param('empresaId') empresaId: string) {
+    return this.eventsService.getPhysicalEventsByEmpresa(empresaId);
+  }
+
   @Get('empresa/:empresaId')
   @ApiOperation({ summary: 'Obtiene todos los eventos de una empresa líder' })
   @ApiParam({ name: 'empresaId', description: 'ID de la empresa líder' })
@@ -50,11 +65,6 @@ export class EventsController {
     return this.eventsService.getEventsByLeadingCompany(empresaId);
   }
 
-  /**
-   * IMPORTANTE:
-   * Se definen primero las rutas literales 'upcoming' y 'upcoming/:year',
-   * para evitar conflicto con la ruta ':eventId'.
-   */
   @Get('upcoming')
   @ApiOperation({ summary: 'Obtiene todos los eventos próximos a partir de la fecha/hora actual' })
   @ApiResponse({ status: 200, description: 'Lista de eventos próximos' })
@@ -83,9 +93,6 @@ export class EventsController {
     return events;
   }
 
-  /**
-   * Ahora definimos la ruta :eventId DESPUÉS de las rutas 'upcoming'.
-   */
   @Get(':eventId')
   @ApiOperation({ summary: 'Obtiene un evento por su ID' })
   @ApiParam({ name: 'eventId', description: 'ID del evento' })
