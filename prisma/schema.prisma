@@ -659,7 +659,7 @@ model Classroom {
   orators          Instructor[]         @relation("ClassroomInstructors")
   enrollments      ClassroomEnrollment[]
   attendees        User[]               @relation("ClassroomAttendees")
-  categories       Profession[] categories Profession[] @default([MEDICO_DERMATOLOGIA])
+  categories Profession[] @default([MEDICO_DERMATOLOGIA])
 }
 
 model ClassroomEnrollment {
