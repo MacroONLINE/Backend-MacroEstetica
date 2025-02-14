@@ -11,6 +11,7 @@ export declare class ClassroomService {
         startDateTime: Date;
         endDateTime: Date;
         price: number | null;
+        categories: import(".prisma/client").$Enums.Profession[];
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -71,6 +72,7 @@ export declare class ClassroomService {
         startDateTime: Date;
         endDateTime: Date;
         price: number | null;
+        categories: import(".prisma/client").$Enums.Profession[];
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -83,6 +85,7 @@ export declare class ClassroomService {
         startDateTime: Date;
         endDateTime: Date;
         price: number | null;
+        categories: import(".prisma/client").$Enums.Profession[];
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -146,6 +149,7 @@ export declare class ClassroomService {
         startDateTime: Date;
         endDateTime: Date;
         price: number | null;
+        categories: import(".prisma/client").$Enums.Profession[];
         imageUrl: string | null;
         channelName: string | null;
     })[]>;

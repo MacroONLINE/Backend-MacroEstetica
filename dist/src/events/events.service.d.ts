@@ -2,6 +2,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export declare class EventsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
+    private formatDate;
     createEvent(data: any): Promise<{
         id: string;
         title: string;
@@ -15,6 +16,7 @@ export declare class EventsService {
         leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
+        categories: import(".prisma/client").$Enums.Profession[];
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -85,6 +87,7 @@ export declare class EventsService {
             id: string;
             startDateTime: Date;
             endDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string;
@@ -167,6 +170,7 @@ export declare class EventsService {
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string | null;
@@ -226,52 +230,13 @@ export declare class EventsService {
         leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
+        categories: import(".prisma/client").$Enums.Profession[];
         createdAt: Date;
         updatedAt: Date;
     })[]>;
     getEventById(eventId: string): Promise<{
         allOrators: any[];
-        offerProducts: {
-            id: string;
-            title: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            offerId: string;
-        }[];
         leadingCompany: {
-            minisite: {
-                offers: ({
-                    products: {
-                        id: string;
-                        title: string;
-                        createdAt: Date;
-                        updatedAt: Date;
-                        description: string;
-                        offerId: string;
-                    }[];
-                } & {
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    minisiteId: string;
-                    sectionTitle: string | null;
-                })[];
-            } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                empresaId: string;
-                videoUrl: string | null;
-                aboutDescription: import("@prisma/client/runtime/library").JsonValue | null;
-                followersCount: number | null;
-                coursesCount: number | null;
-                productsCount: number | null;
-                minisiteColor: string | null;
-                slogan: string | null;
-                catalogueUrl: string | null;
-            };
-        } & {
             id: string;
             title: string | null;
             createdAt: Date;
@@ -336,6 +301,7 @@ export declare class EventsService {
             id: string;
             startDateTime: Date;
             endDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string;
@@ -418,6 +384,7 @@ export declare class EventsService {
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string | null;
@@ -476,6 +443,7 @@ export declare class EventsService {
         leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
+        categories: import(".prisma/client").$Enums.Profession[];
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -525,6 +493,7 @@ export declare class EventsService {
             id: string;
             startDateTime: Date;
             endDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string;
@@ -607,6 +576,7 @@ export declare class EventsService {
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string | null;
@@ -615,14 +585,6 @@ export declare class EventsService {
             description: string;
             whatYouWillLearn: string | null;
         })[];
-        brands: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            eventId: string;
-            imageUrl: string | null;
-        }[];
     }>;
     getWorkshopById(workshopId: string): Promise<{
         event: {
@@ -647,6 +609,7 @@ export declare class EventsService {
             leadingCompanyId: string | null;
             target: import(".prisma/client").$Enums.Target | null;
             price: number;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
         };
@@ -725,6 +688,7 @@ export declare class EventsService {
         startDateTime: Date;
         endDateTime: Date;
         price: number | null;
+        categories: import(".prisma/client").$Enums.Profession[];
         createdAt: Date;
         updatedAt: Date;
         eventId: string | null;
@@ -799,6 +763,7 @@ export declare class EventsService {
             id: string;
             startDateTime: Date;
             endDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string;
@@ -881,6 +846,7 @@ export declare class EventsService {
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string | null;
@@ -940,6 +906,7 @@ export declare class EventsService {
         leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
+        categories: import(".prisma/client").$Enums.Profession[];
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -1009,6 +976,7 @@ export declare class EventsService {
             id: string;
             startDateTime: Date;
             endDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string;
@@ -1091,6 +1059,7 @@ export declare class EventsService {
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string | null;
@@ -1150,6 +1119,7 @@ export declare class EventsService {
         leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
+        categories: import(".prisma/client").$Enums.Profession[];
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -1219,6 +1189,7 @@ export declare class EventsService {
             id: string;
             startDateTime: Date;
             endDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string;
@@ -1301,6 +1272,7 @@ export declare class EventsService {
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string | null;
@@ -1360,6 +1332,7 @@ export declare class EventsService {
         leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
+        categories: import(".prisma/client").$Enums.Profession[];
         createdAt: Date;
         updatedAt: Date;
     })[]>;
@@ -1429,6 +1402,7 @@ export declare class EventsService {
             id: string;
             startDateTime: Date;
             endDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string;
@@ -1511,6 +1485,7 @@ export declare class EventsService {
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
+            categories: import(".prisma/client").$Enums.Profession[];
             createdAt: Date;
             updatedAt: Date;
             eventId: string | null;
@@ -1570,7 +1545,91 @@ export declare class EventsService {
         leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
+        categories: import(".prisma/client").$Enums.Profession[];
         createdAt: Date;
         updatedAt: Date;
+    })[]>;
+    getLiveClassrooms(): Promise<({
+        enrollments: ({
+            user: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                firstName: string | null;
+                lastName: string | null;
+                phone: string | null;
+                email: string;
+                emailVerified: Date | null;
+                address: string | null;
+                province: string | null;
+                city: string | null;
+                country: string | null;
+                countryCode: string | null;
+                zipCode: string | null;
+                role: import(".prisma/client").$Enums.Role;
+                password: string;
+                status: boolean;
+                newsletter: boolean;
+                userSubscription: string | null;
+            };
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            status: string;
+            classroomId: string;
+        })[];
+        attendees: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: import(".prisma/client").$Enums.Role;
+            password: string;
+            status: boolean;
+            newsletter: boolean;
+            userSubscription: string | null;
+        }[];
+        orators: {
+            id: string;
+            title: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            bannerImage: string | null;
+            followers: number | null;
+            status: string;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            description: string;
+            experienceDescription: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            empresaId: string | null;
+            categoryId: string | null;
+        }[];
+    } & {
+        id: string;
+        title: string;
+        startDateTime: Date;
+        endDateTime: Date;
+        price: number | null;
+        categories: import(".prisma/client").$Enums.Profession[];
+        createdAt: Date;
+        updatedAt: Date;
+        channelName: string | null;
+        imageUrl: string | null;
+        description: string;
     })[]>;
 }

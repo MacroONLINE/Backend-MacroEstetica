@@ -211,8 +211,8 @@ export declare class EmpresaService {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                minisiteId: string;
                 productId: string;
+                minisiteId: string;
                 highlightFeatures: string[];
                 highlightDescription: string | null;
                 hoghlightImageUrl: string | null;
@@ -268,8 +268,8 @@ export declare class EmpresaService {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                minisiteId: string;
                 productId: string;
+                minisiteId: string;
                 order: number | null;
                 tagline: string | null;
             })[];

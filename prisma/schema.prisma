@@ -290,13 +290,14 @@ model Event {
   leadingCompanyId String?
   leadingCompany   Empresa?          @relation("LeadingCompany", fields: [leadingCompanyId], references: [id], onDelete: Cascade)
   target           Target?
-    price         Float   @default(0)
+  price            Float             @default(0)
   enrollments      EventEnrollment[]
   streams          EventStream[]
   workshops        Workshop[]
   organizers       EventOrganizer[]
   attendees        User[]            @relation("EventAttendees")
-    brands           EventBrand[]      // Máx. 12 (se valida a nivel de lógica)
+  brands           EventBrand[]
+  categories       Profession[]?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now())
 }
@@ -337,6 +338,7 @@ model EventStream {
   event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   orators       Instructor[] @relation("StreamOrators")
   attendees     User[]       @relation("EventStreamAttendees")
+  categories       Profession[]?
 }
 
 model Workshop {
@@ -356,6 +358,7 @@ model Workshop {
   orators          Instructor[]         @relation("WorkshopInstructors")
   enrollments      WorkshopEnrollment[]
   attendees        User[]               @relation("WorkshopAttendees")
+  categories       Profession[]?
 }
 
 model WorkshopEnrollment {
@@ -370,8 +373,6 @@ model WorkshopEnrollment {
 
   @@unique([workshopId, userId])
 }
-
-
 
 enum SubscriptionType {
   ORO
@@ -649,8 +650,8 @@ model Classroom {
   title            String
   description      String
   price            Float?
-  startDateTime    DateTime  @default(now())
-  endDateTime      DateTime  @default(now())
+  startDateTime    DateTime             @default(now())
+  endDateTime      DateTime             @default(now())
   imageUrl         String?
   channelName      String?              @unique
   createdAt        DateTime             @default(now())
@@ -658,6 +659,7 @@ model Classroom {
   orators          Instructor[]         @relation("ClassroomInstructors")
   enrollments      ClassroomEnrollment[]
   attendees        User[]               @relation("ClassroomAttendees")
+  categories       Profession[]?
 }
 
 model ClassroomEnrollment {
@@ -674,7 +676,7 @@ model ClassroomEnrollment {
 }
 
 model EventBrand {
-  id         String  @id @default(cuid())
+  id         String   @id @default(cuid())
   name       String
   imageUrl   String?
   eventId    String

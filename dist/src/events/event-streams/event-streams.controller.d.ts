@@ -8,6 +8,7 @@ export declare class EventStreamsController {
         updatedAt: Date;
         startDateTime: Date;
         endDateTime: Date;
+        categories: import(".prisma/client").$Enums.Profession[];
         eventId: string;
         imageUrl: string | null;
         channelName: string | null;
@@ -23,6 +24,7 @@ export declare class EventStreamsController {
                 startDateTime: Date;
                 endDateTime: Date;
                 price: number | null;
+                categories: import(".prisma/client").$Enums.Profession[];
                 eventId: string | null;
                 whatYouWillLearn: string | null;
                 imageUrl: string | null;
@@ -93,6 +95,7 @@ export declare class EventStreamsController {
             mapUrl: string | null;
             target: import(".prisma/client").$Enums.Target | null;
             price: number;
+            categories: import(".prisma/client").$Enums.Profession[];
             leadingCompanyId: string | null;
         };
         orators: {
@@ -119,6 +122,7 @@ export declare class EventStreamsController {
         updatedAt: Date;
         startDateTime: Date;
         endDateTime: Date;
+        categories: import(".prisma/client").$Enums.Profession[];
         eventId: string;
         imageUrl: string | null;
         channelName: string | null;

@@ -16,6 +16,13 @@ let EventsService = class EventsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    formatDate(date) {
+        if (!date)
+            return null;
+        const dateFormatter = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
+        const timeFormatter = new Intl.DateTimeFormat('es-ES', { timeStyle: 'short' });
+        return `${dateFormatter.format(date)}, ${timeFormatter.format(date)}`;
+    }
     async createEvent(data) {
         return this.prisma.event.create({
             data: {
@@ -58,7 +65,7 @@ let EventsService = class EventsService {
         return true;
     }
     async getEventsByLeadingCompany(empresaId) {
-        return this.prisma.event.findMany({
+        const events = await this.prisma.event.findMany({
             where: { leadingCompanyId: empresaId },
             include: {
                 leadingCompany: true,
@@ -82,24 +89,17 @@ let EventsService = class EventsService {
                 },
             },
         });
+        events.forEach((evt) => {
+            evt.startDateTime = this.formatDate(evt.startDateTime);
+            evt.endDateTime = this.formatDate(evt.endDateTime);
+        });
+        return events;
     }
     async getEventById(eventId) {
         const event = await this.prisma.event.findUnique({
             where: { id: eventId },
             include: {
-                leadingCompany: {
-                    include: {
-                        minisite: {
-                            include: {
-                                offers: {
-                                    include: {
-                                        products: true,
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
+                leadingCompany: true,
                 attendees: true,
                 organizers: true,
                 brands: true,
@@ -123,18 +123,25 @@ let EventsService = class EventsService {
         if (!event) {
             throw new common_1.NotFoundException(`No se encontró el evento con ID: ${eventId}`);
         }
-        const streamOrators = event.streams?.flatMap((stream) => stream.orators) ?? [];
-        const workshopOrators = event.workshops?.flatMap((workshop) => workshop.orators) ?? [];
+        event.startDateTime = this.formatDate(event.startDateTime);
+        event.endDateTime = this.formatDate(event.endDateTime);
+        event.streams?.forEach((stream) => {
+            stream.startDateTime = this.formatDate(stream.startDateTime);
+            stream.endDateTime = this.formatDate(stream.endDateTime);
+        });
+        event.workshops?.forEach((ws) => {
+            ws.startDateTime = this.formatDate(ws.startDateTime);
+            ws.endDateTime = this.formatDate(ws.endDateTime);
+        });
+        const streamOrators = event.streams?.flatMap((s) => s.orators) ?? [];
+        const workshopOrators = event.workshops?.flatMap((w) => w.orators) ?? [];
         const oratorsMap = new Map();
         streamOrators.forEach((o) => oratorsMap.set(o.id, o));
         workshopOrators.forEach((o) => oratorsMap.set(o.id, o));
         const allOrators = Array.from(oratorsMap.values());
-        const offers = event.leadingCompany?.minisite?.offers ?? [];
-        const offerProducts = offers.flatMap((offer) => offer.products ?? []);
         return {
             ...event,
             allOrators,
-            offerProducts,
         };
     }
     async getStreamsAndWorkshopsByEvent(eventId) {
@@ -161,15 +168,22 @@ let EventsService = class EventsService {
         });
         if (!event)
             return null;
+        event.streams?.forEach((stream) => {
+            stream.startDateTime = this.formatDate(stream.startDateTime);
+            stream.endDateTime = this.formatDate(stream.endDateTime);
+        });
+        event.workshops?.forEach((ws) => {
+            ws.startDateTime = this.formatDate(ws.startDateTime);
+            ws.endDateTime = this.formatDate(ws.endDateTime);
+        });
         return {
             eventId: event.id,
             streams: event.streams,
             workshops: event.workshops,
-            brands: event.brands,
         };
     }
     async getWorkshopById(workshopId) {
-        return this.prisma.workshop.findUnique({
+        const workshop = await this.prisma.workshop.findUnique({
             where: { id: workshopId },
             include: {
                 event: {
@@ -184,10 +198,19 @@ let EventsService = class EventsService {
                 },
             },
         });
+        if (!workshop)
+            return null;
+        workshop.startDateTime = this.formatDate(workshop.startDateTime);
+        workshop.endDateTime = this.formatDate(workshop.endDateTime);
+        if (workshop.event) {
+            workshop.event.startDateTime = this.formatDate(workshop.event.startDateTime);
+            workshop.event.endDateTime = this.formatDate(workshop.event.endDateTime);
+        }
+        return workshop;
     }
     async getUpcomingEvents() {
         const nowUtc = new Date(new Date().toISOString());
-        return this.prisma.event.findMany({
+        const events = await this.prisma.event.findMany({
             where: {
                 startDateTime: { gte: nowUtc },
             },
@@ -216,6 +239,11 @@ let EventsService = class EventsService {
                 },
             },
         });
+        events.forEach((evt) => {
+            evt.startDateTime = this.formatDate(evt.startDateTime);
+            evt.endDateTime = this.formatDate(evt.endDateTime);
+        });
+        return events;
     }
     async getUpcomingEventsByYear(year) {
         const currentYear = new Date().getFullYear();
@@ -226,7 +254,7 @@ let EventsService = class EventsService {
         else {
             startDate = new Date(year, 0, 1);
         }
-        return this.prisma.event.findMany({
+        const events = await this.prisma.event.findMany({
             where: {
                 startDateTime: { gte: startDate },
             },
@@ -255,9 +283,14 @@ let EventsService = class EventsService {
                 },
             },
         });
+        events.forEach((evt) => {
+            evt.startDateTime = this.formatDate(evt.startDateTime);
+            evt.endDateTime = this.formatDate(evt.endDateTime);
+        });
+        return events;
     }
     async getPhysicalEvents() {
-        return this.prisma.event.findMany({
+        const events = await this.prisma.event.findMany({
             where: {
                 physicalLocation: { not: null },
             },
@@ -283,9 +316,14 @@ let EventsService = class EventsService {
                 },
             },
         });
+        events.forEach((evt) => {
+            evt.startDateTime = this.formatDate(evt.startDateTime);
+            evt.endDateTime = this.formatDate(evt.endDateTime);
+        });
+        return events;
     }
     async getPhysicalEventsByEmpresa(empresaId) {
-        return this.prisma.event.findMany({
+        const events = await this.prisma.event.findMany({
             where: {
                 leadingCompanyId: empresaId,
                 physicalLocation: { not: null },
@@ -312,6 +350,34 @@ let EventsService = class EventsService {
                 },
             },
         });
+        events.forEach((evt) => {
+            evt.startDateTime = this.formatDate(evt.startDateTime);
+            evt.endDateTime = this.formatDate(evt.endDateTime);
+        });
+        return events;
+    }
+    async getLiveClassrooms() {
+        const nowUtc = new Date();
+        const classrooms = await this.prisma.classroom.findMany({
+            where: {
+                startDateTime: { lte: nowUtc },
+                endDateTime: { gte: nowUtc },
+            },
+            include: {
+                orators: true,
+                enrollments: {
+                    include: {
+                        user: true,
+                    },
+                },
+                attendees: true,
+            },
+        });
+        classrooms.forEach((cls) => {
+            cls.startDateTime = this.formatDate(cls.startDateTime);
+            cls.endDateTime = this.formatDate(cls.endDateTime);
+        });
+        return classrooms;
     }
 };
 exports.EventsService = EventsService;
