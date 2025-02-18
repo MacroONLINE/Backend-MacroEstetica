@@ -297,7 +297,7 @@ model Event {
   organizers       EventOrganizer[]
   attendees        User[]            @relation("EventAttendees")
   brands           EventBrand[]
-categories Profession[] @default([MEDICO_DERMATOLOGIA])
+  categories       Profession[]      @default([MEDICO_DERMATOLOGIA])
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @default(now())
 }
@@ -330,6 +330,8 @@ model EventStream {
   id            String       @id @default(cuid())
   eventId       String
   channelName   String?      @unique
+  name          String       @default("")
+  description   String       @default("")
   startDateTime DateTime
   endDateTime   DateTime
   imageUrl      String?
@@ -338,7 +340,7 @@ model EventStream {
   event         Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
   orators       Instructor[] @relation("StreamOrators")
   attendees     User[]       @relation("EventStreamAttendees")
-  categories Profession[] @default([MEDICO_DERMATOLOGIA])
+  categories    Profession[] @default([MEDICO_DERMATOLOGIA])
 }
 
 model Workshop {
@@ -358,7 +360,7 @@ model Workshop {
   orators          Instructor[]         @relation("WorkshopInstructors")
   enrollments      WorkshopEnrollment[]
   attendees        User[]               @relation("WorkshopAttendees")
-  categories Profession[] @default([MEDICO_DERMATOLOGIA])
+  categories       Profession[]         @default([MEDICO_DERMATOLOGIA])
 }
 
 model WorkshopEnrollment {
@@ -659,7 +661,7 @@ model Classroom {
   orators          Instructor[]         @relation("ClassroomInstructors")
   enrollments      ClassroomEnrollment[]
   attendees        User[]               @relation("ClassroomAttendees")
-  categories Profession[] @default([MEDICO_DERMATOLOGIA])
+  categories       Profession[]         @default([MEDICO_DERMATOLOGIA])
 }
 
 model ClassroomEnrollment {

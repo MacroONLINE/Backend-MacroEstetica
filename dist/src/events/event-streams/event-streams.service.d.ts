@@ -3,9 +3,11 @@ export declare class EventStreamsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     createStream(data: any): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         startDateTime: Date;
         endDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];
@@ -117,9 +119,11 @@ export declare class EventStreamsService {
             categoryId: string | null;
         }[];
     } & {
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         startDateTime: Date;
         endDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];

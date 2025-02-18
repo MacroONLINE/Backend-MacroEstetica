@@ -66,15 +66,56 @@ let ClassroomService = class ClassroomService {
     async getUpcomingClassrooms() {
         const now = new Date();
         return this.prisma.classroom.findMany({
+            where: { startDateTime: { gte: now } },
+            include: { orators: true, attendees: true, enrollments: true },
+        });
+    }
+    async getLiveClassrooms() {
+        const now = new Date();
+        const classrooms = await this.prisma.classroom.findMany({
             where: {
-                startDateTime: {
-                    gte: now,
+                startDateTime: { lte: now },
+                endDateTime: { gte: now },
+            },
+            include: { orators: true, attendees: true, enrollments: true },
+        });
+        return classrooms;
+    }
+    async addOrator(classroomId, instructorId) {
+        const classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
+        if (!classroom)
+            throw new common_1.NotFoundException('Classroom no encontrado');
+        const instructor = await this.prisma.instructor.findUnique({ where: { id: instructorId } });
+        if (!instructor)
+            throw new common_1.NotFoundException('Instructor no encontrado');
+        return this.prisma.classroom.update({
+            where: { id: classroomId },
+            data: {
+                orators: {
+                    connect: { id: instructorId },
                 },
             },
             include: {
                 orators: true,
-                attendees: true,
-                enrollments: true,
+            },
+        });
+    }
+    async removeOrator(classroomId, instructorId) {
+        const classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
+        if (!classroom)
+            throw new common_1.NotFoundException('Classroom no encontrado');
+        const instructor = await this.prisma.instructor.findUnique({ where: { id: instructorId } });
+        if (!instructor)
+            throw new common_1.NotFoundException('Instructor no encontrado');
+        return this.prisma.classroom.update({
+            where: { id: classroomId },
+            data: {
+                orators: {
+                    disconnect: { id: instructorId },
+                },
+            },
+            include: {
+                orators: true,
             },
         });
     }

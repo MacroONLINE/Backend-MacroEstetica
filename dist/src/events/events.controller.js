@@ -24,12 +24,11 @@ let EventsController = class EventsController {
         return this.eventsService.createEvent(body);
     }
     async registerAttendee(eventId, body) {
-        const { userId } = body;
-        const isRegistered = await this.eventsService.registerAttendee(eventId, userId);
+        const isRegistered = await this.eventsService.registerAttendee(eventId, body.userId);
         if (!isRegistered) {
             throw new common_1.ForbiddenException('El usuario ya está inscrito o no se pudo inscribir en este evento');
         }
-        return { message: `Usuario ${userId} registrado con éxito en el evento ${eventId}` };
+        return { message: `Usuario ${body.userId} registrado con éxito en el evento ${eventId}` };
     }
     async getPhysicalEvents() {
         return this.eventsService.getPhysicalEvents();
@@ -50,6 +49,13 @@ let EventsController = class EventsController {
         }
         return events;
     }
+    async getLiveEvents() {
+        const events = await this.eventsService.getLiveEvents();
+        if (!events || events.length === 0) {
+            throw new common_1.NotFoundException('No hay eventos en vivo en este momento');
+        }
+        return events;
+    }
     async getEventById(eventId) {
         const event = await this.eventsService.getEventById(eventId);
         if (!event)
@@ -61,13 +67,6 @@ let EventsController = class EventsController {
         if (!data)
             throw new common_1.NotFoundException('Evento no encontrado');
         return data;
-    }
-    async getLiveClassrooms() {
-        const classrooms = await this.eventsService.getLiveClassrooms();
-        if (!classrooms || classrooms.length === 0) {
-            throw new common_1.NotFoundException('No hay classrooms en vivo en este momento');
-        }
-        return classrooms;
     }
 };
 exports.EventsController = EventsController;
@@ -150,6 +149,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getUpcomingEventsByYear", null);
 __decorate([
+    (0, common_1.Get)('live'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos que están en vivo en este momento' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de eventos en vivo' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'No hay eventos en vivo en este momento' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getLiveEvents", null);
+__decorate([
     (0, common_1.Get)(':eventId'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtiene un evento por su ID' }),
     (0, swagger_1.ApiParam)({ name: 'eventId', description: 'ID del evento' }),
@@ -171,59 +179,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getEventStreamsAndWorkshops", null);
-__decorate([
-    (0, common_1.Get)('classrooms/live'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Obtiene todos los classrooms que están en vivo en este momento',
-        description: 'Devuelve una lista de classrooms que tienen una sesión en curso, basada en la fecha y hora actuales.',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Lista de classrooms en vivo',
-        schema: {
-            type: 'array',
-            items: {
-                properties: {
-                    id: { type: 'string', example: 'classroom-001' },
-                    title: { type: 'string', example: 'Clase sobre Estética Avanzada' },
-                    description: { type: 'string', example: 'Técnicas innovadoras en estética' },
-                    price: { type: 'number', example: 500 },
-                    startDateTime: { type: 'string', format: 'date-time', example: '2025-03-01T14:00:00Z' },
-                    endDateTime: { type: 'string', format: 'date-time', example: '2025-03-01T16:00:00Z' },
-                    imageUrl: { type: 'string', example: 'https://res.cloudinary.com/example/image.jpg' },
-                    channelName: { type: 'string', example: 'estetica-avanzada' },
-                    createdAt: { type: 'string', format: 'date-time', example: '2025-02-06T21:13:28.937Z' },
-                    updatedAt: { type: 'string', format: 'date-time', example: '2025-02-06T21:13:28.937Z' },
-                    orators: {
-                        type: 'array',
-                        items: {
-                            properties: {
-                                id: { type: 'string', example: 'instructor-004' },
-                                name: { type: 'string', example: 'Dr. Juan Pérez' },
-                                profession: { type: 'string', example: 'MEDICINA_ESTETICA' },
-                            },
-                        },
-                    },
-                    attendees: {
-                        type: 'array',
-                        items: {
-                            properties: {
-                                id: { type: 'string', example: 'user-001' },
-                                firstName: { type: 'string', example: 'Carlos' },
-                                lastName: { type: 'string', example: 'Gómez' },
-                                email: { type: 'string', example: 'carlos@example.com' },
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'No hay classrooms en vivo en este momento' }),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], EventsController.prototype, "getLiveClassrooms", null);
 exports.EventsController = EventsController = __decorate([
     (0, swagger_1.ApiTags)('Events'),
     (0, common_1.Controller)('events'),

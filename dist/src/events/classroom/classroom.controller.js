@@ -32,25 +32,32 @@ let ClassroomController = class ClassroomController {
     async getUpcomingClassrooms() {
         return this.classroomService.getUpcomingClassrooms();
     }
+    async getLiveClassrooms() {
+        const classrooms = await this.classroomService.getLiveClassrooms();
+        if (!classrooms || classrooms.length === 0) {
+            throw new common_1.NotFoundException('No hay Classrooms en vivo en este momento');
+        }
+        return classrooms;
+    }
     async getClassroomById(id) {
         const classroom = await this.classroomService.getClassroomById(id);
         if (!classroom)
             throw new common_1.NotFoundException('Classroom no encontrado');
         return classroom;
     }
+    async addOrator(id, body) {
+        return this.classroomService.addOrator(id, body.instructorId);
+    }
+    async removeOrator(id, body) {
+        return this.classroomService.removeOrator(id, body.instructorId);
+    }
 };
 exports.ClassroomController = ClassroomController;
 __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiOperation)({ summary: 'Crea un nuevo Classroom' }),
-    (0, swagger_1.ApiResponse)({
-        status: 201,
-        description: 'Classroom creado correctamente',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Datos inválidos para la creación del classroom',
-    }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Classroom creado correctamente' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Datos inválidos para la creación del classroom' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -60,14 +67,8 @@ __decorate([
     (0, common_1.Patch)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Actualiza un Classroom existente' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom a actualizar' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Classroom actualizado correctamente',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Classroom no encontrado',
-    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Classroom actualizado correctamente' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -78,14 +79,8 @@ __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Elimina un Classroom por ID' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom a eliminar' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Classroom eliminado correctamente',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Classroom no encontrado',
-    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Classroom eliminado correctamente' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -94,31 +89,55 @@ __decorate([
 __decorate([
     (0, common_1.Get)('upcoming'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los Classrooms que aún no han iniciado' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Lista de Classrooms futuros',
-    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de Classrooms futuros' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ClassroomController.prototype, "getUpcomingClassrooms", null);
 __decorate([
+    (0, common_1.Get)('live'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los Classrooms en vivo en este momento' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de Classrooms en vivo' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'No hay Classrooms en vivo en este momento' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ClassroomController.prototype, "getLiveClassrooms", null);
+__decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtiene un Classroom por su ID' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom a buscar' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Retorna el Classroom si existe',
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'Classroom no encontrado',
-    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna el Classroom si existe' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ClassroomController.prototype, "getClassroomById", null);
+__decorate([
+    (0, common_1.Patch)(':id/add-orator'),
+    (0, swagger_1.ApiOperation)({ summary: 'Agrega un orador (Instructor) a un Classroom' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom donde se agregará el orador' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Orador agregado correctamente' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ClassroomController.prototype, "addOrator", null);
+__decorate([
+    (0, common_1.Patch)(':id/remove-orator'),
+    (0, swagger_1.ApiOperation)({ summary: 'Quita un orador (Instructor) de un Classroom' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom donde se quitará el orador' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Orador removido correctamente' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom o Instructor no encontrado' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], ClassroomController.prototype, "removeOrator", null);
 exports.ClassroomController = ClassroomController = __decorate([
     (0, swagger_1.ApiTags)('Classrooms'),
     (0, common_1.Controller)('classroom'),

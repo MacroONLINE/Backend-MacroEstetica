@@ -4,6 +4,8 @@ export declare class EventsController {
     constructor(eventsService: EventsService);
     createEvent(body: any): Promise<{
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         longDescription: string | null;
         mainBannerUrl: string | null;
@@ -12,12 +14,10 @@ export declare class EventsController {
         startDateTime: Date;
         endDateTime: Date;
         mapUrl: string | null;
-        leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
         categories: import(".prisma/client").$Enums.Profession[];
-        createdAt: Date;
-        updatedAt: Date;
+        leadingCompanyId: string | null;
     }>;
     registerAttendee(eventId: string, body: {
         userId: string;
@@ -25,32 +25,9 @@ export declare class EventsController {
         message: string;
     }>;
     getPhysicalEvents(): Promise<({
-        leadingCompany: {
-            id: string;
-            title: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            dni: string | null;
-            legalName: string | null;
-            giro: import(".prisma/client").$Enums.Giro;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
-            userId: string;
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            bannerImage: string | null;
-            logo: string | null;
-            profileImage: string | null;
-            ceo: string | null;
-            ceoRole: string | null;
-            location: string | null;
-            followers: number;
-            webUrl: string | null;
-        };
         streams: ({
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -65,20 +42,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -87,22 +66,22 @@ export declare class EventsController {
                 categoryId: string | null;
             }[];
         } & {
+            name: string;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string;
-            channelName: string | null;
             imageUrl: string | null;
+            channelName: string | null;
         })[];
         workshops: ({
             enrollments: ({
                 user: {
                     id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
                     firstName: string | null;
                     lastName: string | null;
                     phone: string | null;
@@ -117,21 +96,21 @@ export declare class EventsController {
                     role: import(".prisma/client").$Enums.Role;
                     password: string;
                     status: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
                     newsletter: boolean;
                     userSubscription: string | null;
                 };
             } & {
                 id: string;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
-                status: string;
                 workshopId: string;
             })[];
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -146,20 +125,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -169,32 +150,59 @@ export declare class EventsController {
             }[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             title: string;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string | null;
-            channelName: string | null;
-            imageUrl: string | null;
-            description: string;
             whatYouWillLearn: string | null;
+            imageUrl: string | null;
+            channelName: string | null;
         })[];
-        organizers: {
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            bannerImage: string | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
+        };
+        organizers: {
             name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             eventId: string;
             career: string | null;
             photoUrl: string | null;
         }[];
-        attendees: {
+        brands: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            eventId: string;
+            imageUrl: string | null;
+        }[];
+        attendees: {
+            id: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -209,19 +217,15 @@ export declare class EventsController {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
-        brands: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            eventId: string;
-            imageUrl: string | null;
-        }[];
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         longDescription: string | null;
         mainBannerUrl: string | null;
@@ -230,40 +234,15 @@ export declare class EventsController {
         startDateTime: Date;
         endDateTime: Date;
         mapUrl: string | null;
-        leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
         categories: import(".prisma/client").$Enums.Profession[];
-        createdAt: Date;
-        updatedAt: Date;
+        leadingCompanyId: string | null;
     })[]>;
     getPhysicalEventsByEmpresa(empresaId: string): Promise<({
-        leadingCompany: {
-            id: string;
-            title: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            dni: string | null;
-            legalName: string | null;
-            giro: import(".prisma/client").$Enums.Giro;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
-            userId: string;
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            bannerImage: string | null;
-            logo: string | null;
-            profileImage: string | null;
-            ceo: string | null;
-            ceoRole: string | null;
-            location: string | null;
-            followers: number;
-            webUrl: string | null;
-        };
         streams: ({
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -278,20 +257,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -300,22 +281,22 @@ export declare class EventsController {
                 categoryId: string | null;
             }[];
         } & {
+            name: string;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string;
-            channelName: string | null;
             imageUrl: string | null;
+            channelName: string | null;
         })[];
         workshops: ({
             enrollments: ({
                 user: {
                     id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
                     firstName: string | null;
                     lastName: string | null;
                     phone: string | null;
@@ -330,21 +311,21 @@ export declare class EventsController {
                     role: import(".prisma/client").$Enums.Role;
                     password: string;
                     status: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
                     newsletter: boolean;
                     userSubscription: string | null;
                 };
             } & {
                 id: string;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
-                status: string;
                 workshopId: string;
             })[];
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -359,20 +340,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -382,32 +365,59 @@ export declare class EventsController {
             }[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             title: string;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string | null;
-            channelName: string | null;
-            imageUrl: string | null;
-            description: string;
             whatYouWillLearn: string | null;
+            imageUrl: string | null;
+            channelName: string | null;
         })[];
-        organizers: {
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            bannerImage: string | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
+        };
+        organizers: {
             name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             eventId: string;
             career: string | null;
             photoUrl: string | null;
         }[];
-        attendees: {
+        brands: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            eventId: string;
+            imageUrl: string | null;
+        }[];
+        attendees: {
+            id: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -422,19 +432,15 @@ export declare class EventsController {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
-        brands: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            eventId: string;
-            imageUrl: string | null;
-        }[];
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         longDescription: string | null;
         mainBannerUrl: string | null;
@@ -443,40 +449,15 @@ export declare class EventsController {
         startDateTime: Date;
         endDateTime: Date;
         mapUrl: string | null;
-        leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
         categories: import(".prisma/client").$Enums.Profession[];
-        createdAt: Date;
-        updatedAt: Date;
+        leadingCompanyId: string | null;
     })[]>;
     getEventsByEmpresa(empresaId: string): Promise<({
-        leadingCompany: {
-            id: string;
-            title: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            dni: string | null;
-            legalName: string | null;
-            giro: import(".prisma/client").$Enums.Giro;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
-            userId: string;
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            bannerImage: string | null;
-            logo: string | null;
-            profileImage: string | null;
-            ceo: string | null;
-            ceoRole: string | null;
-            location: string | null;
-            followers: number;
-            webUrl: string | null;
-        };
         streams: ({
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -491,20 +472,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -513,22 +496,22 @@ export declare class EventsController {
                 categoryId: string | null;
             }[];
         } & {
+            name: string;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string;
-            channelName: string | null;
             imageUrl: string | null;
+            channelName: string | null;
         })[];
         workshops: ({
             enrollments: ({
                 user: {
                     id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
                     firstName: string | null;
                     lastName: string | null;
                     phone: string | null;
@@ -543,21 +526,21 @@ export declare class EventsController {
                     role: import(".prisma/client").$Enums.Role;
                     password: string;
                     status: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
                     newsletter: boolean;
                     userSubscription: string | null;
                 };
             } & {
                 id: string;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
-                status: string;
                 workshopId: string;
             })[];
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -572,20 +555,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -595,32 +580,59 @@ export declare class EventsController {
             }[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             title: string;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string | null;
-            channelName: string | null;
-            imageUrl: string | null;
-            description: string;
             whatYouWillLearn: string | null;
+            imageUrl: string | null;
+            channelName: string | null;
         })[];
-        organizers: {
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            bannerImage: string | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
+        };
+        organizers: {
             name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             eventId: string;
             career: string | null;
             photoUrl: string | null;
         }[];
-        attendees: {
+        brands: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            eventId: string;
+            imageUrl: string | null;
+        }[];
+        attendees: {
+            id: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -635,19 +647,15 @@ export declare class EventsController {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
-        brands: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            eventId: string;
-            imageUrl: string | null;
-        }[];
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         longDescription: string | null;
         mainBannerUrl: string | null;
@@ -656,40 +664,15 @@ export declare class EventsController {
         startDateTime: Date;
         endDateTime: Date;
         mapUrl: string | null;
-        leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
         categories: import(".prisma/client").$Enums.Profession[];
-        createdAt: Date;
-        updatedAt: Date;
+        leadingCompanyId: string | null;
     })[]>;
     getUpcomingEvents(): Promise<({
-        leadingCompany: {
-            id: string;
-            title: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            dni: string | null;
-            legalName: string | null;
-            giro: import(".prisma/client").$Enums.Giro;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
-            userId: string;
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            bannerImage: string | null;
-            logo: string | null;
-            profileImage: string | null;
-            ceo: string | null;
-            ceoRole: string | null;
-            location: string | null;
-            followers: number;
-            webUrl: string | null;
-        };
         streams: ({
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -704,20 +687,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -726,22 +711,22 @@ export declare class EventsController {
                 categoryId: string | null;
             }[];
         } & {
+            name: string;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string;
-            channelName: string | null;
             imageUrl: string | null;
+            channelName: string | null;
         })[];
         workshops: ({
             enrollments: ({
                 user: {
                     id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
                     firstName: string | null;
                     lastName: string | null;
                     phone: string | null;
@@ -756,21 +741,21 @@ export declare class EventsController {
                     role: import(".prisma/client").$Enums.Role;
                     password: string;
                     status: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
                     newsletter: boolean;
                     userSubscription: string | null;
                 };
             } & {
                 id: string;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
-                status: string;
                 workshopId: string;
             })[];
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -785,20 +770,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -808,32 +795,59 @@ export declare class EventsController {
             }[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             title: string;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string | null;
-            channelName: string | null;
-            imageUrl: string | null;
-            description: string;
             whatYouWillLearn: string | null;
+            imageUrl: string | null;
+            channelName: string | null;
         })[];
-        organizers: {
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            bannerImage: string | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
+        };
+        organizers: {
             name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             eventId: string;
             career: string | null;
             photoUrl: string | null;
         }[];
-        attendees: {
+        brands: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            eventId: string;
+            imageUrl: string | null;
+        }[];
+        attendees: {
+            id: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -848,19 +862,15 @@ export declare class EventsController {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
-        brands: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            eventId: string;
-            imageUrl: string | null;
-        }[];
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         longDescription: string | null;
         mainBannerUrl: string | null;
@@ -869,40 +879,15 @@ export declare class EventsController {
         startDateTime: Date;
         endDateTime: Date;
         mapUrl: string | null;
-        leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
         categories: import(".prisma/client").$Enums.Profession[];
-        createdAt: Date;
-        updatedAt: Date;
+        leadingCompanyId: string | null;
     })[]>;
     getUpcomingEventsByYear(year: number): Promise<({
-        leadingCompany: {
-            id: string;
-            title: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            dni: string | null;
-            legalName: string | null;
-            giro: import(".prisma/client").$Enums.Giro;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
-            userId: string;
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            bannerImage: string | null;
-            logo: string | null;
-            profileImage: string | null;
-            ceo: string | null;
-            ceoRole: string | null;
-            location: string | null;
-            followers: number;
-            webUrl: string | null;
-        };
         streams: ({
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -917,20 +902,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -939,22 +926,22 @@ export declare class EventsController {
                 categoryId: string | null;
             }[];
         } & {
+            name: string;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string;
-            channelName: string | null;
             imageUrl: string | null;
+            channelName: string | null;
         })[];
         workshops: ({
             enrollments: ({
                 user: {
                     id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
                     firstName: string | null;
                     lastName: string | null;
                     phone: string | null;
@@ -969,21 +956,21 @@ export declare class EventsController {
                     role: import(".prisma/client").$Enums.Role;
                     password: string;
                     status: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
                     newsletter: boolean;
                     userSubscription: string | null;
                 };
             } & {
                 id: string;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
-                status: string;
                 workshopId: string;
             })[];
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -998,20 +985,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -1021,32 +1010,59 @@ export declare class EventsController {
             }[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             title: string;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string | null;
-            channelName: string | null;
-            imageUrl: string | null;
-            description: string;
             whatYouWillLearn: string | null;
+            imageUrl: string | null;
+            channelName: string | null;
         })[];
-        organizers: {
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            bannerImage: string | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
+        };
+        organizers: {
             name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             eventId: string;
             career: string | null;
             photoUrl: string | null;
         }[];
-        attendees: {
+        brands: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            eventId: string;
+            imageUrl: string | null;
+        }[];
+        attendees: {
+            id: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -1061,19 +1077,15 @@ export declare class EventsController {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
-        brands: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            eventId: string;
-            imageUrl: string | null;
-        }[];
     } & {
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         longDescription: string | null;
         mainBannerUrl: string | null;
@@ -1082,41 +1094,231 @@ export declare class EventsController {
         startDateTime: Date;
         endDateTime: Date;
         mapUrl: string | null;
-        leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
         categories: import(".prisma/client").$Enums.Profession[];
+        leadingCompanyId: string | null;
+    })[]>;
+    getLiveEvents(): Promise<({
+        streams: ({
+            attendees: {
+                id: string;
+                firstName: string | null;
+                lastName: string | null;
+                phone: string | null;
+                email: string;
+                emailVerified: Date | null;
+                address: string | null;
+                province: string | null;
+                city: string | null;
+                country: string | null;
+                countryCode: string | null;
+                zipCode: string | null;
+                role: import(".prisma/client").$Enums.Role;
+                password: string;
+                status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                newsletter: boolean;
+                userSubscription: string | null;
+            }[];
+            orators: {
+                id: string;
+                status: string;
+                createdAt: Date;
+                updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
+                userId: string;
+                bannerImage: string | null;
+                title: string | null;
+                followers: number | null;
+                profession: import(".prisma/client").$Enums.Profession;
+                description: string;
+                experienceDescription: string;
+                experienceYears: number;
+                certificationsUrl: string;
+                empresaId: string | null;
+                categoryId: string | null;
+            }[];
+        } & {
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            startDateTime: Date;
+            endDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
+            eventId: string;
+            imageUrl: string | null;
+            channelName: string | null;
+        })[];
+        workshops: ({
+            enrollments: ({
+                user: {
+                    id: string;
+                    firstName: string | null;
+                    lastName: string | null;
+                    phone: string | null;
+                    email: string;
+                    emailVerified: Date | null;
+                    address: string | null;
+                    province: string | null;
+                    city: string | null;
+                    country: string | null;
+                    countryCode: string | null;
+                    zipCode: string | null;
+                    role: import(".prisma/client").$Enums.Role;
+                    password: string;
+                    status: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    newsletter: boolean;
+                    userSubscription: string | null;
+                };
+            } & {
+                id: string;
+                status: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                workshopId: string;
+            })[];
+            attendees: {
+                id: string;
+                firstName: string | null;
+                lastName: string | null;
+                phone: string | null;
+                email: string;
+                emailVerified: Date | null;
+                address: string | null;
+                province: string | null;
+                city: string | null;
+                country: string | null;
+                countryCode: string | null;
+                zipCode: string | null;
+                role: import(".prisma/client").$Enums.Role;
+                password: string;
+                status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
+                newsletter: boolean;
+                userSubscription: string | null;
+            }[];
+            orators: {
+                id: string;
+                status: string;
+                createdAt: Date;
+                updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
+                userId: string;
+                bannerImage: string | null;
+                title: string | null;
+                followers: number | null;
+                profession: import(".prisma/client").$Enums.Profession;
+                description: string;
+                experienceDescription: string;
+                experienceYears: number;
+                certificationsUrl: string;
+                empresaId: string | null;
+                categoryId: string | null;
+            }[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            title: string;
+            description: string;
+            startDateTime: Date;
+            endDateTime: Date;
+            price: number | null;
+            categories: import(".prisma/client").$Enums.Profession[];
+            eventId: string | null;
+            whatYouWillLearn: string | null;
+            imageUrl: string | null;
+            channelName: string | null;
+        })[];
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            bannerImage: string | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
+        };
+        organizers: {
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            eventId: string;
+            career: string | null;
+            photoUrl: string | null;
+        }[];
+        brands: {
+            name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            eventId: string;
+            imageUrl: string | null;
+        }[];
+        attendees: {
+            id: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: import(".prisma/client").$Enums.Role;
+            password: string;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            newsletter: boolean;
+            userSubscription: string | null;
+        }[];
+    } & {
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        title: string;
+        longDescription: string | null;
+        mainBannerUrl: string | null;
+        mainImageUrl: string | null;
+        physicalLocation: string | null;
+        startDateTime: Date;
+        endDateTime: Date;
+        mapUrl: string | null;
+        target: import(".prisma/client").$Enums.Target | null;
+        price: number;
+        categories: import(".prisma/client").$Enums.Profession[];
+        leadingCompanyId: string | null;
     })[]>;
     getEventById(eventId: string): Promise<{
         allOrators: any[];
-        leadingCompany: {
-            id: string;
-            title: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            dni: string | null;
-            legalName: string | null;
-            giro: import(".prisma/client").$Enums.Giro;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
-            userId: string;
-            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
-            bannerImage: string | null;
-            logo: string | null;
-            profileImage: string | null;
-            ceo: string | null;
-            ceoRole: string | null;
-            location: string | null;
-            followers: number;
-            webUrl: string | null;
-        };
         streams: ({
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -1131,20 +1333,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -1153,22 +1357,22 @@ export declare class EventsController {
                 categoryId: string | null;
             }[];
         } & {
+            name: string;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string;
-            channelName: string | null;
             imageUrl: string | null;
+            channelName: string | null;
         })[];
         workshops: ({
             enrollments: ({
                 user: {
                     id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
                     firstName: string | null;
                     lastName: string | null;
                     phone: string | null;
@@ -1183,21 +1387,21 @@ export declare class EventsController {
                     role: import(".prisma/client").$Enums.Role;
                     password: string;
                     status: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
                     newsletter: boolean;
                     userSubscription: string | null;
                 };
             } & {
                 id: string;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
-                status: string;
                 workshopId: string;
             })[];
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -1212,20 +1416,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -1235,32 +1441,59 @@ export declare class EventsController {
             }[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             title: string;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string | null;
-            channelName: string | null;
-            imageUrl: string | null;
-            description: string;
             whatYouWillLearn: string | null;
+            imageUrl: string | null;
+            channelName: string | null;
         })[];
-        organizers: {
+        leadingCompany: {
+            subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            userId: string;
+            dni: string | null;
+            legalName: string | null;
+            giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
+            bannerImage: string | null;
+            logo: string | null;
+            title: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            followers: number;
+            webUrl: string | null;
+        };
+        organizers: {
             name: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             eventId: string;
             career: string | null;
             photoUrl: string | null;
         }[];
-        attendees: {
+        brands: {
+            name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            eventId: string;
+            imageUrl: string | null;
+        }[];
+        attendees: {
+            id: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
@@ -1275,18 +1508,14 @@ export declare class EventsController {
             role: import(".prisma/client").$Enums.Role;
             password: string;
             status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
         }[];
-        brands: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            name: string;
-            eventId: string;
-            imageUrl: string | null;
-        }[];
         id: string;
+        createdAt: Date;
+        updatedAt: Date;
         title: string;
         longDescription: string | null;
         mainBannerUrl: string | null;
@@ -1295,20 +1524,16 @@ export declare class EventsController {
         startDateTime: Date;
         endDateTime: Date;
         mapUrl: string | null;
-        leadingCompanyId: string | null;
         target: import(".prisma/client").$Enums.Target | null;
         price: number;
         categories: import(".prisma/client").$Enums.Profession[];
-        createdAt: Date;
-        updatedAt: Date;
+        leadingCompanyId: string | null;
     }>;
     getEventStreamsAndWorkshops(eventId: string): Promise<{
         eventId: string;
         streams: ({
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -1323,20 +1548,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -1345,22 +1572,22 @@ export declare class EventsController {
                 categoryId: string | null;
             }[];
         } & {
+            name: string;
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string;
-            channelName: string | null;
             imageUrl: string | null;
+            channelName: string | null;
         })[];
         workshops: ({
             enrollments: ({
                 user: {
                     id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
                     firstName: string | null;
                     lastName: string | null;
                     phone: string | null;
@@ -1375,21 +1602,21 @@ export declare class EventsController {
                     role: import(".prisma/client").$Enums.Role;
                     password: string;
                     status: boolean;
+                    createdAt: Date;
+                    updatedAt: Date;
                     newsletter: boolean;
                     userSubscription: string | null;
                 };
             } & {
                 id: string;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
-                status: string;
                 workshopId: string;
             })[];
             attendees: {
                 id: string;
-                createdAt: Date;
-                updatedAt: Date;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
@@ -1404,20 +1631,22 @@ export declare class EventsController {
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
                 status: boolean;
+                createdAt: Date;
+                updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
             }[];
             orators: {
                 id: string;
-                title: string | null;
+                status: string;
                 createdAt: Date;
                 updatedAt: Date;
+                type: import(".prisma/client").$Enums.ProfessionType;
                 userId: string;
                 bannerImage: string | null;
+                title: string | null;
                 followers: number | null;
-                status: string;
                 profession: import(".prisma/client").$Enums.Profession;
-                type: import(".prisma/client").$Enums.ProfessionType;
                 description: string;
                 experienceDescription: string;
                 experienceYears: number;
@@ -1427,101 +1656,18 @@ export declare class EventsController {
             }[];
         } & {
             id: string;
+            createdAt: Date;
+            updatedAt: Date;
             title: string;
+            description: string;
             startDateTime: Date;
             endDateTime: Date;
             price: number | null;
             categories: import(".prisma/client").$Enums.Profession[];
-            createdAt: Date;
-            updatedAt: Date;
             eventId: string | null;
-            channelName: string | null;
-            imageUrl: string | null;
-            description: string;
             whatYouWillLearn: string | null;
+            imageUrl: string | null;
+            channelName: string | null;
         })[];
     }>;
-    getLiveClassrooms(): Promise<({
-        enrollments: ({
-            user: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                firstName: string | null;
-                lastName: string | null;
-                phone: string | null;
-                email: string;
-                emailVerified: Date | null;
-                address: string | null;
-                province: string | null;
-                city: string | null;
-                country: string | null;
-                countryCode: string | null;
-                zipCode: string | null;
-                role: import(".prisma/client").$Enums.Role;
-                password: string;
-                status: boolean;
-                newsletter: boolean;
-                userSubscription: string | null;
-            };
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            status: string;
-            classroomId: string;
-        })[];
-        attendees: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            firstName: string | null;
-            lastName: string | null;
-            phone: string | null;
-            email: string;
-            emailVerified: Date | null;
-            address: string | null;
-            province: string | null;
-            city: string | null;
-            country: string | null;
-            countryCode: string | null;
-            zipCode: string | null;
-            role: import(".prisma/client").$Enums.Role;
-            password: string;
-            status: boolean;
-            newsletter: boolean;
-            userSubscription: string | null;
-        }[];
-        orators: {
-            id: string;
-            title: string | null;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            bannerImage: string | null;
-            followers: number | null;
-            status: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            description: string;
-            experienceDescription: string;
-            experienceYears: number;
-            certificationsUrl: string;
-            empresaId: string | null;
-            categoryId: string | null;
-        }[];
-    } & {
-        id: string;
-        title: string;
-        startDateTime: Date;
-        endDateTime: Date;
-        price: number | null;
-        categories: import(".prisma/client").$Enums.Profession[];
-        createdAt: Date;
-        updatedAt: Date;
-        channelName: string | null;
-        imageUrl: string | null;
-        description: string;
-    })[]>;
 }

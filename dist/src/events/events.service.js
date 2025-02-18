@@ -16,13 +16,6 @@ let EventsService = class EventsService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    formatDate(date) {
-        if (!date)
-            return null;
-        const dateFormatter = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
-        const timeFormatter = new Intl.DateTimeFormat('es-ES', { timeStyle: 'short' });
-        return `${dateFormatter.format(date)}, ${timeFormatter.format(date)}`;
-    }
     async createEvent(data) {
         return this.prisma.event.create({
             data: {
@@ -65,7 +58,7 @@ let EventsService = class EventsService {
         return true;
     }
     async getEventsByLeadingCompany(empresaId) {
-        const events = await this.prisma.event.findMany({
+        return this.prisma.event.findMany({
             where: { leadingCompanyId: empresaId },
             include: {
                 leadingCompany: true,
@@ -82,18 +75,11 @@ let EventsService = class EventsService {
                     include: {
                         orators: true,
                         attendees: true,
-                        enrollments: {
-                            include: { user: true },
-                        },
+                        enrollments: { include: { user: true } },
                     },
                 },
             },
         });
-        events.forEach((evt) => {
-            evt.startDateTime = this.formatDate(evt.startDateTime);
-            evt.endDateTime = this.formatDate(evt.endDateTime);
-        });
-        return events;
     }
     async getEventById(eventId) {
         const event = await this.prisma.event.findUnique({
@@ -113,9 +99,7 @@ let EventsService = class EventsService {
                     include: {
                         orators: true,
                         attendees: true,
-                        enrollments: {
-                            include: { user: true },
-                        },
+                        enrollments: { include: { user: true } },
                     },
                 },
             },
@@ -123,26 +107,13 @@ let EventsService = class EventsService {
         if (!event) {
             throw new common_1.NotFoundException(`No se encontró el evento con ID: ${eventId}`);
         }
-        event.startDateTime = this.formatDate(event.startDateTime);
-        event.endDateTime = this.formatDate(event.endDateTime);
-        event.streams?.forEach((stream) => {
-            stream.startDateTime = this.formatDate(stream.startDateTime);
-            stream.endDateTime = this.formatDate(stream.endDateTime);
-        });
-        event.workshops?.forEach((ws) => {
-            ws.startDateTime = this.formatDate(ws.startDateTime);
-            ws.endDateTime = this.formatDate(ws.endDateTime);
-        });
         const streamOrators = event.streams?.flatMap((s) => s.orators) ?? [];
         const workshopOrators = event.workshops?.flatMap((w) => w.orators) ?? [];
         const oratorsMap = new Map();
         streamOrators.forEach((o) => oratorsMap.set(o.id, o));
         workshopOrators.forEach((o) => oratorsMap.set(o.id, o));
         const allOrators = Array.from(oratorsMap.values());
-        return {
-            ...event,
-            allOrators,
-        };
+        return { ...event, allOrators };
     }
     async getStreamsAndWorkshopsByEvent(eventId) {
         const event = await this.prisma.event.findUnique({
@@ -159,64 +130,33 @@ let EventsService = class EventsService {
                     include: {
                         orators: true,
                         attendees: true,
-                        enrollments: {
-                            include: { user: true },
-                        },
+                        enrollments: { include: { user: true } },
                     },
                 },
             },
         });
         if (!event)
             return null;
-        event.streams?.forEach((stream) => {
-            stream.startDateTime = this.formatDate(stream.startDateTime);
-            stream.endDateTime = this.formatDate(stream.endDateTime);
-        });
-        event.workshops?.forEach((ws) => {
-            ws.startDateTime = this.formatDate(ws.startDateTime);
-            ws.endDateTime = this.formatDate(ws.endDateTime);
-        });
-        return {
-            eventId: event.id,
-            streams: event.streams,
-            workshops: event.workshops,
-        };
+        return { eventId: event.id, streams: event.streams, workshops: event.workshops };
     }
     async getWorkshopById(workshopId) {
-        const workshop = await this.prisma.workshop.findUnique({
+        return this.prisma.workshop.findUnique({
             where: { id: workshopId },
             include: {
-                event: {
-                    include: {
-                        brands: true,
-                    },
-                },
+                event: { include: { brands: true } },
                 orators: true,
                 attendees: true,
-                enrollments: {
-                    include: { user: true },
-                },
+                enrollments: { include: { user: true } },
             },
         });
-        if (!workshop)
-            return null;
-        workshop.startDateTime = this.formatDate(workshop.startDateTime);
-        workshop.endDateTime = this.formatDate(workshop.endDateTime);
-        if (workshop.event) {
-            workshop.event.startDateTime = this.formatDate(workshop.event.startDateTime);
-            workshop.event.endDateTime = this.formatDate(workshop.event.endDateTime);
-        }
-        return workshop;
     }
     async getUpcomingEvents() {
-        const nowUtc = new Date(new Date().toISOString());
-        const events = await this.prisma.event.findMany({
+        const nowUtc = new Date();
+        return this.prisma.event.findMany({
             where: {
                 startDateTime: { gte: nowUtc },
             },
-            orderBy: {
-                startDateTime: 'asc',
-            },
+            orderBy: { startDateTime: 'asc' },
             include: {
                 leadingCompany: true,
                 attendees: true,
@@ -232,18 +172,11 @@ let EventsService = class EventsService {
                     include: {
                         orators: true,
                         attendees: true,
-                        enrollments: {
-                            include: { user: true },
-                        },
+                        enrollments: { include: { user: true } },
                     },
                 },
             },
         });
-        events.forEach((evt) => {
-            evt.startDateTime = this.formatDate(evt.startDateTime);
-            evt.endDateTime = this.formatDate(evt.endDateTime);
-        });
-        return events;
     }
     async getUpcomingEventsByYear(year) {
         const currentYear = new Date().getFullYear();
@@ -254,13 +187,11 @@ let EventsService = class EventsService {
         else {
             startDate = new Date(year, 0, 1);
         }
-        const events = await this.prisma.event.findMany({
+        return this.prisma.event.findMany({
             where: {
                 startDateTime: { gte: startDate },
             },
-            orderBy: {
-                startDateTime: 'asc',
-            },
+            orderBy: { startDateTime: 'asc' },
             include: {
                 leadingCompany: true,
                 attendees: true,
@@ -276,21 +207,14 @@ let EventsService = class EventsService {
                     include: {
                         orators: true,
                         attendees: true,
-                        enrollments: {
-                            include: { user: true },
-                        },
+                        enrollments: { include: { user: true } },
                     },
                 },
             },
         });
-        events.forEach((evt) => {
-            evt.startDateTime = this.formatDate(evt.startDateTime);
-            evt.endDateTime = this.formatDate(evt.endDateTime);
-        });
-        return events;
     }
     async getPhysicalEvents() {
-        const events = await this.prisma.event.findMany({
+        return this.prisma.event.findMany({
             where: {
                 physicalLocation: { not: null },
             },
@@ -309,21 +233,14 @@ let EventsService = class EventsService {
                     include: {
                         orators: true,
                         attendees: true,
-                        enrollments: {
-                            include: { user: true },
-                        },
+                        enrollments: { include: { user: true } },
                     },
                 },
             },
         });
-        events.forEach((evt) => {
-            evt.startDateTime = this.formatDate(evt.startDateTime);
-            evt.endDateTime = this.formatDate(evt.endDateTime);
-        });
-        return events;
     }
     async getPhysicalEventsByEmpresa(empresaId) {
-        const events = await this.prisma.event.findMany({
+        return this.prisma.event.findMany({
             where: {
                 leadingCompanyId: empresaId,
                 physicalLocation: { not: null },
@@ -343,41 +260,39 @@ let EventsService = class EventsService {
                     include: {
                         orators: true,
                         attendees: true,
-                        enrollments: {
-                            include: { user: true },
-                        },
+                        enrollments: { include: { user: true } },
                     },
                 },
             },
         });
-        events.forEach((evt) => {
-            evt.startDateTime = this.formatDate(evt.startDateTime);
-            evt.endDateTime = this.formatDate(evt.endDateTime);
-        });
-        return events;
     }
-    async getLiveClassrooms() {
+    async getLiveEvents() {
         const nowUtc = new Date();
-        const classrooms = await this.prisma.classroom.findMany({
+        return this.prisma.event.findMany({
             where: {
                 startDateTime: { lte: nowUtc },
                 endDateTime: { gte: nowUtc },
             },
             include: {
-                orators: true,
-                enrollments: {
+                leadingCompany: true,
+                attendees: true,
+                organizers: true,
+                brands: true,
+                streams: {
                     include: {
-                        user: true,
+                        orators: true,
+                        attendees: true,
                     },
                 },
-                attendees: true,
+                workshops: {
+                    include: {
+                        orators: true,
+                        attendees: true,
+                        enrollments: { include: { user: true } },
+                    },
+                },
             },
         });
-        classrooms.forEach((cls) => {
-            cls.startDateTime = this.formatDate(cls.startDateTime);
-            cls.endDateTime = this.formatDate(cls.endDateTime);
-        });
-        return classrooms;
     }
 };
 exports.EventsService = EventsService;
