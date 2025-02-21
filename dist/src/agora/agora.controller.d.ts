@@ -10,7 +10,7 @@ export declare class AgoraController {
         rtmToken: string;
         uuid: string;
         uid: string;
-        role: "host" | "audience";
+        role: "audience" | "host";
         expiresAt: number;
     }>;
 }

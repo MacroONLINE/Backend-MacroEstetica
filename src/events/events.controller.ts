@@ -30,10 +30,7 @@ export class EventsController {
   @ApiResponse({ status: 201, description: 'Usuario registrado con éxito' })
   @ApiResponse({ status: 403, description: 'El usuario ya está inscrito o no se pudo inscribir' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
-  async registerAttendee(
-    @Param('eventId') eventId: string,
-    @Body() body: { userId: string },
-  ) {
+  async registerAttendee(@Param('eventId') eventId: string, @Body() body: { userId: string }) {
     const isRegistered = await this.eventsService.registerAttendee(eventId, body.userId);
     if (!isRegistered) {
       throw new ForbiddenException('El usuario ya está inscrito o no se pudo inscribir en este evento');
@@ -42,14 +39,14 @@ export class EventsController {
   }
 
   @Get('physical')
-  @ApiOperation({ summary: 'Obtiene todos los eventos presenciales (con location física) sin importar la empresa' })
+  @ApiOperation({ summary: 'Obtiene todos los eventos presenciales (con location física)' })
   @ApiResponse({ status: 200, description: 'Lista de eventos presenciales' })
   async getPhysicalEvents() {
     return this.eventsService.getPhysicalEvents();
   }
 
   @Get('physical/empresa/:empresaId')
-  @ApiOperation({ summary: 'Obtiene todos los eventos presenciales de una empresa líder específica' })
+  @ApiOperation({ summary: 'Obtiene todos los eventos presenciales de una empresa líder' })
   @ApiParam({ name: 'empresaId', description: 'ID de la empresa líder' })
   @ApiResponse({ status: 200, description: 'Lista de eventos presenciales para la empresa indicada' })
   async getPhysicalEventsByEmpresa(@Param('empresaId') empresaId: string) {
@@ -59,7 +56,7 @@ export class EventsController {
   @Get('empresa/:empresaId')
   @ApiOperation({ summary: 'Obtiene todos los eventos de una empresa líder' })
   @ApiParam({ name: 'empresaId', description: 'ID de la empresa líder' })
-  @ApiResponse({ status: 200, description: 'Retorna la lista de eventos relacionados con la empresa líder' })
+  @ApiResponse({ status: 200, description: 'Retorna la lista de eventos de la empresa líder' })
   async getEventsByEmpresa(@Param('empresaId') empresaId: string) {
     return this.eventsService.getEventsByLeadingCompany(empresaId);
   }
@@ -74,7 +71,7 @@ export class EventsController {
   @Get('upcoming/:year')
   @ApiOperation({
     summary: 'Obtiene todos los eventos futuros de un año específico',
-    description: 'Si el año es el actual, se filtra desde hoy. Si es distinto, se filtra desde el 1 de enero de ese año.',
+    description: 'Si el año es el actual, se filtra desde hoy; si es distinto, se filtra desde el 1 de enero de ese año.',
   })
   @ApiParam({
     name: 'year',
@@ -93,7 +90,7 @@ export class EventsController {
   }
 
   @Get('live')
-  @ApiOperation({ summary: 'Obtiene todos los eventos que están en vivo en este momento' })
+  @ApiOperation({ summary: 'Obtiene todos los eventos en vivo en este momento' })
   @ApiResponse({ status: 200, description: 'Lista de eventos en vivo' })
   @ApiResponse({ status: 404, description: 'No hay eventos en vivo en este momento' })
   async getLiveEvents() {
@@ -115,10 +112,22 @@ export class EventsController {
     return event;
   }
 
-  @Get(':eventId/streams-workshops')
-  @ApiOperation({ summary: 'Obtiene los streams y workshops de un evento' })
+  @Get(':eventId/is-enrolled/:userId')
+  @ApiOperation({ summary: 'Verifica si un usuario ya pagó/inscrito un evento' })
   @ApiParam({ name: 'eventId', description: 'ID del evento' })
-  @ApiResponse({ status: 200, description: 'Retorna los streams y workshops asociados al evento' })
+  @ApiParam({ name: 'userId', description: 'ID del usuario' })
+  @ApiResponse({ status: 200, description: 'true o false, dependiendo si el user está inscrito' })
+  async isUserEnrolled(@Param('eventId') eventId: string, @Param('userId') userId: string) {
+    return this.eventsService.isUserEnrolled(eventId, userId);
+  }
+
+  @Get(':eventId/streams-workshops')
+  @ApiOperation({
+    summary: 'Obtiene streams y workshops ordenados por día y hora, con toda la información, separados por día',
+    description: 'Retorna un schedule donde cada día tiene un array de items (streams o workshops).'
+  })
+  @ApiParam({ name: 'eventId', description: 'ID del evento' })
+  @ApiResponse({ status: 200, description: 'Schedule por días con streams y workshops' })
   @ApiResponse({ status: 404, description: 'Evento no encontrado' })
   async getEventStreamsAndWorkshops(@Param('eventId') eventId: string) {
     const data = await this.eventsService.getStreamsAndWorkshopsByEvent(eventId);

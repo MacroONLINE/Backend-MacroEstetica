@@ -62,6 +62,9 @@ let EventsController = class EventsController {
             throw new common_1.NotFoundException('Evento no encontrado');
         return event;
     }
+    async isUserEnrolled(eventId, userId) {
+        return this.eventsService.isUserEnrolled(eventId, userId);
+    }
     async getEventStreamsAndWorkshops(eventId) {
         const data = await this.eventsService.getStreamsAndWorkshopsByEvent(eventId);
         if (!data)
@@ -95,7 +98,7 @@ __decorate([
 ], EventsController.prototype, "registerAttendee", null);
 __decorate([
     (0, common_1.Get)('physical'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos presenciales (con location física) sin importar la empresa' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos presenciales (con location física)' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de eventos presenciales' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -103,7 +106,7 @@ __decorate([
 ], EventsController.prototype, "getPhysicalEvents", null);
 __decorate([
     (0, common_1.Get)('physical/empresa/:empresaId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos presenciales de una empresa líder específica' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos presenciales de una empresa líder' }),
     (0, swagger_1.ApiParam)({ name: 'empresaId', description: 'ID de la empresa líder' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de eventos presenciales para la empresa indicada' }),
     __param(0, (0, common_1.Param)('empresaId')),
@@ -115,7 +118,7 @@ __decorate([
     (0, common_1.Get)('empresa/:empresaId'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos de una empresa líder' }),
     (0, swagger_1.ApiParam)({ name: 'empresaId', description: 'ID de la empresa líder' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna la lista de eventos relacionados con la empresa líder' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna la lista de eventos de la empresa líder' }),
     __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -133,7 +136,7 @@ __decorate([
     (0, common_1.Get)('upcoming/:year'),
     (0, swagger_1.ApiOperation)({
         summary: 'Obtiene todos los eventos futuros de un año específico',
-        description: 'Si el año es el actual, se filtra desde hoy. Si es distinto, se filtra desde el 1 de enero de ese año.',
+        description: 'Si el año es el actual, se filtra desde hoy; si es distinto, se filtra desde el 1 de enero de ese año.',
     }),
     (0, swagger_1.ApiParam)({
         name: 'year',
@@ -150,7 +153,7 @@ __decorate([
 ], EventsController.prototype, "getUpcomingEventsByYear", null);
 __decorate([
     (0, common_1.Get)('live'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos que están en vivo en este momento' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los eventos en vivo en este momento' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de eventos en vivo' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'No hay eventos en vivo en este momento' }),
     __metadata("design:type", Function),
@@ -169,10 +172,25 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getEventById", null);
 __decorate([
-    (0, common_1.Get)(':eventId/streams-workshops'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene los streams y workshops de un evento' }),
+    (0, common_1.Get)(':eventId/is-enrolled/:userId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Verifica si un usuario ya pagó/inscrito un evento' }),
     (0, swagger_1.ApiParam)({ name: 'eventId', description: 'ID del evento' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna los streams y workshops asociados al evento' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'ID del usuario' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'true o false, dependiendo si el user está inscrito' }),
+    __param(0, (0, common_1.Param)('eventId')),
+    __param(1, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "isUserEnrolled", null);
+__decorate([
+    (0, common_1.Get)(':eventId/streams-workshops'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Obtiene streams y workshops ordenados por día y hora, con toda la información, separados por día',
+        description: 'Retorna un schedule donde cada día tiene un array de items (streams o workshops).'
+    }),
+    (0, swagger_1.ApiParam)({ name: 'eventId', description: 'ID del evento' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Schedule por días con streams y workshops' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Evento no encontrado' }),
     __param(0, (0, common_1.Param)('eventId')),
     __metadata("design:type", Function),

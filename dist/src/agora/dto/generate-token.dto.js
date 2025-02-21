@@ -16,7 +16,7 @@ class GenerateTokenDto {
 }
 exports.GenerateTokenDto = GenerateTokenDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c', description: 'UUID del evento' }),
+    (0, swagger_1.ApiProperty)({ example: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c', description: 'UUID del channel' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], GenerateTokenDto.prototype, "uuid", void 0);
