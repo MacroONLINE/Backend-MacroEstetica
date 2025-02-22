@@ -21,18 +21,24 @@ let EventsService = class EventsService {
         const timeFormatter = new Intl.DateTimeFormat('es-ES', { timeStyle: 'short' });
         return `${dateFormatter.format(date)}, ${timeFormatter.format(date)}`;
     }
-    withFormattedDates(item) {
-        const startDateTimeFormatted = item.startDateTime
-            ? this.formatDate(item.startDateTime)
-            : undefined;
-        const endDateTimeFormatted = item.endDateTime
-            ? this.formatDate(item.endDateTime)
-            : undefined;
-        return {
-            ...item,
-            startDateTimeFormatted,
-            endDateTimeFormatted,
-        };
+    fullyFormatDates(obj) {
+        if (obj === null || obj === undefined)
+            return obj;
+        if (Array.isArray(obj)) {
+            return obj.map((item) => this.fullyFormatDates(item));
+        }
+        if (obj instanceof Date) {
+            return this.formatDate(obj);
+        }
+        if (typeof obj === 'object') {
+            const newObj = {};
+            for (const key of Object.keys(obj)) {
+                const value = obj[key];
+                newObj[key] = this.fullyFormatDates(value);
+            }
+            return newObj;
+        }
+        return obj;
     }
     async createEvent(data) {
         const event = await this.prisma.event.create({
@@ -49,7 +55,7 @@ let EventsService = class EventsService {
                 target: data.target,
             },
         });
-        return this.withFormattedDates(event);
+        return this.fullyFormatDates(event);
     }
     async registerAttendee(eventId, userId) {
         const event = await this.prisma.event.findUnique({
@@ -65,9 +71,7 @@ let EventsService = class EventsService {
         }
         await this.prisma.event.update({
             where: { id: eventId },
-            data: {
-                attendees: { connect: { id: userId } },
-            },
+            data: { attendees: { connect: { id: userId } } },
         });
         return true;
     }
@@ -90,7 +94,9 @@ let EventsService = class EventsService {
                 attendees: true,
                 organizers: true,
                 brands: true,
-                streams: { include: { orators: true, attendees: true } },
+                streams: {
+                    include: { orators: true, attendees: true },
+                },
                 workshops: {
                     include: {
                         orators: true,
@@ -103,92 +109,58 @@ let EventsService = class EventsService {
         if (!event) {
             throw new common_1.NotFoundException(`No se encontró el evento con ID: ${eventId}`);
         }
-        const eventFormatted = this.withFormattedDates(event);
-        const streamsFormatted = eventFormatted.streams?.map((s) => this.withFormattedDates(s));
-        const workshopsFormatted = eventFormatted.workshops?.map((w) => this.withFormattedDates(w));
-        const streamOrators = event.streams?.flatMap((s) => s.orators) ?? [];
-        const workshopOrators = event.workshops?.flatMap((w) => w.orators) ?? [];
-        const oratorsMap = new Map();
-        streamOrators.forEach((o) => oratorsMap.set(o.id, o));
-        workshopOrators.forEach((o) => oratorsMap.set(o.id, o));
-        const allOrators = Array.from(oratorsMap.values());
-        return {
-            ...eventFormatted,
-            streams: streamsFormatted,
-            workshops: workshopsFormatted,
-            allOrators,
-        };
+        return this.fullyFormatDates(event);
     }
     async getStreamsAndWorkshopsByEvent(eventId) {
         const event = await this.prisma.event.findUnique({
             where: { id: eventId },
             include: {
                 brands: true,
-                streams: {
-                    include: {
-                        orators: true,
-                        attendees: true,
-                    },
-                },
+                streams: { include: { orators: true, attendees: true } },
                 workshops: {
-                    include: {
-                        orators: true,
-                        attendees: true,
-                        enrollments: { include: { user: true } },
-                    },
+                    include: { orators: true, attendees: true, enrollments: { include: { user: true } } },
                 },
             },
         });
         if (!event)
             return null;
-        const eventFormatted = this.withFormattedDates(event);
         const allItems = [];
         for (const stream of event.streams ?? []) {
-            const streamFormatted = this.withFormattedDates(stream);
-            allItems.push({
-                type: 'stream',
-                ...streamFormatted,
-            });
+            allItems.push({ type: 'stream', ...stream });
         }
         for (const wk of event.workshops ?? []) {
-            const wkFormatted = this.withFormattedDates(wk);
-            allItems.push({
-                type: 'workshop',
-                ...wkFormatted,
-            });
+            allItems.push({ type: 'workshop', ...wk });
         }
         const groups = {};
-        allItems.forEach((item) => {
+        for (const item of allItems) {
             const realDate = item.startDateTime;
             const dayKey = new Date(realDate.getFullYear(), realDate.getMonth(), realDate.getDate()).getTime();
-            if (!groups[dayKey]) {
-                groups[dayKey] = [];
-            }
+            groups[dayKey] ??= [];
             groups[dayKey].push(item);
-        });
+        }
         const sortedDays = Object.keys(groups)
-            .map((dayKey) => parseInt(dayKey, 10))
+            .map(Number)
             .sort((a, b) => a - b);
         const schedule = sortedDays.map((dayKey) => {
             const dayItems = groups[dayKey];
             dayItems.sort((a, b) => {
-                return new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime();
+                const A = a.startDateTime.getTime();
+                const B = b.startDateTime.getTime();
+                return A - B;
             });
             const dayDate = new Date(dayKey);
             const dateFormatter = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
             const dayLabel = dateFormatter.format(dayDate);
-            return {
-                day: dayLabel,
-                items: dayItems,
-            };
+            return { day: dayLabel, items: dayItems };
         });
-        return {
+        const result = {
             eventId: event.id,
-            eventTitle: eventFormatted.title,
-            eventStartDateFormatted: eventFormatted.startDateTimeFormatted,
-            eventEndDateFormatted: eventFormatted.endDateTimeFormatted,
+            eventTitle: event.title,
+            eventStartDate: event.startDateTime,
+            eventEndDate: event.endDateTime,
             schedule,
         };
+        return this.fullyFormatDates(result);
     }
     async getFullSchedule(eventId) {
         const event = await this.prisma.event.findUnique({
@@ -200,33 +172,25 @@ let EventsService = class EventsService {
         });
         if (!event)
             return null;
-        const eventFormatted = this.withFormattedDates(event);
         const allItems = [];
         for (const s of event.streams ?? []) {
-            const sf = this.withFormattedDates(s);
-            allItems.push({
-                type: 'stream',
-                ...sf,
-            });
+            allItems.push({ type: 'stream', ...s });
         }
         for (const wk of event.workshops ?? []) {
-            const wkf = this.withFormattedDates(wk);
-            allItems.push({
-                type: 'workshop',
-                ...wkf,
-            });
+            allItems.push({ type: 'workshop', ...wk });
         }
         allItems.sort((a, b) => {
-            const realA = a.startDateTime;
-            const realB = b.startDateTime;
-            return new Date(realA).getTime() - new Date(realB).getTime();
+            const A = a.startDateTime.getTime();
+            const B = b.startDateTime.getTime();
+            return A - B;
         });
-        return {
-            eventTitle: eventFormatted.title,
-            eventStart: eventFormatted.startDateTimeFormatted,
-            eventEnd: eventFormatted.endDateTimeFormatted,
+        const result = {
+            eventTitle: event.title,
+            eventStart: event.startDateTime,
+            eventEnd: event.endDateTime,
             schedule: allItems,
         };
+        return this.fullyFormatDates(result);
     }
     async getWorkshopById(workshopId) {
         const workshop = await this.prisma.workshop.findUnique({
@@ -240,11 +204,7 @@ let EventsService = class EventsService {
         });
         if (!workshop)
             return null;
-        const workshopFormatted = this.withFormattedDates(workshop);
-        if (workshopFormatted.event) {
-            workshopFormatted.event = this.withFormattedDates(workshopFormatted.event);
-        }
-        return workshopFormatted;
+        return this.fullyFormatDates(workshop);
     }
     async getUpcomingEvents() {
         const now = new Date();
@@ -258,20 +218,11 @@ let EventsService = class EventsService {
                 brands: true,
                 streams: { include: { orators: true, attendees: true } },
                 workshops: {
-                    include: {
-                        orators: true,
-                        attendees: true,
-                        enrollments: { include: { user: true } },
-                    },
+                    include: { orators: true, attendees: true, enrollments: { include: { user: true } } },
                 },
             },
         });
-        return events.map((evt) => {
-            const formattedEvt = this.withFormattedDates(evt);
-            formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-            formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-            return formattedEvt;
-        });
+        return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getUpcomingEventsByYear(year) {
         const currentYear = new Date().getFullYear();
@@ -296,15 +247,7 @@ let EventsService = class EventsService {
                 },
             },
         });
-        const result = events.map((evt) => {
-            const formattedEvt = this.withFormattedDates(evt);
-            formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-            formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-            return formattedEvt;
-        });
-        if (!result.length)
-            return [];
-        return result;
+        return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getPhysicalEvents() {
         const events = await this.prisma.event.findMany({
@@ -316,20 +259,11 @@ let EventsService = class EventsService {
                 brands: true,
                 streams: { include: { orators: true, attendees: true } },
                 workshops: {
-                    include: {
-                        orators: true,
-                        attendees: true,
-                        enrollments: { include: { user: true } },
-                    },
+                    include: { orators: true, attendees: true, enrollments: { include: { user: true } } },
                 },
             },
         });
-        return events.map((evt) => {
-            const formattedEvt = this.withFormattedDates(evt);
-            formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-            formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-            return formattedEvt;
-        });
+        return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getPhysicalEventsByEmpresa(empresaId) {
         const events = await this.prisma.event.findMany({
@@ -352,12 +286,7 @@ let EventsService = class EventsService {
                 },
             },
         });
-        return events.map((evt) => {
-            const formattedEvt = this.withFormattedDates(evt);
-            formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-            formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-            return formattedEvt;
-        });
+        return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getLiveEvents() {
         const now = new Date();
@@ -373,26 +302,17 @@ let EventsService = class EventsService {
                 brands: true,
                 streams: { include: { orators: true, attendees: true } },
                 workshops: {
-                    include: {
-                        orators: true,
-                        attendees: true,
-                        enrollments: { include: { user: true } },
-                    },
+                    include: { orators: true, attendees: true, enrollments: { include: { user: true } } },
                 },
             },
         });
-        const result = events.map((evt) => {
-            const formattedEvt = this.withFormattedDates(evt);
-            formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-            formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-            return formattedEvt;
-        });
+        const result = events.map((evt) => this.fullyFormatDates(evt));
         if (!result.length)
             return [];
         return result;
     }
     async getEventsByLeadingCompany(empresaId) {
-        return this.prisma.event.findMany({
+        const events = await this.prisma.event.findMany({
             where: { leadingCompanyId: empresaId },
             include: {
                 leadingCompany: true,
@@ -402,6 +322,7 @@ let EventsService = class EventsService {
                 organizers: true,
             },
         });
+        return events.map((evt) => this.fullyFormatDates(evt));
     }
 };
 exports.EventsService = EventsService;

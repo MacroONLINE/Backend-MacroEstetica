@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
+/**
+ * 1) Se hace la lógica y agregación con Date original
+ * 2) Al final, se hace una copia con todas las fechas formateadas recursivamente
+ */
 @Injectable()
 export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -11,21 +15,27 @@ export class EventsService {
     return `${dateFormatter.format(date)}, ${timeFormatter.format(date)}`;
   }
 
-  private withFormattedDates<T extends { startDateTime?: Date; endDateTime?: Date }>(
-    item: T
-  ): T & { startDateTimeFormatted?: string; endDateTimeFormatted?: string } {
-    const startDateTimeFormatted = item.startDateTime
-      ? this.formatDate(item.startDateTime)
-      : undefined;
-    const endDateTimeFormatted = item.endDateTime
-      ? this.formatDate(item.endDateTime)
-      : undefined;
-
-    return {
-      ...item,
-      startDateTimeFormatted,
-      endDateTimeFormatted,
-    };
+  /**
+   * Recorre recursivamente el objeto (incluyendo arrays y sub-objetos),
+   * y reemplaza las propiedades Date por strings formateadas.
+   */
+  private fullyFormatDates(obj: any): any {
+    if (obj === null || obj === undefined) return obj;
+    if (Array.isArray(obj)) {
+      return obj.map((item) => this.fullyFormatDates(item));
+    }
+    if (obj instanceof Date) {
+      return this.formatDate(obj);
+    }
+    if (typeof obj === 'object') {
+      const newObj: any = {};
+      for (const key of Object.keys(obj)) {
+        const value = obj[key];
+        newObj[key] = this.fullyFormatDates(value);
+      }
+      return newObj;
+    }
+    return obj;
   }
 
   async createEvent(data: any) {
@@ -43,7 +53,7 @@ export class EventsService {
         target: data.target,
       },
     });
-    return this.withFormattedDates(event);
+    return this.fullyFormatDates(event);
   }
 
   async registerAttendee(eventId: string, userId: string) {
@@ -60,9 +70,7 @@ export class EventsService {
     }
     await this.prisma.event.update({
       where: { id: eventId },
-      data: {
-        attendees: { connect: { id: userId } },
-      },
+      data: { attendees: { connect: { id: userId } } },
     });
     return true;
   }
@@ -79,6 +87,9 @@ export class EventsService {
     return !!enrollment;
   }
 
+  /**
+   * Retorna un evento con TODAS las fechas formateadas
+   */
   async getEventById(eventId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
@@ -87,7 +98,9 @@ export class EventsService {
         attendees: true,
         organizers: true,
         brands: true,
-        streams: { include: { orators: true, attendees: true } },
+        streams: {
+          include: { orators: true, attendees: true },
+        },
         workshops: {
           include: {
             orators: true,
@@ -100,116 +113,83 @@ export class EventsService {
     if (!event) {
       throw new NotFoundException(`No se encontró el evento con ID: ${eventId}`);
     }
-
-    const eventFormatted = this.withFormattedDates(event);
-    const streamsFormatted = eventFormatted.streams?.map((s) => this.withFormattedDates(s));
-    const workshopsFormatted = eventFormatted.workshops?.map((w) => this.withFormattedDates(w));
-
-    const streamOrators = event.streams?.flatMap((s) => s.orators) ?? [];
-    const workshopOrators = event.workshops?.flatMap((w) => w.orators) ?? [];
-    const oratorsMap = new Map();
-    streamOrators.forEach((o) => oratorsMap.set(o.id, o));
-    workshopOrators.forEach((o) => oratorsMap.set(o.id, o));
-    const allOrators = Array.from(oratorsMap.values());
-
-    return {
-      ...eventFormatted,
-      streams: streamsFormatted,
-      workshops: workshopsFormatted,
-      allOrators,
-    };
+    return this.fullyFormatDates(event);
   }
 
   /**
-   * NUEVO método para retornar streams y workshops en un schedule, 
-   * agrupados por DÍA y ordenados por hora dentro de cada día.
-   * Retorna toda la información de cada stream/workshop.
+   * 2) APLICAMOS la lógica de streams y workshops POR DÍA usando los Date crudos
+   * y AL FINAL formateamos todo con fullyFormatDates.
    */
   async getStreamsAndWorkshopsByEvent(eventId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
       include: {
         brands: true,
-        streams: {
-          include: {
-            orators: true,
-            attendees: true,
-          },
-        },
+        streams: { include: { orators: true, attendees: true } },
         workshops: {
-          include: {
-            orators: true,
-            attendees: true,
-            enrollments: { include: { user: true } },
-          },
+          include: { orators: true, attendees: true, enrollments: { include: { user: true } } },
         },
       },
     });
     if (!event) return null;
 
-    const eventFormatted = this.withFormattedDates(event);
-
-    // Preparar un array con todos los items (streams + workshops)
-    const allItems = [];
-
+    // 1) Creamos un array con streams y workshops con sus Date originales
+    const allItems: any[] = [];
     for (const stream of event.streams ?? []) {
-      const streamFormatted = this.withFormattedDates(stream);
-      allItems.push({
-        type: 'stream',
-        ...streamFormatted,
-      });
+      allItems.push({ type: 'stream', ...stream });
     }
     for (const wk of event.workshops ?? []) {
-      const wkFormatted = this.withFormattedDates(wk);
-      allItems.push({
-        type: 'workshop',
-        ...wkFormatted,
-      });
+      allItems.push({ type: 'workshop', ...wk });
     }
 
-    // Agrupar por "día" => p.e. setHours(0,0,0,0) para la fecha
+    // 2) Agrupamos por DIA usando la fecha real
     const groups: Record<string, any[]> = {};
+    for (const item of allItems) {
+      const realDate: Date = item.startDateTime; // Objeto Date
+      const dayKey = new Date(
+        realDate.getFullYear(),
+        realDate.getMonth(),
+        realDate.getDate()
+      ).getTime();
 
-    allItems.forEach((item) => {
-      const realDate = item.startDateTime as Date;
-      const dayKey = new Date(realDate.getFullYear(), realDate.getMonth(), realDate.getDate()).getTime();
-      if (!groups[dayKey]) {
-        groups[dayKey] = [];
-      }
+      groups[dayKey] ??= [];
       groups[dayKey].push(item);
-    });
+    }
 
-    // Para cada día, ordenar por hora
-    // Y mapear a un array ordenado de días (asc).
+    // 3) Para cada día, ordenamos por hora
     const sortedDays = Object.keys(groups)
-      .map((dayKey) => parseInt(dayKey, 10))
+      .map(Number)
       .sort((a, b) => a - b);
 
     const schedule = sortedDays.map((dayKey) => {
       const dayItems = groups[dayKey];
+
       dayItems.sort((a, b) => {
-        // a.startDateTime y b.startDateTime son Date
-        return new Date(a.startDateTime).getTime() - new Date(b.startDateTime).getTime();
+        const A = a.startDateTime.getTime();
+        const B = b.startDateTime.getTime();
+        return A - B;
       });
 
-      const dayDate = new Date(dayKey); 
-      // p.e. "13 de febrero de 2025"
+      // Nombre de día (ej: "1 de marzo de 2025")
+      const dayDate = new Date(dayKey);
       const dateFormatter = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
       const dayLabel = dateFormatter.format(dayDate);
 
-      return {
-        day: dayLabel,
-        items: dayItems, 
-      };
+      return { day: dayLabel, items: dayItems };
     });
 
-    return {
+    // 4) Ahora que tenemos el schedule final, incluimos
+    //    la info del evento (en crudo). Formateamos al final
+    const result = {
       eventId: event.id,
-      eventTitle: eventFormatted.title,
-      eventStartDateFormatted: eventFormatted.startDateTimeFormatted,
-      eventEndDateFormatted: eventFormatted.endDateTimeFormatted,
+      eventTitle: event.title,
+      eventStartDate: event.startDateTime,
+      eventEndDate: event.endDateTime,
       schedule,
     };
+    // 5) fullyFormatDates en TODO el objeto 'result' para que
+    //    streams, workshops y sub-objetos también se formateen
+    return this.fullyFormatDates(result);
   }
 
   async getFullSchedule(eventId: string) {
@@ -222,36 +202,28 @@ export class EventsService {
     });
     if (!event) return null;
 
-    const eventFormatted = this.withFormattedDates(event);
-    const allItems = [];
-
+    const allItems: any[] = [];
     for (const s of event.streams ?? []) {
-      const sf = this.withFormattedDates(s);
-      allItems.push({
-        type: 'stream',
-        ...sf,
-      });
+      allItems.push({ type: 'stream', ...s });
     }
     for (const wk of event.workshops ?? []) {
-      const wkf = this.withFormattedDates(wk);
-      allItems.push({
-        type: 'workshop',
-        ...wkf,
-      });
+      allItems.push({ type: 'workshop', ...wk });
     }
 
+    // Ordenar por startDateTime real
     allItems.sort((a, b) => {
-      const realA = a.startDateTime as Date;
-      const realB = b.startDateTime as Date;
-      return new Date(realA).getTime() - new Date(realB).getTime();
+      const A = a.startDateTime.getTime();
+      const B = b.startDateTime.getTime();
+      return A - B;
     });
 
-    return {
-      eventTitle: eventFormatted.title,
-      eventStart: eventFormatted.startDateTimeFormatted,
-      eventEnd: eventFormatted.endDateTimeFormatted,
+    const result = {
+      eventTitle: event.title,
+      eventStart: event.startDateTime,
+      eventEnd: event.endDateTime,
       schedule: allItems,
     };
+    return this.fullyFormatDates(result);
   }
 
   async getWorkshopById(workshopId: string) {
@@ -265,12 +237,7 @@ export class EventsService {
       },
     });
     if (!workshop) return null;
-
-    const workshopFormatted = this.withFormattedDates(workshop);
-    if (workshopFormatted.event) {
-      workshopFormatted.event = this.withFormattedDates(workshopFormatted.event);
-    }
-    return workshopFormatted;
+    return this.fullyFormatDates(workshop);
   }
 
   async getUpcomingEvents() {
@@ -285,20 +252,11 @@ export class EventsService {
         brands: true,
         streams: { include: { orators: true, attendees: true } },
         workshops: {
-          include: {
-            orators: true,
-            attendees: true,
-            enrollments: { include: { user: true } },
-          },
+          include: { orators: true, attendees: true, enrollments: { include: { user: true } } },
         },
       },
     });
-    return events.map((evt) => {
-      const formattedEvt = this.withFormattedDates(evt);
-      formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-      formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-      return formattedEvt;
-    });
+    return events.map((evt) => this.fullyFormatDates(evt));
   }
 
   async getUpcomingEventsByYear(year: number) {
@@ -323,14 +281,7 @@ export class EventsService {
         },
       },
     });
-    const result = events.map((evt) => {
-      const formattedEvt = this.withFormattedDates(evt);
-      formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-      formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-      return formattedEvt;
-    });
-    if (!result.length) return [];
-    return result;
+    return events.map((evt) => this.fullyFormatDates(evt));
   }
 
   async getPhysicalEvents() {
@@ -343,20 +294,11 @@ export class EventsService {
         brands: true,
         streams: { include: { orators: true, attendees: true } },
         workshops: {
-          include: {
-            orators: true,
-            attendees: true,
-            enrollments: { include: { user: true } },
-          },
+          include: { orators: true, attendees: true, enrollments: { include: { user: true } } },
         },
       },
     });
-    return events.map((evt) => {
-      const formattedEvt = this.withFormattedDates(evt);
-      formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-      formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-      return formattedEvt;
-    });
+    return events.map((evt) => this.fullyFormatDates(evt));
   }
 
   async getPhysicalEventsByEmpresa(empresaId: string) {
@@ -380,12 +322,7 @@ export class EventsService {
         },
       },
     });
-    return events.map((evt) => {
-      const formattedEvt = this.withFormattedDates(evt);
-      formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-      formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-      return formattedEvt;
-    });
+    return events.map((evt) => this.fullyFormatDates(evt));
   }
 
   async getLiveEvents() {
@@ -402,26 +339,17 @@ export class EventsService {
         brands: true,
         streams: { include: { orators: true, attendees: true } },
         workshops: {
-          include: {
-            orators: true,
-            attendees: true,
-            enrollments: { include: { user: true } },
-          },
+          include: { orators: true, attendees: true, enrollments: { include: { user: true } } },
         },
       },
     });
-    const result = events.map((evt) => {
-      const formattedEvt = this.withFormattedDates(evt);
-      formattedEvt.streams = evt.streams?.map((s) => this.withFormattedDates(s));
-      formattedEvt.workshops = evt.workshops?.map((w) => this.withFormattedDates(w));
-      return formattedEvt;
-    });
+    const result = events.map((evt) => this.fullyFormatDates(evt));
     if (!result.length) return [];
     return result;
   }
 
   async getEventsByLeadingCompany(empresaId: string) {
-    return this.prisma.event.findMany({
+    const events = await this.prisma.event.findMany({
       where: { leadingCompanyId: empresaId },
       include: {
         leadingCompany: true,
@@ -431,5 +359,6 @@ export class EventsService {
         organizers: true,
       },
     });
+    return events.map((evt) => this.fullyFormatDates(evt));
   }
 }
