@@ -15,16 +15,16 @@ let AgoraService = class AgoraService {
         this.appCertificate = "31724ea95d98465baa793ed09a3c68f5";
         this.expirationTimeInSeconds = 3600;
     }
-    generateTokens(uuid, uid, role) {
+    generateTokens(channelName, uid, role) {
         const agoraRole = role === 'host' ? agora_access_token_1.RtcRole.PUBLISHER : agora_access_token_1.RtcRole.SUBSCRIBER;
         const currentTimestamp = Math.floor(Date.now() / 1000);
         const privilegeExpireTime = currentTimestamp + this.expirationTimeInSeconds;
-        const rtcToken = agora_access_token_1.RtcTokenBuilder.buildTokenWithAccount(this.appId, this.appCertificate, uuid, uid, agoraRole, privilegeExpireTime);
+        const rtcToken = agora_access_token_1.RtcTokenBuilder.buildTokenWithAccount(this.appId, this.appCertificate, channelName, uid, agoraRole, privilegeExpireTime);
         const rtmToken = agora_access_token_1.RtmTokenBuilder.buildToken(this.appId, this.appCertificate, uid, agora_access_token_1.RtmRole.Rtm_User, privilegeExpireTime);
         return {
             rtcToken,
             rtmToken,
-            uuid,
+            channelName,
             uid,
             role,
             expiresAt: privilegeExpireTime,

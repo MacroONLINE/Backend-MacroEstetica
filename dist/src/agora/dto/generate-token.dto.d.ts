@@ -1,4 +1,4 @@
 export declare class GenerateTokenDto {
-    uuid: string;
+    channelName: string;
     uid: string;
 }

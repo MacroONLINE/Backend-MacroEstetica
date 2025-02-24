@@ -26,29 +26,29 @@ export class AgoraController {
    * @example
    * // Solicitud
    * {
-   *   "uuid": "d03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c",
+   *   "channelName": "d03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c",
    *   "uid": "user-12345"
    * }
    *
    * @returns Un objeto con los tokens RTC y RTM, el channelName, uid, rol y la fecha de expiración.
    *
-   * @throws NotFoundException si no se encuentra una sesión con ese channelName.
+   * @throws NotFoundException si no se encuentra un stream, workshop o classroom con ese channelName.
    * @throws BadRequestException si la sesión aún no ha comenzado o ya finalizó.
-   * @throws ForbiddenException si el usuario no es instructor ni asistente registrado.
+   * @throws ForbiddenException si el usuario no es instructor ni tiene un enrollment registrado en la sesión.
    */
   @Post('generate-token')
   @ApiOperation({ 
     summary: 'Genera un token de Agora para un usuario en un stream, workshop o classroom',
-    description: 'El endpoint busca la sesión utilizando el campo `channelName` en lugar del `id`. El campo "uuid" del DTO representa el channelName de la sesión.'
+    description: 'El endpoint busca la sesión utilizando el campo `channelName` en lugar del `id`. El campo "channelName" del DTO representa el nombre del canal de la sesión.'
   })
   @ApiBody({
-    description: 'Datos necesarios para generar el token. Nota: el campo "uuid" se utiliza como channelName.',
+    description: 'Datos necesarios para generar el token. Nota: el campo "channelName" se utiliza para identificar la sesión.',
     type: GenerateTokenDto,
     examples: {
       example1: {
         summary: 'Ejemplo de solicitud',
         value: {
-          uuid: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c',
+          channelName: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c',
           uid: 'user-12345'
         }
       }
@@ -84,25 +84,35 @@ export class AgoraController {
     status: 403,
     description: 'Usuario no autorizado para acceder a la sesión',
     schema: {
-      example: { statusCode: 403, message: 'No tienes acceso a esta sesión como instructor ni como asistente registrado', error: 'Forbidden' }
+      example: { statusCode: 403, message: 'No tienes acceso a esta sesión como instructor ni como usuario inscrito', error: 'Forbidden' }
     }
   })
   async generateToken(@Body() dto: GenerateTokenDto) {
-    const { uuid, uid } = dto;
+    const { channelName, uid } = dto;
 
-    // Buscar la sesión en eventStream, workshop o classroom usando el campo channelName
+    // Buscar la sesión en eventStream, workshop o classroom usando el campo channelName,
+    // y obtener los enrollments (inscripciones) en lugar de los asistentes.
     const [stream, workshop, classroom] = await this.prisma.$transaction([
       this.prisma.eventStream.findUnique({
-        where: { channelName: uuid },
-        include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
+        where: { channelName: channelName },
+        include: { 
+          orators: { select: { userId: true } },
+          enrollments: { select: { userId: true } }
+        },
       }),
       this.prisma.workshop.findUnique({
-        where: { channelName: uuid },
-        include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
+        where: { channelName: channelName },
+        include: { 
+          orators: { select: { userId: true } },
+          enrollments: { select: { userId: true } }
+        },
       }),
       this.prisma.classroom.findUnique({
-        where: { channelName: uuid },
-        include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
+        where: { channelName: channelName },
+        include: { 
+          orators: { select: { userId: true } },
+          enrollments: { select: { userId: true } }
+        },
       }),
     ]);
 
@@ -124,15 +134,15 @@ export class AgoraController {
     }
 
     const isInstructor = session.orators.some((orator) => orator.userId === uid);
-    const isAttendee = session.attendees.some((user) => user.id === uid);
+    const isEnrolled = session.enrollments.some((enrollment) => enrollment.userId === uid);
 
-    if (!isInstructor && !isAttendee) {
-      throw new ForbiddenException('No tienes acceso a esta sesión como instructor ni como asistente registrado');
+    if (!isInstructor && !isEnrolled) {
+      throw new ForbiddenException('No tienes acceso a esta sesión como instructor ni como usuario inscrito');
     }
 
     const role = isInstructor ? 'host' : 'audience';
 
-    // Se utiliza el channelName (en este caso, el valor recibido en "uuid") para generar los tokens
-    return this.agoraService.generateTokens(uuid, uid, role);
+    // Se utiliza el channelName para generar los tokens
+    return this.agoraService.generateTokens(channelName, uid, role);
   }
 }
