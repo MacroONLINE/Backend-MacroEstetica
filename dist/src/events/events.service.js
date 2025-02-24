@@ -91,17 +91,14 @@ let EventsService = class EventsService {
             where: { id: eventId },
             include: {
                 leadingCompany: true,
-                attendees: true,
                 organizers: true,
                 brands: true,
                 streams: {
-                    include: { orators: true, attendees: true },
+                    include: { orators: true },
                 },
                 workshops: {
                     include: {
-                        orators: true,
-                        attendees: true,
-                        enrollments: { include: { user: true } },
+                        orators: true
                     },
                 },
             },
@@ -109,6 +106,23 @@ let EventsService = class EventsService {
         if (!event) {
             throw new common_1.NotFoundException(`No se encontró el evento con ID: ${eventId}`);
         }
+        let allOrators = [];
+        if (event.streams && event.streams.length > 0) {
+            event.streams.forEach((stream) => {
+                if (stream.orators && stream.orators.length > 0) {
+                    allOrators.push(...stream.orators);
+                }
+            });
+        }
+        if (event.workshops && event.workshops.length > 0) {
+            event.workshops.forEach((workshop) => {
+                if (workshop.orators && workshop.orators.length > 0) {
+                    allOrators.push(...workshop.orators);
+                }
+            });
+        }
+        const uniqueOrators = Array.from(new Map(allOrators.map((orator) => [orator.id, orator])).values());
+        event.allOrators = uniqueOrators;
         return this.fullyFormatDates(event);
     }
     async getStreamsAndWorkshopsByEvent(eventId) {
