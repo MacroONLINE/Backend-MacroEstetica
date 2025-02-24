@@ -7,7 +7,14 @@ export class AgoraService {
   private readonly appCertificate = "31724ea95d98465baa793ed09a3c68f5";
   private readonly expirationTimeInSeconds = 3600;
 
-  generateTokens(uuid: string, uid: string, role: 'host' | 'audience') {
+  /**
+   * Genera los tokens RTC y RTM para Agora.
+   * @param channelName - Nombre del canal (channelName) para la sesión.
+   * @param uid - Identificador del usuario en la sesión.
+   * @param role - Rol en la sesión ('host' para orador, 'audience' para asistente).
+   * @returns Un objeto con los tokens, channelName, uid, rol y el timestamp de expiración.
+   */
+  generateTokens(channelName: string, uid: string, role: 'host' | 'audience') {
     const agoraRole = role === 'host' ? RtcRole.PUBLISHER : RtcRole.SUBSCRIBER;
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const privilegeExpireTime = currentTimestamp + this.expirationTimeInSeconds;
@@ -15,7 +22,7 @@ export class AgoraService {
     const rtcToken = RtcTokenBuilder.buildTokenWithAccount(
       this.appId,
       this.appCertificate,
-      uuid,
+      channelName,
       uid,
       agoraRole,
       privilegeExpireTime
@@ -32,7 +39,7 @@ export class AgoraService {
     return {
       rtcToken,
       rtmToken,
-      uuid,
+      channelName,
       uid,
       role,
       expiresAt: privilegeExpireTime,

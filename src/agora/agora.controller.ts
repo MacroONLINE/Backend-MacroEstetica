@@ -19,10 +19,30 @@ export class AgoraController {
     private readonly prisma: PrismaService
   ) {}
 
+  /**
+   * Genera un token de Agora para un usuario que accede a una sesión de tipo stream, workshop o classroom.
+   * La búsqueda de la sesión se realiza utilizando el campo `channelName`.
+   *
+   * @example
+   * // Solicitud
+   * {
+   *   "uuid": "d03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c",
+   *   "uid": "user-12345"
+   * }
+   *
+   * @returns Un objeto con los tokens RTC y RTM, el channelName, uid, rol y la fecha de expiración.
+   *
+   * @throws NotFoundException si no se encuentra una sesión con ese channelName.
+   * @throws BadRequestException si la sesión aún no ha comenzado o ya finalizó.
+   * @throws ForbiddenException si el usuario no es instructor ni asistente registrado.
+   */
   @Post('generate-token')
-  @ApiOperation({ summary: 'Genera un token de Agora para un usuario en un stream, workshop o classroom' })
+  @ApiOperation({ 
+    summary: 'Genera un token de Agora para un usuario en un stream, workshop o classroom',
+    description: 'El endpoint busca la sesión utilizando el campo `channelName` en lugar del `id`. El campo "uuid" del DTO representa el channelName de la sesión.'
+  })
   @ApiBody({
-    description: 'Datos necesarios para generar el token',
+    description: 'Datos necesarios para generar el token. Nota: el campo "uuid" se utiliza como channelName.',
     type: GenerateTokenDto,
     examples: {
       example1: {
@@ -41,16 +61,16 @@ export class AgoraController {
       example: {
         rtcToken: '006c9be6c6b3e5f4c3...',
         rtmToken: '007c9be6c6b3e5f4c3...',
-        uuid: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c',
+        channelName: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c',
         role: 'host'
       }
     }
   })
   @ApiResponse({
     status: 404,
-    description: 'No se encontró un stream, workshop o classroom con ese UUID',
+    description: 'No se encontró un stream, workshop o classroom con ese channelName',
     schema: {
-      example: { statusCode: 404, message: 'No se encontró una sesión con ese UUID.', error: 'Not Found' }
+      example: { statusCode: 404, message: 'No se encontró una sesión con ese channelName.', error: 'Not Found' }
     }
   })
   @ApiResponse({
@@ -62,7 +82,7 @@ export class AgoraController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Usuario no autorizado para acceder',
+    description: 'Usuario no autorizado para acceder a la sesión',
     schema: {
       example: { statusCode: 403, message: 'No tienes acceso a esta sesión como instructor ni como asistente registrado', error: 'Forbidden' }
     }
@@ -70,27 +90,27 @@ export class AgoraController {
   async generateToken(@Body() dto: GenerateTokenDto) {
     const { uuid, uid } = dto;
 
-    // Buscar la sesión en `eventStream`, `workshop` o `classroom`
+    // Buscar la sesión en eventStream, workshop o classroom usando el campo channelName
     const [stream, workshop, classroom] = await this.prisma.$transaction([
       this.prisma.eventStream.findUnique({
-        where: { id: uuid },
+        where: { channelName: uuid },
         include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
       }),
       this.prisma.workshop.findUnique({
-        where: { id: uuid },
+        where: { channelName: uuid },
         include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
       }),
       this.prisma.classroom.findUnique({
-        where: { id: uuid },
+        where: { channelName: uuid },
         include: { orators: { select: { userId: true } }, attendees: { select: { id: true } } },
       }),
     ]);
 
-    // Determinar qué tipo de sesión es
+    // Determinar la sesión encontrada (puede ser de cualquiera de los tres tipos)
     const session = stream || workshop || classroom;
 
     if (!session) {
-      throw new NotFoundException('No se encontró una sesión con ese UUID.');
+      throw new NotFoundException('No se encontró una sesión con ese channelName.');
     }
 
     const now = new Date();
@@ -112,6 +132,7 @@ export class AgoraController {
 
     const role = isInstructor ? 'host' : 'audience';
 
+    // Se utiliza el channelName (en este caso, el valor recibido en "uuid") para generar los tokens
     return this.agoraService.generateTokens(uuid, uid, role);
   }
 }
