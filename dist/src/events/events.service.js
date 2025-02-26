@@ -75,16 +75,27 @@ let EventsService = class EventsService {
         });
         return true;
     }
-    async isUserEnrolled(eventId, userId) {
-        const enrollment = await this.prisma.eventEnrollment.findUnique({
-            where: {
-                eventId_userId: {
-                    eventId,
-                    userId,
-                },
-            },
-        });
-        return !!enrollment;
+    async isUserEnrolled(id, userId, type) {
+        switch (type) {
+            case 'event':
+                return !!(await this.prisma.eventEnrollment.findFirst({
+                    where: { eventId: id, userId },
+                }));
+            case 'classroom':
+                return !!(await this.prisma.classroomEnrollment.findFirst({
+                    where: { classroomId: id, userId },
+                }));
+            case 'stream':
+                return !!(await this.prisma.eventStreamEnrollment.findFirst({
+                    where: { eventStreamId: id, userId },
+                }));
+            case 'workshop':
+                return !!(await this.prisma.workshopEnrollment.findFirst({
+                    where: { workshopId: id, userId },
+                }));
+            default:
+                throw new common_1.NotFoundException(`Tipo inválido: ${type}`);
+        }
     }
     async getEventById(eventId) {
         const event = await this.prisma.event.findUnique({

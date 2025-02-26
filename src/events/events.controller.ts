@@ -112,14 +112,20 @@ export class EventsController {
     return event;
   }
 
-  @Get(':eventId/is-enrolled/:userId')
-  @ApiOperation({ summary: 'Verifica si un usuario ya pagó/inscrito un evento' })
-  @ApiParam({ name: 'eventId', description: 'ID del evento' })
-  @ApiParam({ name: 'userId', description: 'ID del usuario' })
-  @ApiResponse({ status: 200, description: 'true o false, dependiendo si el user está inscrito' })
-  async isUserEnrolled(@Param('eventId') eventId: string, @Param('userId') userId: string) {
-    return this.eventsService.isUserEnrolled(eventId, userId);
-  }
+  @Get(':id/is-enrolled/:userId/:type')
+@ApiOperation({ summary: 'Verifica si un usuario está inscrito en un evento, aula, transmisión en vivo o taller' })
+@ApiParam({ name: 'id', description: 'ID del evento, aula, transmisión o taller' })
+@ApiParam({ name: 'userId', description: 'ID del usuario' })
+@ApiParam({ name: 'type', description: 'Tipo de entidad: event, classroom, stream, workshop' })
+@ApiResponse({ status: 200, description: 'true o false, dependiendo si el usuario está inscrito' })
+async isUserEnrolled(
+  @Param('id') id: string,
+  @Param('userId') userId: string,
+  @Param('type') type: 'event' | 'classroom' | 'stream' | 'workshop'
+) {
+  return this.eventsService.isUserEnrolled(id, userId, type);
+}
+
 
   @Get(':eventId/streams-workshops')
   @ApiOperation({

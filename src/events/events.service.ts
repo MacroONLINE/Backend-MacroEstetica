@@ -75,17 +75,38 @@ export class EventsService {
     return true;
   }
 
-  async isUserEnrolled(eventId: string, userId: string) {
-    const enrollment = await this.prisma.eventEnrollment.findUnique({
-      where: {
-        eventId_userId: {
-          eventId,
-          userId,
-        },
-      },
-    });
-    return !!enrollment;
+  async isUserEnrolled(
+    id: string,
+    userId: string,
+    type: 'event' | 'classroom' | 'stream' | 'workshop'
+  ): Promise<boolean> {
+    switch (type) {
+      case 'event':
+        return !!(await this.prisma.eventEnrollment.findFirst({
+          where: { eventId: id, userId },
+        }));
+  
+      case 'classroom':
+        return !!(await this.prisma.classroomEnrollment.findFirst({
+          where: { classroomId: id, userId },
+        }));
+  
+      case 'stream':
+        return !!(await this.prisma.eventStreamEnrollment.findFirst({
+          where: { eventStreamId: id, userId },
+        }));
+  
+      case 'workshop':
+        return !!(await this.prisma.workshopEnrollment.findFirst({
+          where: { workshopId: id, userId },
+        }));
+  
+      default:
+        throw new NotFoundException(`Tipo inválido: ${type}`);
+    }
   }
+  
+  
 
   /**
    * Retorna un evento con TODAS las fechas formateadas

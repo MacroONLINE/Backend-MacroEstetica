@@ -62,8 +62,8 @@ let EventsController = class EventsController {
             throw new common_1.NotFoundException('Evento no encontrado');
         return event;
     }
-    async isUserEnrolled(eventId, userId) {
-        return this.eventsService.isUserEnrolled(eventId, userId);
+    async isUserEnrolled(id, userId, type) {
+        return this.eventsService.isUserEnrolled(id, userId, type);
     }
     async getEventStreamsAndWorkshops(eventId) {
         const data = await this.eventsService.getStreamsAndWorkshopsByEvent(eventId);
@@ -172,15 +172,17 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getEventById", null);
 __decorate([
-    (0, common_1.Get)(':eventId/is-enrolled/:userId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Verifica si un usuario ya pagó/inscrito un evento' }),
-    (0, swagger_1.ApiParam)({ name: 'eventId', description: 'ID del evento' }),
+    (0, common_1.Get)(':id/is-enrolled/:userId/:type'),
+    (0, swagger_1.ApiOperation)({ summary: 'Verifica si un usuario está inscrito en un evento, aula, transmisión en vivo o taller' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del evento, aula, transmisión o taller' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'ID del usuario' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'true o false, dependiendo si el user está inscrito' }),
-    __param(0, (0, common_1.Param)('eventId')),
+    (0, swagger_1.ApiParam)({ name: 'type', description: 'Tipo de entidad: event, classroom, stream, workshop' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'true o false, dependiendo si el usuario está inscrito' }),
+    __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Param)('userId')),
+    __param(2, (0, common_1.Param)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "isUserEnrolled", null);
 __decorate([

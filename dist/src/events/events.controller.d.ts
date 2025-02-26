@@ -15,6 +15,6 @@ export declare class EventsController {
     getUpcomingEventsByYear(year: number): Promise<any[]>;
     getLiveEvents(): Promise<any[]>;
     getEventById(eventId: string): Promise<any>;
-    isUserEnrolled(eventId: string, userId: string): Promise<boolean>;
+    isUserEnrolled(id: string, userId: string, type: 'event' | 'classroom' | 'stream' | 'workshop'): Promise<boolean>;
     getEventStreamsAndWorkshops(eventId: string): Promise<any>;
 }

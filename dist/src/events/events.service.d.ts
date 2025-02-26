@@ -6,7 +6,7 @@ export declare class EventsService {
     private fullyFormatDates;
     createEvent(data: any): Promise<any>;
     registerAttendee(eventId: string, userId: string): Promise<boolean>;
-    isUserEnrolled(eventId: string, userId: string): Promise<boolean>;
+    isUserEnrolled(id: string, userId: string, type: 'event' | 'classroom' | 'stream' | 'workshop'): Promise<boolean>;
     getEventById(eventId: string): Promise<any>;
     getStreamsAndWorkshopsByEvent(eventId: string): Promise<any>;
     getFullSchedule(eventId: string): Promise<any>;
