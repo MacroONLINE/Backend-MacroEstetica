@@ -71,6 +71,13 @@ let EventsController = class EventsController {
             throw new common_1.NotFoundException('Evento no encontrado');
         return data;
     }
+    async enrollEventStream(eventStreamId, body) {
+        const isEnrolled = await this.eventsService.enrollEventStream(eventStreamId, body.userId);
+        if (!isEnrolled) {
+            throw new common_1.ForbiddenException('El usuario ya está inscrito en el stream o no se pudo inscribir');
+        }
+        return { message: `Usuario ${body.userId} inscrito con éxito en el stream ${eventStreamId}` };
+    }
 };
 exports.EventsController = EventsController;
 __decorate([
@@ -199,6 +206,19 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "getEventStreamsAndWorkshops", null);
+__decorate([
+    (0, common_1.Post)('stream/:eventStreamId/enroll'),
+    (0, swagger_1.ApiOperation)({ summary: 'Inscribir un usuario en un stream de evento' }),
+    (0, swagger_1.ApiParam)({ name: 'eventStreamId', description: 'ID del stream del evento' }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Usuario inscrito con éxito en el stream' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'El usuario ya está inscrito en el stream o no se pudo inscribir' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Stream de evento no encontrado' }),
+    __param(0, (0, common_1.Param)('eventStreamId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "enrollEventStream", null);
 exports.EventsController = EventsController = __decorate([
     (0, swagger_1.ApiTags)('Events'),
     (0, common_1.Controller)('events'),

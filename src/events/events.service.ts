@@ -409,4 +409,33 @@ export class EventsService {
     });
     return events.map((evt) => this.fullyFormatDates(evt));
   }
+
+  async enrollEventStream(eventStreamId: string, userId: string): Promise<boolean> {
+    const stream = await this.prisma.eventStream.findUnique({
+      where: { id: eventStreamId },
+    });
+    if (!stream) {
+      throw new NotFoundException(`Stream con ID ${eventStreamId} no encontrado`);
+    }
+    const existingEnrollment = await this.prisma.eventStreamEnrollment.findFirst({
+      where: { eventStreamId, userId },
+    });
+    if (existingEnrollment) {
+      return false;
+    }
+    await this.prisma.eventStreamEnrollment.create({
+      data: {
+        id: uuidv4(),
+        eventStreamId,
+        userId,
+        status: 'ENROLLED',
+      },
+    });
+    return true;
+  }
+  
 }
+function uuidv4(): any {
+  throw new Error('Function not implemented.');
+}
+

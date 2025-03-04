@@ -140,4 +140,22 @@ async isUserEnrolled(
     if (!data) throw new NotFoundException('Evento no encontrado');
     return data;
   }
+
+  @Post('stream/:eventStreamId/enroll')
+@ApiOperation({ summary: 'Inscribir un usuario en un stream de evento' })
+@ApiParam({ name: 'eventStreamId', description: 'ID del stream del evento' })
+@ApiResponse({ status: 201, description: 'Usuario inscrito con éxito en el stream' })
+@ApiResponse({ status: 403, description: 'El usuario ya está inscrito en el stream o no se pudo inscribir' })
+@ApiResponse({ status: 404, description: 'Stream de evento no encontrado' })
+async enrollEventStream(
+  @Param('eventStreamId') eventStreamId: string,
+  @Body() body: { userId: string }
+) {
+  const isEnrolled = await this.eventsService.enrollEventStream(eventStreamId, body.userId);
+  if (!isEnrolled) {
+    throw new ForbiddenException('El usuario ya está inscrito en el stream o no se pudo inscribir');
+  }
+  return { message: `Usuario ${body.userId} inscrito con éxito en el stream ${eventStreamId}` };
+}
+
 }

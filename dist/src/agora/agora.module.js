@@ -10,14 +10,16 @@ exports.AgoraModule = void 0;
 const common_1 = require("@nestjs/common");
 const agora_service_1 = require("./agora.service");
 const agora_controller_1 = require("./agora.controller");
+const agora_chat_service_1 = require("../agora-chat/agora-chat.service");
+const agora_chat_controller_1 = require("../agora-chat/agora-chat.controller");
 let AgoraModule = class AgoraModule {
 };
 exports.AgoraModule = AgoraModule;
 exports.AgoraModule = AgoraModule = __decorate([
     (0, common_1.Module)({
-        controllers: [agora_controller_1.AgoraController],
-        providers: [agora_service_1.AgoraService],
-        exports: [agora_service_1.AgoraService],
+        controllers: [agora_controller_1.AgoraController, agora_chat_controller_1.AgoraChatController],
+        providers: [agora_service_1.AgoraService, agora_chat_service_1.AgoraChatService],
+        exports: [agora_service_1.AgoraService, agora_chat_service_1.AgoraChatService],
     })
 ], AgoraModule);
 //# sourceMappingURL=agora.module.js.map

@@ -349,10 +349,36 @@ let EventsService = class EventsService {
         });
         return events.map((evt) => this.fullyFormatDates(evt));
     }
+    async enrollEventStream(eventStreamId, userId) {
+        const stream = await this.prisma.eventStream.findUnique({
+            where: { id: eventStreamId },
+        });
+        if (!stream) {
+            throw new common_1.NotFoundException(`Stream con ID ${eventStreamId} no encontrado`);
+        }
+        const existingEnrollment = await this.prisma.eventStreamEnrollment.findFirst({
+            where: { eventStreamId, userId },
+        });
+        if (existingEnrollment) {
+            return false;
+        }
+        await this.prisma.eventStreamEnrollment.create({
+            data: {
+                id: uuidv4(),
+                eventStreamId,
+                userId,
+                status: 'ENROLLED',
+            },
+        });
+        return true;
+    }
 };
 exports.EventsService = EventsService;
 exports.EventsService = EventsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], EventsService);
+function uuidv4() {
+    throw new Error('Function not implemented.');
+}
 //# sourceMappingURL=events.service.js.map

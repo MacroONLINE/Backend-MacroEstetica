@@ -17,4 +17,5 @@ export declare class EventsService {
     getPhysicalEventsByEmpresa(empresaId: string): Promise<any[]>;
     getLiveEvents(): Promise<any[]>;
     getEventsByLeadingCompany(empresaId: string): Promise<any[]>;
+    enrollEventStream(eventStreamId: string, userId: string): Promise<boolean>;
 }

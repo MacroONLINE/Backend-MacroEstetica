@@ -17,4 +17,9 @@ export declare class EventsController {
     getEventById(eventId: string): Promise<any>;
     isUserEnrolled(id: string, userId: string, type: 'event' | 'classroom' | 'stream' | 'workshop'): Promise<boolean>;
     getEventStreamsAndWorkshops(eventId: string): Promise<any>;
+    enrollEventStream(eventStreamId: string, body: {
+        userId: string;
+    }): Promise<{
+        message: string;
+    }>;
 }
