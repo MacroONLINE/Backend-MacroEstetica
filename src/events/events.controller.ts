@@ -8,7 +8,7 @@ import {
   NotFoundException,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { EventsService } from './events.service';
 
 @ApiTags('Events')
@@ -144,6 +144,7 @@ async isUserEnrolled(
   @Post('stream/:eventStreamId/enroll')
 @ApiOperation({ summary: 'Inscribir un usuario en un stream de evento' })
 @ApiParam({ name: 'eventStreamId', description: 'ID del stream del evento' })
+@ApiBody({ schema: { example: { userId: 'cm4sths4i0008g1865nsbbh1l' } } })
 @ApiResponse({ status: 201, description: 'Usuario inscrito con éxito en el stream' })
 @ApiResponse({ status: 403, description: 'El usuario ya está inscrito en el stream o no se pudo inscribir' })
 @ApiResponse({ status: 404, description: 'Stream de evento no encontrado' })
@@ -157,5 +158,6 @@ async enrollEventStream(
   }
   return { message: `Usuario ${body.userId} inscrito con éxito en el stream ${eventStreamId}` };
 }
+
 
 }
