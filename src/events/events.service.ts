@@ -1,10 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { v4 as uuidv4 } from 'uuid';
 
-/**
- * 1) Se hace la lógica y agregación con Date original
- * 2) Al final, se hace una copia con todas las fechas formateadas recursivamente
- */
 @Injectable()
 export class EventsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -15,10 +12,6 @@ export class EventsService {
     return `${dateFormatter.format(date)}, ${timeFormatter.format(date)}`;
   }
 
-  /**
-   * Recorre recursivamente el objeto (incluyendo arrays y sub-objetos),
-   * y reemplaza las propiedades Date por strings formateadas.
-   */
   private fullyFormatDates(obj: any): any {
     if (obj === null || obj === undefined) return obj;
     if (Array.isArray(obj)) {
@@ -75,6 +68,91 @@ export class EventsService {
     return true;
   }
 
+  async enrollEventStream(eventStreamId: string, userId: string): Promise<boolean> {
+    const stream = await this.prisma.eventStream.findUnique({
+      where: { id: eventStreamId },
+    });
+    if (!stream) {
+      throw new NotFoundException(`Stream con ID ${eventStreamId} no encontrado`);
+    }
+    const existingEnrollment = await this.prisma.eventStreamEnrollment.findFirst({
+      where: { eventStreamId, userId },
+    });
+    if (existingEnrollment) {
+      return false;
+    }
+    await this.prisma.eventStreamEnrollment.create({
+      data: {
+        id: uuidv4(),
+        eventStreamId,
+        userId,
+        status: 'ENROLLED',
+      },
+    });
+    return true;
+  }
+
+  async enrollWorkshop(workshopId: string, userId: string): Promise<boolean> {
+    const workshop = await this.prisma.workshop.findUnique({
+      where: { id: workshopId },
+      include: { event: true },
+    });
+    if (!workshop) {
+      throw new NotFoundException(`Workshop con ID ${workshopId} no encontrado`);
+    }
+    if (!workshop.eventId) {
+      throw new ForbiddenException('Este workshop no está asociado a ningún evento, o no requiere inscripción de evento');
+    }
+
+    // Verificar que el usuario esté inscrito al evento padre
+    const eventEnrollment = await this.prisma.eventEnrollment.findFirst({
+      where: { eventId: workshop.eventId, userId },
+    });
+    if (!eventEnrollment) {
+      throw new ForbiddenException('El usuario no está inscrito en el evento al que pertenece este workshop');
+    }
+
+    const existingEnrollment = await this.prisma.workshopEnrollment.findFirst({
+      where: { workshopId, userId },
+    });
+    if (existingEnrollment) {
+      return false;
+    }
+    await this.prisma.workshopEnrollment.create({
+      data: {
+        id: uuidv4(),
+        workshopId,
+        userId,
+        status: 'ENROLLED',
+      },
+    });
+    return true;
+  }
+
+  async enrollClassroom(classroomId: string, userId: string): Promise<boolean> {
+    const classroom = await this.prisma.classroom.findUnique({
+      where: { id: classroomId },
+    });
+    if (!classroom) {
+      throw new NotFoundException(`Classroom con ID ${classroomId} no encontrado`);
+    }
+    const existingEnrollment = await this.prisma.classroomEnrollment.findFirst({
+      where: { classroomId, userId },
+    });
+    if (existingEnrollment) {
+      return false;
+    }
+    await this.prisma.classroomEnrollment.create({
+      data: {
+        id: uuidv4(),
+        classroomId,
+        userId,
+        status: 'ENROLLED',
+      },
+    });
+    return true;
+  }
+
   async isUserEnrolled(
     id: string,
     userId: string,
@@ -85,32 +163,23 @@ export class EventsService {
         return !!(await this.prisma.eventEnrollment.findFirst({
           where: { eventId: id, userId },
         }));
-  
       case 'classroom':
         return !!(await this.prisma.classroomEnrollment.findFirst({
           where: { classroomId: id, userId },
         }));
-  
       case 'stream':
         return !!(await this.prisma.eventStreamEnrollment.findFirst({
           where: { eventStreamId: id, userId },
         }));
-  
       case 'workshop':
         return !!(await this.prisma.workshopEnrollment.findFirst({
           where: { workshopId: id, userId },
         }));
-  
       default:
         throw new NotFoundException(`Tipo inválido: ${type}`);
     }
   }
-  
-  
 
-  /**
-   * Retorna un evento con TODAS las fechas formateadas
-   */
   async getEventById(eventId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
@@ -118,24 +187,15 @@ export class EventsService {
         leadingCompany: true,
         organizers: true,
         brands: true,
-        streams: {
-          include: { orators: true },
-        },
-        workshops: {
-          include: {
-            orators: true
-          },
-        },
+        streams: { include: { orators: true } },
+        workshops: { include: { orators: true } },
       },
     });
-    
     if (!event) {
       throw new NotFoundException(`No se encontró el evento con ID: ${eventId}`);
     }
-    
-    // Agregar todos los orators de streams y workshops
+
     let allOrators: any[] = [];
-    
     if (event.streams && event.streams.length > 0) {
       event.streams.forEach((stream) => {
         if (stream.orators && stream.orators.length > 0) {
@@ -143,7 +203,6 @@ export class EventsService {
         }
       });
     }
-    
     if (event.workshops && event.workshops.length > 0) {
       event.workshops.forEach((workshop) => {
         if (workshop.orators && workshop.orators.length > 0) {
@@ -151,23 +210,14 @@ export class EventsService {
         }
       });
     }
-    
-    // Eliminar duplicados basándonos en el id del orator
     const uniqueOrators = Array.from(
-      new Map(allOrators.map((orator) => [orator.id, orator])).values()
+      new Map(allOrators.map((o) => [o.id, o])).values()
     );
-    
-    // Agregar el nuevo campo con la lista de todos los orators
     (event as any).allOrators = uniqueOrators;
-    
+
     return this.fullyFormatDates(event);
   }
-  
 
-  /**
-   * 2) APLICAMOS la lógica de streams y workshops POR DÍA usando los Date crudos
-   * y AL FINAL formateamos todo con fullyFormatDates.
-   */
   async getStreamsAndWorkshopsByEvent(eventId: string) {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
@@ -181,7 +231,6 @@ export class EventsService {
     });
     if (!event) return null;
 
-    // 1) Creamos un array con streams y workshops con sus Date originales
     const allItems: any[] = [];
     for (const stream of event.streams ?? []) {
       allItems.push({ type: 'stream', ...stream });
@@ -190,35 +239,26 @@ export class EventsService {
       allItems.push({ type: 'workshop', ...wk });
     }
 
-    // 2) Agrupamos por DIA usando la fecha real
     const groups: Record<string, any[]> = {};
     for (const item of allItems) {
-      const realDate: Date = item.startDateTime; // Objeto Date
+      const realDate: Date = item.startDateTime;
       const dayKey = new Date(
         realDate.getFullYear(),
         realDate.getMonth(),
         realDate.getDate()
       ).getTime();
-
       groups[dayKey] ??= [];
       groups[dayKey].push(item);
     }
 
-    // 3) Para cada día, ordenamos por hora
     const sortedDays = Object.keys(groups)
       .map(Number)
       .sort((a, b) => a - b);
 
     const schedule = sortedDays.map((dayKey) => {
       const dayItems = groups[dayKey];
+      dayItems.sort((a, b) => a.startDateTime.getTime() - b.startDateTime.getTime());
 
-      dayItems.sort((a, b) => {
-        const A = a.startDateTime.getTime();
-        const B = b.startDateTime.getTime();
-        return A - B;
-      });
-
-      // Nombre de día (ej: "1 de marzo de 2025")
       const dayDate = new Date(dayKey);
       const dateFormatter = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
       const dayLabel = dateFormatter.format(dayDate);
@@ -226,8 +266,6 @@ export class EventsService {
       return { day: dayLabel, items: dayItems };
     });
 
-    // 4) Ahora que tenemos el schedule final, incluimos
-    //    la info del evento (en crudo). Formateamos al final
     const result = {
       eventId: event.id,
       eventTitle: event.title,
@@ -235,57 +273,7 @@ export class EventsService {
       eventEndDate: event.endDateTime,
       schedule,
     };
-    // 5) fullyFormatDates en TODO el objeto 'result' para que
-    //    streams, workshops y sub-objetos también se formateen
     return this.fullyFormatDates(result);
-  }
-
-  async getFullSchedule(eventId: string) {
-    const event = await this.prisma.event.findUnique({
-      where: { id: eventId },
-      include: {
-        streams: true,
-        workshops: true,
-      },
-    });
-    if (!event) return null;
-
-    const allItems: any[] = [];
-    for (const s of event.streams ?? []) {
-      allItems.push({ type: 'stream', ...s });
-    }
-    for (const wk of event.workshops ?? []) {
-      allItems.push({ type: 'workshop', ...wk });
-    }
-
-    // Ordenar por startDateTime real
-    allItems.sort((a, b) => {
-      const A = a.startDateTime.getTime();
-      const B = b.startDateTime.getTime();
-      return A - B;
-    });
-
-    const result = {
-      eventTitle: event.title,
-      eventStart: event.startDateTime,
-      eventEnd: event.endDateTime,
-      schedule: allItems,
-    };
-    return this.fullyFormatDates(result);
-  }
-
-  async getWorkshopById(workshopId: string) {
-    const workshop = await this.prisma.workshop.findUnique({
-      where: { id: workshopId },
-      include: {
-        event: { include: { brands: true } },
-        orators: true,
-        attendees: true,
-        enrollments: { include: { user: true } },
-      },
-    });
-    if (!workshop) return null;
-    return this.fullyFormatDates(workshop);
   }
 
   async getUpcomingEvents() {
@@ -409,33 +397,4 @@ export class EventsService {
     });
     return events.map((evt) => this.fullyFormatDates(evt));
   }
-
-  async enrollEventStream(eventStreamId: string, userId: string): Promise<boolean> {
-    const stream = await this.prisma.eventStream.findUnique({
-      where: { id: eventStreamId },
-    });
-    if (!stream) {
-      throw new NotFoundException(`Stream con ID ${eventStreamId} no encontrado`);
-    }
-    const existingEnrollment = await this.prisma.eventStreamEnrollment.findFirst({
-      where: { eventStreamId, userId },
-    });
-    if (existingEnrollment) {
-      return false;
-    }
-    await this.prisma.eventStreamEnrollment.create({
-      data: {
-        id: uuidv4(),
-        eventStreamId,
-        userId,
-        status: 'ENROLLED',
-      },
-    });
-    return true;
-  }
-  
 }
-function uuidv4(): any {
-  throw new Error('Function not implemented.');
-}
-

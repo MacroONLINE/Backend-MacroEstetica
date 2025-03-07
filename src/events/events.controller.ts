@@ -8,7 +8,13 @@ import {
   NotFoundException,
   ParseIntPipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 import { EventsService } from './events.service';
 
 @ApiTags('Events')
@@ -113,19 +119,18 @@ export class EventsController {
   }
 
   @Get(':id/is-enrolled/:userId/:type')
-@ApiOperation({ summary: 'Verifica si un usuario está inscrito en un evento, aula, transmisión en vivo o taller' })
-@ApiParam({ name: 'id', description: 'ID del evento, aula, transmisión o taller' })
-@ApiParam({ name: 'userId', description: 'ID del usuario' })
-@ApiParam({ name: 'type', description: 'Tipo de entidad: event, classroom, stream, workshop' })
-@ApiResponse({ status: 200, description: 'true o false, dependiendo si el usuario está inscrito' })
-async isUserEnrolled(
-  @Param('id') id: string,
-  @Param('userId') userId: string,
-  @Param('type') type: 'event' | 'classroom' | 'stream' | 'workshop'
-) {
-  return this.eventsService.isUserEnrolled(id, userId, type);
-}
-
+  @ApiOperation({ summary: 'Verifica si un usuario está inscrito en un evento, aula, transmisión en vivo o taller' })
+  @ApiParam({ name: 'id', description: 'ID del evento, aula, transmisión o taller' })
+  @ApiParam({ name: 'userId', description: 'ID del usuario' })
+  @ApiParam({ name: 'type', description: 'Tipo de entidad: event, classroom, stream, workshop' })
+  @ApiResponse({ status: 200, description: 'true o false, dependiendo si el usuario está inscrito' })
+  async isUserEnrolled(
+    @Param('id') id: string,
+    @Param('userId') userId: string,
+    @Param('type') type: 'event' | 'classroom' | 'stream' | 'workshop'
+  ) {
+    return this.eventsService.isUserEnrolled(id, userId, type);
+  }
 
   @Get(':eventId/streams-workshops')
   @ApiOperation({
@@ -142,22 +147,56 @@ async isUserEnrolled(
   }
 
   @Post('stream/:eventStreamId/enroll')
-@ApiOperation({ summary: 'Inscribir un usuario en un stream de evento' })
-@ApiParam({ name: 'eventStreamId', description: 'ID del stream del evento' })
-@ApiBody({ schema: { example: { userId: 'cm4sths4i0008g1865nsbbh1l' } } })
-@ApiResponse({ status: 201, description: 'Usuario inscrito con éxito en el stream' })
-@ApiResponse({ status: 403, description: 'El usuario ya está inscrito en el stream o no se pudo inscribir' })
-@ApiResponse({ status: 404, description: 'Stream de evento no encontrado' })
-async enrollEventStream(
-  @Param('eventStreamId') eventStreamId: string,
-  @Body() body: { userId: string }
-) {
-  const isEnrolled = await this.eventsService.enrollEventStream(eventStreamId, body.userId);
-  if (!isEnrolled) {
-    throw new ForbiddenException('El usuario ya está inscrito en el stream o no se pudo inscribir');
+  @ApiOperation({ summary: 'Inscribir un usuario en un stream de evento' })
+  @ApiParam({ name: 'eventStreamId', description: 'ID del stream del evento' })
+  @ApiBody({ schema: { example: { userId: 'cm4sths4i0008g1865nsbbh1l' } } })
+  @ApiResponse({ status: 201, description: 'Usuario inscrito con éxito en el stream' })
+  @ApiResponse({ status: 403, description: 'El usuario ya está inscrito en el stream o no se pudo inscribir' })
+  @ApiResponse({ status: 404, description: 'Stream de evento no encontrado' })
+  async enrollEventStream(
+    @Param('eventStreamId') eventStreamId: string,
+    @Body() body: { userId: string }
+  ) {
+    const isEnrolled = await this.eventsService.enrollEventStream(eventStreamId, body.userId);
+    if (!isEnrolled) {
+      throw new ForbiddenException('El usuario ya está inscrito en el stream o no se pudo inscribir');
+    }
+    return { message: `Usuario ${body.userId} inscrito con éxito en el stream ${eventStreamId}` };
   }
-  return { message: `Usuario ${body.userId} inscrito con éxito en el stream ${eventStreamId}` };
-}
 
+  @Post('workshop/:workshopId/enroll')
+  @ApiOperation({ summary: 'Inscribir un usuario en un workshop' })
+  @ApiParam({ name: 'workshopId', description: 'ID del workshop' })
+  @ApiBody({ schema: { example: { userId: 'cm4sths4i0008g1865nsbbh1l' } } })
+  @ApiResponse({ status: 201, description: 'Usuario inscrito con éxito en el workshop' })
+  @ApiResponse({ status: 403, description: 'El usuario no está inscrito en el evento padre o ya está en el workshop' })
+  @ApiResponse({ status: 404, description: 'Workshop no encontrado' })
+  async enrollWorkshop(
+    @Param('workshopId') workshopId: string,
+    @Body() body: { userId: string }
+  ) {
+    const isEnrolled = await this.eventsService.enrollWorkshop(workshopId, body.userId);
+    if (!isEnrolled) {
+      throw new ForbiddenException('No se pudo inscribir en el workshop (ya inscrito o sin permisos).');
+    }
+    return { message: `Usuario ${body.userId} inscrito con éxito en el workshop ${workshopId}` };
+  }
 
+  @Post('classroom/:classroomId/enroll')
+  @ApiOperation({ summary: 'Inscribir un usuario en un classroom' })
+  @ApiParam({ name: 'classroomId', description: 'ID del classroom' })
+  @ApiBody({ schema: { example: { userId: 'cm4sths4i0008g1865nsbbh1l' } } })
+  @ApiResponse({ status: 201, description: 'Usuario inscrito con éxito en el classroom' })
+  @ApiResponse({ status: 403, description: 'El usuario ya está inscrito en el classroom o no se pudo inscribir' })
+  @ApiResponse({ status: 404, description: 'Classroom no encontrado' })
+  async enrollClassroom(
+    @Param('classroomId') classroomId: string,
+    @Body() body: { userId: string }
+  ) {
+    const isEnrolled = await this.eventsService.enrollClassroom(classroomId, body.userId);
+    if (!isEnrolled) {
+      throw new ForbiddenException('El usuario ya está inscrito en el classroom o no se pudo inscribir.');
+    }
+    return { message: `Usuario ${body.userId} inscrito con éxito en el classroom ${classroomId}` };
+  }
 }

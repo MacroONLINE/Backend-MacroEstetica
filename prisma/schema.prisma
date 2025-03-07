@@ -355,6 +355,7 @@ model Workshop {
   description      String
   whatYouWillLearn String?
   price            Float?
+  isFree           Boolean   @default(false)
   startDateTime    DateTime
   endDateTime      DateTime
   imageUrl         String?
@@ -657,6 +658,7 @@ model Classroom {
   title            String
   description      String
   price            Float?
+  isFree           Boolean   @default(false)
   startDateTime    DateTime             @default(now())
   endDateTime      DateTime             @default(now())
   imageUrl         String?
