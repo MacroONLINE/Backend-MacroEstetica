@@ -11,8 +11,8 @@ const common_1 = require("@nestjs/common");
 const agora_access_token_1 = require("agora-access-token");
 let AgoraService = class AgoraService {
     constructor() {
-        this.appId = "30eeedb05a31430eac4d19dbe1b73ab7";
-        this.appCertificate = "31724ea95d98465baa793ed09a3c68f5";
+        this.appId = '30eeedb05a31430eac4d19dbe1b73ab7';
+        this.appCertificate = '31724ea95d98465baa793ed09a3c68f5';
         this.expirationTimeInSeconds = 3600;
     }
     generateTokens(channelName, uid, role) {

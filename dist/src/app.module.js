@@ -26,8 +26,6 @@ const events_module_1 = require("./events/events.module");
 const messages_module_1 = require("./messages/messages.module");
 const instructor_module_1 = require("./instructor/instructor.module");
 const agora_module_1 = require("./agora/agora.module");
-const agora_chat_service_1 = require("./agora-chat/agora-chat.service");
-const agora_chat_controller_1 = require("./agora-chat/agora-chat.controller");
 const chat_module_1 = require("./chat/chat.module");
 let AppModule = class AppModule {
 };
@@ -51,8 +49,8 @@ exports.AppModule = AppModule = __decorate([
             agora_module_1.AgoraModule,
             chat_module_1.ChatModule
         ],
-        controllers: [app_controller_1.AppController, users_controller_1.UsersController, agora_chat_controller_1.AgoraChatController],
-        providers: [app_service_1.AppService, users_service_1.UsersService, agora_chat_service_1.AgoraChatService],
+        controllers: [app_controller_1.AppController, users_controller_1.UsersController],
+        providers: [app_service_1.AppService, users_service_1.UsersService],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

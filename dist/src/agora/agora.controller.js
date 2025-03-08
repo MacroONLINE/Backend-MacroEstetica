@@ -27,24 +27,24 @@ let AgoraController = class AgoraController {
         const { channelName, uid } = dto;
         const [stream, workshop, classroom] = await this.prisma.$transaction([
             this.prisma.eventStream.findUnique({
-                where: { channelName: channelName },
+                where: { channelName },
                 include: {
                     orators: { select: { userId: true } },
-                    enrollments: { select: { userId: true } }
+                    enrollments: { select: { userId: true } },
                 },
             }),
             this.prisma.workshop.findUnique({
-                where: { channelName: channelName },
+                where: { channelName },
                 include: {
                     orators: { select: { userId: true } },
-                    enrollments: { select: { userId: true } }
+                    enrollments: { select: { userId: true } },
                 },
             }),
             this.prisma.classroom.findUnique({
-                where: { channelName: channelName },
+                where: { channelName },
                 include: {
                     orators: { select: { userId: true } },
-                    enrollments: { select: { userId: true } }
+                    enrollments: { select: { userId: true } },
                 },
             }),
         ]);
@@ -59,73 +59,82 @@ let AgoraController = class AgoraController {
         if (now > session.endDateTime) {
             throw new common_1.BadRequestException(`La sesión ya finalizó. Terminó a las ${session.endDateTime.toISOString()}`);
         }
-        const isInstructor = session.orators.some((orator) => orator.userId === uid);
-        const isEnrolled = session.enrollments.some((enrollment) => enrollment.userId === uid);
+        const isInstructor = session.orators.some((o) => o.userId === uid);
+        const isEnrolled = session.enrollments.some((e) => e.userId === uid);
         if (!isInstructor && !isEnrolled) {
             throw new common_1.ForbiddenException('No tienes acceso a esta sesión como instructor ni como usuario inscrito');
         }
         const role = isInstructor ? 'host' : 'audience';
-        return this.agoraService.generateTokens(channelName, uid, role);
+        const tokens = this.agoraService.generateTokens(channelName, uid, role);
+        let entityType;
+        if (stream)
+            entityType = 'STREAM';
+        else if (workshop)
+            entityType = 'WORKSHOP';
+        else
+            entityType = 'CLASSROOM';
+        const chatRoom = await this.prisma.chatRoom.findFirst({
+            where: { entityId: session.id, entityType },
+        });
+        const roomId = chatRoom ? chatRoom.id : null;
+        return { ...tokens, roomId };
+    }
+    async getRoomId(channelName) {
+        const [stream, workshop, classroom] = await this.prisma.$transaction([
+            this.prisma.eventStream.findUnique({ where: { channelName } }),
+            this.prisma.workshop.findUnique({ where: { channelName } }),
+            this.prisma.classroom.findUnique({ where: { channelName } }),
+        ]);
+        const entity = stream || workshop || classroom;
+        if (!entity) {
+            throw new common_1.NotFoundException('No se encontró una sesión con ese channelName.');
+        }
+        let entityType;
+        if (stream)
+            entityType = 'STREAM';
+        else if (workshop)
+            entityType = 'WORKSHOP';
+        else
+            entityType = 'CLASSROOM';
+        const chatRoom = await this.prisma.chatRoom.findFirst({
+            where: { entityId: entity.id, entityType },
+        });
+        if (!chatRoom) {
+            throw new common_1.NotFoundException('No se encontró ChatRoom asociado a esa sesión.');
+        }
+        return { roomId: chatRoom.id };
     }
 };
 exports.AgoraController = AgoraController;
 __decorate([
     (0, common_1.Post)('generate-token'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Genera un token de Agora para un usuario en un stream, workshop o classroom',
-        description: 'El endpoint busca la sesión utilizando el campo `channelName` en lugar del `id`. El campo "channelName" del DTO representa el nombre del canal de la sesión.'
-    }),
+    (0, swagger_1.ApiOperation)({ summary: 'Genera un token de Agora para un usuario en un stream, workshop o classroom' }),
     (0, swagger_1.ApiBody)({
-        description: 'Datos necesarios para generar el token. Nota: el campo "channelName" se utiliza para identificar la sesión.',
+        description: 'Datos necesarios para generar el token, usando "channelName" para identificar la sesión.',
         type: generate_token_dto_1.GenerateTokenDto,
-        examples: {
-            example1: {
-                summary: 'Ejemplo de solicitud',
-                value: {
-                    channelName: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c',
-                    uid: 'user-12345'
-                }
-            }
-        }
     }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Token generado exitosamente',
-        schema: {
-            example: {
-                rtcToken: '006c9be6c6b3e5f4c3...',
-                rtmToken: '007c9be6c6b3e5f4c3...',
-                channelName: 'd03b3e6b-9f74-4d49-8e3b-9e6c6b3e5f4c',
-                role: 'host'
-            }
-        }
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'No se encontró un stream, workshop o classroom con ese channelName',
-        schema: {
-            example: { statusCode: 404, message: 'No se encontró una sesión con ese channelName.', error: 'Not Found' }
-        }
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Errores relacionados con la fecha de la sesión',
-        schema: {
-            example: { statusCode: 400, message: 'La sesión aún no ha comenzado. Inicia a las 2025-03-01T09:00:00.000Z', error: 'Bad Request' }
-        }
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 403,
-        description: 'Usuario no autorizado para acceder a la sesión',
-        schema: {
-            example: { statusCode: 403, message: 'No tienes acceso a esta sesión como instructor ni como usuario inscrito', error: 'Forbidden' }
-        }
-    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Token generado exitosamente' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'No se encontró un stream, workshop o classroom con ese channelName' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Errores relacionados con la fecha de la sesión' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Usuario no autorizado para acceder a la sesión' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [generate_token_dto_1.GenerateTokenDto]),
     __metadata("design:returntype", Promise)
 ], AgoraController.prototype, "generateToken", null);
+__decorate([
+    (0, common_1.Get)(':channelName/room-id'),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Retorna el roomId de chat para un channelName asociado a stream, workshop o classroom',
+    }),
+    (0, swagger_1.ApiParam)({ name: 'channelName', description: 'Nombre del canal (coincide con la sesión buscada)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna el roomId si existe' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'No se encontró la sesión o la sala de chat' }),
+    __param(0, (0, common_1.Param)('channelName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AgoraController.prototype, "getRoomId", null);
 exports.AgoraController = AgoraController = __decorate([
     (0, swagger_1.ApiTags)('Agora'),
     (0, common_1.Controller)('agora'),

@@ -6,11 +6,15 @@ export declare class AgoraController {
     private readonly prisma;
     constructor(agoraService: AgoraService, prisma: PrismaService);
     generateToken(dto: GenerateTokenDto): Promise<{
+        roomId: string;
         rtcToken: string;
         rtmToken: string;
         channelName: string;
         uid: string;
-        role: "audience" | "host";
+        role: "host" | "audience";
         expiresAt: number;
+    }>;
+    getRoomId(channelName: string): Promise<{
+        roomId: string;
     }>;
 }

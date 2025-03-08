@@ -18,8 +18,6 @@ import { EventsModule } from './events/events.module';
 import { MessagesModule } from './messages/messages.module';
 import { InstructorModule } from './instructor/instructor.module';
 import { AgoraModule } from './agora/agora.module';
-import { AgoraChatService } from './agora-chat/agora-chat.service';
-import { AgoraChatController } from './agora-chat/agora-chat.controller';
 import { ChatModule } from './chat/chat.module';
 
 @Module({
@@ -40,7 +38,7 @@ import { ChatModule } from './chat/chat.module';
     AgoraModule,
     ChatModule
   ],
-  controllers: [AppController, UsersController, AgoraChatController],
-  providers: [AppService, UsersService, AgoraChatService],
+  controllers: [AppController, UsersController],
+  providers: [AppService, UsersService],
 })
 export class AppModule {}
