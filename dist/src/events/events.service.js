@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const uuid_1 = require("uuid");
 let EventsService = class EventsService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -39,6 +40,17 @@ let EventsService = class EventsService {
             return newObj;
         }
         return obj;
+    }
+    setIsLiveOnEvents(events) {
+        const now = new Date();
+        if (Array.isArray(events)) {
+            for (const evt of events) {
+                evt.isLive = now >= evt.startDateTime && now <= evt.endDateTime;
+            }
+        }
+        else if (events) {
+            events.isLive = now >= events.startDateTime && now <= events.endDateTime;
+        }
     }
     async createEvent(data) {
         const event = await this.prisma.event.create({
@@ -75,6 +87,85 @@ let EventsService = class EventsService {
         });
         return true;
     }
+    async enrollEventStream(eventStreamId, userId) {
+        const stream = await this.prisma.eventStream.findUnique({
+            where: { id: eventStreamId },
+        });
+        if (!stream) {
+            throw new common_1.NotFoundException(`Stream con ID ${eventStreamId} no encontrado`);
+        }
+        const existingEnrollment = await this.prisma.eventStreamEnrollment.findFirst({
+            where: { eventStreamId, userId },
+        });
+        if (existingEnrollment) {
+            return false;
+        }
+        await this.prisma.eventStreamEnrollment.create({
+            data: {
+                id: (0, uuid_1.v4)(),
+                eventStreamId,
+                userId,
+                status: 'ENROLLED',
+            },
+        });
+        return true;
+    }
+    async enrollWorkshop(workshopId, userId) {
+        const workshop = await this.prisma.workshop.findUnique({
+            where: { id: workshopId },
+            include: { event: true },
+        });
+        if (!workshop) {
+            throw new common_1.NotFoundException(`Workshop con ID ${workshopId} no encontrado`);
+        }
+        if (!workshop.eventId) {
+            throw new common_1.ForbiddenException('Este workshop no está asociado a ningún evento, o no requiere inscripción de evento');
+        }
+        const eventEnrollment = await this.prisma.eventEnrollment.findFirst({
+            where: { eventId: workshop.eventId, userId },
+        });
+        if (!eventEnrollment) {
+            throw new common_1.ForbiddenException('El usuario no está inscrito en el evento al que pertenece este workshop');
+        }
+        const existingEnrollment = await this.prisma.workshopEnrollment.findFirst({
+            where: { workshopId, userId },
+        });
+        if (existingEnrollment) {
+            return false;
+        }
+        await this.prisma.workshopEnrollment.create({
+            data: {
+                id: (0, uuid_1.v4)(),
+                workshopId,
+                userId,
+                status: 'ENROLLED',
+            },
+        });
+        return true;
+    }
+    async enrollClassroom(classroomId, userId) {
+        const classroom = await this.prisma.classroom.findUnique({
+            where: { id: classroomId },
+        });
+        if (!classroom) {
+            throw new common_1.NotFoundException(`Classroom con ID ${classroomId} no encontrado`);
+        }
+        const existingEnrollment = await this.prisma.classroomEnrollment.findFirst({
+            where: { classroomId, userId },
+        });
+        if (existingEnrollment) {
+            return false;
+        }
+        await this.prisma.classroomEnrollment.create({
+            data: {
+                id: (0, uuid_1.v4)(),
+                classroomId,
+                userId,
+                status: 'ENROLLED',
+            },
+        });
+        return true;
+    }
     async isUserEnrolled(id, userId, type) {
         switch (type) {
             case 'event':
@@ -104,14 +195,8 @@ let EventsService = class EventsService {
                 leadingCompany: true,
                 organizers: true,
                 brands: true,
-                streams: {
-                    include: { orators: true },
-                },
-                workshops: {
-                    include: {
-                        orators: true
-                    },
-                },
+                streams: { include: { orators: true } },
+                workshops: { include: { orators: true } },
             },
         });
         if (!event) {
@@ -132,8 +217,9 @@ let EventsService = class EventsService {
                 }
             });
         }
-        const uniqueOrators = Array.from(new Map(allOrators.map((orator) => [orator.id, orator])).values());
+        const uniqueOrators = Array.from(new Map(allOrators.map((o) => [o.id, o])).values());
         event.allOrators = uniqueOrators;
+        this.setIsLiveOnEvents(event);
         return this.fullyFormatDates(event);
     }
     async getStreamsAndWorkshopsByEvent(eventId) {
@@ -158,8 +244,8 @@ let EventsService = class EventsService {
         }
         const groups = {};
         for (const item of allItems) {
-            const realDate = item.startDateTime;
-            const dayKey = new Date(realDate.getFullYear(), realDate.getMonth(), realDate.getDate()).getTime();
+            const d = item.startDateTime;
+            const dayKey = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
             groups[dayKey] ??= [];
             groups[dayKey].push(item);
         }
@@ -168,11 +254,7 @@ let EventsService = class EventsService {
             .sort((a, b) => a - b);
         const schedule = sortedDays.map((dayKey) => {
             const dayItems = groups[dayKey];
-            dayItems.sort((a, b) => {
-                const A = a.startDateTime.getTime();
-                const B = b.startDateTime.getTime();
-                return A - B;
-            });
+            dayItems.sort((a, b) => a.startDateTime.getTime() - b.startDateTime.getTime());
             const dayDate = new Date(dayKey);
             const dateFormatter = new Intl.DateTimeFormat('es-ES', { dateStyle: 'long' });
             const dayLabel = dateFormatter.format(dayDate);
@@ -185,51 +267,9 @@ let EventsService = class EventsService {
             eventEndDate: event.endDateTime,
             schedule,
         };
+        const now = new Date();
+        result.isLive = now >= event.startDateTime && now <= event.endDateTime;
         return this.fullyFormatDates(result);
-    }
-    async getFullSchedule(eventId) {
-        const event = await this.prisma.event.findUnique({
-            where: { id: eventId },
-            include: {
-                streams: true,
-                workshops: true,
-            },
-        });
-        if (!event)
-            return null;
-        const allItems = [];
-        for (const s of event.streams ?? []) {
-            allItems.push({ type: 'stream', ...s });
-        }
-        for (const wk of event.workshops ?? []) {
-            allItems.push({ type: 'workshop', ...wk });
-        }
-        allItems.sort((a, b) => {
-            const A = a.startDateTime.getTime();
-            const B = b.startDateTime.getTime();
-            return A - B;
-        });
-        const result = {
-            eventTitle: event.title,
-            eventStart: event.startDateTime,
-            eventEnd: event.endDateTime,
-            schedule: allItems,
-        };
-        return this.fullyFormatDates(result);
-    }
-    async getWorkshopById(workshopId) {
-        const workshop = await this.prisma.workshop.findUnique({
-            where: { id: workshopId },
-            include: {
-                event: { include: { brands: true } },
-                orators: true,
-                attendees: true,
-                enrollments: { include: { user: true } },
-            },
-        });
-        if (!workshop)
-            return null;
-        return this.fullyFormatDates(workshop);
     }
     async getUpcomingEvents() {
         const now = new Date();
@@ -247,6 +287,7 @@ let EventsService = class EventsService {
                 },
             },
         });
+        this.setIsLiveOnEvents(events);
         return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getUpcomingEventsByYear(year) {
@@ -272,6 +313,7 @@ let EventsService = class EventsService {
                 },
             },
         });
+        this.setIsLiveOnEvents(events);
         return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getPhysicalEvents() {
@@ -288,6 +330,7 @@ let EventsService = class EventsService {
                 },
             },
         });
+        this.setIsLiveOnEvents(events);
         return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getPhysicalEventsByEmpresa(empresaId) {
@@ -311,6 +354,7 @@ let EventsService = class EventsService {
                 },
             },
         });
+        this.setIsLiveOnEvents(events);
         return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getLiveEvents() {
@@ -331,10 +375,10 @@ let EventsService = class EventsService {
                 },
             },
         });
-        const result = events.map((evt) => this.fullyFormatDates(evt));
-        if (!result.length)
+        if (!events.length)
             return [];
-        return result;
+        this.setIsLiveOnEvents(events);
+        return events.map((evt) => this.fullyFormatDates(evt));
     }
     async getEventsByLeadingCompany(empresaId) {
         const events = await this.prisma.event.findMany({
@@ -347,30 +391,32 @@ let EventsService = class EventsService {
                 organizers: true,
             },
         });
+        this.setIsLiveOnEvents(events);
         return events.map((evt) => this.fullyFormatDates(evt));
     }
-    async enrollEventStream(eventStreamId, userId) {
+    async getOratorsByChannelName(channelName) {
         const stream = await this.prisma.eventStream.findUnique({
-            where: { id: eventStreamId },
+            where: { channelName },
+            include: { orators: true },
         });
-        if (!stream) {
-            throw new common_1.NotFoundException(`Stream con ID ${eventStreamId} no encontrado`);
+        if (stream) {
+            return { type: 'stream', entityId: stream.id, orators: stream.orators };
         }
-        const existingEnrollment = await this.prisma.eventStreamEnrollment.findFirst({
-            where: { eventStreamId, userId },
+        const workshop = await this.prisma.workshop.findUnique({
+            where: { channelName },
+            include: { orators: true },
         });
-        if (existingEnrollment) {
-            return false;
+        if (workshop) {
+            return { type: 'workshop', entityId: workshop.id, orators: workshop.orators };
         }
-        await this.prisma.eventStreamEnrollment.create({
-            data: {
-                id: uuidv4(),
-                eventStreamId,
-                userId,
-                status: 'ENROLLED',
-            },
+        const classroom = await this.prisma.classroom.findUnique({
+            where: { channelName },
+            include: { orators: true },
         });
-        return true;
+        if (classroom) {
+            return { type: 'classroom', entityId: classroom.id, orators: classroom.orators };
+        }
+        throw new common_1.NotFoundException(`No se encontró un stream, workshop o classroom con channelName: ${channelName}`);
     }
 };
 exports.EventsService = EventsService;
@@ -378,7 +424,4 @@ exports.EventsService = EventsService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService])
 ], EventsService);
-function uuidv4() {
-    throw new Error('Function not implemented.');
-}
 //# sourceMappingURL=events.service.js.map

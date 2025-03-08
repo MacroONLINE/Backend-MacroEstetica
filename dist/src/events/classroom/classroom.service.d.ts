@@ -2,6 +2,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export declare class ClassroomService {
     private readonly prisma;
     constructor(prisma: PrismaService);
+    private setIsLiveOnClassrooms;
     createClassroom(data: any): Promise<{
         id: string;
         createdAt: Date;
@@ -12,6 +13,7 @@ export declare class ClassroomService {
         endDateTime: Date;
         price: number | null;
         categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -73,10 +75,59 @@ export declare class ClassroomService {
         endDateTime: Date;
         price: number | null;
         categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;
     updateClassroom(id: string, data: any): Promise<{
+        enrollments: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            classroomId: string;
+        }[];
+        attendees: {
+            id: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: import(".prisma/client").$Enums.Role;
+            password: string;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            newsletter: boolean;
+            userSubscription: string | null;
+        }[];
+        orators: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            userId: string;
+            bannerImage: string | null;
+            title: string | null;
+            followers: number | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            description: string;
+            experienceDescription: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            empresaId: string | null;
+            categoryId: string | null;
+        }[];
+    } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -86,6 +137,7 @@ export declare class ClassroomService {
         endDateTime: Date;
         price: number | null;
         categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -150,6 +202,7 @@ export declare class ClassroomService {
         endDateTime: Date;
         price: number | null;
         categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     })[]>;
@@ -211,6 +264,7 @@ export declare class ClassroomService {
         endDateTime: Date;
         price: number | null;
         categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     })[]>;
@@ -243,6 +297,7 @@ export declare class ClassroomService {
         endDateTime: Date;
         price: number | null;
         categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -275,6 +330,7 @@ export declare class ClassroomService {
         endDateTime: Date;
         price: number | null;
         categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;

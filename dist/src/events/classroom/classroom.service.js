@@ -16,6 +16,17 @@ let ClassroomService = class ClassroomService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    setIsLiveOnClassrooms(classrooms) {
+        const now = new Date();
+        if (Array.isArray(classrooms)) {
+            for (const cls of classrooms) {
+                cls.isLive = now >= cls.startDateTime && now <= cls.endDateTime;
+            }
+        }
+        else if (classrooms) {
+            classrooms.isLive = now >= classrooms.startDateTime && now <= classrooms.endDateTime;
+        }
+    }
     async createClassroom(data) {
         return this.prisma.classroom.create({
             data: {
@@ -30,7 +41,7 @@ let ClassroomService = class ClassroomService {
         });
     }
     async getClassroomById(id) {
-        return this.prisma.classroom.findUnique({
+        const classroom = await this.prisma.classroom.findUnique({
             where: { id },
             include: {
                 orators: true,
@@ -38,12 +49,16 @@ let ClassroomService = class ClassroomService {
                 enrollments: true,
             },
         });
+        if (!classroom)
+            throw new common_1.NotFoundException('Classroom no encontrado');
+        this.setIsLiveOnClassrooms(classroom);
+        return classroom;
     }
     async updateClassroom(id, data) {
         const classroom = await this.prisma.classroom.findUnique({ where: { id } });
         if (!classroom)
             throw new common_1.NotFoundException('Classroom no encontrado');
-        return this.prisma.classroom.update({
+        const updated = await this.prisma.classroom.update({
             where: { id },
             data: {
                 title: data.title,
@@ -54,7 +69,14 @@ let ClassroomService = class ClassroomService {
                 imageUrl: data.imageUrl,
                 channelName: data.channelName,
             },
+            include: {
+                orators: true,
+                attendees: true,
+                enrollments: true,
+            },
         });
+        this.setIsLiveOnClassrooms(updated);
+        return updated;
     }
     async deleteClassroom(id) {
         const classroom = await this.prisma.classroom.findUnique({ where: { id } });
@@ -65,10 +87,12 @@ let ClassroomService = class ClassroomService {
     }
     async getUpcomingClassrooms() {
         const now = new Date();
-        return this.prisma.classroom.findMany({
+        const classrooms = await this.prisma.classroom.findMany({
             where: { startDateTime: { gte: now } },
             include: { orators: true, attendees: true, enrollments: true },
         });
+        this.setIsLiveOnClassrooms(classrooms);
+        return classrooms;
     }
     async getLiveClassrooms() {
         const now = new Date();
@@ -79,6 +103,7 @@ let ClassroomService = class ClassroomService {
             },
             include: { orators: true, attendees: true, enrollments: true },
         });
+        this.setIsLiveOnClassrooms(classrooms);
         return classrooms;
     }
     async addOrator(classroomId, instructorId) {

@@ -199,4 +199,13 @@ export class EventsController {
     }
     return { message: `Usuario ${body.userId} inscrito con éxito en el classroom ${classroomId}` };
   }
+
+  @Get('channel/:channelName/orators')
+  @ApiOperation({ summary: 'Obtiene los orators (instructores) a partir de un channelName' })
+  @ApiParam({ name: 'channelName', description: 'Channel único para identificar stream, workshop o classroom' })
+  @ApiResponse({ status: 200, description: 'Retorna el tipo de entidad y la lista de orators' })
+  @ApiResponse({ status: 404, description: 'No se encontró un stream, workshop o classroom con ese channelName' })
+  async getOratorsByChannel(@Param('channelName') channelName: string) {
+    return this.eventsService.getOratorsByChannelName(channelName);
+  }
 }

@@ -5,6 +5,20 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ClassroomService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Añade la propiedad isLive a uno o varios classrooms
+   */
+  private setIsLiveOnClassrooms(classrooms: any | any[]): void {
+    const now = new Date();
+    if (Array.isArray(classrooms)) {
+      for (const cls of classrooms) {
+        cls.isLive = now >= cls.startDateTime && now <= cls.endDateTime;
+      }
+    } else if (classrooms) {
+      classrooms.isLive = now >= classrooms.startDateTime && now <= classrooms.endDateTime;
+    }
+  }
+
   async createClassroom(data: any) {
     return this.prisma.classroom.create({
       data: {
@@ -20,7 +34,7 @@ export class ClassroomService {
   }
 
   async getClassroomById(id: string) {
-    return this.prisma.classroom.findUnique({
+    const classroom = await this.prisma.classroom.findUnique({
       where: { id },
       include: {
         orators: true,
@@ -28,12 +42,17 @@ export class ClassroomService {
         enrollments: true,
       },
     });
+    if (!classroom) throw new NotFoundException('Classroom no encontrado');
+
+    this.setIsLiveOnClassrooms(classroom);
+    return classroom;
   }
 
   async updateClassroom(id: string, data: any) {
     const classroom = await this.prisma.classroom.findUnique({ where: { id } });
     if (!classroom) throw new NotFoundException('Classroom no encontrado');
-    return this.prisma.classroom.update({
+
+    const updated = await this.prisma.classroom.update({
       where: { id },
       data: {
         title: data.title,
@@ -44,22 +63,33 @@ export class ClassroomService {
         imageUrl: data.imageUrl,
         channelName: data.channelName,
       },
+      include: {
+        orators: true,
+        attendees: true,
+        enrollments: true,
+      },
     });
+
+    this.setIsLiveOnClassrooms(updated);
+    return updated;
   }
 
   async deleteClassroom(id: string) {
     const classroom = await this.prisma.classroom.findUnique({ where: { id } });
     if (!classroom) throw new NotFoundException('Classroom no encontrado');
+
     await this.prisma.classroom.delete({ where: { id } });
     return { message: 'Classroom eliminado correctamente' };
   }
 
   async getUpcomingClassrooms() {
     const now = new Date();
-    return this.prisma.classroom.findMany({
+    const classrooms = await this.prisma.classroom.findMany({
       where: { startDateTime: { gte: now } },
       include: { orators: true, attendees: true, enrollments: true },
     });
+    this.setIsLiveOnClassrooms(classrooms);
+    return classrooms;
   }
 
   async getLiveClassrooms() {
@@ -71,6 +101,7 @@ export class ClassroomService {
       },
       include: { orators: true, attendees: true, enrollments: true },
     });
+    this.setIsLiveOnClassrooms(classrooms);
     return classrooms;
   }
 
@@ -79,6 +110,7 @@ export class ClassroomService {
     if (!classroom) throw new NotFoundException('Classroom no encontrado');
     const instructor = await this.prisma.instructor.findUnique({ where: { id: instructorId } });
     if (!instructor) throw new NotFoundException('Instructor no encontrado');
+
     return this.prisma.classroom.update({
       where: { id: classroomId },
       data: {
@@ -97,6 +129,7 @@ export class ClassroomService {
     if (!classroom) throw new NotFoundException('Classroom no encontrado');
     const instructor = await this.prisma.instructor.findUnique({ where: { id: instructorId } });
     if (!instructor) throw new NotFoundException('Instructor no encontrado');
+
     return this.prisma.classroom.update({
       where: { id: classroomId },
       data: {

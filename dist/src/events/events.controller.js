@@ -78,6 +78,23 @@ let EventsController = class EventsController {
         }
         return { message: `Usuario ${body.userId} inscrito con éxito en el stream ${eventStreamId}` };
     }
+    async enrollWorkshop(workshopId, body) {
+        const isEnrolled = await this.eventsService.enrollWorkshop(workshopId, body.userId);
+        if (!isEnrolled) {
+            throw new common_1.ForbiddenException('No se pudo inscribir en el workshop (ya inscrito o sin permisos).');
+        }
+        return { message: `Usuario ${body.userId} inscrito con éxito en el workshop ${workshopId}` };
+    }
+    async enrollClassroom(classroomId, body) {
+        const isEnrolled = await this.eventsService.enrollClassroom(classroomId, body.userId);
+        if (!isEnrolled) {
+            throw new common_1.ForbiddenException('El usuario ya está inscrito en el classroom o no se pudo inscribir.');
+        }
+        return { message: `Usuario ${body.userId} inscrito con éxito en el classroom ${classroomId}` };
+    }
+    async getOratorsByChannel(channelName) {
+        return this.eventsService.getOratorsByChannelName(channelName);
+    }
 };
 exports.EventsController = EventsController;
 __decorate([
@@ -220,6 +237,45 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], EventsController.prototype, "enrollEventStream", null);
+__decorate([
+    (0, common_1.Post)('workshop/:workshopId/enroll'),
+    (0, swagger_1.ApiOperation)({ summary: 'Inscribir un usuario en un workshop' }),
+    (0, swagger_1.ApiParam)({ name: 'workshopId', description: 'ID del workshop' }),
+    (0, swagger_1.ApiBody)({ schema: { example: { userId: 'cm4sths4i0008g1865nsbbh1l' } } }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Usuario inscrito con éxito en el workshop' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'El usuario no está inscrito en el evento padre o ya está en el workshop' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Workshop no encontrado' }),
+    __param(0, (0, common_1.Param)('workshopId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "enrollWorkshop", null);
+__decorate([
+    (0, common_1.Post)('classroom/:classroomId/enroll'),
+    (0, swagger_1.ApiOperation)({ summary: 'Inscribir un usuario en un classroom' }),
+    (0, swagger_1.ApiParam)({ name: 'classroomId', description: 'ID del classroom' }),
+    (0, swagger_1.ApiBody)({ schema: { example: { userId: 'cm4sths4i0008g1865nsbbh1l' } } }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Usuario inscrito con éxito en el classroom' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'El usuario ya está inscrito en el classroom o no se pudo inscribir' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
+    __param(0, (0, common_1.Param)('classroomId')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "enrollClassroom", null);
+__decorate([
+    (0, common_1.Get)('channel/:channelName/orators'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtiene los orators (instructores) a partir de un channelName' }),
+    (0, swagger_1.ApiParam)({ name: 'channelName', description: 'Channel único para identificar stream, workshop o classroom' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna el tipo de entidad y la lista de orators' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'No se encontró un stream, workshop o classroom con ese channelName' }),
+    __param(0, (0, common_1.Param)('channelName')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EventsController.prototype, "getOratorsByChannel", null);
 exports.EventsController = EventsController = __decorate([
     (0, swagger_1.ApiTags)('Events'),
     (0, common_1.Controller)('events'),

@@ -14,6 +14,7 @@ export declare class WorkshopsService {
         categories: import(".prisma/client").$Enums.Profession[];
         eventId: string | null;
         whatYouWillLearn: string | null;
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -95,6 +96,7 @@ export declare class WorkshopsService {
         categories: import(".prisma/client").$Enums.Profession[];
         eventId: string | null;
         whatYouWillLearn: string | null;
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -110,6 +112,7 @@ export declare class WorkshopsService {
         categories: import(".prisma/client").$Enums.Profession[];
         eventId: string | null;
         whatYouWillLearn: string | null;
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;
@@ -194,6 +197,7 @@ export declare class WorkshopsService {
         categories: import(".prisma/client").$Enums.Profession[];
         eventId: string | null;
         whatYouWillLearn: string | null;
+        isFree: boolean;
         imageUrl: string | null;
         channelName: string | null;
     }>;

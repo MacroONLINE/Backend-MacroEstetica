@@ -29,6 +29,7 @@ export declare class EventStreamsService {
                 categories: import(".prisma/client").$Enums.Profession[];
                 eventId: string | null;
                 whatYouWillLearn: string | null;
+                isFree: boolean;
                 imageUrl: string | null;
                 channelName: string | null;
             }[];
