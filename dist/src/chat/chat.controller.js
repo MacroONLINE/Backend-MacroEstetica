@@ -15,7 +15,28 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChatController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 const chat_service_1 = require("./chat.service");
+class SendMessageDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'user-12345',
+        description: 'ID del usuario que envía el mensaje',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], SendMessageDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        example: 'Hola, ¿cómo están?',
+        description: 'Contenido del mensaje',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], SendMessageDto.prototype, "message", void 0);
 let ChatController = class ChatController {
     constructor(chatService) {
         this.chatService = chatService;
@@ -34,8 +55,35 @@ let ChatController = class ChatController {
 exports.ChatController = ChatController;
 __decorate([
     (0, common_1.Get)(':roomId/messages'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene los últimos 50 mensajes de una sala de chat' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Arreglo de mensajes' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Obtiene los últimos 50 mensajes de una sala de chat',
+        description: 'Retorna un array con los mensajes más recientes en la sala indicada.',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'roomId',
+        description: 'ID de la sala de chat',
+        example: 'room-001',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Lista de mensajes en la sala',
+        schema: {
+            example: [
+                {
+                    id: 'msg-001',
+                    userId: 'user-12345',
+                    message: 'Hola, ¿cómo están?',
+                    createdAt: '2025-03-08T12:30:00.000Z',
+                },
+                {
+                    id: 'msg-002',
+                    userId: 'user-67890',
+                    message: 'Bien, ¿y tú?',
+                    createdAt: '2025-03-08T12:31:00.000Z',
+                },
+            ],
+        },
+    }),
     __param(0, (0, common_1.Param)('roomId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -43,12 +91,63 @@ __decorate([
 ], ChatController.prototype, "listMessages", null);
 __decorate([
     (0, common_1.Post)(':roomId/messages'),
-    (0, swagger_1.ApiOperation)({ summary: 'Crea un nuevo mensaje en la sala de chat' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Mensaje creado correctamente' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Envía un nuevo mensaje a una sala de chat',
+        description: 'El usuario debe estar inscrito o tener acceso a la sala para poder enviar mensajes.',
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'roomId',
+        description: 'ID de la sala de chat donde se enviará el mensaje',
+        example: 'room-001',
+    }),
+    (0, swagger_1.ApiBody)({
+        description: 'Información del mensaje que se enviará',
+        type: SendMessageDto,
+        examples: {
+            ejemplo1: {
+                summary: 'Mensaje estándar',
+                value: {
+                    userId: 'user-12345',
+                    message: 'Hola, ¿cómo están?',
+                },
+            },
+            ejemplo2: {
+                summary: 'Mensaje largo',
+                value: {
+                    userId: 'user-67890',
+                    message: 'Esto es un mensaje más largo con múltiples palabras y detalles adicionales.',
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Mensaje creado correctamente',
+        schema: {
+            example: {
+                id: 'msg-003',
+                roomId: 'room-001',
+                userId: 'user-12345',
+                message: 'Hola, ¿cómo están?',
+                createdAt: '2025-03-08T12:32:00.000Z',
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 403,
+        description: 'El usuario no tiene acceso a la sala',
+        schema: {
+            example: {
+                statusCode: 403,
+                message: 'No tienes acceso a esta sala',
+                error: 'Forbidden',
+            },
+        },
+    }),
     __param(0, (0, common_1.Param)('roomId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, SendMessageDto]),
     __metadata("design:returntype", Promise)
 ], ChatController.prototype, "sendMessage", null);
 exports.ChatController = ChatController = __decorate([
