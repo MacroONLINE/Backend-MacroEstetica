@@ -3,10 +3,11 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import * as express from 'express';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  logger.log('Inicializando aplicación...');
+  logger.log('🚀 Inicializando aplicación...');
 
   // Crear la aplicación deshabilitando el bodyParser predeterminado
   const app = await NestFactory.create(AppModule, {
@@ -20,37 +21,45 @@ async function bootstrap() {
     express.raw({ type: 'application/json' }),
     (req, res, next) => {
       req['rawBody'] = req.body;
-      console.log('RawBody recibido:', req['rawBody']);
-      console.log('Es Buffer:', Buffer.isBuffer(req['rawBody']));
+      console.log('✅ RawBody recibido en /payment/webhook:', req['rawBody']);
       next();
     },
   );
-  logger.log('Middleware raw configurado para /payment/webhook.');
+  logger.log('✅ Middleware raw configurado para /payment/webhook.');
 
   // Middleware estándar para manejar JSON en las demás rutas
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
-  logger.log('Middleware JSON y URL-encoded habilitados.');
+  logger.log('✅ Middleware JSON y URL-encoded habilitados.');
 
   // Habilitar CORS
-  app.enableCors();
-  logger.log('CORS habilitado.');
+  app.enableCors({
+    origin: '*', // Permite todas las conexiones (ajustar si es necesario)
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+  logger.log('✅ CORS habilitado.');
+
+  // 🔥 Habilitar adaptador de WebSockets
+  app.useWebSocketAdapter(new IoAdapter(app));
+  logger.log('✅ WebSocket Adapter configurado.');
 
   // Configuración de Swagger
   const config = new DocumentBuilder()
-    .setTitle('Documentación de la API')
-    .setDescription('Documentación de la API para la aplicación')
+    .setTitle('📖 Documentación de la API')
+    .setDescription('API para la aplicación con soporte WebSockets')
     .setVersion('1.0')
     .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api-docs', app, document);
-  logger.log('Swagger configurado en /api-docs.');
+  logger.log('✅ Swagger configurado en /api-docs.');
 
   // Iniciar la aplicación en el puerto 3001
   await app.listen(3001);
-  logger.log('Aplicación escuchando en http://localhost:3001');
+  logger.log('🚀 Aplicación escuchando en http://localhost:3001');
+  logger.log('📡 WebSocket activo en ws://localhost:3001');
 }
 
 bootstrap();

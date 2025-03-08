@@ -37,16 +37,16 @@ export declare class EventsController {
         entityId: string;
         orators: {
             id: string;
-            title: string | null;
+            status: string;
             createdAt: Date;
             updatedAt: Date;
+            type: import(".prisma/client").$Enums.ProfessionType;
             userId: string;
             bannerImage: string | null;
+            title: string | null;
             followers: number | null;
-            description: string;
-            status: string;
             profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
+            description: string;
             experienceDescription: string;
             experienceYears: number;
             certificationsUrl: string;

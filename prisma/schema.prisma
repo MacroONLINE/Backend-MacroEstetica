@@ -706,3 +706,30 @@ model EventStreamEnrollment {
 
   @@unique([eventStreamId, userId])
 }
+
+enum ChatEntityType {
+  STREAM
+  WORKSHOP
+  CLASSROOM
+}
+
+model ChatRoom {
+  id          String       @id @default(cuid())
+  entityId    String
+  entityType  ChatEntityType
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  messages    ChatMessage[] @relation("ChatRoomMessages")
+}
+
+model ChatMessage {
+  id         String     @id @default(cuid())
+  chatRoomId String
+  userId     String
+  message    String
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  chatRoom   ChatRoom   @relation("ChatRoomMessages", fields: [chatRoomId], references: [id], onDelete: Cascade)
+}
