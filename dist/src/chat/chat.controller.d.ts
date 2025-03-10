@@ -6,15 +6,27 @@ declare class SendMessageDto {
 export declare class ChatController {
     private readonly chatService;
     constructor(chatService: ChatService);
-    listMessages(roomId: string): Promise<{
+    listMessages(roomId: string): Promise<({
+        user: {
+            firstName: string;
+            lastName: string;
+            profileImageUrl: string;
+        };
+    } & {
         message: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         chatRoomId: string;
-    }[]>;
+    })[]>;
     sendMessage(roomId: string, body: SendMessageDto): Promise<{
+        user: {
+            firstName: string;
+            lastName: string;
+            profileImageUrl: string;
+        };
+    } & {
         message: string;
         id: string;
         createdAt: Date;

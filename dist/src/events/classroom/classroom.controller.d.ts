@@ -29,6 +29,7 @@ export declare class ClassroomController {
             id: string;
             firstName: string | null;
             lastName: string | null;
+            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -94,6 +95,7 @@ export declare class ClassroomController {
             id: string;
             firstName: string | null;
             lastName: string | null;
+            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -156,6 +158,7 @@ export declare class ClassroomController {
             id: string;
             firstName: string | null;
             lastName: string | null;
+            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -218,6 +221,7 @@ export declare class ClassroomController {
             id: string;
             firstName: string | null;
             lastName: string | null;
+            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;

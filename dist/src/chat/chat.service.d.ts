@@ -18,6 +18,12 @@ export declare class ChatService {
         entityType: import(".prisma/client").$Enums.ChatEntityType;
     }>;
     createMessage(roomId: string, userId: string, message: string): Promise<{
+        user: {
+            firstName: string;
+            lastName: string;
+            profileImageUrl: string;
+        };
+    } & {
         message: string;
         id: string;
         createdAt: Date;
@@ -25,13 +31,19 @@ export declare class ChatService {
         userId: string;
         chatRoomId: string;
     }>;
-    getMessages(roomId: string, limit?: number): Promise<{
+    getMessages(roomId: string, limit?: number): Promise<({
+        user: {
+            firstName: string;
+            lastName: string;
+            profileImageUrl: string;
+        };
+    } & {
         message: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         userId: string;
         chatRoomId: string;
-    }[]>;
+    })[]>;
     canUserAccessRoom(roomId: string, userId: string): Promise<boolean>;
 }
