@@ -29,6 +29,15 @@ let ChatService = class ChatService {
     async createMessage(roomId, userId, message) {
         return this.prisma.chatMessage.create({
             data: { chatRoomId: roomId, userId, message },
+            include: {
+                user: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        profileImageUrl: true
+                    },
+                },
+            },
         });
     }
     async getMessages(roomId, limit = 50) {
@@ -36,6 +45,15 @@ let ChatService = class ChatService {
             where: { chatRoomId: roomId },
             orderBy: { createdAt: 'desc' },
             take: limit,
+            include: {
+                user: {
+                    select: {
+                        firstName: true,
+                        lastName: true,
+                        profileImageUrl: true
+                    },
+                },
+            },
         });
     }
     async canUserAccessRoom(roomId, userId) {

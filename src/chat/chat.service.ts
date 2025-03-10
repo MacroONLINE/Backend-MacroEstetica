@@ -18,17 +18,37 @@ export class ChatService {
     });
   }
 
+  // Al crear un mensaje, se incluyen los datos del usuario
   async createMessage(roomId: string, userId: string, message: string) {
     return this.prisma.chatMessage.create({
       data: { chatRoomId: roomId, userId, message },
+      include: {
+        user: {
+          select: { 
+            firstName: true, 
+            lastName: true, 
+            profileImageUrl: true 
+          },
+        },
+      },
     });
   }
 
+  // Al obtener mensajes, se incluyen los datos del usuario
   async getMessages(roomId: string, limit = 50) {
     return this.prisma.chatMessage.findMany({
       where: { chatRoomId: roomId },
       orderBy: { createdAt: 'desc' },
       take: limit,
+      include: {
+        user: {
+          select: { 
+            firstName: true, 
+            lastName: true, 
+            profileImageUrl: true 
+          },
+        },
+      },
     });
   }
 
@@ -41,17 +61,14 @@ export class ChatService {
         return !!(await this.prisma.eventStreamEnrollment.findFirst({
           where: { eventStreamId: room.entityId, userId },
         }));
-
       case 'WORKSHOP':
         return !!(await this.prisma.workshopEnrollment.findFirst({
           where: { workshopId: room.entityId, userId },
         }));
-
       case 'CLASSROOM':
         return !!(await this.prisma.classroomEnrollment.findFirst({
           where: { classroomId: room.entityId, userId },
         }));
-
       default:
         return false;
     }

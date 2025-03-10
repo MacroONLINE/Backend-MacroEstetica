@@ -41,6 +41,7 @@ model User {
   attendedClassrooms  Classroom[]          @relation("ClassroomAttendees")
   attendedStreams     EventStream[]        @relation("EventStreamAttendees")
   eventStreamEnrollments EventStreamEnrollment[] @relation("UserEventStreamEnrollments")
+  chatMessages ChatMessage[] 
 }
 
 
@@ -726,10 +727,12 @@ model ChatRoom {
 model ChatMessage {
   id         String     @id @default(cuid())
   chatRoomId String
-  userId     String
+  userId     String    @default("user-001")
   message    String
   createdAt  DateTime   @default(now())
   updatedAt  DateTime   @updatedAt
 
   chatRoom   ChatRoom   @relation("ChatRoomMessages", fields: [chatRoomId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
 }

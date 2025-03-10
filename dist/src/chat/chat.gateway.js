@@ -34,6 +34,7 @@ let ChatGateway = class ChatGateway {
         }
         client.join(data.roomId);
         client.emit('joinedRoom', { roomId: data.roomId });
+        console.log(`Usuario ${data.userId} se unió a la sala ${data.roomId}`);
     }
     async handleMessage(client, data) {
         const canAccess = await this.chatService.canUserAccessRoom(data.roomId, data.userId);
@@ -47,6 +48,7 @@ let ChatGateway = class ChatGateway {
             userId: data.userId,
             message: data.message,
             createdAt: msg.createdAt,
+            user: msg.user,
         });
     }
 };

@@ -39,6 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     client.join(data.roomId);
     client.emit('joinedRoom', { roomId: data.roomId });
+    console.log(`Usuario ${data.userId} se unió a la sala ${data.roomId}`);
   }
 
   @SubscribeMessage('sendMessage')
@@ -52,12 +53,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return;
     }
 
+    // Al crear el mensaje, se incluirán los datos del usuario gracias a "include" en el ChatService
     const msg = await this.chatService.createMessage(data.roomId, data.userId, data.message);
     this.server.to(data.roomId).emit('newMessage', {
       id: msg.id,
       userId: data.userId,
       message: data.message,
       createdAt: msg.createdAt,
+      // Incluimos los datos del usuario
+      user: msg.user,
     });
   }
 }

@@ -7,20 +7,20 @@ export declare class ChatController {
     private readonly chatService;
     constructor(chatService: ChatService);
     listMessages(roomId: string): Promise<{
-        id: string;
-        chatRoomId: string;
-        userId: string;
         message: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
+        chatRoomId: string;
     }[]>;
     sendMessage(roomId: string, body: SendMessageDto): Promise<{
-        id: string;
-        chatRoomId: string;
-        userId: string;
         message: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
+        chatRoomId: string;
     }>;
 }
 export {};
