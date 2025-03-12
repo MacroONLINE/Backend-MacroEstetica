@@ -19,6 +19,7 @@ import { MessagesModule } from './messages/messages.module';
 import { InstructorModule } from './instructor/instructor.module';
 import { AgoraModule } from './agora/agora.module';
 import { ChatModule } from './chat/chat.module';
+import { BlogModule } from './blog/blog.module';
 
 @Module({
   imports: [
@@ -36,7 +37,8 @@ import { ChatModule } from './chat/chat.module';
     MessagesModule,
     InstructorModule,
     AgoraModule,
-    ChatModule
+    ChatModule,
+    BlogModule
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],

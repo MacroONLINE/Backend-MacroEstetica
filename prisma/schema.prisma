@@ -42,8 +42,12 @@ model User {
   attendedClassrooms  Classroom[]          @relation("ClassroomAttendees")
   attendedStreams     EventStream[]        @relation("EventStreamAttendees")
   eventStreamEnrollments EventStreamEnrollment[] @relation("UserEventStreamEnrollments")
-  chatMessages ChatMessage[] 
+  chatMessages        ChatMessage[] 
+  authoredBlogs       BlogAuthor?
+  blogComments        BlogComment[]
+  blogRatings         BlogRating[]
 }
+
 
 
 model Medico {
@@ -85,7 +89,9 @@ model Empresa {
   banners              Banner[]
   minisite             Minisite?
   leadingEvents        Event[]                  @relation("LeadingCompany")
+  blogPosts            BlogPost[]
 }
+
 
 model Subscription {
   id            String                @id @default(cuid())
@@ -737,3 +743,64 @@ model ChatMessage {
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
 }
+
+model BlogCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  colorHex    String   // Color asociado a la categoría (Ej: "#FF5733")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  blogPosts   BlogPost[] @relation("BlogPostCategories")
+}
+
+model BlogPost {
+  id             String          @id @default(cuid())
+  title          String
+  content        String          @db.Text // Soporta HTML/Markdown
+  bannerImage    String?         // Imagen destacada
+  empresaId      String
+  empresa        Empresa         @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  authorId       String
+  author         BlogAuthor      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @default(now())
+  averageRating  Float           @default(0) // Calificación promedio
+  totalRatings   Int             @default(0) // Número de calificaciones
+  categories     BlogCategory[]  @relation("BlogPostCategories")
+  comments       BlogComment[]   @relation("BlogPostComments")
+  ratings        BlogRating[]
+}
+
+
+model BlogAuthor {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  description         String
+  experienceYears     Int      @default(0)
+  certificationsUrl   String?
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "User_BlogAuthor")
+  blogPosts          BlogPost[]
+}
+
+model BlogComment {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  post      BlogPost @relation("BlogPostComments", fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model BlogRating {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  rating    Int      @default(0) // Número de estrellas 1-5
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
