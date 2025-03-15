@@ -757,6 +757,7 @@ model BlogPost {
   id             String          @id @default(cuid())
   title          String
   content        String          @db.Text // Soporta HTML/Markdown
+  description    String          @default("")
   bannerImage    String?         // Imagen destacada
   empresaId      String
   empresa        Empresa         @relation(fields: [empresaId], references: [id], onDelete: Cascade)

@@ -33,6 +33,7 @@ export declare class BlogController {
         content: string;
         bannerImage: string | null;
         title: string;
+        description: string;
         empresaId: string;
         averageRating: number;
         authorId: string;
@@ -82,6 +83,7 @@ export declare class BlogController {
         content: string;
         bannerImage: string | null;
         title: string;
+        description: string;
         empresaId: string;
         averageRating: number;
         authorId: string;
@@ -115,6 +117,7 @@ export declare class BlogController {
         content: string;
         bannerImage: string | null;
         title: string;
+        description: string;
         empresaId: string;
         averageRating: number;
         authorId: string;
@@ -138,6 +141,7 @@ export declare class BlogController {
         content: string;
         bannerImage: string | null;
         title: string;
+        description: string;
         empresaId: string;
         averageRating: number;
         authorId: string;
@@ -167,6 +171,7 @@ export declare class BlogController {
         content: string;
         bannerImage: string | null;
         title: string;
+        description: string;
         empresaId: string;
         averageRating: number;
         authorId: string;
@@ -196,6 +201,7 @@ export declare class BlogController {
         content: string;
         bannerImage: string | null;
         title: string;
+        description: string;
         empresaId: string;
         averageRating: number;
         authorId: string;
@@ -225,6 +231,7 @@ export declare class BlogController {
         content: string;
         bannerImage: string | null;
         title: string;
+        description: string;
         empresaId: string;
         averageRating: number;
         authorId: string;
@@ -254,6 +261,7 @@ export declare class BlogController {
         content: string;
         bannerImage: string | null;
         title: string;
+        description: string;
         empresaId: string;
         averageRating: number;
         authorId: string;
