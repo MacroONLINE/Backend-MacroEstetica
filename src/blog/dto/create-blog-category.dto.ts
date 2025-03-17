@@ -1,14 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Length, Matches } from 'class-validator';
+import { IsString, IsNotEmpty, IsUrl } from 'class-validator';
 
 export class CreateBlogCategoryDto {
-  @ApiProperty({ example: 'Medicina Estética', description: 'Nombre de la categoría de blog' })
+  @ApiProperty({ example: 'Dermatología', description: 'Nombre de la categoría' })
   @IsString()
-  @Length(3, 50)
+  @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: '#FF5733', description: 'Código de color en formato HEX' })
+  @ApiProperty({ example: 'https://example.com/icon.png', description: 'URL del icono de la categoría' })
+  @IsUrl()
+  iconUrl: string;
+
+  @ApiProperty({ example: '#FF5733', description: 'Color en formato hexadecimal' })
   @IsString()
-  @Matches(/^#([0-9A-F]{3}){1,2}$/i, { message: "El color debe ser un código HEX válido" })
+  @IsNotEmpty()
   colorHex: string;
+  
 }

@@ -1,4 +1,4 @@
-export declare class CreateCommentDto {
+export declare class CreateBlogCommentDto {
     postId: string;
     userId: string;
     content: string;

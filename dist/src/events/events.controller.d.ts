@@ -42,14 +42,14 @@ export declare class EventsController {
             updatedAt: Date;
             type: import(".prisma/client").$Enums.ProfessionType;
             userId: string;
-            bannerImage: string | null;
-            title: string | null;
-            followers: number | null;
             profession: import(".prisma/client").$Enums.Profession;
             description: string;
             experienceDescription: string;
             experienceYears: number;
             certificationsUrl: string;
+            bannerImage: string | null;
+            followers: number | null;
+            title: string | null;
             empresaId: string | null;
             categoryId: string | null;
         }[];

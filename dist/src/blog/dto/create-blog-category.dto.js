@@ -16,15 +16,20 @@ class CreateBlogCategoryDto {
 }
 exports.CreateBlogCategoryDto = CreateBlogCategoryDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Medicina Estética', description: 'Nombre de la categoría de blog' }),
+    (0, swagger_1.ApiProperty)({ example: 'Dermatología', description: 'Nombre de la categoría' }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Length)(3, 50),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateBlogCategoryDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '#FF5733', description: 'Código de color en formato HEX' }),
+    (0, swagger_1.ApiProperty)({ example: 'https://example.com/icon.png', description: 'URL del icono de la categoría' }),
+    (0, class_validator_1.IsUrl)(),
+    __metadata("design:type", String)
+], CreateBlogCategoryDto.prototype, "iconUrl", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '#FF5733', description: 'Color en formato hexadecimal' }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.Matches)(/^#([0-9A-F]{3}){1,2}$/i, { message: "El color debe ser un código HEX válido" }),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateBlogCategoryDto.prototype, "colorHex", void 0);
 //# sourceMappingURL=create-blog-category.dto.js.map

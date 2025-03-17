@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, NotFoundException } from '@nestjs/common';
 import { BlogService } from './blog.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 
@@ -69,5 +69,28 @@ export class BlogController {
   @ApiResponse({ status: 200, description: 'Lista de blogs filtrados por búsqueda' })
   async searchBlogs(@Query('query') query: string) {
     return this.blogService.searchBlogs(query);
+  }
+
+  @Get('categories')
+  @ApiOperation({ summary: 'Obtener todas las categorías de blog' })
+  @ApiResponse({ status: 200, description: 'Lista de categorías obtenida' })
+  async getAllCategories() {
+    return this.blogService.getAllCategories();
+  }
+
+  @Post(':id/increment-reader')
+  @ApiOperation({ summary: 'Incrementar el contador de lectores de un blog' })
+  @ApiParam({ name: 'id', description: 'ID del blog', example: 'blog-001' })
+  @ApiResponse({ status: 200, description: 'Número total de lectores actualizado' })
+  async incrementReaderCount(@Param('id') id: string) {
+    return this.blogService.incrementReaderCount(id);
+  }
+
+  @Post(':id/vote-usefulness')
+  @ApiOperation({ summary: 'Actualizar el contador de utilidad de un blog' })
+  @ApiParam({ name: 'id', description: 'ID del blog', example: 'blog-001' })
+  @ApiResponse({ status: 200, description: 'Voto de utilidad actualizado' })
+  async updateUsefulness(@Param('id') id: string, @Query('useful') useful: boolean) {
+    return this.blogService.updateUsefulness(id, useful);
   }
 }

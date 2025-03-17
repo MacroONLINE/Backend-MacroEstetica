@@ -1,286 +1,137 @@
+// src/courses/courses.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateCourseDto } from './dto/create-course.dto';
-import { CreateModuleDto } from './dto/create-module.dto';
-import { CreateClassDto } from './dto/create-class.dto';
-import { CreateCommentDto } from './dto/create-comment.dto';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { Target } from '@prisma/client';
-import { CourseResponseDto } from './response-dto/course-response.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class CoursesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private mapToCourseResponseDto(course: any): CourseResponseDto {
-    const totalModules = course.modules?.length || 0;
-    const totalResources = course.resources?.length || 0;
-
-    return {
-      id: course.id,
-      title: course.title,
-      description: course.description,
-      price: course.price,
-      discountPercentage: course.discountPercentage || 0,
-      level: course.level,
-      target: course.target,
-      participantsCount: course.participantsCount,
-      rating: course.rating,
-      isFeatured: course.isFeatured || false,
-      bannerUrl: course.bannerUrl || '',
-      courseImageUrl: course.courseImageUrl || '',
-      totalHours: course.totalHours || 1,
-      aboutDescription: course.aboutDescription || '',
-      whatYouWillLearn: course.whatYouWillLearn || [],
-      requirements: course.requirements || [],
-      instructorId: course.instructorId || 'N/A',
-      categoryName: course.category?.name || 'N/A',
-      categoryColor: course.category?.colorHex || 'N/A',
-      categoryIcon: course.category?.urlIcon || 'N/A',
-      instructorName: `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() || 'N/A',
-      instructorExperience: course.instructor?.experienceYears || 0,
-      instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
-      instructorStatus: course.instructor?.status || 'N/A',
-      modules: course.modules?.map((module: any) => ({
-        id: module.id,
-        description: module.description,
-        classes: module.classes?.map((cls: any) => ({
-          id: cls.id,
-          description: cls.description,
-        })) || [],
-      })) || [],
-      totalModules,
-      resources: course.resources?.map((resource: any) => ({
-        id: resource.id,
-        url: resource.url,
-      })) || [],
-      totalResources,
-      comments: course.comments?.map((comment: any) => ({
-        id: comment.id,
-        userId: comment.userId,
-        content: comment.content,
-        rating: comment.rating,
-        createdAt: comment.createdAt,
-        updatedAt: comment.updatedAt,
-      })) || [],
-    };
-  }
-
-  async createCourse(data: CreateCourseDto) {
-    const { instructorId, categoryId, ...rest } = data;
-
-    return this.prisma.course.create({
-      data: {
-        ...rest,
-        instructor: instructorId ? { connect: { id: instructorId } } : undefined,
-        category: categoryId ? { connect: { id: categoryId } } : undefined,
-      },
+  // Obtener todos los cursos con sus módulos y clases
+  async getAllCourses() {
+    return this.prisma.course.findMany({
+      include: {
+        instructor: {
+          include: {
+            user: {
+              select: { firstName: true, lastName: true, profileImageUrl: true }
+            }
+          }
+        },
+        modules: {
+          include: {
+            classes: {
+              include: { classResources: true }
+            }
+          }
+        }
+      }
     });
   }
 
-  async getCourseById(courseId: string): Promise<CourseResponseDto> {
+  // Obtener curso por ID (con módulos, clases, resources)
+  async getCourseById(courseId: string) {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
       include: {
-        category: true,
         instructor: {
-          include: { user: true },
+          include: {
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
+          }
         },
         modules: {
           include: {
-            classes: true,
-          },
-        },
-        resources: true,
-        comments: true, // Incluir comentarios
-      },
+            classes: {
+              include: {
+                classResources: true
+              }
+            }
+          }
+        }
+      }
     });
+    if (!course) throw new NotFoundException('Course not found');
+    return course;
+  }
 
-    if (!course) {
-      throw new NotFoundException(`Course with ID ${courseId} not found.`);
+  // Obtener el listado de cursos en que un usuario está inscrito, con progreso
+  async getUserCourses(userId: string) {
+    const enrollments = await this.prisma.courseEnrollment.findMany({
+      where: { userId },
+      include: {
+        course: {
+          include: {
+            modules: {
+              include: { classes: true }
+            }
+          }
+        }
+      }
+    });
+    // Calcular si el curso está completado
+    // Se considera completado si todas las clases del curso las tiene completed = true en ClassProgress
+    const result = [];
+    for (const e of enrollments) {
+      const course = e.course;
+      const totalClasses = course.modules.reduce((acc, m) => acc + m.classes.length, 0);
+      const userProgress = await this.prisma.classProgress.findMany({
+        where: { userId, classId: { in: course.modules.flatMap(m => m.classes.map(c => c.id)) } }
+      });
+      const completedClasses = userProgress.filter(p => p.completed).length;
+      const isCompleted = completedClasses === totalClasses && totalClasses > 0;
+      result.push({
+        enrollmentId: e.id,
+        enrolledAt: e.enrolledAt,
+        course: {
+          id: course.id,
+          title: course.title,
+          target: course.target,
+          totalClasses,
+          completedClasses,
+          isCompleted
+        }
+      });
     }
-
-    return this.mapToCourseResponseDto(course);
+    return result;
   }
 
-  async getAllCourses(): Promise<CourseResponseDto[]> {
-    const courses = await this.prisma.course.findMany({
-      include: {
-        category: true,
-        instructor: {
-          include: { user: true },
-        },
-        modules: {
-          include: {
-            classes: true,
-          },
-        },
-        resources: true,
-        comments: true, // Incluir comentarios
-      },
+  // Obtener progreso de un usuario dentro de un curso específico
+  async getUserCourseProgress(userId: string, courseId: string) {
+    // Verificar si el usuario está inscrito
+    const enrollment = await this.prisma.courseEnrollment.findFirst({
+      where: { userId, courseId }
     });
-
-    return courses.map(this.mapToCourseResponseDto);
-  }
-
-  async getFeaturedCourses(): Promise<CourseResponseDto[]> {
-    const courses = await this.prisma.course.findMany({
-      where: { isFeatured: true },
-      include: {
-        category: true,
-        instructor: {
-          include: { user: true },
-        },
-        modules: {
-          include: {
-            classes: true,
-          },
-        },
-        resources: true,
-        comments: true, // Incluir comentarios
-      },
-    });
-
-    return courses.map(this.mapToCourseResponseDto);
-  }
-
-  async getCoursesByCategory(categoryId: string): Promise<CourseResponseDto[]> {
-    const courses = await this.prisma.course.findMany({
-      where: { categoryId },
-      include: {
-        category: true,
-        instructor: {
-          include: { user: true },
-        },
-        modules: {
-          include: {
-            classes: true,
-          },
-        },
-        resources: true,
-        comments: true, // Incluir comentarios
-      },
-    });
-
-    return courses.map(this.mapToCourseResponseDto);
-  }
-
-  async getCoursesByInstructor(instructorId: string): Promise<CourseResponseDto[]> {
-    const courses = await this.prisma.course.findMany({
-      where: { instructorId },
-      include: {
-        category: true,
-        instructor: {
-          include: { user: true },
-        },
-        modules: {
-          include: {
-            classes: true,
-          },
-        },
-        resources: true,
-        comments: true, // Incluir comentarios
-      },
-    });
-
-    return courses.map(this.mapToCourseResponseDto);
-  }
-
-  async getCoursesByTarget(target: string): Promise<CourseResponseDto[]> {
-    const validatedTarget: Target =
-      Object.values(Target).includes(target as Target)
-        ? (target as Target)
-        : Target.COSMETOLOGO;
-
-    const courses = await this.prisma.course.findMany({
-      where: { target: validatedTarget },
-      include: {
-        category: true,
-        instructor: {
-          include: { user: true },
-        },
-        modules: {
-          include: {
-            classes: true,
-          },
-        },
-        resources: true,
-        comments: true, // Incluir comentarios
-      },
-    });
-
-    return courses.map(this.mapToCourseResponseDto);
-  }
-
-  async createModule(data: CreateModuleDto) {
-    const { courseId, description } = data;
-
-    const courseExists = await this.prisma.course.findUnique({
+    if (!enrollment) {
+      throw new NotFoundException('User not enrolled in this course');
+    }
+    // Obtener las clases y ver cuántas están completadas
+    const course = await this.prisma.course.findUnique({
       where: { id: courseId },
+      include: { modules: { include: { classes: true } } }
     });
+    const totalClasses = course.modules.reduce((acc, m) => acc + m.classes.length, 0);
 
-    if (!courseExists) {
-      throw new NotFoundException(`Course with ID ${courseId} not found.`);
-    }
-
-    return this.prisma.module.create({
-      data: {
-        courseId,
-        description,
-      },
+    const userProgress = await this.prisma.classProgress.findMany({
+      where: { userId, classId: { in: course.modules.flatMap(m => m.classes.map(c => c.id)) } }
     });
+    const completedClasses = userProgress.filter(p => p.completed).length;
+
+    return {
+      courseId: courseId,
+      totalClasses,
+      completedClasses,
+      isCompleted: (completedClasses === totalClasses && totalClasses > 0)
+    };
   }
 
-  async createClass(data: CreateClassDto) {
-    const { moduleId, description } = data;
-
-    const moduleExists = await this.prisma.module.findUnique({
-      where: { id: moduleId },
-    });
-
-    if (!moduleExists) {
-      throw new NotFoundException(`Module with ID ${moduleId} not found.`);
-    }
-
-    return this.prisma.class.create({
-      data: {
-        moduleId,
-        description,
-      },
-    });
-  }
-
-  async createComment(data: CreateCommentDto) {
-    const { userId, classId, type, rating, content } = data;
-
-    const classExists = await this.prisma.class.findUnique({
+  // Obtener datos de una clase con su recurso
+  async getClassById(classId: string) {
+    const cls = await this.prisma.class.findUnique({
       where: { id: classId },
+      include: {
+        classResources: true
+      }
     });
-
-    if (!classExists) {
-      throw new NotFoundException(`Class with ID ${classId} not found.`);
-    }
-
-    return this.prisma.comment.create({
-      data: {
-        userId,
-        classId,
-        type,
-        rating,
-        content,
-      },
-    });
-  }
-
-  async createCategory(data: CreateCategoryDto) {
-    const { name, urlIcon, colorHex } = data;
-
-    return this.prisma.category.create({
-      data: {
-        name,
-        urlIcon,
-        colorHex,
-      },
-    });
+    if (!cls) throw new NotFoundException('Class not found');
+    return cls;
   }
 }

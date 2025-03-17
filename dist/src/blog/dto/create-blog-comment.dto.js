@@ -9,24 +9,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateCommentDto = void 0;
+exports.CreateBlogCommentDto = void 0;
+const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-class CreateCommentDto {
+class CreateBlogCommentDto {
 }
-exports.CreateCommentDto = CreateCommentDto;
+exports.CreateBlogCommentDto = CreateBlogCommentDto;
 __decorate([
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiProperty)({ example: '123e4567-e89b-12d3-a456-426614174000', description: 'ID del post' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateBlogCommentDto.prototype, "postId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '234e4567-e89b-12d3-a456-426614174000', description: 'ID del usuario' }),
+    (0, class_validator_1.IsUUID)(),
+    __metadata("design:type", String)
+], CreateBlogCommentDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Excelente artículo, muy informativo.', description: 'Contenido del comentario' }),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], CreateCommentDto.prototype, "postId", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateCommentDto.prototype, "userId", void 0);
-__decorate([
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateCommentDto.prototype, "content", void 0);
+], CreateBlogCommentDto.prototype, "content", void 0);
 //# sourceMappingURL=create-blog-comment.dto.js.map

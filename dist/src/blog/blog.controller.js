@@ -47,6 +47,15 @@ let BlogController = class BlogController {
     async searchBlogs(query) {
         return this.blogService.searchBlogs(query);
     }
+    async getAllCategories() {
+        return this.blogService.getAllCategories();
+    }
+    async incrementReaderCount(id) {
+        return this.blogService.incrementReaderCount(id);
+    }
+    async updateUsefulness(id, useful) {
+        return this.blogService.updateUsefulness(id, useful);
+    }
 };
 exports.BlogController = BlogController;
 __decorate([
@@ -124,6 +133,35 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BlogController.prototype, "searchBlogs", null);
+__decorate([
+    (0, common_1.Get)('categories'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener todas las categorías de blog' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de categorías obtenida' }),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], BlogController.prototype, "getAllCategories", null);
+__decorate([
+    (0, common_1.Post)(':id/increment-reader'),
+    (0, swagger_1.ApiOperation)({ summary: 'Incrementar el contador de lectores de un blog' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del blog', example: 'blog-001' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Número total de lectores actualizado' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BlogController.prototype, "incrementReaderCount", null);
+__decorate([
+    (0, common_1.Post)(':id/vote-usefulness'),
+    (0, swagger_1.ApiOperation)({ summary: 'Actualizar el contador de utilidad de un blog' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del blog', example: 'blog-001' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Voto de utilidad actualizado' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('useful')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Boolean]),
+    __metadata("design:returntype", Promise)
+], BlogController.prototype, "updateUsefulness", null);
 exports.BlogController = BlogController = __decorate([
     (0, swagger_1.ApiTags)('Blog'),
     (0, common_1.Controller)('blog'),
