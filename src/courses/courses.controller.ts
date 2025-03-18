@@ -53,4 +53,6 @@ export class CoursesController {
   async getClassById(@Param('classId') classId: string) {
     return this.coursesService.getClassById(classId);
   }
+
+
 }
