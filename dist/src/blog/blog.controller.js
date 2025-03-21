@@ -16,6 +16,8 @@ exports.BlogController = void 0;
 const common_1 = require("@nestjs/common");
 const blog_service_1 = require("./blog.service");
 const swagger_1 = require("@nestjs/swagger");
+class VoteCommentDto {
+}
 let BlogController = class BlogController {
     constructor(blogService) {
         this.blogService = blogService;
@@ -47,14 +49,14 @@ let BlogController = class BlogController {
     async searchBlogs(query) {
         return this.blogService.searchBlogs(query);
     }
+    async voteAndComment(id, voteCommentDto) {
+        return this.blogService.voteAndComment(id, voteCommentDto.userId, voteCommentDto.useful, voteCommentDto.commentContent);
+    }
     async getAllCategories() {
         return this.blogService.getAllCategories();
     }
     async incrementReaderCount(id) {
         return this.blogService.incrementReaderCount(id);
-    }
-    async updateUsefulness(id, useful) {
-        return this.blogService.updateUsefulness(id, useful);
     }
 };
 exports.BlogController = BlogController;
@@ -125,14 +127,39 @@ __decorate([
 ], BlogController.prototype, "getRecentBlogs", null);
 __decorate([
     (0, common_1.Get)('busqueda'),
-    (0, swagger_1.ApiOperation)({ summary: 'Buscar blogs por título o contenido' }),
-    (0, swagger_1.ApiQuery)({ name: 'query', description: 'Texto de búsqueda', example: 'dermatología', required: true }),
+    (0, swagger_1.ApiOperation)({ summary: 'Buscar blogs por título o contenido (sin importar acentos y mayúsculas)' }),
+    (0, swagger_1.ApiQuery)({ name: 'query', description: 'Texto de búsqueda', required: true }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de blogs filtrados por búsqueda' }),
     __param(0, (0, common_1.Query)('query')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BlogController.prototype, "searchBlogs", null);
+__decorate([
+    (0, common_1.Post)(':id/vote-comment'),
+    (0, swagger_1.ApiOperation)({ summary: 'Votar utilidad y comentar un blog en una sola acción' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del blog post' }),
+    (0, swagger_1.ApiBody)({
+        description: 'Datos del voto y comentario',
+        schema: {
+            type: 'object',
+            properties: {
+                userId: { type: 'string' },
+                useful: { type: 'boolean' },
+                commentContent: { type: 'string' },
+            },
+            required: ['userId', 'useful', 'commentContent'],
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Voto y comentario registrados correctamente.' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'El usuario ya ha comentado este post.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Blog no encontrado.' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, VoteCommentDto]),
+    __metadata("design:returntype", Promise)
+], BlogController.prototype, "voteAndComment", null);
 __decorate([
     (0, common_1.Get)('categories'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener todas las categorías de blog' }),
@@ -151,17 +178,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], BlogController.prototype, "incrementReaderCount", null);
-__decorate([
-    (0, common_1.Post)(':id/vote-usefulness'),
-    (0, swagger_1.ApiOperation)({ summary: 'Actualizar el contador de utilidad de un blog' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del blog', example: 'blog-001' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Voto de utilidad actualizado' }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Query)('useful')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Boolean]),
-    __metadata("design:returntype", Promise)
-], BlogController.prototype, "updateUsefulness", null);
 exports.BlogController = BlogController = __decorate([
     (0, swagger_1.ApiTags)('Blog'),
     (0, common_1.Controller)('blog'),

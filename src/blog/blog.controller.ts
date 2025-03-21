@@ -1,6 +1,12 @@
-import { Controller, Get, Post, Param, Query, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Param, Query, Body, NotFoundException } from '@nestjs/common';
 import { BlogService } from './blog.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiBody } from '@nestjs/swagger';
+
+class VoteCommentDto {
+  userId: string;
+  useful: boolean;
+  commentContent: string;
+}
 
 @ApiTags('Blog')
 @Controller('blog')
@@ -64,11 +70,41 @@ export class BlogController {
   }
 
   @Get('busqueda')
-  @ApiOperation({ summary: 'Buscar blogs por título o contenido' })
-  @ApiQuery({ name: 'query', description: 'Texto de búsqueda', example: 'dermatología', required: true })
+  @ApiOperation({ summary: 'Buscar blogs por título o contenido (sin importar acentos y mayúsculas)' })
+  @ApiQuery({ name: 'query', description: 'Texto de búsqueda', required: true })
   @ApiResponse({ status: 200, description: 'Lista de blogs filtrados por búsqueda' })
   async searchBlogs(@Query('query') query: string) {
     return this.blogService.searchBlogs(query);
+  }
+
+  @Post(':id/vote-comment')
+  @ApiOperation({ summary: 'Votar utilidad y comentar un blog en una sola acción' })
+  @ApiParam({ name: 'id', description: 'ID del blog post' })
+  @ApiBody({
+    description: 'Datos del voto y comentario',
+    schema: {
+      type: 'object',
+      properties: {
+        userId: { type: 'string' },
+        useful: { type: 'boolean' },
+        commentContent: { type: 'string' },
+      },
+      required: ['userId', 'useful', 'commentContent'],
+    },
+  })
+  @ApiResponse({ status: 201, description: 'Voto y comentario registrados correctamente.' })
+  @ApiResponse({ status: 400, description: 'El usuario ya ha comentado este post.' })
+  @ApiResponse({ status: 404, description: 'Blog no encontrado.' })
+  async voteAndComment(
+    @Param('id') id: string,
+    @Body() voteCommentDto: VoteCommentDto,
+  ) {
+    return this.blogService.voteAndComment(
+      id,
+      voteCommentDto.userId,
+      voteCommentDto.useful,
+      voteCommentDto.commentContent,
+    );
   }
 
   @Get('categories')
@@ -86,11 +122,5 @@ export class BlogController {
     return this.blogService.incrementReaderCount(id);
   }
 
-  @Post(':id/vote-usefulness')
-  @ApiOperation({ summary: 'Actualizar el contador de utilidad de un blog' })
-  @ApiParam({ name: 'id', description: 'ID del blog', example: 'blog-001' })
-  @ApiResponse({ status: 200, description: 'Voto de utilidad actualizado' })
-  async updateUsefulness(@Param('id') id: string, @Query('useful') useful: boolean) {
-    return this.blogService.updateUsefulness(id, useful);
-  }
+ 
 }

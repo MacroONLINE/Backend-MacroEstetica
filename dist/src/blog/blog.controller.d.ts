@@ -1,4 +1,9 @@
 import { BlogService } from './blog.service';
+declare class VoteCommentDto {
+    userId: string;
+    useful: boolean;
+    commentContent: string;
+}
 export declare class BlogController {
     private readonly blogService;
     constructor(blogService: BlogService);
@@ -10,19 +15,19 @@ export declare class BlogController {
     getTopRatedBlogs(): Promise<any[]>;
     getRecentBlogs(): Promise<any[]>;
     searchBlogs(query: string): Promise<any[]>;
+    voteAndComment(id: string, voteCommentDto: VoteCommentDto): Promise<{
+        message: string;
+    }>;
     getAllCategories(): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        colorHex: string;
+        name: string;
         iconUrl: string | null;
+        colorHex: string;
     }[]>;
     incrementReaderCount(id: string): Promise<{
         totalReaders: number;
     }>;
-    updateUsefulness(id: string, useful: boolean): Promise<{
-        usefulCount: number;
-        notUsefulCount: number;
-    }>;
 }
+export {};

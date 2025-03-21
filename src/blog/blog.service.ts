@@ -1,5 +1,5 @@
 // src/blog/blog.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -121,24 +121,52 @@ export class BlogService {
   }
 
   async searchBlogs(query: string) {
+    const normalizedQuery = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const data = await this.prisma.blogPost.findMany({
       where: {
         OR: [
-          { title: { contains: query, mode: 'insensitive' } },
-          { content: { contains: query, mode: 'insensitive' } }
-        ]
+          { title: { contains: normalizedQuery, mode: 'insensitive' } },
+          { content: { contains: normalizedQuery, mode: 'insensitive' } },
+        ],
       },
       orderBy: { createdAt: 'desc' },
       include: {
         author: {
-          include: {
-            user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
-          }
+          include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } },
         },
-        empresa: { select: { name: true } }
-      }
+        empresa: { select: { name: true } },
+      },
     });
+
     return data.map((item) => this.formatBlogDates(item));
+  }
+
+  // Método para votar y comentar en un solo método
+  async voteAndComment(
+    postId: string,
+    userId: string,
+    useful: boolean,
+    commentContent: string,
+  ) {
+    const existingComment = await this.prisma.blogComment.findFirst({
+      where: { postId, userId },
+    });
+
+    if (existingComment) {
+      throw new BadRequestException('User has already commented on this post.');
+    }
+
+    await this.prisma.$transaction([
+      this.prisma.blogComment.create({
+        data: { postId, userId, content: commentContent },
+      }),
+      this.prisma.blogPost.update({
+        where: { id: postId },
+        data: useful ? { usefulCount: { increment: 1 } } : { notUsefulCount: { increment: 1 } },
+      }),
+    ]);
+
+    return { message: 'Vote and comment successfully registered.' };
   }
 
   async getAllCategories() {
@@ -156,18 +184,7 @@ export class BlogService {
     return { totalReaders: updated.totalReaders };
   }
 
-  async updateUsefulness(postId: string, useful: boolean) {
-    const post = await this.prisma.blogPost.findUnique({ where: { id: postId } });
-    if (!post) throw new NotFoundException('Blog not found');
-    const field = useful ? 'usefulCount' : 'notUsefulCount';
-    const updated = await this.prisma.blogPost.update({
-      where: { id: postId },
-      data: { [field]: { increment: 1 } },
-      select: { usefulCount: true, notUsefulCount: true }
-    });
-    return { usefulCount: updated.usefulCount, notUsefulCount: updated.notUsefulCount };
-  }
-
+ 
   private formatBlogDates(item: any) {
     const cardDate = new Intl.DateTimeFormat('es-ES', {
       day: '2-digit',

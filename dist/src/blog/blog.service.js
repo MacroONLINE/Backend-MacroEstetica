@@ -125,24 +125,41 @@ let BlogService = class BlogService {
         return data.map((item) => this.formatBlogDates(item));
     }
     async searchBlogs(query) {
+        const normalizedQuery = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         const data = await this.prisma.blogPost.findMany({
             where: {
                 OR: [
-                    { title: { contains: query, mode: 'insensitive' } },
-                    { content: { contains: query, mode: 'insensitive' } }
-                ]
+                    { title: { contains: normalizedQuery, mode: 'insensitive' } },
+                    { content: { contains: normalizedQuery, mode: 'insensitive' } },
+                ],
             },
             orderBy: { createdAt: 'desc' },
             include: {
                 author: {
-                    include: {
-                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
-                    }
+                    include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } },
                 },
-                empresa: { select: { name: true } }
-            }
+                empresa: { select: { name: true } },
+            },
         });
         return data.map((item) => this.formatBlogDates(item));
+    }
+    async voteAndComment(postId, userId, useful, commentContent) {
+        const existingComment = await this.prisma.blogComment.findFirst({
+            where: { postId, userId },
+        });
+        if (existingComment) {
+            throw new common_1.BadRequestException('User has already commented on this post.');
+        }
+        await this.prisma.$transaction([
+            this.prisma.blogComment.create({
+                data: { postId, userId, content: commentContent },
+            }),
+            this.prisma.blogPost.update({
+                where: { id: postId },
+                data: useful ? { usefulCount: { increment: 1 } } : { notUsefulCount: { increment: 1 } },
+            }),
+        ]);
+        return { message: 'Vote and comment successfully registered.' };
     }
     async getAllCategories() {
         return this.prisma.blogCategory.findMany();
@@ -157,18 +174,6 @@ let BlogService = class BlogService {
             select: { totalReaders: true }
         });
         return { totalReaders: updated.totalReaders };
-    }
-    async updateUsefulness(postId, useful) {
-        const post = await this.prisma.blogPost.findUnique({ where: { id: postId } });
-        if (!post)
-            throw new common_1.NotFoundException('Blog not found');
-        const field = useful ? 'usefulCount' : 'notUsefulCount';
-        const updated = await this.prisma.blogPost.update({
-            where: { id: postId },
-            data: { [field]: { increment: 1 } },
-            select: { usefulCount: true, notUsefulCount: true }
-        });
-        return { usefulCount: updated.usefulCount, notUsefulCount: updated.notUsefulCount };
     }
     formatBlogDates(item) {
         const cardDate = new Intl.DateTimeFormat('es-ES', {
