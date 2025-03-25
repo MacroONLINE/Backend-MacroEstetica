@@ -22,12 +22,18 @@ let BlogService = class BlogService {
             include: {
                 author: {
                     include: {
-                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
-                    }
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                profileImageUrl: true,
+                            },
+                        },
+                    },
                 },
                 empresa: { select: { name: true } },
-                categories: true
-            }
+                categories: true,
+            },
         });
         return data.map((item) => this.formatBlogDates(item));
     }
@@ -37,20 +43,31 @@ let BlogService = class BlogService {
             include: {
                 author: {
                     include: {
-                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
-                    }
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                profileImageUrl: true,
+                            },
+                        },
+                    },
                 },
                 empresa: { select: { name: true } },
                 categories: true,
                 comments: {
                     include: {
-                        user: { select: { firstName: true, lastName: true } }
-                    }
-                }
-            }
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                            },
+                        },
+                    },
+                },
+            },
         });
         if (!blog)
-            throw new common_1.NotFoundException('Blog not found');
+            throw new common_1.NotFoundException('Blog no encontrado');
         return this.formatBlogDates(blog);
     }
     async getBlogsByEmpresa(empresaId) {
@@ -60,11 +77,17 @@ let BlogService = class BlogService {
             include: {
                 author: {
                     include: {
-                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
-                    }
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                profileImageUrl: true,
+                            },
+                        },
+                    },
                 },
-                categories: true
-            }
+                categories: true,
+            },
         });
         return data.map((item) => this.formatBlogDates(item));
     }
@@ -74,23 +97,33 @@ let BlogService = class BlogService {
             orderBy: { createdAt: 'desc' },
             include: {
                 empresa: { select: { name: true } },
-                categories: true
-            }
+                categories: true,
+            },
         });
         return data.map((item) => this.formatBlogDates(item));
     }
     async getBlogsByCategory(categoryId) {
         const data = await this.prisma.blogPost.findMany({
-            where: { categories: { some: { id: categoryId } } },
+            where: {
+                categories: {
+                    some: { id: categoryId },
+                },
+            },
             orderBy: { createdAt: 'desc' },
             include: {
                 author: {
                     include: {
-                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
-                    }
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                profileImageUrl: true,
+                            },
+                        },
+                    },
                 },
-                empresa: { select: { name: true } }
-            }
+                empresa: { select: { name: true } },
+            },
         });
         return data.map((item) => this.formatBlogDates(item));
     }
@@ -101,11 +134,17 @@ let BlogService = class BlogService {
             include: {
                 author: {
                     include: {
-                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
-                    }
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                profileImageUrl: true,
+                            },
+                        },
+                    },
                 },
-                empresa: { select: { name: true } }
-            }
+                empresa: { select: { name: true } },
+            },
         });
         return data.map((item) => this.formatBlogDates(item));
     }
@@ -116,29 +155,66 @@ let BlogService = class BlogService {
             include: {
                 author: {
                     include: {
-                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } }
-                    }
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                profileImageUrl: true,
+                            },
+                        },
+                    },
                 },
-                empresa: { select: { name: true } }
-            }
+                empresa: { select: { name: true } },
+            },
         });
         return data.map((item) => this.formatBlogDates(item));
     }
     async searchBlogs(query) {
-        const normalizedQuery = query.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const normalizedQuery = query
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
         const data = await this.prisma.blogPost.findMany({
             where: {
                 OR: [
-                    { title: { contains: normalizedQuery, mode: 'insensitive' } },
-                    { content: { contains: normalizedQuery, mode: 'insensitive' } },
+                    {
+                        title: {
+                            contains: normalizedQuery,
+                            mode: 'insensitive',
+                        },
+                    },
+                    {
+                        content: {
+                            contains: normalizedQuery,
+                            mode: 'insensitive',
+                        },
+                    },
+                    {
+                        categories: {
+                            some: {
+                                name: {
+                                    contains: normalizedQuery,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
+                    },
                 ],
             },
             orderBy: { createdAt: 'desc' },
             include: {
                 author: {
-                    include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } },
+                    include: {
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                profileImageUrl: true,
+                            },
+                        },
+                    },
                 },
                 empresa: { select: { name: true } },
+                categories: true,
             },
         });
         return data.map((item) => this.formatBlogDates(item));
@@ -148,7 +224,7 @@ let BlogService = class BlogService {
             where: { postId, userId },
         });
         if (existingComment) {
-            throw new common_1.BadRequestException('User has already commented on this post.');
+            throw new common_1.BadRequestException('El usuario ya ha comentado en este post.');
         }
         await this.prisma.$transaction([
             this.prisma.blogComment.create({
@@ -156,22 +232,28 @@ let BlogService = class BlogService {
             }),
             this.prisma.blogPost.update({
                 where: { id: postId },
-                data: useful ? { usefulCount: { increment: 1 } } : { notUsefulCount: { increment: 1 } },
+                data: useful
+                    ? { usefulCount: { increment: 1 } }
+                    : { notUsefulCount: { increment: 1 } },
             }),
         ]);
-        return { message: 'Vote and comment successfully registered.' };
+        return { message: 'Voto y comentario registrados correctamente.' };
     }
     async getAllCategories() {
-        return this.prisma.blogCategory.findMany();
+        return this.prisma.blogCategory.findMany({
+            orderBy: { name: 'asc' },
+        });
     }
     async incrementReaderCount(postId) {
-        const post = await this.prisma.blogPost.findUnique({ where: { id: postId } });
+        const post = await this.prisma.blogPost.findUnique({
+            where: { id: postId },
+        });
         if (!post)
-            throw new common_1.NotFoundException('Blog not found');
+            throw new common_1.NotFoundException('Blog no encontrado');
         const updated = await this.prisma.blogPost.update({
             where: { id: postId },
             data: { totalReaders: { increment: 1 } },
-            select: { totalReaders: true }
+            select: { totalReaders: true },
         });
         return { totalReaders: updated.totalReaders };
     }
@@ -179,13 +261,13 @@ let BlogService = class BlogService {
         const cardDate = new Intl.DateTimeFormat('es-ES', {
             day: '2-digit',
             month: '2-digit',
-            year: 'numeric'
+            year: 'numeric',
         }).format(item.createdAt);
         const titleDate = item.createdAt.toISOString().split('T')[0];
         return {
             ...item,
             createdAtCard: cardDate,
-            createdAtTitle: titleDate
+            createdAtTitle: titleDate,
         };
     }
 };

@@ -10,60 +10,60 @@ export declare class CoursesController {
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
         id: string;
-        title: string;
-        bannerUrl: string;
-        description: string;
-        level: string;
-        rating: number;
-        commentsCount: number;
-        averageRating: number;
-        instructorId: string | null;
-        price: number;
-        discountPercentage: number | null;
-        participantsCount: number;
-        target: import(".prisma/client").$Enums.Target;
         createdAt: Date;
         updatedAt: Date;
+        rating: number;
+        description: string;
+        title: string;
         categoryId: string;
+        target: import(".prisma/client").$Enums.Target;
+        price: number;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        bannerUrl: string;
+        level: string;
+        commentsCount: number;
+        averageRating: number;
+        discountPercentage: number | null;
+        participantsCount: number;
         isFeatured: boolean | null;
         courseImageUrl: string;
         aboutDescription: string | null;
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
         totalHours: number;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
+        instructorId: string | null;
     }>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
+        description: string;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         moduleId: string | null;
         videoUrl: string | null;
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
         id: string;
-        rating: number;
         createdAt: Date;
         updatedAt: Date;
+        type: import(".prisma/client").$Enums.CommentType;
+        rating: number;
+        content: string;
+        classId: string | null;
         courseId: string | null;
         userId: string;
-        classId: string | null;
-        type: import(".prisma/client").$Enums.CommentType;
-        content: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         urlIcon: string;
         colorHex: string;
     }>;
@@ -83,17 +83,17 @@ export declare class CoursesController {
     getClassById(classId: string): Promise<{
         classResources: {
             id: string;
-            title: string;
             createdAt: Date;
             updatedAt: Date;
             classId: string;
+            title: string;
             fileUrl: string;
         }[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         moduleId: string | null;
         videoUrl: string | null;
     }>;
@@ -103,59 +103,59 @@ export declare class CoursesController {
     getModulesByCourse(courseId: string): Promise<({
         classes: {
             id: string;
-            description: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string;
             moduleId: string | null;
             videoUrl: string | null;
         }[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
+        description: string;
     })[]>;
     getModuleById(moduleId: string): Promise<{
         course: {
             id: string;
-            title: string;
-            bannerUrl: string;
-            description: string;
-            level: string;
-            rating: number;
-            commentsCount: number;
-            averageRating: number;
-            instructorId: string | null;
-            price: number;
-            discountPercentage: number | null;
-            participantsCount: number;
-            target: import(".prisma/client").$Enums.Target;
             createdAt: Date;
             updatedAt: Date;
+            rating: number;
+            description: string;
+            title: string;
             categoryId: string;
+            target: import(".prisma/client").$Enums.Target;
+            price: number;
+            whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+            bannerUrl: string;
+            level: string;
+            commentsCount: number;
+            averageRating: number;
+            discountPercentage: number | null;
+            participantsCount: number;
             isFeatured: boolean | null;
             courseImageUrl: string;
             aboutDescription: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             totalHours: number;
-            whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
             introductoryVideoUrl: string | null;
+            instructorId: string | null;
         };
         classes: {
             id: string;
-            description: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string;
             moduleId: string | null;
             videoUrl: string | null;
         }[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
+        description: string;
     }>;
     getUserModuleProgress(moduleId: string, userId: string): Promise<{
         classId: string;

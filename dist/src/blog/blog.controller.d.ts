@@ -8,7 +8,6 @@ export declare class BlogController {
     private readonly blogService;
     constructor(blogService: BlogService);
     getAllBlogs(): Promise<any[]>;
-    getBlogById(id: string): Promise<any>;
     getBlogsByEmpresa(empresaId: string): Promise<any[]>;
     getBlogsByAuthor(authorId: string): Promise<any[]>;
     getBlogsByCategory(categoryId: string): Promise<any[]>;
@@ -29,5 +28,6 @@ export declare class BlogController {
     incrementReaderCount(id: string): Promise<{
         totalReaders: number;
     }>;
+    getBlogById(id: string): Promise<any>;
 }
 export {};
