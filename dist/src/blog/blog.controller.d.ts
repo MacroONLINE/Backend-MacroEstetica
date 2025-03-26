@@ -18,12 +18,12 @@ export declare class BlogController {
         message: string;
     }>;
     getAllCategories(): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
-        iconUrl: string | null;
         colorHex: string;
+        iconUrl: string | null;
     }[]>;
     incrementReaderCount(id: string): Promise<{
         totalReaders: number;

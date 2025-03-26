@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Param, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  Patch,
+} from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CreateModuleDto } from './dto/create-module.dto';
@@ -6,7 +15,13 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Target } from '@prisma/client';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -109,7 +124,10 @@ export class CoursesController {
   @ApiParam({ name: 'courseId', description: 'Course ID' })
   @ApiResponse({ status: 200, description: 'User progress returned.' })
   @ApiResponse({ status: 404, description: 'User or course not found.' })
-  async getUserCourseProgress(@Param('userId') userId: string, @Param('courseId') courseId: string) {
+  async getUserCourseProgress(
+    @Param('userId') userId: string,
+    @Param('courseId') courseId: string
+  ) {
     return this.coursesService.getUserCourseProgress(userId, courseId);
   }
 
@@ -128,7 +146,10 @@ export class CoursesController {
   @ApiParam({ name: 'userId', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'Enrollment status returned.' })
   @ApiResponse({ status: 404, description: 'Course or user not found.' })
-  async isUserEnrolled(@Param('courseId') courseId: string, @Param('userId') userId: string) {
+  async isUserEnrolled(
+    @Param('courseId') courseId: string,
+    @Param('userId') userId: string
+  ) {
     return this.coursesService.isUserEnrolled(courseId, userId);
   }
 
@@ -154,7 +175,22 @@ export class CoursesController {
   @ApiParam({ name: 'moduleId', description: 'Module ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'User class progress in the module returned.' })
-  async getUserModuleProgress(@Param('moduleId') moduleId: string, @Param('userId') userId: string) {
+  async getUserModuleProgress(
+    @Param('moduleId') moduleId: string,
+    @Param('userId') userId: string
+  ) {
     return this.coursesService.getUserModuleProgress(moduleId, userId);
+  }
+
+  @Patch('class/:classId/user/:userId/complete')
+  @ApiOperation({ summary: 'Mark a class as completed for a specific user' })
+  @ApiParam({ name: 'classId', description: 'Class ID' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @HttpCode(HttpStatus.OK)
+  async markClassAsCompleted(
+    @Param('classId') classId: string,
+    @Param('userId') userId: string
+  ) {
+    return this.coursesService.markClassAsCompleted(userId, classId);
   }
 }

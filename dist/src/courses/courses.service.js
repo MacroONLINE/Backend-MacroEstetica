@@ -119,9 +119,7 @@ let CoursesService = class CoursesService {
                 category: true,
                 instructor: {
                     include: {
-                        user: {
-                            select: { firstName: true, lastName: true, profileImageUrl: true },
-                        },
+                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
                     },
                 },
                 modules: {
@@ -144,9 +142,7 @@ let CoursesService = class CoursesService {
                 category: true,
                 instructor: {
                     include: {
-                        user: {
-                            select: { firstName: true, lastName: true, profileImageUrl: true },
-                        },
+                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
                     },
                 },
                 modules: {
@@ -172,16 +168,12 @@ let CoursesService = class CoursesService {
                 category: true,
                 instructor: {
                     include: {
-                        user: {
-                            select: { firstName: true, lastName: true, profileImageUrl: true },
-                        },
+                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
                     },
                 },
                 modules: {
                     include: {
-                        classes: {
-                            include: { classResources: true },
-                        },
+                        classes: { include: { classResources: true } },
                     },
                 },
                 resources: true,
@@ -197,16 +189,12 @@ let CoursesService = class CoursesService {
                 category: true,
                 instructor: {
                     include: {
-                        user: {
-                            select: { firstName: true, lastName: true, profileImageUrl: true },
-                        },
+                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
                     },
                 },
                 modules: {
                     include: {
-                        classes: {
-                            include: { classResources: true },
-                        },
+                        classes: { include: { classResources: true } },
                     },
                 },
                 resources: true,
@@ -222,16 +210,12 @@ let CoursesService = class CoursesService {
                 category: true,
                 instructor: {
                     include: {
-                        user: {
-                            select: { firstName: true, lastName: true, profileImageUrl: true },
-                        },
+                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
                     },
                 },
                 modules: {
                     include: {
-                        classes: {
-                            include: { classResources: true },
-                        },
+                        classes: { include: { classResources: true } },
                     },
                 },
                 resources: true,
@@ -248,16 +232,12 @@ let CoursesService = class CoursesService {
                 category: true,
                 instructor: {
                     include: {
-                        user: {
-                            select: { firstName: true, lastName: true, profileImageUrl: true },
-                        },
+                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
                     },
                 },
                 modules: {
                     include: {
-                        classes: {
-                            include: { classResources: true },
-                        },
+                        classes: { include: { classResources: true } },
                     },
                 },
                 resources: true,
@@ -272,7 +252,9 @@ let CoursesService = class CoursesService {
             include: {
                 course: {
                     include: {
-                        modules: { include: { classes: true } },
+                        modules: {
+                            include: { classes: true },
+                        },
                     },
                 },
             },
@@ -284,7 +266,9 @@ let CoursesService = class CoursesService {
             const userProgress = await this.prisma.classProgress.findMany({
                 where: {
                     userId,
-                    classId: { in: course.modules.flatMap((m) => m.classes.map((c) => c.id)) },
+                    classId: {
+                        in: course.modules.flatMap((m) => m.classes.map((c) => c.id)),
+                    },
                 },
             });
             const completedClasses = userProgress.filter((p) => p.completed).length;
@@ -324,7 +308,9 @@ let CoursesService = class CoursesService {
         const userProgress = await this.prisma.classProgress.findMany({
             where: {
                 userId,
-                classId: { in: course.modules.flatMap((m) => m.classes.map((c) => c.id)) },
+                classId: {
+                    in: course.modules.flatMap((m) => m.classes.map((c) => c.id)),
+                },
             },
         });
         const completedClasses = userProgress.filter((p) => p.completed).length;
@@ -338,7 +324,9 @@ let CoursesService = class CoursesService {
     async getClassById(classId) {
         const cls = await this.prisma.class.findUnique({
             where: { id: classId },
-            include: { classResources: true },
+            include: {
+                classResources: true,
+            },
         });
         if (!cls) {
             throw new common_1.NotFoundException('Class not found');
@@ -357,13 +345,25 @@ let CoursesService = class CoursesService {
     async getModulesByCourse(courseId) {
         return this.prisma.module.findMany({
             where: { courseId },
-            include: { classes: true },
+            include: {
+                classes: {
+                    include: {
+                        classResources: true,
+                    },
+                },
+            },
         });
     }
     async getModuleById(moduleId) {
         return this.prisma.module.findUnique({
             where: { id: moduleId },
-            include: { classes: true, course: true },
+            include: {
+                classes: {
+                    include: {
+                        classResources: true,
+                    },
+                },
+            },
         });
     }
     async getUserModuleProgress(moduleId, userId) {
@@ -371,15 +371,47 @@ let CoursesService = class CoursesService {
             where: { moduleId },
             include: {
                 progress: {
-                    where: { userId, completed: true },
+                    where: {
+                        userId,
+                        completed: true,
+                    },
                 },
+                classResources: true,
             },
         });
-        return classes.map(cls => ({
+        return classes.map((cls) => ({
             classId: cls.id,
             description: cls.description,
             completed: cls.progress.length > 0,
+            classResources: cls.classResources,
         }));
+    }
+    async markClassAsCompleted(userId, classId) {
+        const cls = await this.prisma.class.findUnique({ where: { id: classId } });
+        if (!cls) {
+            throw new common_1.NotFoundException('Class not found');
+        }
+        const existingProgress = await this.prisma.classProgress.findFirst({
+            where: { userId, classId },
+        });
+        if (!existingProgress) {
+            return this.prisma.classProgress.create({
+                data: {
+                    userId,
+                    classId,
+                    completed: true,
+                },
+            });
+        }
+        else {
+            return this.prisma.classProgress.update({
+                where: { id: existingProgress.id },
+                data: {
+                    completed: true,
+                    updatedAt: new Date(),
+                },
+            });
+        }
     }
 };
 exports.CoursesService = CoursesService;

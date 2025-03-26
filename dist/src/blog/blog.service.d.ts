@@ -14,12 +14,12 @@ export declare class BlogService {
         message: string;
     }>;
     getAllCategories(): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
-        iconUrl: string | null;
         colorHex: string;
+        iconUrl: string | null;
     }[]>;
     incrementReaderCount(postId: string): Promise<{
         totalReaders: number;

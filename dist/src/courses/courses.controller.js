@@ -80,6 +80,9 @@ let CoursesController = class CoursesController {
     async getUserModuleProgress(moduleId, userId) {
         return this.coursesService.getUserModuleProgress(moduleId, userId);
     }
+    async markClassAsCompleted(classId, userId) {
+        return this.coursesService.markClassAsCompleted(userId, classId);
+    }
 };
 exports.CoursesController = CoursesController;
 __decorate([
@@ -264,6 +267,18 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getUserModuleProgress", null);
+__decorate([
+    (0, common_1.Patch)('class/:classId/user/:userId/complete'),
+    (0, swagger_1.ApiOperation)({ summary: 'Mark a class as completed for a specific user' }),
+    (0, swagger_1.ApiParam)({ name: 'classId', description: 'Class ID' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('classId')),
+    __param(1, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "markClassAsCompleted", null);
 exports.CoursesController = CoursesController = __decorate([
     (0, swagger_1.ApiTags)('Courses'),
     (0, common_1.Controller)('courses'),

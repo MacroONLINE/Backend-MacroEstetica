@@ -120,9 +120,7 @@ export class CoursesService {
         category: true,
         instructor: {
           include: {
-            user: {
-              select: { firstName: true, lastName: true, profileImageUrl: true },
-            },
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
           },
         },
         modules: {
@@ -146,9 +144,7 @@ export class CoursesService {
         category: true,
         instructor: {
           include: {
-            user: {
-              select: { firstName: true, lastName: true, profileImageUrl: true },
-            },
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
           },
         },
         modules: {
@@ -175,16 +171,12 @@ export class CoursesService {
         category: true,
         instructor: {
           include: {
-            user: {
-              select: { firstName: true, lastName: true, profileImageUrl: true },
-            },
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
           },
         },
         modules: {
           include: {
-            classes: {
-              include: { classResources: true },
-            },
+            classes: { include: { classResources: true } },
           },
         },
         resources: true,
@@ -201,16 +193,12 @@ export class CoursesService {
         category: true,
         instructor: {
           include: {
-            user: {
-              select: { firstName: true, lastName: true, profileImageUrl: true },
-            },
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
           },
         },
         modules: {
           include: {
-            classes: {
-              include: { classResources: true },
-            },
+            classes: { include: { classResources: true } },
           },
         },
         resources: true,
@@ -227,16 +215,12 @@ export class CoursesService {
         category: true,
         instructor: {
           include: {
-            user: {
-              select: { firstName: true, lastName: true, profileImageUrl: true },
-            },
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
           },
         },
         modules: {
           include: {
-            classes: {
-              include: { classResources: true },
-            },
+            classes: { include: { classResources: true } },
           },
         },
         resources: true,
@@ -254,16 +238,12 @@ export class CoursesService {
         category: true,
         instructor: {
           include: {
-            user: {
-              select: { firstName: true, lastName: true, profileImageUrl: true },
-            },
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
           },
         },
         modules: {
           include: {
-            classes: {
-              include: { classResources: true },
-            },
+            classes: { include: { classResources: true } },
           },
         },
         resources: true,
@@ -279,21 +259,29 @@ export class CoursesService {
       include: {
         course: {
           include: {
-            modules: { include: { classes: true } },
+            modules: {
+              include: { classes: true },
+            },
           },
         },
       },
     });
+
     const result = [];
     for (const e of enrollments) {
       const course = e.course;
       const totalClasses = course.modules.reduce((acc, m) => acc + m.classes.length, 0);
+
+      // Buscamos el progreso usando un filtro "in" en classId
       const userProgress = await this.prisma.classProgress.findMany({
         where: {
           userId,
-          classId: { in: course.modules.flatMap((m) => m.classes.map((c) => c.id)) },
+          classId: {
+            in: course.modules.flatMap((m) => m.classes.map((c) => c.id)),
+          },
         },
       });
+
       const completedClasses = userProgress.filter((p) => p.completed).length;
       const isCompleted = completedClasses === totalClasses && totalClasses > 0;
       result.push({
@@ -329,10 +317,14 @@ export class CoursesService {
       throw new NotFoundException(`Course with ID ${courseId} not found.`);
     }
     const totalClasses = course.modules.reduce((acc, m) => acc + m.classes.length, 0);
+
+    // Uso de "in" para filtrar múltiples IDs
     const userProgress = await this.prisma.classProgress.findMany({
       where: {
         userId,
-        classId: { in: course.modules.flatMap((m) => m.classes.map((c) => c.id)) },
+        classId: {
+          in: course.modules.flatMap((m) => m.classes.map((c) => c.id)),
+        },
       },
     });
     const completedClasses = userProgress.filter((p) => p.completed).length;
@@ -347,7 +339,9 @@ export class CoursesService {
   async getClassById(classId: string) {
     const cls = await this.prisma.class.findUnique({
       where: { id: classId },
-      include: { classResources: true },
+      include: {
+        classResources: true,
+      },
     });
     if (!cls) {
       throw new NotFoundException('Class not found');
@@ -362,43 +356,88 @@ export class CoursesService {
         userId,
       },
     });
-  
     return { enrolled: !!enrollment };
   }
 
-  // Obtener módulos de un curso específico
-async getModulesByCourse(courseId: string) {
-  return this.prisma.module.findMany({
-    where: { courseId },
-    include: { classes: true },
-  });
-}
-
-// Obtener detalles de un módulo específico
-async getModuleById(moduleId: string) {
-  return this.prisma.module.findUnique({
-    where: { id: moduleId },
-    include: { classes: true, course: true },
-  });
-}
-
-// Obtener clases aprobadas por un usuario en un módulo específico
-async getUserModuleProgress(moduleId: string, userId: string) {
-  const classes = await this.prisma.class.findMany({
-    where: { moduleId },
-    include: {
-      progress: {
-        where: { userId, completed: true },
+  async getModulesByCourse(courseId: string) {
+    return this.prisma.module.findMany({
+      where: { courseId },
+      include: {
+        classes: {
+          include: {
+            classResources: true,
+          },
+        },
       },
-    },
-  });
+    });
+  }
 
-  return classes.map(cls => ({
-    classId: cls.id,
-    description: cls.description,
-    completed: cls.progress.length > 0,
-  }));
-}
+  async getModuleById(moduleId: string) {
+    return this.prisma.module.findUnique({
+      where: { id: moduleId },
+      include: {
+        classes: {
+          include: {
+            classResources: true,
+          },
+        },
+      },
+    });
+  }
 
-  
+  async getUserModuleProgress(moduleId: string, userId: string) {
+    const classes = await this.prisma.class.findMany({
+      where: { moduleId },
+      include: {
+        progress: {
+          where: {
+            userId,
+            completed: true,
+          },
+        },
+        classResources: true,
+      },
+    });
+
+    return classes.map((cls) => ({
+      classId: cls.id,
+      description: cls.description,
+      completed: cls.progress.length > 0,
+      classResources: cls.classResources,
+    }));
+  }
+
+  /**
+   * Marcar una clase como completada para un usuario
+   */
+  async markClassAsCompleted(userId: string, classId: string) {
+    const cls = await this.prisma.class.findUnique({ where: { id: classId } });
+    if (!cls) {
+      throw new NotFoundException('Class not found');
+    }
+    // Buscamos si existe un registro en ClassProgress
+    const existingProgress = await this.prisma.classProgress.findFirst({
+      where: { userId, classId },
+    });
+
+    if (!existingProgress) {
+      // Lo creamos si no existe
+      return this.prisma.classProgress.create({
+        data: {
+          userId,
+          classId,
+          completed: true,
+        },
+      });
+    } else {
+      // Lo actualizamos si sí existe
+      return this.prisma.classProgress.update({
+        where: { id: existingProgress.id },
+        data: {
+          completed: true,
+          updatedAt: new Date(),
+        },
+      });
+    }
+  }
 }
