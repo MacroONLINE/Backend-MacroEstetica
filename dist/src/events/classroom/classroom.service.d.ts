@@ -9,13 +9,13 @@ export declare class ClassroomService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
+        channelName: string | null;
         endDateTime: Date;
+        imageUrl: string | null;
         price: number | null;
+        startDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];
         isFree: boolean;
-        imageUrl: string | null;
-        channelName: string | null;
     }>;
     getClassroomById(id: string): Promise<{
         enrollments: {
@@ -26,11 +26,28 @@ export declare class ClassroomService {
             userId: string;
             classroomId: string;
         }[];
+        orators: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            userId: string;
+            bannerImage: string | null;
+            followers: number | null;
+            title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
+            empresaId: string | null;
+            categoryId: string | null;
+        }[];
         attendees: {
             id: string;
             firstName: string | null;
             lastName: string | null;
-            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -47,24 +64,7 @@ export declare class ClassroomService {
             updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
-        }[];
-        orators: {
-            id: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            description: string;
-            experienceDescription: string;
-            experienceYears: number;
-            certificationsUrl: string;
-            bannerImage: string | null;
-            followers: number | null;
-            title: string | null;
-            empresaId: string | null;
-            categoryId: string | null;
+            profileImageUrl: string | null;
         }[];
     } & {
         id: string;
@@ -72,13 +72,13 @@ export declare class ClassroomService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
+        channelName: string | null;
         endDateTime: Date;
+        imageUrl: string | null;
         price: number | null;
+        startDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];
         isFree: boolean;
-        imageUrl: string | null;
-        channelName: string | null;
     }>;
     updateClassroom(id: string, data: any): Promise<{
         enrollments: {
@@ -89,11 +89,28 @@ export declare class ClassroomService {
             userId: string;
             classroomId: string;
         }[];
+        orators: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            userId: string;
+            bannerImage: string | null;
+            followers: number | null;
+            title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
+            empresaId: string | null;
+            categoryId: string | null;
+        }[];
         attendees: {
             id: string;
             firstName: string | null;
             lastName: string | null;
-            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -110,24 +127,7 @@ export declare class ClassroomService {
             updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
-        }[];
-        orators: {
-            id: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            description: string;
-            experienceDescription: string;
-            experienceYears: number;
-            certificationsUrl: string;
-            bannerImage: string | null;
-            followers: number | null;
-            title: string | null;
-            empresaId: string | null;
-            categoryId: string | null;
+            profileImageUrl: string | null;
         }[];
     } & {
         id: string;
@@ -135,13 +135,13 @@ export declare class ClassroomService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
+        channelName: string | null;
         endDateTime: Date;
+        imageUrl: string | null;
         price: number | null;
+        startDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];
         isFree: boolean;
-        imageUrl: string | null;
-        channelName: string | null;
     }>;
     deleteClassroom(id: string): Promise<{
         message: string;
@@ -155,11 +155,28 @@ export declare class ClassroomService {
             userId: string;
             classroomId: string;
         }[];
+        orators: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            userId: string;
+            bannerImage: string | null;
+            followers: number | null;
+            title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
+            empresaId: string | null;
+            categoryId: string | null;
+        }[];
         attendees: {
             id: string;
             firstName: string | null;
             lastName: string | null;
-            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -176,24 +193,7 @@ export declare class ClassroomService {
             updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
-        }[];
-        orators: {
-            id: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            description: string;
-            experienceDescription: string;
-            experienceYears: number;
-            certificationsUrl: string;
-            bannerImage: string | null;
-            followers: number | null;
-            title: string | null;
-            empresaId: string | null;
-            categoryId: string | null;
+            profileImageUrl: string | null;
         }[];
     } & {
         id: string;
@@ -201,13 +201,13 @@ export declare class ClassroomService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
+        channelName: string | null;
         endDateTime: Date;
+        imageUrl: string | null;
         price: number | null;
+        startDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];
         isFree: boolean;
-        imageUrl: string | null;
-        channelName: string | null;
     })[]>;
     getLiveClassrooms(): Promise<({
         enrollments: {
@@ -218,11 +218,28 @@ export declare class ClassroomService {
             userId: string;
             classroomId: string;
         }[];
+        orators: {
+            id: string;
+            status: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            experienceYears: number;
+            certificationsUrl: string;
+            userId: string;
+            bannerImage: string | null;
+            followers: number | null;
+            title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
+            empresaId: string | null;
+            categoryId: string | null;
+        }[];
         attendees: {
             id: string;
             firstName: string | null;
             lastName: string | null;
-            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -239,24 +256,7 @@ export declare class ClassroomService {
             updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
-        }[];
-        orators: {
-            id: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            description: string;
-            experienceDescription: string;
-            experienceYears: number;
-            certificationsUrl: string;
-            bannerImage: string | null;
-            followers: number | null;
-            title: string | null;
-            empresaId: string | null;
-            categoryId: string | null;
+            profileImageUrl: string | null;
         }[];
     } & {
         id: string;
@@ -264,13 +264,13 @@ export declare class ClassroomService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
+        channelName: string | null;
         endDateTime: Date;
+        imageUrl: string | null;
         price: number | null;
+        startDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];
         isFree: boolean;
-        imageUrl: string | null;
-        channelName: string | null;
     })[]>;
     addOrator(classroomId: string, instructorId: string): Promise<{
         orators: {
@@ -278,16 +278,16 @@ export declare class ClassroomService {
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
             description: string;
-            experienceDescription: string;
             experienceYears: number;
             certificationsUrl: string;
+            userId: string;
             bannerImage: string | null;
             followers: number | null;
             title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
             empresaId: string | null;
             categoryId: string | null;
         }[];
@@ -297,13 +297,13 @@ export declare class ClassroomService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
+        channelName: string | null;
         endDateTime: Date;
+        imageUrl: string | null;
         price: number | null;
+        startDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];
         isFree: boolean;
-        imageUrl: string | null;
-        channelName: string | null;
     }>;
     removeOrator(classroomId: string, instructorId: string): Promise<{
         orators: {
@@ -311,16 +311,16 @@ export declare class ClassroomService {
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
             description: string;
-            experienceDescription: string;
             experienceYears: number;
             certificationsUrl: string;
+            userId: string;
             bannerImage: string | null;
             followers: number | null;
             title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
             empresaId: string | null;
             categoryId: string | null;
         }[];
@@ -330,12 +330,12 @@ export declare class ClassroomService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
+        channelName: string | null;
         endDateTime: Date;
+        imageUrl: string | null;
         price: number | null;
+        startDateTime: Date;
         categories: import(".prisma/client").$Enums.Profession[];
         isFree: boolean;
-        imageUrl: string | null;
-        channelName: string | null;
     }>;
 }

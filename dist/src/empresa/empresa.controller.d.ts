@@ -7,7 +7,6 @@ export declare class EmpresaController {
             id: string;
             firstName: string | null;
             lastName: string | null;
-            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -24,6 +23,7 @@ export declare class EmpresaController {
             updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
+            profileImageUrl: string | null;
         };
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -32,26 +32,25 @@ export declare class EmpresaController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        bannerImage: string | null;
-        followers: number;
-        title: string | null;
         dni: string | null;
-        legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
+        bannerImage: string | null;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        logo: string | null;
-        profileImage: string | null;
         ceo: string | null;
         ceoRole: string | null;
+        followers: number;
         location: string | null;
+        logo: string | null;
+        profileImage: string | null;
+        title: string | null;
         webUrl: string | null;
+        legalName: string | null;
     })[]>;
     getAllByGiro(giro: string): Promise<({
         user: {
             id: string;
             firstName: string | null;
             lastName: string | null;
-            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -68,6 +67,7 @@ export declare class EmpresaController {
             updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
+            profileImageUrl: string | null;
         };
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -76,26 +76,25 @@ export declare class EmpresaController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        bannerImage: string | null;
-        followers: number;
-        title: string | null;
         dni: string | null;
-        legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
+        bannerImage: string | null;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        logo: string | null;
-        profileImage: string | null;
         ceo: string | null;
         ceoRole: string | null;
+        followers: number;
         location: string | null;
+        logo: string | null;
+        profileImage: string | null;
+        title: string | null;
         webUrl: string | null;
+        legalName: string | null;
     })[]>;
     getAllByTarget(target: string): Promise<({
         user: {
             id: string;
             firstName: string | null;
             lastName: string | null;
-            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -112,6 +111,7 @@ export declare class EmpresaController {
             updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
+            profileImageUrl: string | null;
         };
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -120,26 +120,25 @@ export declare class EmpresaController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        bannerImage: string | null;
-        followers: number;
-        title: string | null;
         dni: string | null;
-        legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
+        bannerImage: string | null;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        logo: string | null;
-        profileImage: string | null;
         ceo: string | null;
         ceoRole: string | null;
+        followers: number;
         location: string | null;
+        logo: string | null;
+        profileImage: string | null;
+        title: string | null;
         webUrl: string | null;
+        legalName: string | null;
     })[]>;
     getAllByGiroAndTarget(giro: string, target: string): Promise<({
         user: {
             id: string;
             firstName: string | null;
             lastName: string | null;
-            profileImageUrl: string | null;
             phone: string | null;
             email: string;
             emailVerified: Date | null;
@@ -156,6 +155,7 @@ export declare class EmpresaController {
             updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
+            profileImageUrl: string | null;
         };
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -164,19 +164,19 @@ export declare class EmpresaController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        bannerImage: string | null;
-        followers: number;
-        title: string | null;
         dni: string | null;
-        legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
+        bannerImage: string | null;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        logo: string | null;
-        profileImage: string | null;
         ceo: string | null;
         ceoRole: string | null;
+        followers: number;
         location: string | null;
+        logo: string | null;
+        profileImage: string | null;
+        title: string | null;
         webUrl: string | null;
+        legalName: string | null;
     })[]>;
     getMinisiteByEmpresaId(empresaId: string): Promise<{
         minisite: {
@@ -197,16 +197,16 @@ export declare class EmpresaController {
                     description: string;
                     categoryId: number;
                     isFeatured: boolean | null;
-                    lab: string | null;
+                    companyId: string;
                     activeIngredients: string[];
-                    features: string[];
                     benefits: string[];
-                    problemAddressed: string | null;
-                    imageMain: string | null;
+                    features: string[];
                     imageGallery: string[];
+                    imageMain: string | null;
                     isBestSeller: boolean | null;
                     isOnSale: boolean | null;
-                    companyId: string;
+                    lab: string | null;
+                    problemAddressed: string | null;
                 };
             } & {
                 id: string;
@@ -218,17 +218,35 @@ export declare class EmpresaController {
                 highlightDescription: string | null;
                 hoghlightImageUrl: string | null;
             })[];
-            slides: {
+            featuredProducts: ({
+                product: {
+                    name: string;
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    description: string;
+                    categoryId: number;
+                    isFeatured: boolean | null;
+                    companyId: string;
+                    activeIngredients: string[];
+                    benefits: string[];
+                    features: string[];
+                    imageGallery: string[];
+                    imageMain: string | null;
+                    isBestSeller: boolean | null;
+                    isOnSale: boolean | null;
+                    lab: string | null;
+                    problemAddressed: string | null;
+                };
+            } & {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                description: string;
-                title: string;
+                productId: string;
                 minisiteId: string;
-                cta: string | null;
-                imageSrc: string | null;
                 order: number | null;
-            }[];
+                tagline: string | null;
+            })[];
             offers: ({
                 products: {
                     id: string;
@@ -245,35 +263,17 @@ export declare class EmpresaController {
                 minisiteId: string;
                 sectionTitle: string | null;
             })[];
-            featuredProducts: ({
-                product: {
-                    name: string;
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    description: string;
-                    categoryId: number;
-                    isFeatured: boolean | null;
-                    lab: string | null;
-                    activeIngredients: string[];
-                    features: string[];
-                    benefits: string[];
-                    problemAddressed: string | null;
-                    imageMain: string | null;
-                    imageGallery: string[];
-                    isBestSeller: boolean | null;
-                    isOnSale: boolean | null;
-                    companyId: string;
-                };
-            } & {
+            slides: {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                productId: string;
+                description: string;
+                title: string;
                 minisiteId: string;
                 order: number | null;
-                tagline: string | null;
-            })[];
+                cta: string | null;
+                imageSrc: string | null;
+            }[];
             specialities: {
                 id: string;
                 createdAt: Date;
@@ -296,21 +296,34 @@ export declare class EmpresaController {
             slogan: string | null;
             catalogueUrl: string | null;
         };
+        banners: {
+            banner: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            logo: string;
+            title: string;
+            empresaId: string | null;
+            date: Date | null;
+            cta_url: string | null;
+            cta_button_text: string;
+        }[];
         instructores: {
             id: string;
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
             description: string;
-            experienceDescription: string;
             experienceYears: number;
             certificationsUrl: string;
+            userId: string;
             bannerImage: string | null;
             followers: number | null;
             title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
             empresaId: string | null;
             categoryId: string | null;
         }[];
@@ -322,16 +335,16 @@ export declare class EmpresaController {
             description: string;
             categoryId: number;
             isFeatured: boolean | null;
-            lab: string | null;
+            companyId: string;
             activeIngredients: string[];
-            features: string[];
             benefits: string[];
-            problemAddressed: string | null;
-            imageMain: string | null;
+            features: string[];
             imageGallery: string[];
+            imageMain: string | null;
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
-            companyId: string;
+            lab: string | null;
+            problemAddressed: string | null;
         }[];
         categorias: ({
             products: {
@@ -342,16 +355,16 @@ export declare class EmpresaController {
                 description: string;
                 categoryId: number;
                 isFeatured: boolean | null;
-                lab: string | null;
+                companyId: string;
                 activeIngredients: string[];
-                features: string[];
                 benefits: string[];
-                problemAddressed: string | null;
-                imageMain: string | null;
+                features: string[];
                 imageGallery: string[];
+                imageMain: string | null;
                 isBestSeller: boolean | null;
                 isOnSale: boolean | null;
-                companyId: string;
+                lab: string | null;
+                problemAddressed: string | null;
             }[];
         } & {
             name: string;
@@ -364,19 +377,6 @@ export declare class EmpresaController {
             footerBanner: string | null;
             iconUrl: string | null;
         })[];
-        banners: {
-            banner: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            title: string;
-            empresaId: string | null;
-            logo: string;
-            date: Date | null;
-            cta_url: string | null;
-            cta_button_text: string;
-        }[];
     } & {
         subscription: import(".prisma/client").$Enums.SubscriptionType | null;
         name: string;
@@ -384,19 +384,19 @@ export declare class EmpresaController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        bannerImage: string | null;
-        followers: number;
-        title: string | null;
         dni: string | null;
-        legalName: string | null;
         giro: import(".prisma/client").$Enums.Giro;
+        bannerImage: string | null;
         categoria: import(".prisma/client").$Enums.EmpresaCategory;
-        logo: string | null;
-        profileImage: string | null;
         ceo: string | null;
         ceoRole: string | null;
+        followers: number;
         location: string | null;
+        logo: string | null;
+        profileImage: string | null;
+        title: string | null;
         webUrl: string | null;
+        legalName: string | null;
     }>;
     uploadCatalogueFile(empresaId: string, file: Express.Multer.File): Promise<{
         message: string;

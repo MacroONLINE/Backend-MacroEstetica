@@ -50,13 +50,11 @@ export declare class CoursesController {
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
         id: string;
-        rating: number;
         createdAt: Date;
         updatedAt: Date;
-        courseId: string | null;
         userId: string;
-        classId: string | null;
-        type: import(".prisma/client").$Enums.CommentType;
+        classId: string;
+        parentCommentId: string | null;
         content: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
@@ -78,6 +76,7 @@ export declare class CoursesController {
         courseId: string;
         totalClasses: number;
         completedClasses: number;
+        completedClassIds: string[];
         isCompleted: boolean;
     }>;
     getClassById(classId: string): Promise<{
@@ -89,6 +88,36 @@ export declare class CoursesController {
             classId: string;
             fileUrl: string;
         }[];
+        classComments: ({
+            user: {
+                firstName: string;
+                lastName: string;
+                profileImageUrl: string;
+            };
+            replies: ({
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                classId: string;
+                parentCommentId: string | null;
+                content: string;
+            })[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            classId: string;
+            parentCommentId: string | null;
+            content: string;
+        })[];
     } & {
         id: string;
         description: string;
@@ -110,6 +139,36 @@ export declare class CoursesController {
                 classId: string;
                 fileUrl: string;
             }[];
+            classComments: ({
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
+                replies: ({
+                    user: {
+                        firstName: string;
+                        lastName: string;
+                        profileImageUrl: string;
+                    };
+                } & {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    classId: string;
+                    parentCommentId: string | null;
+                    content: string;
+                })[];
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                classId: string;
+                parentCommentId: string | null;
+                content: string;
+            })[];
         } & {
             id: string;
             description: string;
@@ -135,6 +194,36 @@ export declare class CoursesController {
                 classId: string;
                 fileUrl: string;
             }[];
+            classComments: ({
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
+                replies: ({
+                    user: {
+                        firstName: string;
+                        lastName: string;
+                        profileImageUrl: string;
+                    };
+                } & {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    classId: string;
+                    parentCommentId: string | null;
+                    content: string;
+                })[];
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                classId: string;
+                parentCommentId: string | null;
+                content: string;
+            })[];
         } & {
             id: string;
             description: string;

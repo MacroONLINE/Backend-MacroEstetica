@@ -53,7 +53,8 @@ export class CoursesController {
   @ApiOperation({ summary: 'Create a new comment for a class' })
   @ApiResponse({ status: 201, description: 'Comment created successfully.' })
   async createComment(@Body() createCommentDto: CreateCommentDto) {
-    return this.coursesService.createComment(createCommentDto);
+    // Internamente llamará a createClassComment
+    return this.coursesService.createClassComment(createCommentDto);
   }
 
   @Post('categories')
@@ -95,7 +96,10 @@ export class CoursesController {
 
   @Get('by-target/:target')
   @ApiOperation({ summary: 'Get courses by target audience' })
-  @ApiParam({ name: 'target', description: 'Target audience (e.g., MEDICO, COSMETOLOGO)' })
+  @ApiParam({
+    name: 'target',
+    description: 'Target audience (e.g., MEDICO, COSMETOLOGO)',
+  })
   @ApiResponse({ status: 200, description: 'List of courses by target audience.' })
   async getCoursesByTarget(@Param('target') target: Target) {
     return this.coursesService.getCoursesByTarget(target);
@@ -126,7 +130,7 @@ export class CoursesController {
   @ApiResponse({ status: 404, description: 'User or course not found.' })
   async getUserCourseProgress(
     @Param('userId') userId: string,
-    @Param('courseId') courseId: string
+    @Param('courseId') courseId: string,
   ) {
     return this.coursesService.getUserCourseProgress(userId, courseId);
   }
@@ -148,7 +152,7 @@ export class CoursesController {
   @ApiResponse({ status: 404, description: 'Course or user not found.' })
   async isUserEnrolled(
     @Param('courseId') courseId: string,
-    @Param('userId') userId: string
+    @Param('userId') userId: string,
   ) {
     return this.coursesService.isUserEnrolled(courseId, userId);
   }
@@ -171,13 +175,18 @@ export class CoursesController {
   }
 
   @Get('module/:moduleId/user/:userId/progress')
-  @ApiOperation({ summary: 'Get classes approved by a user in a specific module' })
+  @ApiOperation({
+    summary: 'Get classes approved by a user in a specific module',
+  })
   @ApiParam({ name: 'moduleId', description: 'Module ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
-  @ApiResponse({ status: 200, description: 'User class progress in the module returned.' })
+  @ApiResponse({
+    status: 200,
+    description: 'User class progress in the module returned.',
+  })
   async getUserModuleProgress(
     @Param('moduleId') moduleId: string,
-    @Param('userId') userId: string
+    @Param('userId') userId: string,
   ) {
     return this.coursesService.getUserModuleProgress(moduleId, userId);
   }
@@ -189,7 +198,7 @@ export class CoursesController {
   @HttpCode(HttpStatus.OK)
   async markClassAsCompleted(
     @Param('classId') classId: string,
-    @Param('userId') userId: string
+    @Param('userId') userId: string,
   ) {
     return this.coursesService.markClassAsCompleted(userId, classId);
   }

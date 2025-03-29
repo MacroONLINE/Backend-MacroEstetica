@@ -50,17 +50,6 @@ export declare class CoursesService {
         moduleId: string | null;
         videoUrl: string | null;
     }>;
-    createComment(data: CreateCommentDto): Promise<{
-        id: string;
-        rating: number;
-        createdAt: Date;
-        updatedAt: Date;
-        courseId: string | null;
-        userId: string;
-        classId: string | null;
-        type: import(".prisma/client").$Enums.CommentType;
-        content: string;
-    }>;
     createCategory(data: CreateCategoryDto): Promise<{
         id: string;
         createdAt: Date;
@@ -80,6 +69,7 @@ export declare class CoursesService {
         courseId: string;
         totalClasses: number;
         completedClasses: number;
+        completedClassIds: string[];
         isCompleted: boolean;
     }>;
     getClassById(classId: string): Promise<{
@@ -91,6 +81,36 @@ export declare class CoursesService {
             classId: string;
             fileUrl: string;
         }[];
+        classComments: ({
+            user: {
+                firstName: string;
+                lastName: string;
+                profileImageUrl: string;
+            };
+            replies: ({
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                classId: string;
+                parentCommentId: string | null;
+                content: string;
+            })[];
+        } & {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            classId: string;
+            parentCommentId: string | null;
+            content: string;
+        })[];
     } & {
         id: string;
         description: string;
@@ -112,6 +132,36 @@ export declare class CoursesService {
                 classId: string;
                 fileUrl: string;
             }[];
+            classComments: ({
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
+                replies: ({
+                    user: {
+                        firstName: string;
+                        lastName: string;
+                        profileImageUrl: string;
+                    };
+                } & {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    classId: string;
+                    parentCommentId: string | null;
+                    content: string;
+                })[];
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                classId: string;
+                parentCommentId: string | null;
+                content: string;
+            })[];
         } & {
             id: string;
             description: string;
@@ -137,6 +187,36 @@ export declare class CoursesService {
                 classId: string;
                 fileUrl: string;
             }[];
+            classComments: ({
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
+                replies: ({
+                    user: {
+                        firstName: string;
+                        lastName: string;
+                        profileImageUrl: string;
+                    };
+                } & {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    classId: string;
+                    parentCommentId: string | null;
+                    content: string;
+                })[];
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                classId: string;
+                parentCommentId: string | null;
+                content: string;
+            })[];
         } & {
             id: string;
             description: string;
@@ -172,5 +252,14 @@ export declare class CoursesService {
         userId: string;
         classId: string;
         completed: boolean;
+    }>;
+    createClassComment(dto: CreateCommentDto): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        userId: string;
+        classId: string;
+        parentCommentId: string | null;
+        content: string;
     }>;
 }

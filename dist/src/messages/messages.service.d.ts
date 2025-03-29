@@ -13,9 +13,9 @@ export declare class MessagesService {
         email: string;
         createdAt: Date;
         updatedAt: Date;
-        type: import(".prisma/client").$Enums.MessageType;
-        userId: string | null;
         description: string;
+        userId: string | null;
+        type: import(".prisma/client").$Enums.MessageType;
         empresaId: string | null;
         productId: string | null;
     }>;

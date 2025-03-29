@@ -1,25 +1,17 @@
-import { IsString, IsEnum, IsNumber } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { CommentType } from '../enums/comment-type.enum';
+// src/courses/dto/create-comment.dto.ts
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCommentDto {
-  @ApiProperty({ description: 'User ID who created the comment' })
-  @IsString()
+  @ApiProperty()
   userId: string;
 
-  @ApiProperty({ description: 'Class ID the comment belongs to' })
-  @IsString()
+  @ApiProperty()
   classId: string;
 
-  @ApiProperty({ description: 'Type of the comment', enum: CommentType })
-  @IsEnum(CommentType)
-  type: CommentType;
-
-  @ApiProperty({ description: 'Rating of the comment' })
-  @IsNumber()
-  rating: number;
-
-  @ApiProperty({ description: 'Content of the comment' })
-  @IsString()
+  @ApiProperty()
   content: string;
+
+  // Campo opcional para indicar si es una "reply"
+  @ApiPropertyOptional()
+  parentCommentId?: string;
 }

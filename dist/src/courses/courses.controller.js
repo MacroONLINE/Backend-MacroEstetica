@@ -36,7 +36,7 @@ let CoursesController = class CoursesController {
         return this.coursesService.createClass(createClassDto);
     }
     async createComment(createCommentDto) {
-        return this.coursesService.createComment(createCommentDto);
+        return this.coursesService.createClassComment(createCommentDto);
     }
     async createCategory(createCategoryDto) {
         return this.coursesService.createCategory(createCategoryDto);
@@ -169,7 +169,10 @@ __decorate([
 __decorate([
     (0, common_1.Get)('by-target/:target'),
     (0, swagger_1.ApiOperation)({ summary: 'Get courses by target audience' }),
-    (0, swagger_1.ApiParam)({ name: 'target', description: 'Target audience (e.g., MEDICO, COSMETOLOGO)' }),
+    (0, swagger_1.ApiParam)({
+        name: 'target',
+        description: 'Target audience (e.g., MEDICO, COSMETOLOGO)',
+    }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'List of courses by target audience.' }),
     __param(0, (0, common_1.Param)('target')),
     __metadata("design:type", Function),
@@ -257,10 +260,15 @@ __decorate([
 ], CoursesController.prototype, "getModuleById", null);
 __decorate([
     (0, common_1.Get)('module/:moduleId/user/:userId/progress'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get classes approved by a user in a specific module' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Get classes approved by a user in a specific module',
+    }),
     (0, swagger_1.ApiParam)({ name: 'moduleId', description: 'Module ID' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'User class progress in the module returned.' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'User class progress in the module returned.',
+    }),
     __param(0, (0, common_1.Param)('moduleId')),
     __param(1, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),

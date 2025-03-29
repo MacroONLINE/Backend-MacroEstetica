@@ -39,7 +39,8 @@ let CoursesService = class CoursesService {
             categoryName: course.category?.name || 'N/A',
             categoryColor: course.category?.colorHex || 'N/A',
             categoryIcon: course.category?.urlIcon || 'N/A',
-            instructorName: `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() || 'N/A',
+            instructorName: `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() ||
+                'N/A',
             instructorExperience: course.instructor?.experienceYears || 0,
             instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
             instructorStatus: course.instructor?.status || 'N/A',
@@ -55,7 +56,7 @@ let CoursesService = class CoursesService {
             totalModules: course.modules?.length || 0,
             resources: course.resources || [],
             totalResources: course.resources?.length || 0,
-            comments: course.comments || [],
+            comments: [],
         };
     }
     async createCourse(data) {
@@ -94,22 +95,6 @@ let CoursesService = class CoursesService {
             },
         });
     }
-    async createComment(data) {
-        const { userId, classId, type, rating, content } = data;
-        const classExists = await this.prisma.class.findUnique({ where: { id: classId } });
-        if (!classExists) {
-            throw new common_1.NotFoundException(`Class with ID ${classId} not found.`);
-        }
-        return this.prisma.comment.create({
-            data: {
-                userId,
-                classId,
-                type,
-                rating,
-                content,
-            },
-        });
-    }
     async createCategory(data) {
         return this.prisma.category.create({ data });
     }
@@ -130,7 +115,6 @@ let CoursesService = class CoursesService {
                     },
                 },
                 resources: true,
-                comments: true,
             },
         });
         return courses.map((course) => this.mapToCourseResponseDto(course));
@@ -153,7 +137,6 @@ let CoursesService = class CoursesService {
                     },
                 },
                 resources: true,
-                comments: true,
             },
         });
         if (!course) {
@@ -177,7 +160,6 @@ let CoursesService = class CoursesService {
                     },
                 },
                 resources: true,
-                comments: true,
             },
         });
         return courses.map((course) => this.mapToCourseResponseDto(course));
@@ -198,7 +180,6 @@ let CoursesService = class CoursesService {
                     },
                 },
                 resources: true,
-                comments: true,
             },
         });
         return courses.map((course) => this.mapToCourseResponseDto(course));
@@ -219,7 +200,6 @@ let CoursesService = class CoursesService {
                     },
                 },
                 resources: true,
-                comments: true,
             },
         });
         return courses.map((course) => this.mapToCourseResponseDto(course));
@@ -241,7 +221,6 @@ let CoursesService = class CoursesService {
                     },
                 },
                 resources: true,
-                comments: true,
             },
         });
         return courses.map((course) => this.mapToCourseResponseDto(course));
@@ -298,7 +277,9 @@ let CoursesService = class CoursesService {
         const course = await this.prisma.course.findUnique({
             where: { id: courseId },
             include: {
-                modules: { include: { classes: true } },
+                modules: {
+                    include: { classes: true },
+                },
             },
         });
         if (!course) {
@@ -313,12 +294,17 @@ let CoursesService = class CoursesService {
                 },
             },
         });
-        const completedClasses = userProgress.filter((p) => p.completed).length;
+        const completedClassIds = userProgress
+            .filter((p) => p.completed)
+            .map((p) => p.classId);
+        const completedClasses = completedClassIds.length;
+        const isCompleted = completedClasses === totalClasses && totalClasses > 0;
         return {
             courseId,
             totalClasses,
             completedClasses,
-            isCompleted: completedClasses === totalClasses && totalClasses > 0,
+            completedClassIds,
+            isCompleted,
         };
     }
     async getClassById(classId) {
@@ -326,6 +312,29 @@ let CoursesService = class CoursesService {
             where: { id: classId },
             include: {
                 classResources: true,
+                classComments: {
+                    where: { parentCommentId: null },
+                    include: {
+                        user: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                profileImageUrl: true,
+                            },
+                        },
+                        replies: {
+                            include: {
+                                user: {
+                                    select: {
+                                        firstName: true,
+                                        lastName: true,
+                                        profileImageUrl: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         });
         if (!cls) {
@@ -335,10 +344,7 @@ let CoursesService = class CoursesService {
     }
     async isUserEnrolled(courseId, userId) {
         const enrollment = await this.prisma.courseEnrollment.findFirst({
-            where: {
-                courseId,
-                userId,
-            },
+            where: { courseId, userId },
         });
         return { enrolled: !!enrollment };
     }
@@ -349,22 +355,72 @@ let CoursesService = class CoursesService {
                 classes: {
                     include: {
                         classResources: true,
+                        classComments: {
+                            where: { parentCommentId: null },
+                            include: {
+                                user: {
+                                    select: {
+                                        firstName: true,
+                                        lastName: true,
+                                        profileImageUrl: true,
+                                    },
+                                },
+                                replies: {
+                                    include: {
+                                        user: {
+                                            select: {
+                                                firstName: true,
+                                                lastName: true,
+                                                profileImageUrl: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },
         });
     }
     async getModuleById(moduleId) {
-        return this.prisma.module.findUnique({
+        const mod = await this.prisma.module.findUnique({
             where: { id: moduleId },
             include: {
                 classes: {
                     include: {
                         classResources: true,
+                        classComments: {
+                            where: { parentCommentId: null },
+                            include: {
+                                user: {
+                                    select: {
+                                        firstName: true,
+                                        lastName: true,
+                                        profileImageUrl: true,
+                                    },
+                                },
+                                replies: {
+                                    include: {
+                                        user: {
+                                            select: {
+                                                firstName: true,
+                                                lastName: true,
+                                                profileImageUrl: true,
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
                     },
                 },
             },
         });
+        if (!mod) {
+            throw new common_1.NotFoundException(`Module with ID ${moduleId} not found.`);
+        }
+        return mod;
     }
     async getUserModuleProgress(moduleId, userId) {
         const classes = await this.prisma.class.findMany({
@@ -412,6 +468,29 @@ let CoursesService = class CoursesService {
                 },
             });
         }
+    }
+    async createClassComment(dto) {
+        const { userId, classId, content, parentCommentId } = dto;
+        const cls = await this.prisma.class.findUnique({ where: { id: classId } });
+        if (!cls) {
+            throw new common_1.NotFoundException(`Class with ID ${classId} not found.`);
+        }
+        if (parentCommentId) {
+            const parent = await this.prisma.classComment.findUnique({
+                where: { id: parentCommentId },
+            });
+            if (!parent) {
+                throw new common_1.NotFoundException(`Parent comment with ID ${parentCommentId} not found.`);
+            }
+        }
+        return this.prisma.classComment.create({
+            data: {
+                userId,
+                classId,
+                content,
+                parentCommentId: parentCommentId || null,
+            },
+        });
     }
 };
 exports.CoursesService = CoursesService;

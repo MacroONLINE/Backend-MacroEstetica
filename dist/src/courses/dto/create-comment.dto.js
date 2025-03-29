@@ -10,35 +10,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateCommentDto = void 0;
-const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
-const comment_type_enum_1 = require("../enums/comment-type.enum");
 class CreateCommentDto {
 }
 exports.CreateCommentDto = CreateCommentDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'User ID who created the comment' }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], CreateCommentDto.prototype, "userId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Class ID the comment belongs to' }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], CreateCommentDto.prototype, "classId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Type of the comment', enum: comment_type_enum_1.CommentType }),
-    (0, class_validator_1.IsEnum)(comment_type_enum_1.CommentType),
-    __metadata("design:type", String)
-], CreateCommentDto.prototype, "type", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Rating of the comment' }),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], CreateCommentDto.prototype, "rating", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Content of the comment' }),
-    (0, class_validator_1.IsString)(),
+    (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], CreateCommentDto.prototype, "content", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    __metadata("design:type", String)
+], CreateCommentDto.prototype, "parentCommentId", void 0);
 //# sourceMappingURL=create-comment.dto.js.map

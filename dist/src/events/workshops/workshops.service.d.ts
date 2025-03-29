@@ -8,15 +8,15 @@ export declare class WorkshopsService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
-        endDateTime: Date;
-        price: number | null;
-        categories: import(".prisma/client").$Enums.Profession[];
         eventId: string | null;
-        whatYouWillLearn: string | null;
-        isFree: boolean;
-        imageUrl: string | null;
         channelName: string | null;
+        endDateTime: Date;
+        imageUrl: string | null;
+        price: number | null;
+        startDateTime: Date;
+        categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
+        whatYouWillLearn: string | null;
     }>;
     getWorkshopById(id: string): Promise<{
         event: {
@@ -24,16 +24,16 @@ export declare class WorkshopsService {
             createdAt: Date;
             updatedAt: Date;
             title: string;
+            endDateTime: Date;
+            price: number;
+            startDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             longDescription: string | null;
             mainBannerUrl: string | null;
             mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
             mapUrl: string | null;
+            physicalLocation: string | null;
             target: import(".prisma/client").$Enums.Target | null;
-            price: number;
-            categories: import(".prisma/client").$Enums.Profession[];
             leadingCompanyId: string | null;
         };
         enrollments: ({
@@ -41,7 +41,6 @@ export declare class WorkshopsService {
                 id: string;
                 firstName: string | null;
                 lastName: string | null;
-                profileImageUrl: string | null;
                 phone: string | null;
                 email: string;
                 emailVerified: Date | null;
@@ -58,6 +57,7 @@ export declare class WorkshopsService {
                 updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
+                profileImageUrl: string | null;
             };
         } & {
             id: string;
@@ -72,16 +72,16 @@ export declare class WorkshopsService {
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
             description: string;
-            experienceDescription: string;
             experienceYears: number;
             certificationsUrl: string;
+            userId: string;
             bannerImage: string | null;
             followers: number | null;
             title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
             empresaId: string | null;
             categoryId: string | null;
         }[];
@@ -91,15 +91,15 @@ export declare class WorkshopsService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
-        endDateTime: Date;
-        price: number | null;
-        categories: import(".prisma/client").$Enums.Profession[];
         eventId: string | null;
-        whatYouWillLearn: string | null;
-        isFree: boolean;
-        imageUrl: string | null;
         channelName: string | null;
+        endDateTime: Date;
+        imageUrl: string | null;
+        price: number | null;
+        startDateTime: Date;
+        categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
+        whatYouWillLearn: string | null;
     }>;
     updateWorkshop(id: string, data: any): Promise<{
         id: string;
@@ -107,15 +107,15 @@ export declare class WorkshopsService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
-        endDateTime: Date;
-        price: number | null;
-        categories: import(".prisma/client").$Enums.Profession[];
         eventId: string | null;
-        whatYouWillLearn: string | null;
-        isFree: boolean;
-        imageUrl: string | null;
         channelName: string | null;
+        endDateTime: Date;
+        imageUrl: string | null;
+        price: number | null;
+        startDateTime: Date;
+        categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
+        whatYouWillLearn: string | null;
     }>;
     deleteWorkshop(id: string): Promise<{
         message: string;
@@ -126,16 +126,16 @@ export declare class WorkshopsService {
             createdAt: Date;
             updatedAt: Date;
             title: string;
+            endDateTime: Date;
+            price: number;
+            startDateTime: Date;
+            categories: import(".prisma/client").$Enums.Profession[];
             longDescription: string | null;
             mainBannerUrl: string | null;
             mainImageUrl: string | null;
-            physicalLocation: string | null;
-            startDateTime: Date;
-            endDateTime: Date;
             mapUrl: string | null;
+            physicalLocation: string | null;
             target: import(".prisma/client").$Enums.Target | null;
-            price: number;
-            categories: import(".prisma/client").$Enums.Profession[];
             leadingCompanyId: string | null;
         };
         enrollments: ({
@@ -143,7 +143,6 @@ export declare class WorkshopsService {
                 id: string;
                 firstName: string | null;
                 lastName: string | null;
-                profileImageUrl: string | null;
                 phone: string | null;
                 email: string;
                 emailVerified: Date | null;
@@ -160,6 +159,7 @@ export declare class WorkshopsService {
                 updatedAt: Date;
                 newsletter: boolean;
                 userSubscription: string | null;
+                profileImageUrl: string | null;
             };
         } & {
             id: string;
@@ -174,16 +174,16 @@ export declare class WorkshopsService {
             status: string;
             createdAt: Date;
             updatedAt: Date;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
             description: string;
-            experienceDescription: string;
             experienceYears: number;
             certificationsUrl: string;
+            userId: string;
             bannerImage: string | null;
             followers: number | null;
             title: string | null;
+            profession: import(".prisma/client").$Enums.Profession;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            experienceDescription: string;
             empresaId: string | null;
             categoryId: string | null;
         }[];
@@ -193,14 +193,14 @@ export declare class WorkshopsService {
         updatedAt: Date;
         description: string;
         title: string;
-        startDateTime: Date;
-        endDateTime: Date;
-        price: number | null;
-        categories: import(".prisma/client").$Enums.Profession[];
         eventId: string | null;
-        whatYouWillLearn: string | null;
-        isFree: boolean;
-        imageUrl: string | null;
         channelName: string | null;
+        endDateTime: Date;
+        imageUrl: string | null;
+        price: number | null;
+        startDateTime: Date;
+        categories: import(".prisma/client").$Enums.Profession[];
+        isFree: boolean;
+        whatYouWillLearn: string | null;
     }>;
 }

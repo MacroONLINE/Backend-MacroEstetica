@@ -9,9 +9,9 @@ export declare class BannerController {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        logo: string;
         title: string;
         empresaId: string | null;
-        logo: string;
         date: Date | null;
         cta_url: string | null;
         cta_button_text: string;
@@ -22,9 +22,9 @@ export declare class BannerController {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        logo: string;
         title: string;
         empresaId: string | null;
-        logo: string;
         date: Date | null;
         cta_url: string | null;
         cta_button_text: string;
@@ -35,9 +35,9 @@ export declare class BannerController {
         createdAt: Date;
         updatedAt: Date;
         description: string;
+        logo: string;
         title: string;
         empresaId: string | null;
-        logo: string;
         date: Date | null;
         cta_url: string | null;
         cta_button_text: string;
