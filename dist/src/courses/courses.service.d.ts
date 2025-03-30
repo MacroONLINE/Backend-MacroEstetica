@@ -12,49 +12,51 @@ export declare class CoursesService {
     private mapToCourseResponseDto;
     createCourse(data: CreateCourseDto): Promise<{
         id: string;
-        title: string;
-        bannerUrl: string;
-        description: string;
-        level: string;
-        rating: number;
-        commentsCount: number;
-        averageRating: number;
-        instructorId: string | null;
-        price: number;
-        discountPercentage: number | null;
-        participantsCount: number;
-        target: import(".prisma/client").$Enums.Target;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
+        rating: number;
+        title: string;
         categoryId: string;
+        price: number;
+        target: import(".prisma/client").$Enums.Target;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        bannerUrl: string;
+        level: string;
+        commentsCount: number;
+        averageRating: number;
+        discountPercentage: number | null;
+        participantsCount: number;
         isFeatured: boolean | null;
         courseImageUrl: string;
         aboutDescription: string | null;
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
         totalHours: number;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
+        instructorId: string | null;
     }>;
     createModule(data: CreateModuleDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         courseId: string | null;
     }>;
     createClass(data: CreateClassDto): Promise<{
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
+        title: string;
+        imageUrl: string | null;
         moduleId: string | null;
         videoUrl: string | null;
     }>;
     createCategory(data: CreateCategoryDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         urlIcon: string;
         colorHex: string;
     }>;
@@ -73,14 +75,6 @@ export declare class CoursesService {
         isCompleted: boolean;
     }>;
     getClassById(classId: string): Promise<{
-        classResources: {
-            id: string;
-            title: string;
-            createdAt: Date;
-            updatedAt: Date;
-            classId: string;
-            fileUrl: string;
-        }[];
         classComments: ({
             user: {
                 firstName: string;
@@ -98,24 +92,34 @@ export declare class CoursesService {
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
+                content: string;
                 classId: string;
                 parentCommentId: string | null;
-                content: string;
             })[];
         } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            content: string;
             classId: string;
             parentCommentId: string | null;
-            content: string;
         })[];
+        classResources: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            classId: string;
+            title: string;
+            fileUrl: string;
+        }[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
+        title: string;
+        imageUrl: string | null;
         moduleId: string | null;
         videoUrl: string | null;
     }>;
@@ -124,14 +128,6 @@ export declare class CoursesService {
     }>;
     getModulesByCourse(courseId: string): Promise<({
         classes: ({
-            classResources: {
-                id: string;
-                title: string;
-                createdAt: Date;
-                updatedAt: Date;
-                classId: string;
-                fileUrl: string;
-            }[];
             classComments: ({
                 user: {
                     firstName: string;
@@ -149,44 +145,46 @@ export declare class CoursesService {
                     createdAt: Date;
                     updatedAt: Date;
                     userId: string;
+                    content: string;
                     classId: string;
                     parentCommentId: string | null;
-                    content: string;
                 })[];
             } & {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
+                content: string;
                 classId: string;
                 parentCommentId: string | null;
-                content: string;
             })[];
+            classResources: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                classId: string;
+                title: string;
+                fileUrl: string;
+            }[];
         } & {
             id: string;
-            description: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string;
+            title: string;
+            imageUrl: string | null;
             moduleId: string | null;
             videoUrl: string | null;
         })[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         courseId: string | null;
     })[]>;
     getModuleById(moduleId: string): Promise<{
         classes: ({
-            classResources: {
-                id: string;
-                title: string;
-                createdAt: Date;
-                updatedAt: Date;
-                classId: string;
-                fileUrl: string;
-            }[];
             classComments: ({
                 user: {
                     firstName: string;
@@ -204,32 +202,42 @@ export declare class CoursesService {
                     createdAt: Date;
                     updatedAt: Date;
                     userId: string;
+                    content: string;
                     classId: string;
                     parentCommentId: string | null;
-                    content: string;
                 })[];
             } & {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
                 userId: string;
+                content: string;
                 classId: string;
                 parentCommentId: string | null;
-                content: string;
             })[];
+            classResources: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                classId: string;
+                title: string;
+                fileUrl: string;
+            }[];
         } & {
             id: string;
-            description: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string;
+            title: string;
+            imageUrl: string | null;
             moduleId: string | null;
             videoUrl: string | null;
         })[];
     } & {
         id: string;
-        description: string;
         createdAt: Date;
         updatedAt: Date;
+        description: string;
         courseId: string | null;
     }>;
     getUserModuleProgress(moduleId: string, userId: string): Promise<{
@@ -238,10 +246,10 @@ export declare class CoursesService {
         completed: boolean;
         classResources: {
             id: string;
-            title: string;
             createdAt: Date;
             updatedAt: Date;
             classId: string;
+            title: string;
             fileUrl: string;
         }[];
     }[]>;
@@ -258,8 +266,8 @@ export declare class CoursesService {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
+        content: string;
         classId: string;
         parentCommentId: string | null;
-        content: string;
     }>;
 }

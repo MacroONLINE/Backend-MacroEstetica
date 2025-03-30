@@ -32,6 +32,7 @@ model User {
   blogComments           BlogComment[]
   blogRatings            BlogRating[]
   chatMessages           ChatMessage[]
+  classComments          ClassComment[]
   classProgress          ClassProgress[]
   classroomEnrollments   ClassroomEnrollment[]
   enrollments            CourseEnrollment[]
@@ -46,7 +47,6 @@ model User {
   attendedEvents         Event[]                 @relation("EventAttendees")
   attendedStreams        EventStream[]           @relation("EventStreamAttendees")
   attendedWorkshops      Workshop[]              @relation("WorkshopAttendees")
-  classComments  ClassComment[]
 }
 
 model Medico {
@@ -205,13 +205,14 @@ model Class {
   id             String          @id @default(cuid())
   moduleId       String?
   description    String
+  title          String          @default("")
+  imageUrl       String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @default(now())
   videoUrl       String?
   module         Module?         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   progress       ClassProgress[]
   classResources ClassResource[]
-  // Relación con los comentarios
   classComments  ClassComment[]
 }
 
@@ -707,22 +708,18 @@ model Presentation {
   @@index([productId])
 }
 
-
 model ClassComment {
   id              String         @id @default(cuid())
   userId          String
   classId         String
-  parentCommentId String? 
+  parentCommentId String?
   content         String
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @default(now())
-
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  class  Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
-
-  // Relación bidireccional en la misma tabla
-  replies ClassComment[] @relation("ClassCommentReplies")
-  parent  ClassComment?  @relation("ClassCommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  class           Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  parent          ClassComment?  @relation("ClassCommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         ClassComment[] @relation("ClassCommentReplies")
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum SubscriptionType {
