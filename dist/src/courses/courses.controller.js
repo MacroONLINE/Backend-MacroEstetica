@@ -276,7 +276,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getUserModuleProgress", null);
 __decorate([
-    (0, common_1.Patch)('class/:classId/user/:userId/complete'),
+    (0, common_1.Post)('class/:classId/user/:userId/complete'),
     (0, swagger_1.ApiOperation)({ summary: 'Mark a class as completed for a specific user' }),
     (0, swagger_1.ApiParam)({ name: 'classId', description: 'Class ID' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),

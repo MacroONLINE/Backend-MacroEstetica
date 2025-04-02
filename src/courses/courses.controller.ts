@@ -191,7 +191,7 @@ export class CoursesController {
     return this.coursesService.getUserModuleProgress(moduleId, userId);
   }
 
-  @Patch('class/:classId/user/:userId/complete')
+  @Post('class/:classId/user/:userId/complete')
   @ApiOperation({ summary: 'Mark a class as completed for a specific user' })
   @ApiParam({ name: 'classId', description: 'Class ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
@@ -202,4 +202,5 @@ export class CoursesController {
   ) {
     return this.coursesService.markClassAsCompleted(userId, classId);
   }
+
 }
