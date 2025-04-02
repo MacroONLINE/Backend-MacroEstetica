@@ -1,6 +1,7 @@
 import { PrismaService } from 'src/prisma/prisma.service';
 export declare class BlogService {
     private readonly prisma;
+    private currentDto;
     constructor(prisma: PrismaService);
     getAllBlogs(): Promise<any[]>;
     getBlogById(id: string): Promise<any>;
@@ -14,15 +15,24 @@ export declare class BlogService {
         message: string;
     }>;
     getAllCategories(): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         colorHex: string;
         iconUrl: string | null;
     }[]>;
     incrementReaderCount(postId: string): Promise<{
         totalReaders: number;
     }>;
+    getUsersCommentRatingForPost(postId: string): Promise<{
+        userId: string;
+        commentContent: string;
+        rating: number;
+        firstName: string;
+        lastName: string;
+        profileImageUrl: string;
+    }[]>;
+    setCurrentDto(dto: any): void;
     private formatBlogDates;
 }

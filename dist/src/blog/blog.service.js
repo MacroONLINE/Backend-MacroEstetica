@@ -54,21 +54,17 @@ let BlogService = class BlogService {
                 },
                 empresa: { select: { name: true } },
                 categories: true,
-                comments: {
-                    include: {
-                        user: {
-                            select: {
-                                firstName: true,
-                                lastName: true,
-                            },
-                        },
-                    },
-                },
             },
         });
-        if (!blog)
+        if (!blog) {
             throw new common_1.NotFoundException('Blog no encontrado');
-        return this.formatBlogDates(blog);
+        }
+        const formattedBlog = this.formatBlogDates(blog);
+        const commentRatings = await this.getUsersCommentRatingForPost(id);
+        return {
+            ...formattedBlog,
+            comments: commentRatings,
+        };
     }
     async getBlogsByEmpresa(empresaId) {
         const data = await this.prisma.blogPost.findMany({
@@ -226,18 +222,39 @@ let BlogService = class BlogService {
         if (existingComment) {
             throw new common_1.BadRequestException('El usuario ya ha comentado en este post.');
         }
-        await this.prisma.$transaction([
-            this.prisma.blogComment.create({
+        const ratingValue = this.currentDto?.rating;
+        if (typeof ratingValue !== 'number' || ratingValue < 1 || ratingValue > 5) {
+            throw new common_1.BadRequestException('El rating debe ser un número entre 1 y 5.');
+        }
+        const existingRating = await this.prisma.blogRating.findFirst({
+            where: { postId, userId },
+        });
+        if (existingRating) {
+            throw new common_1.BadRequestException('El usuario ya ha calificado este post.');
+        }
+        await this.prisma.$transaction(async (tx) => {
+            await tx.blogComment.create({
                 data: { postId, userId, content: commentContent },
-            }),
-            this.prisma.blogPost.update({
+            });
+            await tx.blogRating.create({
+                data: { postId, userId, rating: ratingValue },
+            });
+            const agg = await tx.blogRating.aggregate({
+                where: { postId },
+                _avg: { rating: true },
+                _count: { rating: true },
+            });
+            await tx.blogPost.update({
                 where: { id: postId },
-                data: useful
-                    ? { usefulCount: { increment: 1 } }
-                    : { notUsefulCount: { increment: 1 } },
-            }),
-        ]);
-        return { message: 'Voto y comentario registrados correctamente.' };
+                data: {
+                    averageRating: agg._avg.rating || 0,
+                    totalRatings: agg._count.rating,
+                    usefulCount: useful ? { increment: 1 } : undefined,
+                    notUsefulCount: !useful ? { increment: 1 } : undefined,
+                },
+            });
+        });
+        return { message: 'Voto, comentario y rating registrados correctamente.' };
     }
     async getAllCategories() {
         return this.prisma.blogCategory.findMany({
@@ -248,14 +265,47 @@ let BlogService = class BlogService {
         const post = await this.prisma.blogPost.findUnique({
             where: { id: postId },
         });
-        if (!post)
+        if (!post) {
             throw new common_1.NotFoundException('Blog no encontrado');
+        }
         const updated = await this.prisma.blogPost.update({
             where: { id: postId },
             data: { totalReaders: { increment: 1 } },
             select: { totalReaders: true },
         });
         return { totalReaders: updated.totalReaders };
+    }
+    async getUsersCommentRatingForPost(postId) {
+        const comments = await this.prisma.blogComment.findMany({
+            where: { postId },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        profileImageUrl: true,
+                    },
+                },
+            },
+        });
+        const ratings = await this.prisma.blogRating.findMany({
+            where: { postId },
+        });
+        return comments.map((comment) => {
+            const userRating = ratings.find((r) => r.userId === comment.userId);
+            return {
+                userId: comment.userId,
+                commentContent: comment.content,
+                rating: userRating ? userRating.rating : null,
+                firstName: comment.user.firstName,
+                lastName: comment.user.lastName,
+                profileImageUrl: comment.user.profileImageUrl,
+            };
+        });
+    }
+    setCurrentDto(dto) {
+        this.currentDto = dto;
     }
     formatBlogDates(item) {
         const cardDate = new Intl.DateTimeFormat('es-ES', {

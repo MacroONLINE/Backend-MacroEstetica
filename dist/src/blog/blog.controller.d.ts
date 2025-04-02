@@ -3,6 +3,7 @@ declare class VoteCommentDto {
     userId: string;
     useful: boolean;
     commentContent: string;
+    rating: number;
 }
 export declare class BlogController {
     private readonly blogService;
@@ -18,10 +19,10 @@ export declare class BlogController {
         message: string;
     }>;
     getAllCategories(): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         colorHex: string;
         iconUrl: string | null;
     }[]>;
@@ -29,5 +30,13 @@ export declare class BlogController {
         totalReaders: number;
     }>;
     getBlogById(id: string): Promise<any>;
+    getUsersCommentRatingForPost(id: string): Promise<{
+        userId: string;
+        commentContent: string;
+        rating: number;
+        firstName: string;
+        lastName: string;
+        profileImageUrl: string;
+    }[]>;
 }
 export {};

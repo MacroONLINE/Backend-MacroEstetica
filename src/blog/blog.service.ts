@@ -3,11 +3,10 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class BlogService {
+  private currentDto: any;
+
   constructor(private readonly prisma: PrismaService) {}
 
-  /**
-   * Obtiene todos los blogs, ordenados por fecha de creación descendente.
-   */
   async getAllBlogs() {
     const data = await this.prisma.blogPost.findMany({
       orderBy: { createdAt: 'desc' },
@@ -30,9 +29,6 @@ export class BlogService {
     return data.map((item) => this.formatBlogDates(item));
   }
 
-  /**
-   * Obtiene un blog por su ID.
-   */
   async getBlogById(id: string) {
     const blog = await this.prisma.blogPost.findUnique({
       where: { id },
@@ -50,25 +46,19 @@ export class BlogService {
         },
         empresa: { select: { name: true } },
         categories: true,
-        comments: {
-          include: {
-            user: {
-              select: {
-                firstName: true,
-                lastName: true,
-              },
-            },
-          },
-        },
       },
     });
-    if (!blog) throw new NotFoundException('Blog no encontrado');
-    return this.formatBlogDates(blog);
+    if (!blog) {
+      throw new NotFoundException('Blog no encontrado');
+    }
+    const formattedBlog = this.formatBlogDates(blog);
+    const commentRatings = await this.getUsersCommentRatingForPost(id);
+    return {
+      ...formattedBlog,
+      comments: commentRatings,
+    };
   }
 
-  /**
-   * Obtiene todos los blogs de una empresa específica.
-   */
   async getBlogsByEmpresa(empresaId: string) {
     const data = await this.prisma.blogPost.findMany({
       where: { empresaId },
@@ -91,9 +81,6 @@ export class BlogService {
     return data.map((item) => this.formatBlogDates(item));
   }
 
-  /**
-   * Obtiene todos los blogs de un autor específico (BlogAuthor).
-   */
   async getBlogsByAuthor(authorId: string) {
     const data = await this.prisma.blogPost.findMany({
       where: { authorId },
@@ -106,9 +93,6 @@ export class BlogService {
     return data.map((item) => this.formatBlogDates(item));
   }
 
-  /**
-   * Obtiene todos los blogs de una categoría específica, filtrando por ID de la categoría.
-   */
   async getBlogsByCategory(categoryId: string) {
     const data = await this.prisma.blogPost.findMany({
       where: {
@@ -135,9 +119,6 @@ export class BlogService {
     return data.map((item) => this.formatBlogDates(item));
   }
 
-  /**
-   * Obtiene los 10 blogs con mayor calificación promedio.
-   */
   async getTopRatedBlogs() {
     const data = await this.prisma.blogPost.findMany({
       orderBy: { averageRating: 'desc' },
@@ -160,9 +141,6 @@ export class BlogService {
     return data.map((item) => this.formatBlogDates(item));
   }
 
-  /**
-   * Obtiene los 10 blogs más recientes (fecha de creación).
-   */
   async getRecentBlogs() {
     const data = await this.prisma.blogPost.findMany({
       orderBy: { createdAt: 'desc' },
@@ -185,16 +163,10 @@ export class BlogService {
     return data.map((item) => this.formatBlogDates(item));
   }
 
-  /**
-   * Busca blogs por coincidencia en título, contenido o nombre de categoría.
-   * Se ignoran acentos y mayúsculas/minúsculas.
-   */
   async searchBlogs(query: string) {
     const normalizedQuery = query
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
-
-    // Filtra por título, contenido o nombre de la categoría (insensible a mayúsculas).
     const data = await this.prisma.blogPost.findMany({
       where: {
         OR: [
@@ -239,13 +211,9 @@ export class BlogService {
         categories: true,
       },
     });
-
     return data.map((item) => this.formatBlogDates(item));
   }
 
-  /**
-   * Votar (útil / no útil) y comentar un post de blog en una sola acción.
-   */
   async voteAndComment(
     postId: string,
     userId: string,
@@ -255,46 +223,57 @@ export class BlogService {
     const existingComment = await this.prisma.blogComment.findFirst({
       where: { postId, userId },
     });
-
     if (existingComment) {
-      throw new BadRequestException(
-        'El usuario ya ha comentado en este post.',
-      );
+      throw new BadRequestException('El usuario ya ha comentado en este post.');
     }
-
-    await this.prisma.$transaction([
-      this.prisma.blogComment.create({
+    const ratingValue = this.currentDto?.rating;
+    if (typeof ratingValue !== 'number' || ratingValue < 1 || ratingValue > 5) {
+      throw new BadRequestException('El rating debe ser un número entre 1 y 5.');
+    }
+    const existingRating = await this.prisma.blogRating.findFirst({
+      where: { postId, userId },
+    });
+    if (existingRating) {
+      throw new BadRequestException('El usuario ya ha calificado este post.');
+    }
+    await this.prisma.$transaction(async (tx) => {
+      await tx.blogComment.create({
         data: { postId, userId, content: commentContent },
-      }),
-      this.prisma.blogPost.update({
+      });
+      await tx.blogRating.create({
+        data: { postId, userId, rating: ratingValue },
+      });
+      const agg = await tx.blogRating.aggregate({
+        where: { postId },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+      await tx.blogPost.update({
         where: { id: postId },
-        data: useful
-          ? { usefulCount: { increment: 1 } }
-          : { notUsefulCount: { increment: 1 } },
-      }),
-    ]);
-
-    return { message: 'Voto y comentario registrados correctamente.' };
+        data: {
+          averageRating: agg._avg.rating || 0,
+          totalRatings: agg._count.rating,
+          usefulCount: useful ? { increment: 1 } : undefined,
+          notUsefulCount: !useful ? { increment: 1 } : undefined,
+        },
+      });
+    });
+    return { message: 'Voto, comentario y rating registrados correctamente.' };
   }
 
-  /**
-   * Obtiene todas las categorías de blog.
-   */
   async getAllCategories() {
     return this.prisma.blogCategory.findMany({
       orderBy: { name: 'asc' },
     });
   }
 
-  /**
-   * Incrementa el contador de lectores de un blog.
-   */
   async incrementReaderCount(postId: string) {
     const post = await this.prisma.blogPost.findUnique({
       where: { id: postId },
     });
-    if (!post) throw new NotFoundException('Blog no encontrado');
-
+    if (!post) {
+      throw new NotFoundException('Blog no encontrado');
+    }
     const updated = await this.prisma.blogPost.update({
       where: { id: postId },
       data: { totalReaders: { increment: 1 } },
@@ -303,18 +282,47 @@ export class BlogService {
     return { totalReaders: updated.totalReaders };
   }
 
-  /**
-   * Formatea las fechas de creación a formatos específicos para la vista.
-   */
+  async getUsersCommentRatingForPost(postId: string) {
+    const comments = await this.prisma.blogComment.findMany({
+      where: { postId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            profileImageUrl: true,
+          },
+        },
+      },
+    });
+    const ratings = await this.prisma.blogRating.findMany({
+      where: { postId },
+    });
+    return comments.map((comment) => {
+      const userRating = ratings.find((r) => r.userId === comment.userId);
+      return {
+        userId: comment.userId,
+        commentContent: comment.content,
+        rating: userRating ? userRating.rating : null,
+        firstName: comment.user.firstName,
+        lastName: comment.user.lastName,
+        profileImageUrl: comment.user.profileImageUrl,
+      };
+    });
+  }
+
+  setCurrentDto(dto: any) {
+    this.currentDto = dto;
+  }
+
   private formatBlogDates(item: any) {
     const cardDate = new Intl.DateTimeFormat('es-ES', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
     }).format(item.createdAt);
-
     const titleDate = item.createdAt.toISOString().split('T')[0];
-
     return {
       ...item,
       createdAtCard: cardDate,
