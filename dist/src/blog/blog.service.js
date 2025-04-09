@@ -119,6 +119,7 @@ let BlogService = class BlogService {
                     },
                 },
                 empresa: { select: { name: true } },
+                categories: true
             },
         });
         return data.map((item) => this.formatBlogDates(item));
@@ -140,6 +141,7 @@ let BlogService = class BlogService {
                     },
                 },
                 empresa: { select: { name: true } },
+                categories: true
             },
         });
         return data.map((item) => this.formatBlogDates(item));
@@ -161,6 +163,7 @@ let BlogService = class BlogService {
                     },
                 },
                 empresa: { select: { name: true } },
+                categories: true
             },
         });
         return data.map((item) => this.formatBlogDates(item));
