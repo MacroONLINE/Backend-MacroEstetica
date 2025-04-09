@@ -13,6 +13,22 @@ export declare class BlogService {
     searchBlogs(query: string): Promise<any[]>;
     voteAndComment(postId: string, userId: string, useful: boolean, commentContent: string): Promise<{
         message: string;
+        comment: {
+            id: string;
+            content: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            postId: string;
+        };
+        rating: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            postId: string;
+            rating: number;
+        };
     }>;
     getAllCategories(): Promise<{
         id: string;

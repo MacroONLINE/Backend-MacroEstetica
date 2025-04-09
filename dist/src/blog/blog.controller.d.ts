@@ -17,6 +17,22 @@ export declare class BlogController {
     searchBlogs(query: string): Promise<any[]>;
     voteAndComment(id: string, voteCommentDto: VoteCommentDto): Promise<{
         message: string;
+        comment: {
+            id: string;
+            content: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            postId: string;
+        };
+        rating: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            postId: string;
+            rating: number;
+        };
     }>;
     getAllCategories(): Promise<{
         id: string;
