@@ -88,12 +88,6 @@ __decorate([
 ], UpdateEmpresaDto.prototype, "location", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Number)
-], UpdateEmpresaDto.prototype, "followers", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)(),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)

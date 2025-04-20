@@ -12,6 +12,5 @@ export declare class UpdateEmpresaDto {
     ceo?: string;
     ceoRole?: string;
     location?: string;
-    followers?: number;
     dni?: string;
 }

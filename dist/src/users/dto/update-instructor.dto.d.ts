@@ -11,7 +11,6 @@ export declare class UpdateInstructorDto {
     categoryId?: string;
     title?: string;
     bannerImage?: string;
-    followers?: number;
     gender?: Gender;
     validated?: boolean;
 }

@@ -37,8 +37,6 @@ export class UpdateInstructorDto {
   @ApiPropertyOptional() @IsString() @IsOptional()
   bannerImage?: string
 
-  @ApiPropertyOptional() @IsNumber() @IsOptional()
-  followers?: number
 
   @ApiPropertyOptional({ enum: Gender })
   @IsEnum(Gender) @IsOptional()

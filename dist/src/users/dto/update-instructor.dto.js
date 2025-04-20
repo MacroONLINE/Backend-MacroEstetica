@@ -82,12 +82,6 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateInstructorDto.prototype, "bannerImage", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Number)
-], UpdateInstructorDto.prototype, "followers", void 0);
-__decorate([
     (0, swagger_1.ApiPropertyOptional)({ enum: client_1.Gender }),
     (0, class_validator_1.IsEnum)(client_1.Gender),
     (0, class_validator_1.IsOptional)(),

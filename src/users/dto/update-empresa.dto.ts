@@ -30,8 +30,6 @@ export class UpdateEmpresaDto {
   ceoRole?: string
   @ApiPropertyOptional() @IsString() @IsOptional()
   location?: string
-  @ApiPropertyOptional() @IsNumber() @IsOptional()
-  followers?: number
   @ApiPropertyOptional() @IsString() @IsOptional()
   dni?: string
 }
