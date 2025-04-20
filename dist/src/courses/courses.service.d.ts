@@ -12,52 +12,52 @@ export declare class CoursesService {
     constructor(prisma: PrismaService);
     private mapToCourseResponseDto;
     createCourse(dto: CreateCourseDto): Promise<{
-        id: string;
-        title: string;
-        bannerUrl: string;
         description: string;
-        level: string;
-        rating: number;
-        commentsCount: number;
-        averageRating: number;
-        instructorId: string | null;
-        price: number;
-        discountPercentage: number | null;
-        participantsCount: number;
-        target: import(".prisma/client").$Enums.Target;
+        title: string;
+        categoryId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoryId: string;
-        isFeatured: boolean | null;
+        rating: number;
+        price: number;
+        target: import(".prisma/client").$Enums.Target;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        bannerUrl: string;
         courseImageUrl: string;
         aboutDescription: string | null;
-        requirements: import("@prisma/client/runtime/library").JsonValue | null;
         totalHours: number;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        level: string;
+        discountPercentage: number | null;
+        instructorId: string | null;
+        requirements: import("@prisma/client/runtime/library").JsonValue | null;
+        isFeatured: boolean | null;
+        participantsCount: number;
+        commentsCount: number;
+        averageRating: number;
         introductoryVideoUrl: string | null;
     }>;
     createModule(dto: CreateModuleDto): Promise<{
-        id: string;
         description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
     }>;
     createClass(dto: CreateClassDto): Promise<{
-        id: string;
-        title: string;
         description: string;
+        title: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        moduleId: string | null;
         imageUrl: string | null;
+        moduleId: string | null;
         videoUrl: string | null;
     }>;
     createCategory(dto: CreateCategoryDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         urlIcon: string;
         colorHex: string;
     }>;
@@ -76,14 +76,6 @@ export declare class CoursesService {
         isCompleted: boolean;
     }>;
     getClassById(classId: string): Promise<{
-        classResources: {
-            id: string;
-            title: string;
-            createdAt: Date;
-            updatedAt: Date;
-            classId: string;
-            fileUrl: string;
-        }[];
         classComments: ({
             user: {
                 firstName: string;
@@ -97,31 +89,39 @@ export declare class CoursesService {
                     profileImageUrl: string;
                 };
             } & {
+                userId: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
+                content: string;
                 classId: string;
                 parentCommentId: string | null;
-                content: string;
             })[];
         } & {
+            userId: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
+            content: string;
             classId: string;
             parentCommentId: string | null;
-            content: string;
         })[];
+        classResources: {
+            title: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            classId: string;
+            fileUrl: string;
+        }[];
     } & {
-        id: string;
-        title: string;
         description: string;
+        title: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        moduleId: string | null;
         imageUrl: string | null;
+        moduleId: string | null;
         videoUrl: string | null;
     }>;
     isUserEnrolled(courseId: string, userId: string): Promise<{
@@ -129,14 +129,6 @@ export declare class CoursesService {
     }>;
     getModulesByCourse(courseId: string): Promise<({
         classes: ({
-            classResources: {
-                id: string;
-                title: string;
-                createdAt: Date;
-                updatedAt: Date;
-                classId: string;
-                fileUrl: string;
-            }[];
             classComments: ({
                 user: {
                     firstName: string;
@@ -150,50 +142,50 @@ export declare class CoursesService {
                         profileImageUrl: string;
                     };
                 } & {
+                    userId: string;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    userId: string;
+                    content: string;
                     classId: string;
                     parentCommentId: string | null;
-                    content: string;
                 })[];
             } & {
+                userId: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
+                content: string;
                 classId: string;
                 parentCommentId: string | null;
-                content: string;
             })[];
+            classResources: {
+                title: string;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                classId: string;
+                fileUrl: string;
+            }[];
         } & {
-            id: string;
-            title: string;
             description: string;
+            title: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
-            moduleId: string | null;
             imageUrl: string | null;
+            moduleId: string | null;
             videoUrl: string | null;
         })[];
     } & {
-        id: string;
         description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
     })[]>;
     getModuleById(moduleId: string): Promise<{
         classes: ({
-            classResources: {
-                id: string;
-                title: string;
-                createdAt: Date;
-                updatedAt: Date;
-                classId: string;
-                fileUrl: string;
-            }[];
             classComments: ({
                 user: {
                     firstName: string;
@@ -207,36 +199,44 @@ export declare class CoursesService {
                         profileImageUrl: string;
                     };
                 } & {
+                    userId: string;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    userId: string;
+                    content: string;
                     classId: string;
                     parentCommentId: string | null;
-                    content: string;
                 })[];
             } & {
+                userId: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
+                content: string;
                 classId: string;
                 parentCommentId: string | null;
-                content: string;
             })[];
+            classResources: {
+                title: string;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                classId: string;
+                fileUrl: string;
+            }[];
         } & {
-            id: string;
-            title: string;
             description: string;
+            title: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
-            moduleId: string | null;
             imageUrl: string | null;
+            moduleId: string | null;
             videoUrl: string | null;
         })[];
     } & {
-        id: string;
         description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
@@ -246,8 +246,8 @@ export declare class CoursesService {
         description: string;
         completed: boolean;
         classResources: {
-            id: string;
             title: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             classId: string;
@@ -255,21 +255,21 @@ export declare class CoursesService {
         }[];
     }[]>;
     markClassAsCompleted(userId: string, classId: string): Promise<{
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         classId: string;
         completed: boolean;
     }>;
     createClassComment(dto: CreateCommentDto): Promise<{
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
+        content: string;
         classId: string;
         parentCommentId: string | null;
-        content: string;
     }>;
     getActiveCoursesCardInfo(userId: string): Promise<ActiveCoursesDto>;
 }

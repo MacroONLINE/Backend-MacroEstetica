@@ -28,13 +28,13 @@ export declare class EventsService {
             description: string;
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
+            bannerImage: string | null;
+            followers: number | null;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
             empresaId: string | null;
             categoryId: string | null;
-            bannerImage: string | null;
-            followers: number | null;
             validated: boolean | null;
             id: string;
             createdAt: Date;

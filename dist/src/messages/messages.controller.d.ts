@@ -7,9 +7,9 @@ export declare class MessagesController {
         userId: string | null;
         type: import(".prisma/client").$Enums.MessageType;
         description: string;
+        name: string;
         empresaId: string | null;
         phone: string;
-        name: string;
         id: string;
         email: string;
         createdAt: Date;

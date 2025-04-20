@@ -10,62 +10,62 @@ export declare class CoursesController {
     private readonly coursesService;
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
-        id: string;
-        title: string;
-        bannerUrl: string;
         description: string;
-        level: string;
-        rating: number;
-        commentsCount: number;
-        averageRating: number;
-        instructorId: string | null;
-        price: number;
-        discountPercentage: number | null;
-        participantsCount: number;
-        target: import(".prisma/client").$Enums.Target;
+        title: string;
+        categoryId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoryId: string;
-        isFeatured: boolean | null;
+        rating: number;
+        price: number;
+        target: import(".prisma/client").$Enums.Target;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        bannerUrl: string;
         courseImageUrl: string;
         aboutDescription: string | null;
-        requirements: import("@prisma/client/runtime/library").JsonValue | null;
         totalHours: number;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        level: string;
+        discountPercentage: number | null;
+        instructorId: string | null;
+        requirements: import("@prisma/client/runtime/library").JsonValue | null;
+        isFeatured: boolean | null;
+        participantsCount: number;
+        commentsCount: number;
+        averageRating: number;
         introductoryVideoUrl: string | null;
     }>;
     getActiveCourses(req: any): Promise<ActiveCoursesDto>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
-        id: string;
         description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
-        id: string;
-        title: string;
         description: string;
+        title: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        moduleId: string | null;
         imageUrl: string | null;
+        moduleId: string | null;
         videoUrl: string | null;
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
+        content: string;
         classId: string;
         parentCommentId: string | null;
-        content: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         urlIcon: string;
         colorHex: string;
     }>;
@@ -91,8 +91,8 @@ export declare class CoursesController {
         description: string;
         completed: boolean;
         classResources: {
-            id: string;
             title: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             classId: string;
@@ -100,10 +100,10 @@ export declare class CoursesController {
         }[];
     }[]>;
     markClassAsCompleted(classId: string, userId: string, req: any): Promise<{
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         classId: string;
         completed: boolean;
     }>;

@@ -85,21 +85,21 @@ export declare class CategoryService {
         };
         products: {
             description: string;
-            categoryId: number;
             name: string;
+            categoryId: number;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            benefits: string[];
             isFeatured: boolean | null;
+            lab: string | null;
             activeIngredients: string[];
             features: string[];
-            imageGallery: string[];
+            benefits: string[];
+            problemAddressed: string | null;
             imageMain: string | null;
+            imageGallery: string[];
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
-            lab: string | null;
-            problemAddressed: string | null;
             companyId: string;
         }[];
     } & {

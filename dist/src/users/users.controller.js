@@ -103,6 +103,10 @@ let UsersController = UsersController_1 = class UsersController {
 exports.UsersController = UsersController;
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Check if a user exists by email' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Returns { exists: boolean, user?: Partial<User> }',
+    }),
     (0, common_1.Get)('check-email'),
     __param(0, (0, common_1.Query)('email')),
     __metadata("design:type", Function),
@@ -111,7 +115,7 @@ __decorate([
 ], UsersController.prototype, "checkUserByEmail", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Register a new user (Step 1)' }),
-    (0, swagger_1.ApiResponse)({ status: 201 }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'User created, returns userId' }),
     (0, common_1.Post)('register'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -128,6 +132,21 @@ __decorate([
 ], UsersController.prototype, "completeProfile", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar un Medico' }),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiBody)({
+        description: 'Si se envía archivo, utilizar field `file` (multipart).',
+        schema: {
+            type: 'object',
+            required: ['userId', 'profession', 'type'],
+            properties: {
+                userId: { type: 'string', example: 'cm4sths4i0008g1865nsbbh1l' },
+                profession: { type: 'string', example: 'MEDICO_MEDICINA_ESTETICA' },
+                type: { type: 'string', example: 'MEDICO' },
+                verification: { type: 'string', example: 'https://cdn.miapp.com/docs/certificado.pdf' },
+                file: { type: 'string', format: 'binary' },
+            },
+        },
+    }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     (0, common_1.Put)('medico'),
     __param(0, (0, common_1.UploadedFile)()),
@@ -138,7 +157,25 @@ __decorate([
 ], UsersController.prototype, "updateMedico", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar una Empresa' }),
-    (0, swagger_1.ApiBody)({ type: update_empresa_dto_1.UpdateEmpresaDto }),
+    (0, swagger_1.ApiBody)({
+        type: update_empresa_dto_1.UpdateEmpresaDto,
+        examples: {
+            full: {
+                summary: 'Ejemplo completo',
+                value: {
+                    userId: 'cm4sths4i0008g1865nsbbh1l',
+                    name: 'DermaTech SA',
+                    dni: 'RFC‑12345678',
+                    giro: 'EMPRESA_PROFESIONAL_PERFIL',
+                    subscription: 'ORO',
+                    bannerImage: 'https://cdn.miapp.com/banners/dermatech.jpg',
+                    logo: 'https://cdn.miapp.com/logos/dermatech.png',
+                    webUrl: 'https://dermatech.mx',
+                    followers: 300,
+                },
+            },
+        },
+    }),
     (0, common_1.Put)('empresa'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -147,7 +184,26 @@ __decorate([
 ], UsersController.prototype, "updateEmpresa", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar un Instructor' }),
-    (0, swagger_1.ApiBody)({ type: update_instructor_dto_1.UpdateInstructorDto }),
+    (0, swagger_1.ApiBody)({
+        type: update_instructor_dto_1.UpdateInstructorDto,
+        examples: {
+            basic: {
+                summary: 'Ejemplo básico',
+                value: {
+                    userId: 'cm4sths4i0008g1865nsbbh1l',
+                    profession: 'MEDICINA_ESTETICA',
+                    type: 'MEDICO',
+                    description: 'Especialista en peelings químicos',
+                    experienceYears: 5,
+                    certificationsUrl: 'https://cdn.miapp.com/certificaciones',
+                    status: 'active',
+                    bannerImage: 'https://cdn.miapp.com/banners/instructor.jpg',
+                    followers: 80,
+                    validated: false,
+                },
+            },
+        },
+    }),
     (0, common_1.Put)('instructor'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -158,7 +214,60 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Update full profile (generic)' }),
-    (0, swagger_1.ApiBody)({ type: update_profile_dto_1.UpdateProfileDto }),
+    (0, swagger_1.ApiBody)({
+        type: update_profile_dto_1.UpdateProfileDto,
+        description: 'Envía solo las secciones (medico, instructor, empresa) que apliquen para el rol del usuario.',
+        examples: {
+            medico: {
+                summary: 'Ejemplo MEDICO',
+                value: {
+                    firstName: 'Ana',
+                    lastName: 'Ramírez',
+                    phone: '+525511223344',
+                    medico: {
+                        profession: 'MEDICO_MEDICINA_ESTETICA',
+                        type: 'MEDICO',
+                        verification: 'https://cdn.miapp.com/docs/ana-certificado.pdf',
+                    },
+                },
+            },
+            instructor: {
+                summary: 'Ejemplo INSTRUCTOR',
+                value: {
+                    firstName: 'Carlos',
+                    lastName: 'Díaz',
+                    instructor: {
+                        profession: 'MEDICINA_ESTETICA',
+                        type: 'MEDICO',
+                        description: 'Experto en láser dermatológico',
+                        experienceYears: 10,
+                        certificationsUrl: 'https://cdn.miapp.com/certificados/carlos',
+                        status: 'active',
+                        bannerImage: 'https://cdn.miapp.com/banners/carlos.jpg',
+                        followers: 150,
+                        validated: true,
+                    },
+                },
+            },
+            empresa: {
+                summary: 'Ejemplo EMPRESA',
+                value: {
+                    firstName: 'Laura',
+                    lastName: 'Gómez',
+                    empresa: {
+                        name: 'Spa Belleza',
+                        dni: 'RFC‑98765432',
+                        giro: 'EMPRESA_APARATOLOGIA_PERFIL',
+                        subscription: 'PLATA',
+                        bannerImage: 'https://cdn.miapp.com/banners/spa.jpg',
+                        logo: 'https://cdn.miapp.com/logos/spa.png',
+                        webUrl: 'https://spabelleza.mx',
+                        followers: 120,
+                    },
+                },
+            },
+        },
+    }),
     (0, common_1.Post)('profile'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -174,7 +283,10 @@ __decorate([
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
-            properties: { file: { type: 'string', format: 'binary' } },
+            required: ['file'],
+            properties: {
+                file: { type: 'string', format: 'binary' },
+            },
         },
     }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
@@ -189,7 +301,18 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Change password' }),
-    (0, swagger_1.ApiBody)({ type: change_password_dto_1.ChangePasswordDto }),
+    (0, swagger_1.ApiBody)({
+        type: change_password_dto_1.ChangePasswordDto,
+        examples: {
+            demo: {
+                summary: 'Ejemplo',
+                value: {
+                    currentPassword: 'OldPass123!',
+                    newPassword: 'NewPass456!',
+                },
+            },
+        },
+    }),
     (0, common_1.Post)('change-password'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -201,7 +324,18 @@ __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Change email' }),
-    (0, swagger_1.ApiBody)({ type: change_email_dto_1.ChangeEmailDto }),
+    (0, swagger_1.ApiBody)({
+        type: change_email_dto_1.ChangeEmailDto,
+        examples: {
+            demo: {
+                summary: 'Ejemplo',
+                value: {
+                    password: 'MyPass123!',
+                    newEmail: 'nuevo@correo.com',
+                },
+            },
+        },
+    }),
     (0, common_1.Post)('change-email'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
@@ -212,6 +346,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'Get MEDICO details for current user' }),
     (0, common_1.Get)('medico'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -221,6 +356,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'Get EMPRESA details for current user' }),
     (0, common_1.Get)('empresa'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -230,6 +366,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'Get INSTRUCTOR details for current user' }),
     (0, common_1.Get)('instructor'),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
@@ -238,6 +375,9 @@ __decorate([
 ], UsersController.prototype, "getInstructor", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get user by ID' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'User ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'User found (password omitted)' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'User not found' }),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),

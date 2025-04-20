@@ -7,8 +7,8 @@ export declare class BannerController {
         banner: string;
         description: string;
         title: string;
-        empresaId: string | null;
         logo: string;
+        empresaId: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -20,8 +20,8 @@ export declare class BannerController {
         banner: string;
         description: string;
         title: string;
-        empresaId: string | null;
         logo: string;
+        empresaId: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -33,8 +33,8 @@ export declare class BannerController {
         banner: string;
         description: string;
         title: string;
-        empresaId: string | null;
         logo: string;
+        empresaId: string | null;
         id: string;
         createdAt: Date;
         updatedAt: Date;

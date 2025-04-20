@@ -19,8 +19,8 @@ export declare class BlogService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        iconUrl: string | null;
         colorHex: string;
+        iconUrl: string | null;
     }[]>;
     incrementReaderCount(postId: string): Promise<{
         totalReaders: number;
