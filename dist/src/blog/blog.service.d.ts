@@ -13,30 +13,14 @@ export declare class BlogService {
     searchBlogs(query: string): Promise<any[]>;
     voteAndComment(postId: string, userId: string, useful: boolean, commentContent: string): Promise<{
         message: string;
-        comment: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            content: string;
-            postId: string;
-        };
-        rating: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            postId: string;
-            rating: number;
-        };
     }>;
     getAllCategories(): Promise<{
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        colorHex: string;
         iconUrl: string | null;
+        colorHex: string;
     }[]>;
     incrementReaderCount(postId: string): Promise<{
         totalReaders: number;

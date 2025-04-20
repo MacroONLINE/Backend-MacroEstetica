@@ -3,11 +3,11 @@ export declare class EventStreamsController {
     private readonly eventStreamsService;
     constructor(eventStreamsService: EventStreamsService);
     createStream(body: any): Promise<{
+        description: string;
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         eventId: string;
         channelName: string | null;
         endDateTime: Date;
@@ -18,11 +18,11 @@ export declare class EventStreamsController {
     getStreamById(id: string): Promise<{
         event: {
             workshops: {
+                description: string;
+                title: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                description: string;
-                title: string;
                 eventId: string | null;
                 channelName: string | null;
                 endDateTime: Date;
@@ -34,21 +34,21 @@ export declare class EventStreamsController {
                 whatYouWillLearn: string | null;
             }[];
             attendees: {
-                id: string;
+                status: boolean;
                 firstName: string | null;
                 lastName: string | null;
                 phone: string | null;
-                email: string;
-                emailVerified: Date | null;
                 address: string | null;
                 province: string | null;
                 city: string | null;
                 country: string | null;
                 countryCode: string | null;
                 zipCode: string | null;
+                id: string;
+                email: string;
+                emailVerified: Date | null;
                 role: import(".prisma/client").$Enums.Role;
                 password: string;
-                status: boolean;
                 createdAt: Date;
                 updatedAt: Date;
                 newsletter: boolean;
@@ -57,23 +57,23 @@ export declare class EventStreamsController {
             }[];
             leadingCompany: {
                 subscription: import(".prisma/client").$Enums.SubscriptionType | null;
+                userId: string;
+                title: string | null;
+                bannerImage: string | null;
+                followers: number;
                 name: string;
+                giro: import(".prisma/client").$Enums.Giro;
+                webUrl: string | null;
+                logo: string | null;
+                profileImage: string | null;
+                ceo: string | null;
+                ceoRole: string | null;
+                location: string | null;
+                dni: string | null;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
-                dni: string | null;
-                giro: import(".prisma/client").$Enums.Giro;
-                bannerImage: string | null;
                 categoria: import(".prisma/client").$Enums.EmpresaCategory;
-                ceo: string | null;
-                ceoRole: string | null;
-                followers: number;
-                location: string | null;
-                logo: string | null;
-                profileImage: string | null;
-                title: string | null;
-                webUrl: string | null;
                 legalName: string | null;
             };
             organizers: {
@@ -86,10 +86,10 @@ export declare class EventStreamsController {
                 photoUrl: string | null;
             }[];
         } & {
+            title: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
             endDateTime: Date;
             price: number;
             startDateTime: Date;
@@ -103,31 +103,31 @@ export declare class EventStreamsController {
             leadingCompanyId: string | null;
         };
         orators: {
-            id: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            experienceYears: number;
-            certificationsUrl: string;
             userId: string;
-            bannerImage: string | null;
-            followers: number | null;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            description: string;
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            experienceDescription: string;
-            genero: import(".prisma/client").$Enums.Gender | null;
-            validated: boolean | null;
+            experienceYears: number;
+            certificationsUrl: string;
+            status: string;
             empresaId: string | null;
             categoryId: string | null;
+            bannerImage: string | null;
+            followers: number | null;
+            validated: boolean | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            experienceDescription: string;
+            genero: import(".prisma/client").$Enums.Gender | null;
         }[];
     } & {
+        description: string;
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         eventId: string;
         channelName: string | null;
         endDateTime: Date;

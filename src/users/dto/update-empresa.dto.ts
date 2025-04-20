@@ -1,78 +1,37 @@
-import { IsOptional, IsString, IsEnum } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { Giro, SubscriptionType } from '@prisma/client'; // Importa los enums generados por Prisma
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsEnum, IsOptional, IsString, IsNumber, IsUrl } from 'class-validator'
+import { Giro, SubscriptionType } from '@prisma/client'
 
-export class CreateEmpresaDto {
-  @ApiProperty({ description: 'DNI de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  dni?: string;
+export class UpdateEmpresaDto {
+  @ApiProperty() @IsString() userId: string
+  @ApiProperty() @IsString() name: string                       // ← requerido
 
-  @ApiProperty({ description: 'Nombre de la empresa' })
-  @IsString()
-  name: string;
+  @ApiPropertyOptional({ enum: Giro })
+  @IsEnum(Giro) @IsOptional()
+  giro?: Giro
 
-  @ApiProperty({ enum: Giro, description: 'Giro de la empresa' })
-  @IsEnum(Giro, { message: 'Giro must be a valid enum value' })
-  giro: Giro;
+  @ApiPropertyOptional({ enum: SubscriptionType })
+  @IsEnum(SubscriptionType) @IsOptional()
+  subscription?: SubscriptionType
 
-  @ApiProperty({
-    enum: SubscriptionType,
-    description: 'Tipo de suscripción de la empresa',
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(SubscriptionType, {
-    message: 'Subscription must be a valid enum value',
-  })
-  subscription?: SubscriptionType;
-
-  @ApiProperty({ description: 'ID del usuario asociado a la empresa' })
-  @IsString()
-  userId: string;
-
-  @ApiProperty({ description: 'Imagen del banner de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  bannerImage?: string;
-
-  @ApiProperty({ description: 'Logo de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  logo?: string;
-
-  @ApiProperty({ description: 'Título de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  title?: string;
-
-  @ApiProperty({ description: 'Imagen de perfil de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  profileImage?: string;
-
-  @ApiProperty({ description: 'Nombre del CEO de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  ceo?: string;
-
-  @ApiProperty({ description: 'Cargo del CEO de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  ceoRole?: string;
-
-  @ApiProperty({ description: 'Ubicación de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  location?: string;
-
-  @ApiProperty({ description: 'Número de seguidores de la empresa', required: false })
-  @IsOptional()
-  @IsString()
-  followers?: number;
-
-  @ApiProperty({ description: 'URL del sitio web de la empresa' })
-  @IsOptional()
-  @IsString()
-  webUrl: string;
+  @ApiPropertyOptional() @IsUrl() @IsOptional()
+  webUrl?: string
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  bannerImage?: string
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  logo?: string
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  title?: string
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  profileImage?: string
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  ceo?: string
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  ceoRole?: string
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  location?: string
+  @ApiPropertyOptional() @IsNumber() @IsOptional()
+  followers?: number
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  dni?: string
 }

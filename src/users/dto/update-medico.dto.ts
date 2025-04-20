@@ -1,13 +1,19 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsEnum, IsOptional, IsString } from 'class-validator'
+import { Profession, ProfessionType } from '@prisma/client'
 
 export class UpdateMedicoDto {
-  @ApiPropertyOptional({ description: 'Verification file (will be stored as a URL)' })
-  @IsOptional()
-  @IsString()
-  verification?: string;
+  @ApiProperty() @IsString() userId: string
 
-  @ApiProperty({ description: 'ID of the associated user' })
-  @IsString()
-  userId!: string;
+  @ApiPropertyOptional({ enum: Profession })
+  @IsEnum(Profession) @IsOptional()
+  profession?: Profession
+
+  @ApiPropertyOptional({ enum: ProfessionType })
+  @IsEnum(ProfessionType) @IsOptional()
+  type?: ProfessionType
+
+  @ApiPropertyOptional()
+  @IsString() @IsOptional()
+  verification?: string
 }

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Query, Patch, Delete } from '@nestj
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { InstructorService } from './instructor.service';
 import { CreateInstructorDto } from './dto/create-instructor.dto';
-import { Prisma } from '@prisma/client';
+import { UpdateInstructorDto } from './dto/update-instructor.dto';
 
 @ApiTags('instructors')
 @Controller('instructors')
@@ -15,7 +15,7 @@ export class InstructorController {
     return this.instructorService.createInstructor(createInstructorDto);
   }
 
-  @ApiOperation({ summary: 'Obtener todos los instructores (opcional)' })
+  @ApiOperation({ summary: 'Obtener todos los instructores' })
   @Get()
   async getAllInstructors() {
     return this.instructorService.getAllInstructors();
@@ -39,13 +39,16 @@ export class InstructorController {
     return this.instructorService.getInstructorsByEmpresa(empresaId);
   }
 
-  @ApiOperation({ summary: 'Actualizar un instructor (opcional)' })
+  @ApiOperation({ summary: 'Actualizar un instructor' })
   @Patch(':id')
-  async updateInstructor(@Param('id') id: string, @Body() data: Prisma.InstructorUpdateInput) {
-    return this.instructorService.updateInstructor(id, data);
+  async updateInstructor(
+    @Param('id') id: string,
+    @Body() updateDto: UpdateInstructorDto,
+  ) {
+    return this.instructorService.updateInstructor(id, updateDto);
   }
 
-  @ApiOperation({ summary: 'Eliminar un instructor (opcional)' })
+  @ApiOperation({ summary: 'Eliminar un instructor' })
   @Delete(':id')
   async deleteInstructor(@Param('id') id: string) {
     return this.instructorService.deleteInstructor(id);

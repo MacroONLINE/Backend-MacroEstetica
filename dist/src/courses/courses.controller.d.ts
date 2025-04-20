@@ -5,49 +5,51 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Target } from '@prisma/client';
+import { ActiveCoursesDto } from './dto/course-card.dto/active-courses.dto';
 export declare class CoursesController {
     private readonly coursesService;
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string;
-        rating: number;
         title: string;
-        categoryId: string;
-        price: number;
-        target: import(".prisma/client").$Enums.Target;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         bannerUrl: string;
+        description: string;
         level: string;
+        rating: number;
         commentsCount: number;
         averageRating: number;
+        instructorId: string | null;
+        price: number;
         discountPercentage: number | null;
         participantsCount: number;
+        target: import(".prisma/client").$Enums.Target;
+        createdAt: Date;
+        updatedAt: Date;
+        categoryId: string;
         isFeatured: boolean | null;
         courseImageUrl: string;
         aboutDescription: string | null;
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
         totalHours: number;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
-        instructorId: string | null;
     }>;
+    getActiveCourses(req: any): Promise<ActiveCoursesDto>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
         courseId: string | null;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
         id: string;
+        title: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        description: string;
-        title: string;
-        imageUrl: string | null;
         moduleId: string | null;
+        imageUrl: string | null;
         videoUrl: string | null;
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
@@ -55,15 +57,15 @@ export declare class CoursesController {
         createdAt: Date;
         updatedAt: Date;
         userId: string;
-        content: string;
         classId: string;
         parentCommentId: string | null;
+        content: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         urlIcon: string;
         colorHex: string;
     }>;
@@ -73,194 +75,31 @@ export declare class CoursesController {
     getCoursesByInstructor(instructorId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
     getCoursesByTarget(target: Target): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
     getCourseById(courseId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto>;
-    getUserCourses(userId: string): Promise<any[]>;
-    getUserCourseProgress(userId: string, courseId: string): Promise<{
+    getUserCourses(userId: string, req: any): Promise<any[]>;
+    getUserCourseProgress(userId: string, courseId: string, req: any): Promise<{
         courseId: string;
         totalClasses: number;
         completedClasses: number;
         completedClassIds: string[];
         isCompleted: boolean;
     }>;
-    getClassById(classId: string): Promise<{
-        classComments: ({
-            user: {
-                firstName: string;
-                lastName: string;
-                profileImageUrl: string;
-            };
-            replies: ({
-                user: {
-                    firstName: string;
-                    lastName: string;
-                    profileImageUrl: string;
-                };
-            } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                userId: string;
-                content: string;
-                classId: string;
-                parentCommentId: string | null;
-            })[];
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            content: string;
-            classId: string;
-            parentCommentId: string | null;
-        })[];
-        classResources: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            classId: string;
-            title: string;
-            fileUrl: string;
-        }[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string;
-        title: string;
-        imageUrl: string | null;
-        moduleId: string | null;
-        videoUrl: string | null;
-    }>;
-    isUserEnrolled(courseId: string, userId: string): Promise<{
+    isUserEnrolled(courseId: string, userId: string, req: any): Promise<{
         enrolled: boolean;
     }>;
-    getModulesByCourse(courseId: string): Promise<({
-        classes: ({
-            classComments: ({
-                user: {
-                    firstName: string;
-                    lastName: string;
-                    profileImageUrl: string;
-                };
-                replies: ({
-                    user: {
-                        firstName: string;
-                        lastName: string;
-                        profileImageUrl: string;
-                    };
-                } & {
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    userId: string;
-                    content: string;
-                    classId: string;
-                    parentCommentId: string | null;
-                })[];
-            } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                userId: string;
-                content: string;
-                classId: string;
-                parentCommentId: string | null;
-            })[];
-            classResources: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                classId: string;
-                title: string;
-                fileUrl: string;
-            }[];
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            title: string;
-            imageUrl: string | null;
-            moduleId: string | null;
-            videoUrl: string | null;
-        })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string;
-        courseId: string | null;
-    })[]>;
-    getModuleById(moduleId: string): Promise<{
-        classes: ({
-            classComments: ({
-                user: {
-                    firstName: string;
-                    lastName: string;
-                    profileImageUrl: string;
-                };
-                replies: ({
-                    user: {
-                        firstName: string;
-                        lastName: string;
-                        profileImageUrl: string;
-                    };
-                } & {
-                    id: string;
-                    createdAt: Date;
-                    updatedAt: Date;
-                    userId: string;
-                    content: string;
-                    classId: string;
-                    parentCommentId: string | null;
-                })[];
-            } & {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                userId: string;
-                content: string;
-                classId: string;
-                parentCommentId: string | null;
-            })[];
-            classResources: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                classId: string;
-                title: string;
-                fileUrl: string;
-            }[];
-        } & {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            title: string;
-            imageUrl: string | null;
-            moduleId: string | null;
-            videoUrl: string | null;
-        })[];
-    } & {
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        description: string;
-        courseId: string | null;
-    }>;
-    getUserModuleProgress(moduleId: string, userId: string): Promise<{
+    getUserModuleProgress(moduleId: string, userId: string, req: any): Promise<{
         classId: string;
         description: string;
         completed: boolean;
         classResources: {
             id: string;
+            title: string;
             createdAt: Date;
             updatedAt: Date;
             classId: string;
-            title: string;
             fileUrl: string;
         }[];
     }[]>;
-    markClassAsCompleted(classId: string, userId: string): Promise<{
+    markClassAsCompleted(classId: string, userId: string, req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;

@@ -7,7 +7,7 @@ export declare class AgoraService {
         rtmToken: string;
         channelName: string;
         uid: string;
-        role: "host" | "audience";
+        role: "audience" | "host";
         expiresAt: number;
     };
 }

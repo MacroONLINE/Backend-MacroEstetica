@@ -23,24 +23,24 @@ export declare class EventsService {
         type: string;
         entityId: string;
         orators: {
-            id: string;
-            status: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            experienceYears: number;
-            certificationsUrl: string;
             userId: string;
-            bannerImage: string | null;
-            followers: number | null;
+            type: import(".prisma/client").$Enums.ProfessionType;
+            description: string;
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            experienceDescription: string;
-            genero: import(".prisma/client").$Enums.Gender | null;
-            validated: boolean | null;
+            experienceYears: number;
+            certificationsUrl: string;
+            status: string;
             empresaId: string | null;
             categoryId: string | null;
+            bannerImage: string | null;
+            followers: number | null;
+            validated: boolean | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            experienceDescription: string;
+            genero: import(".prisma/client").$Enums.Gender | null;
         }[];
     }>;
 }

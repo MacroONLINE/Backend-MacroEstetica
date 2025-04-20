@@ -7,6 +7,9 @@ import {
   HttpCode,
   HttpStatus,
   Patch,
+  UseGuards,
+  Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -21,7 +24,11 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { CourseCardDto } from './dto/course-card.dto/course-card.dto';
+import { ActiveCoursesDto } from './dto/course-card.dto/active-courses.dto';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -34,6 +41,18 @@ export class CoursesController {
   async createCourse(@Body() createCourseDto: CreateCourseDto) {
     return this.coursesService.createCourse(createCourseDto);
   }
+  
+  @Get('active')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiResponse({ status: 200, type: ActiveCoursesDto })
+  async getActiveCourses(@Request() req) {
+    const { userId, username } = req.user        // ← extraído por el JwtStrategy
+    console.log('[CoursesController] userId:', userId, 'username:', username)
+  
+    return this.coursesService.getActiveCoursesCardInfo(userId)
+  }
+  
 
   @Post('modules')
   @ApiOperation({ summary: 'Create a new module for a course' })
@@ -53,7 +72,6 @@ export class CoursesController {
   @ApiOperation({ summary: 'Create a new comment for a class' })
   @ApiResponse({ status: 201, description: 'Comment created successfully.' })
   async createComment(@Body() createCommentDto: CreateCommentDto) {
-    // Internamente llamará a createClassComment
     return this.coursesService.createClassComment(createCommentDto);
   }
 
@@ -114,15 +132,27 @@ export class CoursesController {
     return this.coursesService.getCourseById(courseId);
   }
 
+  // -------------------------------------
+  // Endpoints que involucran información sensible de un usuario específico
+  // Se protegen con JwtAuthGuard y se valida que req.user.userId === userId
+  // -------------------------------------
+
   @Get('user/:userId')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get courses enrolled by a user with progress' })
   @ApiParam({ name: 'userId', description: 'User ID' })
   @ApiResponse({ status: 200, description: 'User enrolled courses with progress.' })
-  async getUserCourses(@Param('userId') userId: string) {
+  async getUserCourses(@Param('userId') userId: string, @Request() req) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('No tienes permiso para ver estos cursos');
+    }
     return this.coursesService.getUserCourses(userId);
   }
 
   @Get('user/:userId/course/:courseId/progress')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get user progress in a specific course' })
   @ApiParam({ name: 'userId', description: 'User ID' })
   @ApiParam({ name: 'courseId', description: 'Course ID' })
@@ -131,20 +161,17 @@ export class CoursesController {
   async getUserCourseProgress(
     @Param('userId') userId: string,
     @Param('courseId') courseId: string,
+    @Request() req,
   ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('No tienes permiso para ver este progreso');
+    }
     return this.coursesService.getUserCourseProgress(userId, courseId);
   }
 
-  @Get('class/:classId')
-  @ApiOperation({ summary: 'Get class details by ID' })
-  @ApiParam({ name: 'classId', description: 'Class ID' })
-  @ApiResponse({ status: 200, description: 'Class details returned.' })
-  @ApiResponse({ status: 404, description: 'Class not found.' })
-  async getClassById(@Param('classId') classId: string) {
-    return this.coursesService.getClassById(classId);
-  }
-
   @Get(':courseId/user/:userId/enrolled')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Check if a user is enrolled in a specific course' })
   @ApiParam({ name: 'courseId', description: 'Course ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
@@ -153,45 +180,35 @@ export class CoursesController {
   async isUserEnrolled(
     @Param('courseId') courseId: string,
     @Param('userId') userId: string,
+    @Request() req,
   ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('No tienes permiso para consultar la matrícula');
+    }
     return this.coursesService.isUserEnrolled(courseId, userId);
   }
 
-  @Get('modules/course/:courseId')
-  @ApiOperation({ summary: 'Get modules by course ID' })
-  @ApiParam({ name: 'courseId', description: 'Course ID' })
-  @ApiResponse({ status: 200, description: 'Modules of the specified course returned.' })
-  async getModulesByCourse(@Param('courseId') courseId: string) {
-    return this.coursesService.getModulesByCourse(courseId);
-  }
-
-  @Get('module/:moduleId')
-  @ApiOperation({ summary: 'Get details of a specific module' })
-  @ApiParam({ name: 'moduleId', description: 'Module ID' })
-  @ApiResponse({ status: 200, description: 'Module details returned.' })
-  @ApiResponse({ status: 404, description: 'Module not found.' })
-  async getModuleById(@Param('moduleId') moduleId: string) {
-    return this.coursesService.getModuleById(moduleId);
-  }
-
   @Get('module/:moduleId/user/:userId/progress')
-  @ApiOperation({
-    summary: 'Get classes approved by a user in a specific module',
-  })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get classes approved by a user in a specific module' })
   @ApiParam({ name: 'moduleId', description: 'Module ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'User class progress in the module returned.',
-  })
+  @ApiResponse({ status: 200, description: 'User class progress in the module returned.' })
   async getUserModuleProgress(
     @Param('moduleId') moduleId: string,
     @Param('userId') userId: string,
+    @Request() req,
   ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('No tienes permiso para ver este progreso');
+    }
     return this.coursesService.getUserModuleProgress(moduleId, userId);
   }
 
   @Post('class/:classId/user/:userId/complete')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Mark a class as completed for a specific user' })
   @ApiParam({ name: 'classId', description: 'Class ID' })
   @ApiParam({ name: 'userId', description: 'User ID' })
@@ -199,8 +216,15 @@ export class CoursesController {
   async markClassAsCompleted(
     @Param('classId') classId: string,
     @Param('userId') userId: string,
+    @Request() req,
   ) {
+    if (req.user.userId !== userId) {
+      throw new ForbiddenException('No tienes permiso para completar esta clase');
+    }
     return this.coursesService.markClassAsCompleted(userId, classId);
   }
+
+ 
+
 
 }

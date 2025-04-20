@@ -1,10 +1,10 @@
 import { Giro, SubscriptionType } from '@prisma/client';
-export declare class CreateEmpresaDto {
-    dni?: string;
-    name: string;
-    giro: Giro;
-    subscription?: SubscriptionType;
+export declare class UpdateEmpresaDto {
     userId: string;
+    name: string;
+    giro?: Giro;
+    subscription?: SubscriptionType;
+    webUrl?: string;
     bannerImage?: string;
     logo?: string;
     title?: string;
@@ -13,5 +13,5 @@ export declare class CreateEmpresaDto {
     ceoRole?: string;
     location?: string;
     followers?: number;
-    webUrl: string;
+    dni?: string;
 }

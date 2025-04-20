@@ -10,50 +10,93 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateInstructorDto = void 0;
-const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 const client_1 = require("@prisma/client");
 class UpdateInstructorDto {
 }
 exports.UpdateInstructorDto = UpdateInstructorDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Profession of the instructor' }),
-    (0, class_validator_1.IsEnum)(client_1.Profession, { message: 'Profession must be a valid enum value' }),
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], UpdateInstructorDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.Profession }),
+    (0, class_validator_1.IsEnum)(client_1.Profession),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateInstructorDto.prototype, "profession", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Type of the profession' }),
-    (0, class_validator_1.IsEnum)(client_1.ProfessionType, { message: 'Type must be either MEDICO or ESTETICISTA' }),
+    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.ProfessionType }),
+    (0, class_validator_1.IsEnum)(client_1.ProfessionType),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateInstructorDto.prototype, "type", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Description of the instructor' }),
+    (0, swagger_1.ApiPropertyOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateInstructorDto.prototype, "description", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Years of experience of the instructor' }),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Number)
 ], UpdateInstructorDto.prototype, "experienceYears", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'URL of the instructor certifications' }),
+    (0, swagger_1.ApiPropertyOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateInstructorDto.prototype, "certificationsUrl", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Status of the instructor' }),
+    (0, swagger_1.ApiPropertyOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateInstructorDto.prototype, "status", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ description: 'ID of the associated user' }),
+    (0, swagger_1.ApiPropertyOptional)(),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], UpdateInstructorDto.prototype, "userId", void 0);
+], UpdateInstructorDto.prototype, "empresaId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateInstructorDto.prototype, "categoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateInstructorDto.prototype, "title", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateInstructorDto.prototype, "bannerImage", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateInstructorDto.prototype, "followers", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.Gender }),
+    (0, class_validator_1.IsEnum)(client_1.Gender),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateInstructorDto.prototype, "gender", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Boolean)
+], UpdateInstructorDto.prototype, "validated", void 0);
 //# sourceMappingURL=update-instructor.dto.js.map

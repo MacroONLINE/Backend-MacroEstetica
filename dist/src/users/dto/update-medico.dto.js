@@ -12,18 +12,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateMedicoDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const client_1 = require("@prisma/client");
 class UpdateMedicoDto {
 }
 exports.UpdateMedicoDto = UpdateMedicoDto;
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ description: 'Verification file (will be stored as a URL)' }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], UpdateMedicoDto.prototype, "verification", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'ID of the associated user' }),
+    (0, swagger_1.ApiProperty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateMedicoDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.Profession }),
+    (0, class_validator_1.IsEnum)(client_1.Profession),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMedicoDto.prototype, "profession", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.ProfessionType }),
+    (0, class_validator_1.IsEnum)(client_1.ProfessionType),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMedicoDto.prototype, "type", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMedicoDto.prototype, "verification", void 0);
 //# sourceMappingURL=update-medico.dto.js.map

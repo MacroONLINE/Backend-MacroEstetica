@@ -84,16 +84,15 @@ export declare class CategoryService {
             logo: string;
         };
         products: {
+            description: string;
+            categoryId: number;
             name: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            description: string;
-            categoryId: number;
-            isFeatured: boolean | null;
-            companyId: string;
-            activeIngredients: string[];
             benefits: string[];
+            isFeatured: boolean | null;
+            activeIngredients: string[];
             features: string[];
             imageGallery: string[];
             imageMain: string | null;
@@ -101,6 +100,7 @@ export declare class CategoryService {
             isOnSale: boolean | null;
             lab: string | null;
             problemAddressed: string | null;
+            companyId: string;
         }[];
     } & {
         name: string;

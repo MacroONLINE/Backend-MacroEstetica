@@ -1,38 +1,49 @@
-import { IsEnum, IsInt, IsString, IsNotEmpty } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { Profession, ProfessionType } from '@prisma/client';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsString, IsNumber, IsOptional, IsEnum, IsBoolean } from 'class-validator'
+import { Profession, ProfessionType, Gender } from '@prisma/client'
 
 export class UpdateInstructorDto {
-  @ApiProperty({ description: 'Profession of the instructor' })
-  @IsEnum(Profession, { message: 'Profession must be a valid enum value' })
-  profession!: Profession;
+  @ApiProperty() @IsString() userId: string
 
-  @ApiProperty({ description: 'Type of the profession' })
-  @IsEnum(ProfessionType, { message: 'Type must be either MEDICO or ESTETICISTA' })
-  type!: ProfessionType;
+  @ApiPropertyOptional({ enum: Profession })
+  @IsEnum(Profession) @IsOptional()
+  profession?: Profession
 
-  @ApiProperty({ description: 'Description of the instructor' })
-  @IsString()
-  @IsNotEmpty()
-  description!: string;
+  @ApiPropertyOptional({ enum: ProfessionType })
+  @IsEnum(ProfessionType) @IsOptional()
+  type?: ProfessionType
 
-  @ApiProperty({ description: 'Years of experience of the instructor' })
-  @IsInt()
-  @IsNotEmpty()
-  experienceYears!: number;
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  description?: string
 
-  @ApiProperty({ description: 'URL of the instructor certifications' })
-  @IsString()
-  @IsNotEmpty() // Ahora es obligatorio
-  certificationsUrl!: string;
+  @ApiPropertyOptional() @IsNumber() @IsOptional()
+  experienceYears?: number
 
-  @ApiProperty({ description: 'Status of the instructor' })
-  @IsString()
-  @IsNotEmpty()
-  status!: string;
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  certificationsUrl?: string
 
-  @ApiProperty({ description: 'ID of the associated user' })
-  @IsString()
-  @IsNotEmpty()
-  userId!: string;
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  status?: string
+
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  empresaId?: string
+
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  categoryId?: string
+
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  title?: string
+
+  @ApiPropertyOptional() @IsString() @IsOptional()
+  bannerImage?: string
+
+  @ApiPropertyOptional() @IsNumber() @IsOptional()
+  followers?: number
+
+  @ApiPropertyOptional({ enum: Gender })
+  @IsEnum(Gender) @IsOptional()
+  gender?: Gender
+
+  @ApiPropertyOptional() @IsBoolean() @IsOptional()
+  validated?: boolean
 }

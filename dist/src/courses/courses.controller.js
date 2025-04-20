@@ -22,12 +22,19 @@ const create_comment_dto_1 = require("./dto/create-comment.dto");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const client_1 = require("@prisma/client");
 const swagger_1 = require("@nestjs/swagger");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const active_courses_dto_1 = require("./dto/course-card.dto/active-courses.dto");
 let CoursesController = class CoursesController {
     constructor(coursesService) {
         this.coursesService = coursesService;
     }
     async createCourse(createCourseDto) {
         return this.coursesService.createCourse(createCourseDto);
+    }
+    async getActiveCourses(req) {
+        const { userId, username } = req.user;
+        console.log('[CoursesController] userId:', userId, 'username:', username);
+        return this.coursesService.getActiveCoursesCardInfo(userId);
     }
     async createModule(createModuleDto) {
         return this.coursesService.createModule(createModuleDto);
@@ -59,28 +66,34 @@ let CoursesController = class CoursesController {
     async getCourseById(courseId) {
         return this.coursesService.getCourseById(courseId);
     }
-    async getUserCourses(userId) {
+    async getUserCourses(userId, req) {
+        if (req.user.userId !== userId) {
+            throw new common_1.ForbiddenException('No tienes permiso para ver estos cursos');
+        }
         return this.coursesService.getUserCourses(userId);
     }
-    async getUserCourseProgress(userId, courseId) {
+    async getUserCourseProgress(userId, courseId, req) {
+        if (req.user.userId !== userId) {
+            throw new common_1.ForbiddenException('No tienes permiso para ver este progreso');
+        }
         return this.coursesService.getUserCourseProgress(userId, courseId);
     }
-    async getClassById(classId) {
-        return this.coursesService.getClassById(classId);
-    }
-    async isUserEnrolled(courseId, userId) {
+    async isUserEnrolled(courseId, userId, req) {
+        if (req.user.userId !== userId) {
+            throw new common_1.ForbiddenException('No tienes permiso para consultar la matrícula');
+        }
         return this.coursesService.isUserEnrolled(courseId, userId);
     }
-    async getModulesByCourse(courseId) {
-        return this.coursesService.getModulesByCourse(courseId);
-    }
-    async getModuleById(moduleId) {
-        return this.coursesService.getModuleById(moduleId);
-    }
-    async getUserModuleProgress(moduleId, userId) {
+    async getUserModuleProgress(moduleId, userId, req) {
+        if (req.user.userId !== userId) {
+            throw new common_1.ForbiddenException('No tienes permiso para ver este progreso');
+        }
         return this.coursesService.getUserModuleProgress(moduleId, userId);
     }
-    async markClassAsCompleted(classId, userId) {
+    async markClassAsCompleted(classId, userId, req) {
+        if (req.user.userId !== userId) {
+            throw new common_1.ForbiddenException('No tienes permiso para completar esta clase');
+        }
         return this.coursesService.markClassAsCompleted(userId, classId);
     }
 };
@@ -94,6 +107,16 @@ __decorate([
     __metadata("design:paramtypes", [create_course_dto_1.CreateCourseDto]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "createCourse", null);
+__decorate([
+    (0, common_1.Get)('active'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiResponse)({ status: 200, type: active_courses_dto_1.ActiveCoursesDto }),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getActiveCourses", null);
 __decorate([
     (0, common_1.Post)('modules'),
     (0, swagger_1.ApiOperation)({ summary: 'Create a new module for a course' }),
@@ -192,16 +215,21 @@ __decorate([
 ], CoursesController.prototype, "getCourseById", null);
 __decorate([
     (0, common_1.Get)('user/:userId'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Get courses enrolled by a user with progress' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'User enrolled courses with progress.' }),
     __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getUserCourses", null);
 __decorate([
     (0, common_1.Get)('user/:userId/course/:courseId/progress'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Get user progress in a specific course' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
     (0, swagger_1.ApiParam)({ name: 'courseId', description: 'Course ID' }),
@@ -209,23 +237,15 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 404, description: 'User or course not found.' }),
     __param(0, (0, common_1.Param)('userId')),
     __param(1, (0, common_1.Param)('courseId')),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getUserCourseProgress", null);
 __decorate([
-    (0, common_1.Get)('class/:classId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get class details by ID' }),
-    (0, swagger_1.ApiParam)({ name: 'classId', description: 'Class ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Class details returned.' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Class not found.' }),
-    __param(0, (0, common_1.Param)('classId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], CoursesController.prototype, "getClassById", null);
-__decorate([
     (0, common_1.Get)(':courseId/user/:userId/enrolled'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Check if a user is enrolled in a specific course' }),
     (0, swagger_1.ApiParam)({ name: 'courseId', description: 'Course ID' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
@@ -233,58 +253,39 @@ __decorate([
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Course or user not found.' }),
     __param(0, (0, common_1.Param)('courseId')),
     __param(1, (0, common_1.Param)('userId')),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "isUserEnrolled", null);
 __decorate([
-    (0, common_1.Get)('modules/course/:courseId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get modules by course ID' }),
-    (0, swagger_1.ApiParam)({ name: 'courseId', description: 'Course ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Modules of the specified course returned.' }),
-    __param(0, (0, common_1.Param)('courseId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], CoursesController.prototype, "getModulesByCourse", null);
-__decorate([
-    (0, common_1.Get)('module/:moduleId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get details of a specific module' }),
-    (0, swagger_1.ApiParam)({ name: 'moduleId', description: 'Module ID' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Module details returned.' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Module not found.' }),
-    __param(0, (0, common_1.Param)('moduleId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], CoursesController.prototype, "getModuleById", null);
-__decorate([
     (0, common_1.Get)('module/:moduleId/user/:userId/progress'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Get classes approved by a user in a specific module',
-    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiOperation)({ summary: 'Get classes approved by a user in a specific module' }),
     (0, swagger_1.ApiParam)({ name: 'moduleId', description: 'Module ID' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'User class progress in the module returned.',
-    }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'User class progress in the module returned.' }),
     __param(0, (0, common_1.Param)('moduleId')),
     __param(1, (0, common_1.Param)('userId')),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getUserModuleProgress", null);
 __decorate([
     (0, common_1.Post)('class/:classId/user/:userId/complete'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Mark a class as completed for a specific user' }),
     (0, swagger_1.ApiParam)({ name: 'classId', description: 'Class ID' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     __param(0, (0, common_1.Param)('classId')),
     __param(1, (0, common_1.Param)('userId')),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "markClassAsCompleted", null);
 exports.CoursesController = CoursesController = __decorate([

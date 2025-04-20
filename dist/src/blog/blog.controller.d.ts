@@ -17,30 +17,14 @@ export declare class BlogController {
     searchBlogs(query: string): Promise<any[]>;
     voteAndComment(id: string, voteCommentDto: VoteCommentDto): Promise<{
         message: string;
-        comment: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            content: string;
-            postId: string;
-        };
-        rating: {
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            postId: string;
-            rating: number;
-        };
     }>;
     getAllCategories(): Promise<{
         name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        colorHex: string;
         iconUrl: string | null;
+        colorHex: string;
     }[]>;
     incrementReaderCount(id: string): Promise<{
         totalReaders: number;

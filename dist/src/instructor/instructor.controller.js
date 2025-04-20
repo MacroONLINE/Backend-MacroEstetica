@@ -17,7 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const instructor_service_1 = require("./instructor.service");
 const create_instructor_dto_1 = require("./dto/create-instructor.dto");
-const client_1 = require("@prisma/client");
+const update_instructor_dto_1 = require("./dto/update-instructor.dto");
 let InstructorController = class InstructorController {
     constructor(instructorService) {
         this.instructorService = instructorService;
@@ -37,8 +37,8 @@ let InstructorController = class InstructorController {
     async getInstructorsByEmpresa(empresaId) {
         return this.instructorService.getInstructorsByEmpresa(empresaId);
     }
-    async updateInstructor(id, data) {
-        return this.instructorService.updateInstructor(id, data);
+    async updateInstructor(id, updateDto) {
+        return this.instructorService.updateInstructor(id, updateDto);
     }
     async deleteInstructor(id) {
         return this.instructorService.deleteInstructor(id);
@@ -54,7 +54,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InstructorController.prototype, "createInstructor", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Obtener todos los instructores (opcional)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener todos los instructores' }),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -85,16 +85,16 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], InstructorController.prototype, "getInstructorsByEmpresa", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Actualizar un instructor (opcional)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Actualizar un instructor' }),
     (0, common_1.Patch)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String, update_instructor_dto_1.UpdateInstructorDto]),
     __metadata("design:returntype", Promise)
 ], InstructorController.prototype, "updateInstructor", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Eliminar un instructor (opcional)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Eliminar un instructor' }),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),

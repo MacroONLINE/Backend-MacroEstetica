@@ -25,10 +25,10 @@ export declare class ChatService {
         };
     } & {
         message: string;
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         chatRoomId: string;
     }>;
     getMessages(roomId: string, limit?: number): Promise<({
@@ -39,10 +39,10 @@ export declare class ChatService {
         };
     } & {
         message: string;
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         chatRoomId: string;
     })[]>;
     canUserAccessRoom(roomId: string, userId: string): Promise<boolean>;

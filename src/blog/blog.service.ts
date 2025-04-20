@@ -114,7 +114,6 @@ export class BlogService {
           },
         },
         empresa: { select: { name: true } },
-        categories: true
       },
     });
     return data.map((item) => this.formatBlogDates(item));
@@ -137,7 +136,6 @@ export class BlogService {
           },
         },
         empresa: { select: { name: true } },
-        categories: true
       },
     });
     return data.map((item) => this.formatBlogDates(item));
@@ -160,7 +158,6 @@ export class BlogService {
           },
         },
         empresa: { select: { name: true } },
-        categories: true
       },
     });
     return data.map((item) => this.formatBlogDates(item));
@@ -229,52 +226,41 @@ export class BlogService {
     if (existingComment) {
       throw new BadRequestException('El usuario ya ha comentado en este post.');
     }
-
     const ratingValue = this.currentDto?.rating;
     if (typeof ratingValue !== 'number' || ratingValue < 1 || ratingValue > 5) {
       throw new BadRequestException('El rating debe ser un número entre 1 y 5.');
     }
-
     const existingRating = await this.prisma.blogRating.findFirst({
       where: { postId, userId },
     });
     if (existingRating) {
       throw new BadRequestException('El usuario ya ha calificado este post.');
     }
-
-    const [newComment, newRating] = await this.prisma.$transaction([
-      this.prisma.blogComment.create({
+    await this.prisma.$transaction(async (tx) => {
+      await tx.blogComment.create({
         data: { postId, userId, content: commentContent },
-      }),
-      this.prisma.blogRating.create({
+      });
+      await tx.blogRating.create({
         data: { postId, userId, rating: ratingValue },
-      }),
-    ]);
-
-    const agg = await this.prisma.blogRating.aggregate({
-      where: { postId },
-      _avg: { rating: true },
-      _count: { rating: true },
+      });
+      const agg = await tx.blogRating.aggregate({
+        where: { postId },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+      await tx.blogPost.update({
+        where: { id: postId },
+        data: {
+          averageRating: agg._avg.rating || 0,
+          totalRatings: agg._count.rating,
+          usefulCount: useful ? { increment: 1 } : undefined,
+          notUsefulCount: !useful ? { increment: 1 } : undefined,
+        },
+      });
     });
-
-    await this.prisma.blogPost.update({
-      where: { id: postId },
-      data: {
-        averageRating: agg._avg.rating || 0,
-        totalRatings: agg._count.rating,
-        usefulCount: useful ? { increment: 1 } : undefined,
-        notUsefulCount: !useful ? { increment: 1 } : undefined,
-      },
-    });
-
-    return {
-      message: 'Voto, comentario y rating registrados correctamente.',
-      comment: newComment,
-      rating: newRating,
-    };
+    return { message: 'Voto, comentario y rating registrados correctamente.' };
   }
 
- 
   async getAllCategories() {
     return this.prisma.blogCategory.findMany({
       orderBy: { name: 'asc' },

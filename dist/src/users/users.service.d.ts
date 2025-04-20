@@ -1,13 +1,71 @@
 import { PrismaService } from '../prisma/prisma.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { Prisma, User, Medico, Empresa, Instructor } from '@prisma/client';
+import { UpdateProfileDto } from './dto/update-profile.dto/update-profile.dto';
+import { UpdateMedicoDto } from './dto/update-medico.dto';
+import { UpdateEmpresaDto } from './dto/update-empresa.dto';
+import { UpdateInstructorDto } from './dto/update-instructor.dto';
+import { ChangePasswordDto } from './dto/change-password.dto/change-password.dto';
+import { ChangeEmailDto } from './dto/change-email.dto/change-email.dto';
 export declare class UsersService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private cloudinary;
+    constructor(prisma: PrismaService, cloudinary: CloudinaryService);
     createUser(data: Prisma.UserCreateInput): Promise<User>;
     updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User>;
-    createOrUpdateMedico(userId: string, data: Partial<Prisma.MedicoUncheckedCreateInput>): Promise<Medico>;
-    createOrUpdateEmpresa(userId: string, data: Omit<Prisma.EmpresaUncheckedCreateInput, 'userId'>): Promise<Empresa>;
-    createOrUpdateInstructor(userId: string, data: Omit<Prisma.InstructorUncheckedCreateInput, 'userId'>): Promise<Instructor>;
+    createOrUpdateMedico(userId: string, dto: UpdateMedicoDto): Promise<Medico>;
+    createOrUpdateEmpresa(userId: string, dto: UpdateEmpresaDto): Promise<Empresa>;
+    createOrUpdateInstructor(userId: string, dto: UpdateInstructorDto): Promise<Instructor>;
+    updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
+        id: string;
+        firstName: string | null;
+        lastName: string | null;
+        phone: string | null;
+        email: string;
+        emailVerified: Date | null;
+        address: string | null;
+        province: string | null;
+        city: string | null;
+        country: string | null;
+        countryCode: string | null;
+        zipCode: string | null;
+        role: import(".prisma/client").$Enums.Role;
+        password: string;
+        status: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        newsletter: boolean;
+        userSubscription: string | null;
+        profileImageUrl: string | null;
+    }>;
+    updateProfileImage(userId: string, file: Express.Multer.File): Promise<{
+        id: string;
+        firstName: string | null;
+        lastName: string | null;
+        phone: string | null;
+        email: string;
+        emailVerified: Date | null;
+        address: string | null;
+        province: string | null;
+        city: string | null;
+        country: string | null;
+        countryCode: string | null;
+        zipCode: string | null;
+        role: import(".prisma/client").$Enums.Role;
+        password: string;
+        status: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+        newsletter: boolean;
+        userSubscription: string | null;
+        profileImageUrl: string | null;
+    }>;
+    changePassword(userId: string, dto: ChangePasswordDto): Promise<{
+        message: string;
+    }>;
+    changeEmail(userId: string, dto: ChangeEmailDto): Promise<{
+        message: string;
+    }>;
     getMedicoByUserId(userId: string): Promise<Medico | null>;
     getEmpresaByUserId(userId: string): Promise<Empresa | null>;
     getInstructorByUserId(userId: string): Promise<Instructor | null>;
@@ -15,8 +73,30 @@ export declare class UsersService {
     findUserByEmail(email: string): Promise<User | null>;
     checkUserExistsByEmail(email: string): Promise<{
         exists: boolean;
-        user?: Partial<User>;
-        debugInfo?: any;
+        user: {
+            id: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            email: string;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: import(".prisma/client").$Enums.Role;
+            status: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            newsletter: boolean;
+            userSubscription: string | null;
+            profileImageUrl: string | null;
+        };
+    } | {
+        exists: boolean;
+        user?: undefined;
     }>;
     checkEmail(email: string): Promise<{
         id: string;

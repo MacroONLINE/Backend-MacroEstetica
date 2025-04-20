@@ -1,4 +1,7 @@
+import { Profession, ProfessionType } from '@prisma/client';
 export declare class UpdateMedicoDto {
-    verification?: string;
     userId: string;
+    profession?: Profession;
+    type?: ProfessionType;
+    verification?: string;
 }

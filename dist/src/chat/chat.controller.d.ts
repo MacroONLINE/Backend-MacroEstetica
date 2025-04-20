@@ -14,10 +14,10 @@ export declare class ChatController {
         };
     } & {
         message: string;
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         chatRoomId: string;
     })[]>;
     sendMessage(roomId: string, body: SendMessageDto): Promise<{
@@ -28,10 +28,10 @@ export declare class ChatController {
         };
     } & {
         message: string;
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         chatRoomId: string;
     }>;
 }

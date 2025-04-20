@@ -12,191 +12,149 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 const client_1 = require("@prisma/client");
+const bcrypt = require("bcrypt");
 let UsersService = class UsersService {
-    constructor(prisma) {
+    constructor(prisma, cloudinary) {
         this.prisma = prisma;
+        this.cloudinary = cloudinary;
     }
     async createUser(data) {
         return this.prisma.user.create({
             data,
-            include: {
-                medico: true,
-                empresa: true,
-                instructor: true,
-            },
+            include: { medico: true, empresa: true, instructor: true },
         });
     }
     async updateUser(id, data) {
-        const updatedData = {
-            ...data,
-            role: client_1.Role.COSMETOLOGO,
-        };
         return this.prisma.user.update({
             where: { id },
-            data: updatedData,
-            include: {
-                medico: true,
-                empresa: true,
-                instructor: true,
-            },
+            data: { ...data, role: client_1.Role.COSMETOLOGO },
+            include: { medico: true, empresa: true, instructor: true },
         });
     }
-    async createOrUpdateMedico(userId, data) {
-        const createData = {
-            userId,
-            verification: data.verification || '',
-        };
+    async createOrUpdateMedico(userId, dto) {
         return this.prisma.medico.upsert({
             where: { userId },
-            update: {
-                ...data,
-            },
-            create: createData,
+            update: dto,
+            create: { ...dto, userId, verification: dto.verification || '' },
         });
     }
-    async createOrUpdateEmpresa(userId, data) {
-        if (!data.name) {
-            throw new Error("El campo 'name' es obligatorio.");
-        }
-        if (data.dni) {
-            const existing = await this.prisma.empresa.findFirst({
-                where: {
-                    dni: data.dni,
-                },
+    async createOrUpdateEmpresa(userId, dto) {
+        if (!dto.name)
+            throw new common_1.HttpException('name required', common_1.HttpStatus.BAD_REQUEST);
+        if (dto.dni) {
+            const duplicate = await this.prisma.empresa.findFirst({
+                where: { dni: dto.dni, userId: { not: userId } },
             });
-            if (existing) {
-                throw new common_1.HttpException('Registro duplicado: El DNI ya está en uso.', common_1.HttpStatus.CONFLICT);
-            }
+            if (duplicate)
+                throw new common_1.HttpException('DNI already in use', common_1.HttpStatus.CONFLICT);
         }
-        const updateData = {
-            name: data.name,
-            giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
-            subscription: data.subscription,
-            webUrl: data.webUrl,
-            updatedAt: new Date(),
-            bannerImage: data.bannerImage,
-            logo: data.logo,
-            title: data.title,
-            profileImage: data.profileImage,
-            ceo: data.ceo,
-            ceoRole: data.ceoRole,
-            location: data.location,
-            followers: data.followers,
-            dni: data.dni,
-        };
-        const createData = {
-            userId,
-            name: data.name,
-            giro: data.giro || 'EMPRESA_PROFESIONAL_PERFIL',
-            subscription: data.subscription,
-            webUrl: data.webUrl,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            bannerImage: data.bannerImage,
-            logo: data.logo,
-            title: data.title,
-            profileImage: data.profileImage,
-            ceo: data.ceo,
-            ceoRole: data.ceoRole,
-            location: data.location,
-            followers: data.followers,
-            dni: data.dni,
-        };
         return this.prisma.empresa.upsert({
             where: { userId },
-            update: updateData,
-            create: createData,
+            update: dto,
+            create: { ...dto, userId },
         });
     }
-    async createOrUpdateInstructor(userId, data) {
+    async createOrUpdateInstructor(userId, dto) {
+        const { userId: _discard, ...data } = dto;
         return this.prisma.instructor.upsert({
             where: { userId },
             update: data,
             create: {
                 ...data,
-                userId,
+                user: { connect: { id: userId } },
             },
         });
     }
-    async getMedicoByUserId(userId) {
-        return this.prisma.medico.findUnique({
-            where: { userId },
+    async updateProfile(userId, dto) {
+        const { medico, empresa, instructor, ...userFields } = dto;
+        await this.prisma.user.update({ where: { id: userId }, data: userFields });
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user)
+            throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
+        if (user.role === client_1.Role.MEDICO && medico)
+            await this.createOrUpdateMedico(userId, medico);
+        if (user.role === client_1.Role.EMPRESA && empresa)
+            await this.createOrUpdateEmpresa(userId, empresa);
+        if (user.role === client_1.Role.INSTRUCTOR && instructor)
+            await this.createOrUpdateInstructor(userId, instructor);
+        return this.findUserById(userId);
+    }
+    async updateProfileImage(userId, file) {
+        const upload = await this.cloudinary.uploadImage(file);
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: { profileImageUrl: upload.secure_url },
         });
+    }
+    async changePassword(userId, dto) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user)
+            throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
+        const ok = await bcrypt.compare(dto.currentPassword, user.password);
+        if (!ok)
+            throw new common_1.HttpException('Invalid password', common_1.HttpStatus.FORBIDDEN);
+        const hash = await bcrypt.hash(dto.newPassword, 10);
+        await this.prisma.user.update({ where: { id: userId }, data: { password: hash } });
+        return { message: 'Password updated' };
+    }
+    async changeEmail(userId, dto) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user)
+            throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
+        const ok = await bcrypt.compare(dto.password, user.password);
+        if (!ok)
+            throw new common_1.HttpException('Invalid password', common_1.HttpStatus.FORBIDDEN);
+        const email = dto.newEmail.trim().toLowerCase();
+        const exists = await this.prisma.user.findFirst({ where: { email } });
+        if (exists && exists.id !== userId)
+            throw new common_1.HttpException('Email already in use', common_1.HttpStatus.CONFLICT);
+        await this.prisma.user.update({ where: { id: userId }, data: { email } });
+        return { message: 'Email updated' };
+    }
+    async getMedicoByUserId(userId) {
+        return this.prisma.medico.findUnique({ where: { userId } });
     }
     async getEmpresaByUserId(userId) {
-        return this.prisma.empresa.findUnique({
-            where: { userId },
-        });
+        return this.prisma.empresa.findUnique({ where: { userId } });
     }
     async getInstructorByUserId(userId) {
-        return this.prisma.instructor.findUnique({
-            where: { userId },
-        });
+        return this.prisma.instructor.findUnique({ where: { userId } });
     }
     async findUserById(id) {
         return this.prisma.user.findUnique({
             where: { id },
-            include: {
-                medico: true,
-                empresa: true,
-                instructor: true,
-            },
+            include: { medico: true, empresa: true, instructor: true },
         });
     }
     async findUserByEmail(email) {
-        const standardizedEmail = email.trim().toLowerCase();
+        const e = email.trim().toLowerCase();
         return this.prisma.user.findFirst({
-            where: { email: standardizedEmail },
-            include: {
-                medico: true,
-                empresa: true,
-                instructor: true,
-            },
+            where: { email: e },
+            include: { medico: true, empresa: true, instructor: true },
         });
     }
     async checkUserExistsByEmail(email) {
-        const standardizedEmail = email.trim().toLowerCase();
-        const debugInfo = {
-            receivedEmail: email,
-            standardizedEmail: standardizedEmail,
-            prismaResult: null,
-        };
-        const user = await this.prisma.user.findFirst({
-            where: { email: standardizedEmail },
-        });
-        debugInfo.prismaResult = user;
+        const e = email.trim().toLowerCase();
+        const user = await this.prisma.user.findFirst({ where: { email: e } });
         if (user) {
-            const { password, ...userWithoutPassword } = user;
-            return {
-                exists: true,
-                user: userWithoutPassword,
-                debugInfo,
-            };
+            const { password, ...safe } = user;
+            return { exists: true, user: safe };
         }
-        else {
-            return {
-                exists: false,
-                debugInfo: {
-                    ...debugInfo,
-                    message: `User not found for email: ${standardizedEmail}`,
-                },
-            };
-        }
+        return { exists: false };
     }
     async checkEmail(email) {
-        const user = await this.prisma.user.findUnique({
-            where: { email },
-        });
-        if (!user) {
+        const user = await this.prisma.user.findUnique({ where: { email } });
+        if (!user)
             throw new common_1.NotFoundException('User not found');
-        }
         return user;
     }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        cloudinary_service_1.CloudinaryService])
 ], UsersService);
 //# sourceMappingURL=users.service.js.map
