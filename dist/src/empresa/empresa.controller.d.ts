@@ -197,16 +197,16 @@ export declare class EmpresaController {
                     description: string;
                     categoryId: number;
                     isFeatured: boolean | null;
-                    lab: string | null;
+                    companyId: string;
                     activeIngredients: string[];
-                    features: string[];
                     benefits: string[];
-                    problemAddressed: string | null;
-                    imageMain: string | null;
+                    features: string[];
                     imageGallery: string[];
+                    imageMain: string | null;
                     isBestSeller: boolean | null;
                     isOnSale: boolean | null;
-                    companyId: string;
+                    lab: string | null;
+                    problemAddressed: string | null;
                 };
             } & {
                 id: string;
@@ -227,16 +227,16 @@ export declare class EmpresaController {
                     description: string;
                     categoryId: number;
                     isFeatured: boolean | null;
-                    lab: string | null;
+                    companyId: string;
                     activeIngredients: string[];
-                    features: string[];
                     benefits: string[];
-                    problemAddressed: string | null;
-                    imageMain: string | null;
+                    features: string[];
                     imageGallery: string[];
+                    imageMain: string | null;
                     isBestSeller: boolean | null;
                     isOnSale: boolean | null;
-                    companyId: string;
+                    lab: string | null;
+                    problemAddressed: string | null;
                 };
             } & {
                 id: string;
@@ -324,6 +324,8 @@ export declare class EmpresaController {
             profession: import(".prisma/client").$Enums.Profession;
             type: import(".prisma/client").$Enums.ProfessionType;
             experienceDescription: string;
+            genero: import(".prisma/client").$Enums.Gender | null;
+            validated: boolean | null;
             empresaId: string | null;
             categoryId: string | null;
         }[];
@@ -335,16 +337,16 @@ export declare class EmpresaController {
             description: string;
             categoryId: number;
             isFeatured: boolean | null;
-            lab: string | null;
+            companyId: string;
             activeIngredients: string[];
-            features: string[];
             benefits: string[];
-            problemAddressed: string | null;
-            imageMain: string | null;
+            features: string[];
             imageGallery: string[];
+            imageMain: string | null;
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
-            companyId: string;
+            lab: string | null;
+            problemAddressed: string | null;
         }[];
         categorias: ({
             products: {
@@ -355,16 +357,16 @@ export declare class EmpresaController {
                 description: string;
                 categoryId: number;
                 isFeatured: boolean | null;
-                lab: string | null;
+                companyId: string;
                 activeIngredients: string[];
-                features: string[];
                 benefits: string[];
-                problemAddressed: string | null;
-                imageMain: string | null;
+                features: string[];
                 imageGallery: string[];
+                imageMain: string | null;
                 isBestSeller: boolean | null;
                 isOnSale: boolean | null;
-                companyId: string;
+                lab: string | null;
+                problemAddressed: string | null;
             }[];
         } & {
             name: string;

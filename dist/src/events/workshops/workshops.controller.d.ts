@@ -82,6 +82,8 @@ export declare class WorkshopsController {
             profession: import(".prisma/client").$Enums.Profession;
             type: import(".prisma/client").$Enums.ProfessionType;
             experienceDescription: string;
+            genero: import(".prisma/client").$Enums.Gender | null;
+            validated: boolean | null;
             empresaId: string | null;
             categoryId: string | null;
         }[];
@@ -184,6 +186,8 @@ export declare class WorkshopsController {
             profession: import(".prisma/client").$Enums.Profession;
             type: import(".prisma/client").$Enums.ProfessionType;
             experienceDescription: string;
+            genero: import(".prisma/client").$Enums.Gender | null;
+            validated: boolean | null;
             empresaId: string | null;
             categoryId: string | null;
         }[];

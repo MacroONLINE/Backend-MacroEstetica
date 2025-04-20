@@ -214,6 +214,8 @@ CREATE TABLE "Class" (
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "videoUrl" TEXT,
+    "imageUrl" TEXT,
+    "title" TEXT NOT NULL DEFAULT '',
 
     CONSTRAINT "Class_pkey" PRIMARY KEY ("id")
 );
@@ -1131,4 +1133,3 @@ ALTER TABLE "_BlogPostCategories" ADD CONSTRAINT "_BlogPostCategories_A_fkey" FO
 
 -- AddForeignKey
 ALTER TABLE "_BlogPostCategories" ADD CONSTRAINT "_BlogPostCategories_B_fkey" FOREIGN KEY ("B") REFERENCES "BlogPost"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-

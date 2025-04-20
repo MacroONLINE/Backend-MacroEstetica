@@ -15,10 +15,10 @@ export declare class BlogService {
         message: string;
         comment: {
             id: string;
-            content: string;
             createdAt: Date;
             updatedAt: Date;
             userId: string;
+            content: string;
             postId: string;
         };
         rating: {
@@ -31,10 +31,10 @@ export declare class BlogService {
         };
     }>;
     getAllCategories(): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         colorHex: string;
         iconUrl: string | null;
     }[]>;

@@ -154,6 +154,13 @@ model Resource {
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
 
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+
 model Instructor {
   id                    String         @id @default(cuid())
   profession            Profession
@@ -171,6 +178,8 @@ model Instructor {
   followers             Int?
   title                 String?
   experienceDescription String         @default("")
+  genero                Gender?
+  validated          Boolean?       @default(false)
   courses               Course[]
   category              Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   empresa               Empresa?       @relation("EmpresaInstructors", fields: [empresaId], references: [id], onDelete: Cascade)
@@ -214,6 +223,7 @@ model Class {
   progress       ClassProgress[]
   classResources ClassResource[]
   classComments  ClassComment[]
+  @@map("Class")
 }
 
 model ClassResource {

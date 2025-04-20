@@ -59,6 +59,23 @@ let InstructorService = class InstructorService {
             },
         });
     }
+    async getAllInstructors() {
+        return this.prisma.instructor.findMany({
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        firstName: true,
+                        lastName: true,
+                        email: true,
+                    },
+                },
+                category: true,
+                empresa: true,
+                courses: true,
+            },
+        });
+    }
     async getInstructorById(id) {
         return this.prisma.instructor.findUnique({
             where: { id },
@@ -113,27 +130,65 @@ let InstructorService = class InstructorService {
             },
         });
     }
-    async getAllInstructors() {
-        return this.prisma.instructor.findMany({
-            include: {
-                user: {
-                    select: {
-                        id: true,
-                        firstName: true,
-                        lastName: true,
-                        email: true,
-                    },
-                },
-                category: true,
-                empresa: true,
-                courses: true,
-            },
-        });
-    }
-    async updateInstructor(id, data) {
+    async updateInstructor(id, dto) {
+        let computedTitle = dto.title;
+        if (!computedTitle && dto.userId) {
+            const user = await this.prisma.user.findUnique({
+                where: { id: dto.userId },
+                select: { firstName: true, lastName: true },
+            });
+            if (user) {
+                const firstName = user.firstName || '';
+                const lastName = user.lastName || '';
+                computedTitle = `${firstName} ${lastName}`.trim();
+            }
+        }
+        const updateData = {};
+        if (dto.profession !== undefined) {
+            updateData.profession = dto.profession;
+        }
+        if (dto.type !== undefined) {
+            updateData.type = dto.type;
+        }
+        if (dto.description !== undefined) {
+            updateData.description = dto.description;
+        }
+        if (dto.experienceYears !== undefined) {
+            updateData.experienceYears = dto.experienceYears;
+        }
+        if (dto.certificationsUrl !== undefined) {
+            updateData.certificationsUrl = dto.certificationsUrl;
+        }
+        if (dto.status !== undefined) {
+            updateData.status = dto.status;
+        }
+        if (dto.userId !== undefined) {
+            updateData.userId = dto.userId;
+        }
+        if (dto.empresaId !== undefined) {
+            updateData.empresaId = dto.empresaId;
+        }
+        if (dto.categoryId !== undefined) {
+            updateData.categoryId = dto.categoryId;
+        }
+        if (dto.bannerImage !== undefined) {
+            updateData.bannerImage = dto.bannerImage;
+        }
+        if (dto.followers !== undefined) {
+            updateData.followers = dto.followers;
+        }
+        if (computedTitle !== undefined) {
+            updateData.title = computedTitle;
+        }
+        if (dto.gender !== undefined) {
+            updateData.genero = dto.gender;
+        }
+        if (dto.validated !== undefined) {
+            updateData.validated = dto.validated;
+        }
         return this.prisma.instructor.update({
             where: { id },
-            data,
+            data: updateData,
             include: {
                 user: {
                     select: {

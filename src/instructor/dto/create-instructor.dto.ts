@@ -1,3 +1,4 @@
+// create-instructor.dto.ts
 import { IsString, IsNumber, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Profession, ProfessionType } from '@prisma/client';
@@ -70,7 +71,6 @@ export class CreateInstructorDto {
   @IsOptional()
   categoryId?: string;
 
-  // Nuevos campos:
   @ApiProperty({
     description: 'Título personalizado para el instructor',
     required: false,
