@@ -163,8 +163,7 @@ export class UsersController {
 
   /* ───────────────────────  GENERIC PROFILE VIA JWT  ─────────────────────── */
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @ApiOperation({ summary: 'Update full profile (generic)' })
   @ApiBody({
     type: UpdateProfileDto,
@@ -225,8 +224,7 @@ export class UsersController {
 
   /* ───────────────────────  PROFILE IMAGE  ─────────────────────── */
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+ 
   @ApiOperation({ summary: 'Upload/replace profile picture' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -247,8 +245,7 @@ export class UsersController {
 
   /* ───────────────────────  PASSWORD & EMAIL  ─────────────────────── */
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @ApiOperation({ summary: 'Change password' })
   @ApiBody({
     type: ChangePasswordDto,
@@ -267,8 +264,7 @@ export class UsersController {
     return this.usersService.changePassword(req.user.userId, dto)
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @ApiOperation({ summary: 'Change email' })
   @ApiBody({
     type: ChangeEmailDto,
@@ -289,24 +285,21 @@ export class UsersController {
 
   /* ───────────────────────  ROLE-BASED QUERIES (JWT)  ─────────────────────── */
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+ 
   @ApiOperation({ summary: 'Get MEDICO details for current user' })
   @Get('medico')
   async getMedico(@Req() req) {
     return this.usersService.getMedicoByUserId(req.user.userId)
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+
   @ApiOperation({ summary: 'Get EMPRESA details for current user' })
   @Get('empresa')
   async getEmpresa(@Req() req) {
     return this.usersService.getEmpresaByUserId(req.user.userId)
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+ 
   @ApiOperation({ summary: 'Get INSTRUCTOR details for current user' })
   @Get('instructor')
   async getInstructor(@Req() req) {
