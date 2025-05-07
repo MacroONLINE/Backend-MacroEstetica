@@ -9,7 +9,7 @@ import {
   UseInterceptors,
   UploadedFile,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiConsumes, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { EmpresaService } from './empresa.service';
 import { Giro, Target } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -109,4 +109,14 @@ export class EmpresaController {
 
     return this.empresaService.uploadCatalogue(empresaId, file);
   }
+
+@ApiOperation({ summary: 'Obtener plan activo de la empresa por User ID' })
+@ApiParam({ name: 'userId', description: 'ID del usuario relacionado a la empresa' })
+@ApiResponse({ status: 200, description: 'Plan encontrado', schema: { type: 'object', properties: { id: { type: 'string' }, type: { type: 'string' }, description: { type: 'string' }, price: { type: 'number' } } } })
+@ApiResponse({ status: 404, description: 'Plan no encontrado' })
+@Get('user/:userId/plan')
+async getPlanByUserId(@Param('userId') userId: string) {
+  return this.empresaService.getPlanByUserId(userId)
+}
+
 }

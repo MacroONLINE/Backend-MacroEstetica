@@ -97,8 +97,6 @@ export class ProductController {
   }
 
   @Post(':productId/react')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Like/Dislike para un producto',
     description:

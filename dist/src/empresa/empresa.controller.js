@@ -65,6 +65,9 @@ let EmpresaController = class EmpresaController {
         }
         return this.empresaService.uploadCatalogue(empresaId, file);
     }
+    async getPlanByUserId(userId) {
+        return this.empresaService.getPlanByUserId(userId);
+    }
 };
 exports.EmpresaController = EmpresaController;
 __decorate([
@@ -131,6 +134,17 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "uploadCatalogueFile", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener plan activo de la empresa por User ID' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'ID del usuario relacionado a la empresa' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Plan encontrado', schema: { type: 'object', properties: { id: { type: 'string' }, type: { type: 'string' }, description: { type: 'string' }, price: { type: 'number' } } } }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Plan no encontrado' }),
+    (0, common_1.Get)('user/:userId/plan'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], EmpresaController.prototype, "getPlanByUserId", null);
 exports.EmpresaController = EmpresaController = __decorate([
     (0, swagger_1.ApiTags)('empresa'),
     (0, common_1.Controller)('empresa'),

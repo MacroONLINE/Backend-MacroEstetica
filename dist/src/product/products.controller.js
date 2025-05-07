@@ -18,7 +18,6 @@ const products_service_1 = require("./products.service");
 const create_product_dto_1 = require("./dto/create-product.dto");
 const update_product_dto_1 = require("./dto/update-product.dto");
 const swagger_1 = require("@nestjs/swagger");
-const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const client_1 = require("@prisma/client");
 let ProductController = class ProductController {
     constructor(productService) {
@@ -133,8 +132,6 @@ __decorate([
 ], ProductController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)(':productId/react'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Like/Dislike para un producto',
         description: 'Si no existe reacción, se crea. Si existe la misma, se elimina. Si existe la opuesta, se cambia.',

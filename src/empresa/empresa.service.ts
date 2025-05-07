@@ -145,4 +145,23 @@ export class EmpresaService {
       );
     }
   }
+
+async getPlanByUserId(userId: string) {
+  const empresa = await this.prisma.empresa.findUnique({
+    where: { userId },
+    include: {
+      empresaSubscriptions: {
+        where: { status: 'active' },
+        include: { subscription: true },
+        orderBy: { startDate: 'desc' },
+        take: 1,
+      },
+    },
+  })
+  if (!empresa || empresa.empresaSubscriptions.length === 0) {
+    throw new HttpException('Plan no encontrado', HttpStatus.NOT_FOUND)
+  }
+  return empresa.empresaSubscriptions[0].subscription
+}
+
 }

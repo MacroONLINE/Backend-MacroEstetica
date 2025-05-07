@@ -68,8 +68,8 @@ let UsersController = UsersController_1 = class UsersController {
             throw new common_1.HttpException('User ID required', common_1.HttpStatus.BAD_REQUEST);
         return this.usersService.createOrUpdateInstructor(dto.userId, dto);
     }
-    async updateProfile(req, dto) {
-        return this.usersService.updateProfile(req.user.userId, dto);
+    async updateProfile(userId, dto) {
+        return this.usersService.updateProfile(userId, dto);
     }
     async uploadProfileImage(req, file) {
         if (!file)
@@ -211,12 +211,22 @@ __decorate([
 ], UsersController.prototype, "updateInstructor", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Update full profile (generic)' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
     (0, swagger_1.ApiBody)({
         type: update_profile_dto_1.UpdateProfileDto,
-        description: 'Envía solo las secciones (medico, instructor, empresa) que apliquen para el rol del usuario.',
+        description: 'Envía solo las secciones (medico, instructor, empresa) que apliquen para el rol del usuario. ' +
+            'Si el usuario no posee esos roles, envía únicamente los campos propios del usuario.',
         examples: {
+            user: {
+                summary: 'Solo datos de usuario (sin roles asociados)',
+                value: {
+                    firstName: 'María',
+                    lastName: 'López',
+                    phone: '+525511112233',
+                },
+            },
             medico: {
-                summary: 'Ejemplo MEDICO',
+                summary: 'Usuario con rol MEDICO',
                 value: {
                     firstName: 'Ana',
                     lastName: 'Ramírez',
@@ -229,7 +239,7 @@ __decorate([
                 },
             },
             instructor: {
-                summary: 'Ejemplo INSTRUCTOR',
+                summary: 'Usuario con rol INSTRUCTOR',
                 value: {
                     firstName: 'Carlos',
                     lastName: 'Díaz',
@@ -246,7 +256,7 @@ __decorate([
                 },
             },
             empresa: {
-                summary: 'Ejemplo EMPRESA',
+                summary: 'Usuario con rol EMPRESA',
                 value: {
                     firstName: 'Laura',
                     lastName: 'Gómez',
@@ -263,11 +273,11 @@ __decorate([
             },
         },
     }),
-    (0, common_1.Put)('profile'),
-    __param(0, (0, common_1.Req)()),
+    (0, common_1.Put)(':userId/profile'),
+    __param(0, (0, common_1.Param)('userId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, update_profile_dto_1.UpdateProfileDto]),
+    __metadata("design:paramtypes", [String, update_profile_dto_1.UpdateProfileDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([

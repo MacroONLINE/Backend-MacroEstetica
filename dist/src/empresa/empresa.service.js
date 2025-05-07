@@ -134,6 +134,23 @@ let EmpresaService = class EmpresaService {
             throw new common_1.HttpException('Error al actualizar la URL del catálogo en el Minisite', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    async getPlanByUserId(userId) {
+        const empresa = await this.prisma.empresa.findUnique({
+            where: { userId },
+            include: {
+                empresaSubscriptions: {
+                    where: { status: 'active' },
+                    include: { subscription: true },
+                    orderBy: { startDate: 'desc' },
+                    take: 1,
+                },
+            },
+        });
+        if (!empresa || empresa.empresaSubscriptions.length === 0) {
+            throw new common_1.HttpException('Plan no encontrado', common_1.HttpStatus.NOT_FOUND);
+        }
+        return empresa.empresaSubscriptions[0].subscription;
+    }
 };
 exports.EmpresaService = EmpresaService;
 exports.EmpresaService = EmpresaService = __decorate([

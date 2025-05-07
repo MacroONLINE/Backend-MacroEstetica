@@ -149,62 +149,77 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Update full profile (generic)' })
-  @ApiBody({
-    type: UpdateProfileDto,
-    description: 'Envía solo las secciones (medico, instructor, empresa) que apliquen para el rol del usuario.',
-    examples: {
-      medico: {
-        summary: 'Ejemplo MEDICO',
-        value: {
-          firstName: 'Ana',
-          lastName: 'Ramírez',
-          phone: '+525511223344',
-          medico: {
-            profession: 'MEDICO_MEDICINA_ESTETICA',
-            type: 'MEDICO',
-            verification: 'https://cdn.miapp.com/docs/ana-certificado.pdf',
-          },
-        },
+@ApiParam({ name: 'userId', description: 'User ID' })
+@ApiBody({
+  type: UpdateProfileDto,
+  description:
+    'Envía solo las secciones (medico, instructor, empresa) que apliquen para el rol del usuario. ' +
+    'Si el usuario no posee esos roles, envía únicamente los campos propios del usuario.',
+  examples: {
+    user: {
+      summary: 'Solo datos de usuario (sin roles asociados)',
+      value: {
+        firstName: 'María',
+        lastName: 'López',
+        phone: '+525511112233',
       },
-      instructor: {
-        summary: 'Ejemplo INSTRUCTOR',
-        value: {
-          firstName: 'Carlos',
-          lastName: 'Díaz',
-          instructor: {
-            profession: 'MEDICINA_ESTETICA',
-            type: 'MEDICO',
-            description: 'Experto en láser dermatológico',
-            experienceYears: 10,
-            certificationsUrl: 'https://cdn.miapp.com/certificados/carlos',
-            status: 'active',
-            bannerImage: 'https://cdn.miapp.com/banners/carlos.jpg',
-            validated: true,
-          },
-        },
-      },
-      empresa: {
-        summary: 'Ejemplo EMPRESA',
-        value: {
-          firstName: 'Laura',
-          lastName: 'Gómez',
-          empresa: {
-            name: 'Spa Belleza',
-            dni: 'RFC-98765432',
-            giro: 'EMPRESA_APARATOLOGIA_PERFIL',
-            subscription: 'PLATA',
-            bannerImage: 'https://cdn.miapp.com/banners/spa.jpg',
-            logo: 'https://cdn.miapp.com/logos/spa.png',
-            webUrl: 'https://spabelleza.mx',
-          },
+    },
+    medico: {
+      summary: 'Usuario con rol MEDICO',
+      value: {
+        firstName: 'Ana',
+        lastName: 'Ramírez',
+        phone: '+525511223344',
+        medico: {
+          profession: 'MEDICO_MEDICINA_ESTETICA',
+          type: 'MEDICO',
+          verification: 'https://cdn.miapp.com/docs/ana-certificado.pdf',
         },
       },
     },
-  })
-  @Put('profile')
-  async updateProfile(@Req() req, @Body() dto: UpdateProfileDto) {
-    return this.usersService.updateProfile(req.user.userId, dto)
-  }
+    instructor: {
+      summary: 'Usuario con rol INSTRUCTOR',
+      value: {
+        firstName: 'Carlos',
+        lastName: 'Díaz',
+        instructor: {
+          profession: 'MEDICINA_ESTETICA',
+          type: 'MEDICO',
+          description: 'Experto en láser dermatológico',
+          experienceYears: 10,
+          certificationsUrl: 'https://cdn.miapp.com/certificados/carlos',
+          status: 'active',
+          bannerImage: 'https://cdn.miapp.com/banners/carlos.jpg',
+          validated: true,
+        },
+      },
+    },
+    empresa: {
+      summary: 'Usuario con rol EMPRESA',
+      value: {
+        firstName: 'Laura',
+        lastName: 'Gómez',
+        empresa: {
+          name: 'Spa Belleza',
+          dni: 'RFC-98765432',
+          giro: 'EMPRESA_APARATOLOGIA_PERFIL',
+          subscription: 'PLATA',
+          bannerImage: 'https://cdn.miapp.com/banners/spa.jpg',
+          logo: 'https://cdn.miapp.com/logos/spa.png',
+          webUrl: 'https://spabelleza.mx',
+        },
+      },
+    },
+  },
+})
+@Put(':userId/profile')
+async updateProfile(
+  @Param('userId') userId: string,
+  @Body() dto: UpdateProfileDto,
+) {
+  return this.usersService.updateProfile(userId, dto)
+}
+
 
   @ApiOperation({ summary: 'Upload/replace profile picture' })
   @ApiConsumes('multipart/form-data')
