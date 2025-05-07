@@ -1,4 +1,3 @@
-// src/users/users.controller.ts
 import {
   Controller,
   Post,
@@ -9,7 +8,6 @@ import {
   Param,
   Req,
   UploadedFile,
-  UseGuards,
   UseInterceptors,
   HttpException,
   HttpStatus,
@@ -19,17 +17,14 @@ import {
   ApiTags,
   ApiOperation,
   ApiResponse,
-  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiParam,
 } from '@nestjs/swagger'
 import { FileInterceptor } from '@nestjs/platform-express'
 import * as bcrypt from 'bcrypt'
-
 import { UsersService } from './users.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UpdateMedicoDto } from './dto/update-medico.dto'
@@ -46,8 +41,6 @@ export class UsersController {
 
   constructor(private usersService: UsersService) {}
 
-  /* ───────────────────────  CHECK EMAIL  ─────────────────────── */
-
   @ApiOperation({ summary: 'Check if a user exists by email' })
   @ApiResponse({
     status: 200,
@@ -59,9 +52,7 @@ export class UsersController {
     return this.usersService.checkUserExistsByEmail(email)
   }
 
-  /* ───────────────────────  REGISTER  ─────────────────────── */
-
-  @ApiOperation({ summary: 'Register a new user (Step 1)' })
+  @ApiOperation({ summary: 'Register a new user (Step 1)' })
   @ApiResponse({ status: 201, description: 'User created, returns userId' })
   @Post('register')
   async register(@Body() dto: CreateUserDto) {
@@ -72,17 +63,13 @@ export class UsersController {
     return { message: 'User created successfully', userId: user.id }
   }
 
-  /* ───────────────────────  LEGACY COMPLETE PROFILE  ─────────────────────── */
-
-  @ApiOperation({ summary: 'Complete user profile (legacy Step 2)' })
+  @ApiOperation({ summary: 'Complete user profile (legacy Step 2)' })
   @Put('complete-profile')
   async completeProfile(@Body() dto: UpdateUserDto) {
     if (!dto.id) throw new HttpException('User ID required', HttpStatus.BAD_REQUEST)
     await this.usersService.updateUser(dto.id, dto)
     return { message: 'User profile updated successfully' }
   }
-
-  /* ───────────────────────  INDIVIDUAL ROLE ENDPOINTS  ─────────────────────── */
 
   @ApiOperation({ summary: 'Crear o actualizar un Medico' })
   @ApiConsumes('multipart/form-data')
@@ -117,7 +104,7 @@ export class UsersController {
         value: {
           userId: 'cm4sths4i0008g1865nsbbh1l',
           name: 'DermaTech SA',
-          dni: 'RFC‑12345678',
+          dni: 'RFC-12345678',
           giro: 'EMPRESA_PROFESIONAL_PERFIL',
           subscription: 'ORO',
           bannerImage: 'https://cdn.miapp.com/banners/dermatech.jpg',
@@ -161,9 +148,6 @@ export class UsersController {
     return this.usersService.createOrUpdateInstructor(dto.userId, dto)
   }
 
-  /* ───────────────────────  GENERIC PROFILE VIA JWT  ─────────────────────── */
-
-
   @ApiOperation({ summary: 'Update full profile (generic)' })
   @ApiBody({
     type: UpdateProfileDto,
@@ -206,7 +190,7 @@ export class UsersController {
           lastName: 'Gómez',
           empresa: {
             name: 'Spa Belleza',
-            dni: 'RFC‑98765432',
+            dni: 'RFC-98765432',
             giro: 'EMPRESA_APARATOLOGIA_PERFIL',
             subscription: 'PLATA',
             bannerImage: 'https://cdn.miapp.com/banners/spa.jpg',
@@ -217,14 +201,11 @@ export class UsersController {
       },
     },
   })
-  @Post('profile')
+  @Put('profile')
   async updateProfile(@Req() req, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(req.user.userId, dto)
   }
 
-  /* ───────────────────────  PROFILE IMAGE  ─────────────────────── */
-
- 
   @ApiOperation({ summary: 'Upload/replace profile picture' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -237,14 +218,11 @@ export class UsersController {
     },
   })
   @UseInterceptors(FileInterceptor('file'))
-  @Post('profile-image')
+  @Put('profile-image')
   async uploadProfileImage(@Req() req, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new HttpException('File required', HttpStatus.BAD_REQUEST)
     return this.usersService.updateProfileImage(req.user.userId, file)
   }
-
-  /* ───────────────────────  PASSWORD & EMAIL  ─────────────────────── */
-
 
   @ApiOperation({ summary: 'Change password' })
   @ApiBody({
@@ -259,11 +237,10 @@ export class UsersController {
       },
     },
   })
-  @Post('change-password')
+  @Put('change-password')
   async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {
     return this.usersService.changePassword(req.user.userId, dto)
   }
-
 
   @ApiOperation({ summary: 'Change email' })
   @ApiBody({
@@ -278,20 +255,16 @@ export class UsersController {
       },
     },
   })
-  @Post('change-email')
+  @Put('change-email')
   async changeEmail(@Req() req, @Body() dto: ChangeEmailDto) {
     return this.usersService.changeEmail(req.user.userId, dto)
   }
 
-  /* ───────────────────────  ROLE-BASED QUERIES (JWT)  ─────────────────────── */
-
- 
   @ApiOperation({ summary: 'Get MEDICO details for current user' })
   @Get('medico')
   async getMedico(@Req() req) {
     return this.usersService.getMedicoByUserId(req.user.userId)
   }
-
 
   @ApiOperation({ summary: 'Get EMPRESA details for current user' })
   @Get('empresa')
@@ -299,14 +272,11 @@ export class UsersController {
     return this.usersService.getEmpresaByUserId(req.user.userId)
   }
 
- 
   @ApiOperation({ summary: 'Get INSTRUCTOR details for current user' })
   @Get('instructor')
   async getInstructor(@Req() req) {
     return this.usersService.getInstructorByUserId(req.user.userId)
   }
-
-  /* ───────────────────────  GENERIC QUERY BY ID  ─────────────────────── */
 
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })

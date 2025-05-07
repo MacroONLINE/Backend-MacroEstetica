@@ -383,6 +383,21 @@ let CoursesService = class CoursesService {
         });
         return { userId, courses };
     }
+    async toggleCourseReaction(userId, courseId, type = client_1.ReactionType.LIKE) {
+        const existing = await this.prisma.courseReaction.findUnique({
+            where: { userId_courseId: { userId, courseId } },
+        });
+        if (existing) {
+            if (existing.type === type) {
+                await this.prisma.courseReaction.delete({ where: { id: existing.id } });
+                return { userId, courseId, reacted: false };
+            }
+            await this.prisma.courseReaction.update({ where: { id: existing.id }, data: { type } });
+            return { userId, courseId, reacted: true, type };
+        }
+        await this.prisma.courseReaction.create({ data: { userId, courseId, type } });
+        return { userId, courseId, reacted: true, type };
+    }
 };
 exports.CoursesService = CoursesService;
 exports.CoursesService = CoursesService = __decorate([

@@ -4,68 +4,68 @@ import { CreateModuleDto } from './dto/create-module.dto';
 import { CreateClassDto } from './dto/create-class.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { Target } from '@prisma/client';
+import { Target, ReactionType } from '@prisma/client';
 import { ActiveCoursesDto } from './dto/course-card.dto/active-courses.dto';
 export declare class CoursesController {
     private readonly coursesService;
     constructor(coursesService: CoursesService);
     createCourse(createCourseDto: CreateCourseDto): Promise<{
-        description: string;
-        title: string;
-        categoryId: string;
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        rating: number;
-        price: number;
-        target: import(".prisma/client").$Enums.Target;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        title: string;
         bannerUrl: string;
-        courseImageUrl: string;
-        aboutDescription: string | null;
-        totalHours: number;
+        description: string;
         level: string;
-        discountPercentage: number | null;
-        instructorId: string | null;
-        requirements: import("@prisma/client/runtime/library").JsonValue | null;
-        isFeatured: boolean | null;
-        participantsCount: number;
+        rating: number;
         commentsCount: number;
         averageRating: number;
+        instructorId: string | null;
+        price: number;
+        discountPercentage: number | null;
+        participantsCount: number;
+        target: import(".prisma/client").$Enums.Target;
+        createdAt: Date;
+        updatedAt: Date;
+        categoryId: string;
+        isFeatured: boolean | null;
+        courseImageUrl: string;
+        aboutDescription: string | null;
+        requirements: import("@prisma/client/runtime/library").JsonValue | null;
+        totalHours: number;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
     }>;
     getActiveCourses(req: any): Promise<ActiveCoursesDto>;
     createModule(createModuleDto: CreateModuleDto): Promise<{
-        description: string;
         id: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
     }>;
     createClass(createClassDto: CreateClassDto): Promise<{
-        description: string;
-        title: string;
         id: string;
+        title: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        imageUrl: string | null;
         moduleId: string | null;
         videoUrl: string | null;
+        imageUrl: string | null;
     }>;
     createComment(createCommentDto: CreateCommentDto): Promise<{
-        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
+        userId: string;
         classId: string;
         parentCommentId: string | null;
+        content: string;
     }>;
     createCategory(createCategoryDto: CreateCategoryDto): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         urlIcon: string;
         colorHex: string;
     }>;
@@ -75,6 +75,17 @@ export declare class CoursesController {
     getCoursesByInstructor(instructorId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
     getCoursesByTarget(target: Target): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
     getCourseById(courseId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto>;
+    reactToCourse(courseId: string, type: ReactionType, req: any): Promise<{
+        userId: string;
+        courseId: string;
+        reacted: boolean;
+        type?: undefined;
+    } | {
+        userId: string;
+        courseId: string;
+        reacted: boolean;
+        type: import(".prisma/client").$Enums.ReactionType;
+    }>;
     getUserCourses(userId: string, req: any): Promise<any[]>;
     getUserCourseProgress(userId: string, courseId: string, req: any): Promise<{
         courseId: string;
@@ -91,8 +102,8 @@ export declare class CoursesController {
         description: string;
         completed: boolean;
         classResources: {
-            title: string;
             id: string;
+            title: string;
             createdAt: Date;
             updatedAt: Date;
             classId: string;
@@ -100,10 +111,10 @@ export declare class CoursesController {
         }[];
     }[]>;
     markClassAsCompleted(classId: string, userId: string, req: any): Promise<{
-        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        userId: string;
         classId: string;
         completed: boolean;
     }>;

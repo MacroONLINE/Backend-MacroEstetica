@@ -29,7 +29,6 @@ export declare class EventsService {
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
             bannerImage: string | null;
-            followers: number | null;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -39,6 +38,7 @@ export declare class EventsService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            followers: number | null;
             experienceDescription: string;
             genero: import(".prisma/client").$Enums.Gender | null;
         }[];

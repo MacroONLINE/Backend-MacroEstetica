@@ -43,6 +43,9 @@ let InstructorController = class InstructorController {
     async deleteInstructor(id) {
         return this.instructorService.deleteInstructor(id);
     }
+    async convertUserToInstructor(userId, description) {
+        return this.instructorService.convertUserToInstructor(userId, description);
+    }
 };
 exports.InstructorController = InstructorController;
 __decorate([
@@ -101,6 +104,25 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], InstructorController.prototype, "deleteInstructor", null);
+__decorate([
+    (0, common_1.Post)('convert/:userId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Convertir un usuario en instructor (solo descripción)' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'ID del usuario' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            required: ['description'],
+            properties: {
+                description: { type: 'string', example: 'Especialista en láser facial' },
+            },
+        },
+    }),
+    __param(0, (0, common_1.Param)('userId')),
+    __param(1, (0, common_1.Body)('description')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], InstructorController.prototype, "convertUserToInstructor", null);
 exports.InstructorController = InstructorController = __decorate([
     (0, swagger_1.ApiTags)('instructors'),
     (0, common_1.Controller)('instructors'),

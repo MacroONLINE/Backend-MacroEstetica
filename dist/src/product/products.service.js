@@ -12,84 +12,71 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProductService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const client_1 = require("@prisma/client");
 let ProductService = class ProductService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    async create(createProductDto) {
-        return this.prisma.product.create({
-            data: createProductDto,
-        });
+    async create(dto) {
+        return this.prisma.product.create({ data: dto });
     }
     async findAll(companyId) {
         return this.prisma.product.findMany({
             where: { companyId },
-            include: {
-                presentations: true,
-            },
+            include: { presentations: true },
         });
     }
     async findByCategory(companyId, categoryId) {
         return this.prisma.product.findMany({
-            where: {
-                companyId,
-                categoryId: Number(categoryId),
-            },
-            include: {
-                presentations: true,
-            },
+            where: { companyId, categoryId: Number(categoryId) },
+            include: { presentations: true },
         });
     }
     async findFeaturedByCompany(companyId) {
         return this.prisma.product.findMany({
-            where: {
-                companyId,
-                isFeatured: true,
-            },
-            include: {
-                presentations: true,
-            },
+            where: { companyId, isFeatured: true },
+            include: { presentations: true },
         });
     }
     async findById(id) {
         const product = await this.prisma.product.findUnique({
-            where: {
-                id,
-            },
-            include: {
-                presentations: true,
-            },
+            where: { id },
+            include: { presentations: true },
         });
-        if (!product) {
+        if (!product)
             throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
-        }
         return product;
     }
-    async update(id, updateProductDto) {
+    async update(id, dto) {
         const product = await this.prisma.product.update({
-            where: {
-                id,
-            },
-            data: updateProductDto,
-            include: {
-                presentations: true,
-            },
+            where: { id },
+            data: dto,
+            include: { presentations: true },
         });
-        if (!product) {
+        if (!product)
             throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
-        }
         return product;
     }
     async remove(id) {
-        const product = await this.prisma.product.delete({
-            where: {
-                id,
-            },
-        });
-        if (!product) {
+        const deleted = await this.prisma.product.delete({ where: { id } });
+        if (!deleted)
             throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
-        }
         return { message: 'Producto eliminado correctamente' };
+    }
+    async toggleProductReaction(userId, productId, type = client_1.ReactionType.LIKE) {
+        const existing = await this.prisma.productReaction.findUnique({
+            where: { userId_productId: { userId, productId } },
+        });
+        if (existing) {
+            if (existing.type === type) {
+                await this.prisma.productReaction.delete({ where: { id: existing.id } });
+                return { userId, productId, reacted: false };
+            }
+            await this.prisma.productReaction.update({ where: { id: existing.id }, data: { type } });
+            return { userId, productId, reacted: true, type };
+        }
+        await this.prisma.productReaction.create({ data: { userId, productId, type } });
+        return { userId, productId, reacted: true, type };
     }
 };
 exports.ProductService = ProductService;

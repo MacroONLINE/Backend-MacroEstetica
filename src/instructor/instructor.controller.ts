@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, Query, Patch, Delete } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiBody } from '@nestjs/swagger';
 import { InstructorService } from './instructor.service';
 import { CreateInstructorDto } from './dto/create-instructor.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
@@ -53,4 +53,25 @@ export class InstructorController {
   async deleteInstructor(@Param('id') id: string) {
     return this.instructorService.deleteInstructor(id);
   }
+
+  @Post('convert/:userId')
+@ApiOperation({ summary: 'Convertir un usuario en instructor (solo descripción)' })
+@ApiParam({ name: 'userId', description: 'ID del usuario' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    required: ['description'],
+    properties: {
+      description: { type: 'string', example: 'Especialista en láser facial' },
+    },
+  },
+})
+async convertUserToInstructor(
+  @Param('userId') userId: string,
+  @Body('description') description: string,
+) {
+  return this.instructorService.convertUserToInstructor(userId, description)
+}
+
+
 }

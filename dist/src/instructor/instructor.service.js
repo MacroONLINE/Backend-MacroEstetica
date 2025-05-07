@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InstructorService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const client_1 = require("@prisma/client");
 let InstructorService = class InstructorService {
     constructor(prisma) {
         this.prisma = prisma;
@@ -219,6 +220,30 @@ let InstructorService = class InstructorService {
                 category: true,
                 empresa: true,
                 courses: true,
+            },
+        });
+    }
+    async convertUserToInstructor(userId, description) {
+        const user = await this.prisma.user.findUnique({ where: { id: userId } });
+        if (!user)
+            throw new common_1.NotFoundException('Usuario no encontrado');
+        const exists = await this.prisma.instructor.findUnique({ where: { userId } });
+        if (exists)
+            throw new common_1.ConflictException('El usuario ya es instructor');
+        const title = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+        return this.prisma.instructor.create({
+            data: {
+                userId,
+                description,
+                profession: client_1.Profession.MEDICINA_ESTETICA,
+                type: client_1.ProfessionType.MEDICO,
+                experienceYears: 0,
+                certificationsUrl: '',
+                status: 'active',
+                title,
+            },
+            include: {
+                user: { select: { id: true, firstName: true, lastName: true, email: true } },
             },
         });
     }

@@ -47,6 +47,9 @@ model User {
   attendedEvents         Event[]                 @relation("EventAttendees")
   attendedStreams        EventStream[]           @relation("EventStreamAttendees")
   attendedWorkshops      Workshop[]              @relation("WorkshopAttendees")
+
+   courseReactions  CourseReaction[]
+  productReactions ProductReaction[]
 }
 
 model Medico {
@@ -143,6 +146,7 @@ model Course {
   enrollments          CourseEnrollment[]
   modules              Module[]
   resources            Resource[]
+  reactions CourseReaction[]
 }
 
 model Resource {
@@ -153,13 +157,6 @@ model Resource {
   updatedAt DateTime @default(now())
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 }
-
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
-
 
 model Instructor {
   id                    String         @id @default(cuid())
@@ -179,7 +176,7 @@ model Instructor {
   title                 String?
   experienceDescription String         @default("")
   genero                Gender?
-  validated          Boolean?       @default(false)
+  validated             Boolean?       @default(false)
   courses               Course[]
   category              Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   empresa               Empresa?       @relation("EmpresaInstructors", fields: [empresaId], references: [id], onDelete: Cascade)
@@ -214,15 +211,16 @@ model Class {
   id             String          @id @default(cuid())
   moduleId       String?
   description    String
-  title          String          @default("")
-  imageUrl       String?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @default(now())
   videoUrl       String?
+  imageUrl       String?
+  title          String          @default("")
   module         Module?         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  classComments  ClassComment[]
   progress       ClassProgress[]
   classResources ClassResource[]
-  classComments  ClassComment[]
+
   @@map("Class")
 }
 
@@ -700,7 +698,7 @@ model Product {
   presentations     Presentation[]             @relation("ProductPresentations")
   category          ProductCompanyCategory     @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
   company           Empresa                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
+reactions ProductReaction[]
   @@unique([categoryId, name])
 }
 
@@ -730,6 +728,12 @@ model ClassComment {
   parent          ClassComment?  @relation("ClassCommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
   replies         ClassComment[] @relation("ClassCommentReplies")
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
 enum SubscriptionType {
@@ -833,4 +837,37 @@ enum Unit {
   L
   FL_OZ
   MG
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+}
+
+model CourseReaction {
+  id        String       @id @default(cuid())
+  userId    String
+  courseId  String
+  type      ReactionType @default(LIKE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user      User   @relation(fields: [userId],   references: [id], onDelete: Cascade)
+  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model ProductReaction {
+  id        String       @id @default(cuid())
+  userId    String
+  productId String
+  type      ReactionType @default(LIKE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  user      User    @relation(fields: [userId],    references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
 }

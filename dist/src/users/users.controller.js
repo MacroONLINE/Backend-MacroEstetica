@@ -19,7 +19,6 @@ const swagger_1 = require("@nestjs/swagger");
 const platform_express_1 = require("@nestjs/platform-express");
 const bcrypt = require("bcrypt");
 const users_service_1 = require("./users.service");
-const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
 const update_medico_dto_1 = require("./dto/update-medico.dto");
@@ -114,7 +113,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "checkUserByEmail", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Register a new user (Step 1)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Register a new user (Step 1)' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'User created, returns userId' }),
     (0, common_1.Post)('register'),
     __param(0, (0, common_1.Body)()),
@@ -123,7 +122,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "register", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Complete user profile (legacy Step 2)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Complete user profile (legacy Step 2)' }),
     (0, common_1.Put)('complete-profile'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -165,7 +164,7 @@ __decorate([
                 value: {
                     userId: 'cm4sths4i0008g1865nsbbh1l',
                     name: 'DermaTech SA',
-                    dni: 'RFC‑12345678',
+                    dni: 'RFC-12345678',
                     giro: 'EMPRESA_PROFESIONAL_PERFIL',
                     subscription: 'ORO',
                     bannerImage: 'https://cdn.miapp.com/banners/dermatech.jpg',
@@ -211,8 +210,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateInstructor", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Update full profile (generic)' }),
     (0, swagger_1.ApiBody)({
         type: update_profile_dto_1.UpdateProfileDto,
@@ -255,7 +252,7 @@ __decorate([
                     lastName: 'Gómez',
                     empresa: {
                         name: 'Spa Belleza',
-                        dni: 'RFC‑98765432',
+                        dni: 'RFC-98765432',
                         giro: 'EMPRESA_APARATOLOGIA_PERFIL',
                         subscription: 'PLATA',
                         bannerImage: 'https://cdn.miapp.com/banners/spa.jpg',
@@ -266,7 +263,7 @@ __decorate([
             },
         },
     }),
-    (0, common_1.Post)('profile'),
+    (0, common_1.Put)('profile'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -274,8 +271,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Upload/replace profile picture' }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
@@ -288,7 +283,7 @@ __decorate([
         },
     }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    (0, common_1.Post)('profile-image'),
+    (0, common_1.Put)('profile-image'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
@@ -296,8 +291,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "uploadProfileImage", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Change password' }),
     (0, swagger_1.ApiBody)({
         type: change_password_dto_1.ChangePasswordDto,
@@ -311,7 +304,7 @@ __decorate([
             },
         },
     }),
-    (0, common_1.Post)('change-password'),
+    (0, common_1.Put)('change-password'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -319,8 +312,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Change email' }),
     (0, swagger_1.ApiBody)({
         type: change_email_dto_1.ChangeEmailDto,
@@ -334,7 +325,7 @@ __decorate([
             },
         },
     }),
-    (0, common_1.Post)('change-email'),
+    (0, common_1.Put)('change-email'),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -342,8 +333,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changeEmail", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Get MEDICO details for current user' }),
     (0, common_1.Get)('medico'),
     __param(0, (0, common_1.Req)()),
@@ -352,8 +341,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getMedico", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Get EMPRESA details for current user' }),
     (0, common_1.Get)('empresa'),
     __param(0, (0, common_1.Req)()),
@@ -362,8 +349,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getEmpresa", null);
 __decorate([
-    (0, swagger_1.ApiBearerAuth)(),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Get INSTRUCTOR details for current user' }),
     (0, common_1.Get)('instructor'),
     __param(0, (0, common_1.Req)()),

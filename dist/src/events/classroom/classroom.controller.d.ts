@@ -32,7 +32,6 @@ export declare class ClassroomController {
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
             bannerImage: string | null;
-            followers: number | null;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -42,6 +41,7 @@ export declare class ClassroomController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            followers: number | null;
             experienceDescription: string;
             genero: import(".prisma/client").$Enums.Gender | null;
         }[];
@@ -56,11 +56,11 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            password: string;
             id: string;
             email: string;
             emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            password: string;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -100,7 +100,6 @@ export declare class ClassroomController {
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
             bannerImage: string | null;
-            followers: number | null;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -110,6 +109,7 @@ export declare class ClassroomController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            followers: number | null;
             experienceDescription: string;
             genero: import(".prisma/client").$Enums.Gender | null;
         }[];
@@ -124,11 +124,11 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            password: string;
             id: string;
             email: string;
             emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            password: string;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -165,7 +165,6 @@ export declare class ClassroomController {
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
             bannerImage: string | null;
-            followers: number | null;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -175,6 +174,7 @@ export declare class ClassroomController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            followers: number | null;
             experienceDescription: string;
             genero: import(".prisma/client").$Enums.Gender | null;
         }[];
@@ -189,11 +189,11 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            password: string;
             id: string;
             email: string;
             emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            password: string;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -230,7 +230,6 @@ export declare class ClassroomController {
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
             bannerImage: string | null;
-            followers: number | null;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -240,6 +239,7 @@ export declare class ClassroomController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            followers: number | null;
             experienceDescription: string;
             genero: import(".prisma/client").$Enums.Gender | null;
         }[];
@@ -254,11 +254,11 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            password: string;
             id: string;
             email: string;
             emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            password: string;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -289,7 +289,6 @@ export declare class ClassroomController {
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
             bannerImage: string | null;
-            followers: number | null;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -299,6 +298,7 @@ export declare class ClassroomController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            followers: number | null;
             experienceDescription: string;
             genero: import(".prisma/client").$Enums.Gender | null;
         }[];
@@ -326,7 +326,6 @@ export declare class ClassroomController {
             title: string | null;
             profession: import(".prisma/client").$Enums.Profession;
             bannerImage: string | null;
-            followers: number | null;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -336,6 +335,7 @@ export declare class ClassroomController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            followers: number | null;
             experienceDescription: string;
             genero: import(".prisma/client").$Enums.Gender | null;
         }[];

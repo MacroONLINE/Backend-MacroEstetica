@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateInstructorDto } from './dto/create-instructor.dto';
 import { UpdateInstructorDto } from './dto/update-instructor.dto';
-import { Prisma } from '@prisma/client';
+import { Prisma, Profession, ProfessionType } from '@prisma/client';
 
 @Injectable()
 export class InstructorService {
@@ -223,4 +223,33 @@ export class InstructorService {
       },
     });
   }
+
+
+  async convertUserToInstructor(userId: string, description: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user) throw new NotFoundException('Usuario no encontrado')
+    const exists = await this.prisma.instructor.findUnique({ where: { userId } })
+    if (exists) throw new ConflictException('El usuario ya es instructor')
+  
+    const title = `${user.firstName || ''} ${user.lastName || ''}`.trim()
+  
+    return this.prisma.instructor.create({
+      data: {
+        userId,
+        description,
+        profession: Profession.MEDICINA_ESTETICA,
+        type: ProfessionType.MEDICO,
+        experienceYears: 0,
+        certificationsUrl: '',
+        status: 'active',
+        title,
+      },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+      },
+    })
+  }
+  
+  
+  
 }
