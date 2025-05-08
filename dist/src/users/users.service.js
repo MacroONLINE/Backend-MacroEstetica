@@ -70,26 +70,28 @@ let UsersService = class UsersService {
     async updateProfile(userId, dto, file) {
         let uploadedUrl;
         if (file) {
-            const up = await this.cloudinary.uploadImage(file);
-            uploadedUrl = up.secure_url;
+            const uploaded = await this.cloudinary.uploadImage(file);
+            uploadedUrl = uploaded.secure_url;
         }
         const { medico, empresa, instructor, ...userFields } = dto;
         await this.prisma.user.update({ where: { id: userId }, data: userFields });
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         if (!user)
             throw new common_1.HttpException('User not found', common_1.HttpStatus.NOT_FOUND);
-        if (user.role === client_1.Role.MEDICO) {
-            const med = {
+        if (medico || user.role === client_1.Role.MEDICO) {
+            const medPayload = {
                 userId,
                 ...(medico ?? {}),
                 ...(uploadedUrl ? { verification: uploadedUrl } : {}),
             };
-            await this.createOrUpdateMedico(userId, med);
+            await this.createOrUpdateMedico(userId, medPayload);
         }
-        if (user.role === client_1.Role.EMPRESA && empresa)
+        if (empresa) {
             await this.createOrUpdateEmpresa(userId, empresa);
-        if (user.role === client_1.Role.INSTRUCTOR && instructor)
+        }
+        if (instructor) {
             await this.createOrUpdateInstructor(userId, instructor);
+        }
         return this.findUserById(userId);
     }
     async updateProfileImage(userId, file) {

@@ -55,10 +55,10 @@ export declare class UsersController {
         userId: string;
     }>;
     updateEmpresa(dto: UpdateEmpresaDto): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
@@ -117,7 +117,7 @@ export declare class UsersController {
         userSubscription: string | null;
         profileImageUrl: string | null;
     }>;
-    uploadProfileImage(userId: string, file: Express.Multer.File): Promise<{
+    uploadProfileImage(req: any, file: Express.Multer.File): Promise<{
         id: string;
         firstName: string | null;
         lastName: string | null;
@@ -139,13 +139,13 @@ export declare class UsersController {
         userSubscription: string | null;
         profileImageUrl: string | null;
     }>;
-    changePassword(userId: string, dto: ChangePasswordDto): Promise<{
+    changePassword(req: any, dto: ChangePasswordDto): Promise<{
         message: string;
     }>;
-    changeEmail(userId: string, dto: ChangeEmailDto): Promise<{
+    changeEmail(req: any, dto: ChangeEmailDto): Promise<{
         message: string;
     }>;
-    getMedico(userId: string): Promise<{
+    getMedico(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -154,11 +154,11 @@ export declare class UsersController {
         verification: string;
         userId: string;
     }>;
-    getEmpresa(userId: string): Promise<{
-        name: string;
+    getEmpresa(req: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
@@ -175,7 +175,7 @@ export declare class UsersController {
         webUrl: string | null;
         legalName: string | null;
     }>;
-    getInstructor(userId: string): Promise<{
+    getInstructor(req: any): Promise<{
         id: string;
         status: string;
         createdAt: Date;

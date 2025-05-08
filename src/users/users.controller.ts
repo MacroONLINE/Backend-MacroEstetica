@@ -6,6 +6,7 @@ import {
   Body,
   Query,
   Param,
+  Req,
   UploadedFile,
   UseInterceptors,
   HttpException,
@@ -19,10 +20,12 @@ import {
   ApiBody,
   ApiConsumes,
   ApiParam,
+  getSchemaPath,
 } from '@nestjs/swagger'
 import { FileInterceptor } from '@nestjs/platform-express'
 import * as bcrypt from 'bcrypt'
 import { UsersService } from './users.service'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UpdateMedicoDto } from './dto/update-medico.dto'
@@ -94,7 +97,25 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Crear o actualizar una Empresa' })
-  @ApiBody({ type: UpdateEmpresaDto })
+  @ApiBody({
+    type: UpdateEmpresaDto,
+    examples: {
+      full: {
+        summary: 'Ejemplo completo',
+        value: {
+          userId: 'cm4sths4i0008g1865nsbbh1l',
+          name: 'DermaTech SA',
+          dni: 'RFC-12345678',
+          giro: 'EMPRESA_PROFESIONAL_PERFIL',
+          subscription: 'ORO',
+          bannerImage: 'https://cdn.miapp.com/banners/dermatech.jpg',
+          logo: 'https://cdn.miapp.com/logos/dermatech.png',
+          webUrl: 'https://dermatech.mx',
+          followers: 300,
+        },
+      },
+    },
+  })
   @Put('empresa')
   async updateEmpresa(@Body() dto: UpdateEmpresaDto) {
     if (!dto.userId) throw new HttpException('User ID required', HttpStatus.BAD_REQUEST)
@@ -102,25 +123,96 @@ export class UsersController {
   }
 
   @ApiOperation({ summary: 'Crear o actualizar un Instructor' })
-  @ApiBody({ type: UpdateInstructorDto })
+  @ApiBody({
+    type: UpdateInstructorDto,
+    examples: {
+      basic: {
+        summary: 'Ejemplo básico',
+        value: {
+          userId: 'cm4sths4i0008g1865nsbbh1l',
+          profession: 'MEDICINA_ESTETICA',
+          type: 'MEDICO',
+          description: 'Especialista en peelings químicos',
+          experienceYears: 5,
+          certificationsUrl: 'https://cdn.miapp.com/certificaciones',
+          status: 'active',
+          bannerImage: 'https://cdn.miapp.com/banners/instructor.jpg',
+          followers: 80,
+          validated: false,
+        },
+      },
+    },
+  })
   @Put('instructor')
   async updateInstructor(@Body() dto: UpdateInstructorDto) {
     if (!dto.userId) throw new HttpException('User ID required', HttpStatus.BAD_REQUEST)
     return this.usersService.createOrUpdateInstructor(dto.userId, dto)
   }
 
+  // ——— únicamente el endpoint genérico update-profile con soporte de archivo ———
 @ApiOperation({ summary: 'Update full profile (generic)' })
 @ApiParam({ name: 'userId', description: 'User ID' })
 @ApiConsumes('multipart/form-data')
 @ApiBody({
   description:
-    'Datos del usuario + secciones (medico, instructor, empresa) que apliquen. ' +
-    'Puedes adjuntar opcionalmente un archivo `file` (binary) para reemplazar el documento cargado al crear la cuenta.',
+    'Envía los campos de usuario y las secciones (medico, instructor, empresa) que apliquen. ' +
+    'Para sustituir el documento de verificación adjunta opcionalmente `file` (binary).',
   schema: {
     type: 'object',
     properties: {
-      /* …campos de UpdateProfileDto… */
+      /* …campos del usuario… */
+      firstName:  { type: 'string', example: 'María' },
+      lastName:   { type: 'string', example: 'López' },
+      phone:      { type: 'string', example: '+525511112233' },
+      /* …sub-objetos según rol… */
+      medico:     { $ref: getSchemaPath(UpdateMedicoDto) },
+      empresa:    { $ref: getSchemaPath(UpdateEmpresaDto) },
+      instructor: { $ref: getSchemaPath(UpdateInstructorDto) },
+      /* archivo opcional */
       file: { type: 'string', format: 'binary' },
+    },
+  },
+  examples: {
+    user: {
+      summary: 'Solo datos de usuario',
+      value: { firstName: 'María', lastName: 'López', phone: '+525511112233' },
+    },
+    medico: {
+      summary: 'Usuario MEDICO',
+      value: {
+        firstName: 'Ana',
+        lastName: 'Ramírez',
+        medico: {
+          userId: 'usr123',
+          profession: 'MEDICO_MEDICINA_ESTETICA',
+          type: 'MEDICO',
+        },
+      },
+    },
+    instructor: {
+      summary: 'Usuario INSTRUCTOR',
+      value: {
+        firstName: 'Carlos',
+        lastName: 'Díaz',
+        instructor: {
+          userId: 'usr456',
+          profession: 'MEDICINA_ESTETICA',
+          type: 'MEDICO',
+          description: 'Experto en láser dermatológico',
+        },
+      },
+    },
+    empresa: {
+      summary: 'Usuario EMPRESA',
+      value: {
+        firstName: 'Laura',
+        lastName: 'Gómez',
+        empresa: {
+          userId: 'usr789',
+          name: 'Spa Belleza',
+          giro: 'EMPRESA_APARATOLOGIA_PERFIL',
+        },
+      },
     },
   },
 })
@@ -135,61 +227,77 @@ async updateProfile(
 }
 
 
-  @ApiOperation({ summary: 'Upload or replace profile picture' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
+
+  @ApiOperation({ summary: 'Upload/replace profile picture' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
       type: 'object',
       required: ['file'],
-      properties: { file: { type: 'string', format: 'binary' } },
+      properties: {
+        file: { type: 'string', format: 'binary' },
+      },
     },
   })
   @UseInterceptors(FileInterceptor('file'))
-  @Put(':userId/profile-image')
-  async uploadProfileImage(
-    @Param('userId') userId: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  @Put('profile-image')
+  async uploadProfileImage(@Req() req, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new HttpException('File required', HttpStatus.BAD_REQUEST)
-    return this.usersService.updateProfileImage(userId, file)
+    return this.usersService.updateProfileImage(req.user.userId, file)
   }
 
   @ApiOperation({ summary: 'Change password' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
-  @ApiBody({ type: ChangePasswordDto })
-  @Put(':userId/change-password')
-  async changePassword(@Param('userId') userId: string, @Body() dto: ChangePasswordDto) {
-    return this.usersService.changePassword(userId, dto)
+  @ApiBody({
+    type: ChangePasswordDto,
+    examples: {
+      demo: {
+        summary: 'Ejemplo',
+        value: {
+          currentPassword: 'OldPass123!',
+          newPassword: 'NewPass456!',
+        },
+      },
+    },
+  })
+  @Put('change-password')
+  async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {
+    return this.usersService.changePassword(req.user.userId, dto)
   }
 
   @ApiOperation({ summary: 'Change email' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
-  @ApiBody({ type: ChangeEmailDto })
-  @Put(':userId/change-email')
-  async changeEmail(@Param('userId') userId: string, @Body() dto: ChangeEmailDto) {
-    return this.usersService.changeEmail(userId, dto)
+  @ApiBody({
+    type: ChangeEmailDto,
+    examples: {
+      demo: {
+        summary: 'Ejemplo',
+        value: {
+          password: 'MyPass123!',
+          newEmail: 'nuevo@correo.com',
+        },
+      },
+    },
+  })
+  @Put('change-email')
+  async changeEmail(@Req() req, @Body() dto: ChangeEmailDto) {
+    return this.usersService.changeEmail(req.user.userId, dto)
   }
 
   @ApiOperation({ summary: 'Get MEDICO details for current user' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
-  @Get(':userId/medico')
-  async getMedico(@Param('userId') userId: string) {
-    return this.usersService.getMedicoByUserId(userId)
+  @Get('medico')
+  async getMedico(@Req() req) {
+    return this.usersService.getMedicoByUserId(req.user.userId)
   }
 
   @ApiOperation({ summary: 'Get EMPRESA details for current user' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
-  @Get(':userId/empresa')
-  async getEmpresa(@Param('userId') userId: string) {
-    return this.usersService.getEmpresaByUserId(userId)
+  @Get('empresa')
+  async getEmpresa(@Req() req) {
+    return this.usersService.getEmpresaByUserId(req.user.userId)
   }
 
   @ApiOperation({ summary: 'Get INSTRUCTOR details for current user' })
-  @ApiParam({ name: 'userId', description: 'User ID' })
-  @Get(':userId/instructor')
-  async getInstructor(@Param('userId') userId: string) {
-    return this.usersService.getInstructorByUserId(userId)
+  @Get('instructor')
+  async getInstructor(@Req() req) {
+    return this.usersService.getInstructorByUserId(req.user.userId)
   }
 
   @ApiOperation({ summary: 'Get user by ID' })

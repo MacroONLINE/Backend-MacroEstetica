@@ -103,8 +103,7 @@ export class UsersService {
     })
   }
 
-// users.service.ts  ➜  reemplaza únicamente el método updateProfile
-
+// users.service.ts  ➜  reemplaza SOLO este método
 async updateProfile(
   userId: string,
   dto: UpdateProfileDto,
@@ -112,8 +111,8 @@ async updateProfile(
 ) {
   let uploadedUrl: string | undefined
   if (file) {
-    const up = await this.cloudinary.uploadImage(file)
-    uploadedUrl = up.secure_url
+    const uploaded = await this.cloudinary.uploadImage(file)
+    uploadedUrl = uploaded.secure_url
   }
 
   const { medico, empresa, instructor, ...userFields } = dto
@@ -122,23 +121,29 @@ async updateProfile(
   const user = await this.prisma.user.findUnique({ where: { id: userId } })
   if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
 
-  if (user.role === Role.MEDICO) {
-    const med: UpdateMedicoDto = {
+  /* ---------- MEDICO ---------- */
+  if (medico || user.role === Role.MEDICO) {
+    const medPayload: UpdateMedicoDto = {
       userId,
       ...(medico ?? {}),
       ...(uploadedUrl ? { verification: uploadedUrl } : {}),
     }
-    await this.createOrUpdateMedico(userId, med)
+    await this.createOrUpdateMedico(userId, medPayload)
   }
 
-  if (user.role === Role.EMPRESA && empresa)
+  /* ---------- EMPRESA ---------- */
+  if (empresa) {
     await this.createOrUpdateEmpresa(userId, empresa)
+  }
 
-  if (user.role === Role.INSTRUCTOR && instructor)
+  /* ---------- INSTRUCTOR ---------- */
+  if (instructor) {
     await this.createOrUpdateInstructor(userId, instructor)
+  }
 
   return this.findUserById(userId)
 }
+
 
 
 

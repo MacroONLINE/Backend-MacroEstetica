@@ -71,25 +71,25 @@ let UsersController = UsersController_1 = class UsersController {
     async updateProfile(userId, dto, file) {
         return this.usersService.updateProfile(userId, dto, file);
     }
-    async uploadProfileImage(userId, file) {
+    async uploadProfileImage(req, file) {
         if (!file)
             throw new common_1.HttpException('File required', common_1.HttpStatus.BAD_REQUEST);
-        return this.usersService.updateProfileImage(userId, file);
+        return this.usersService.updateProfileImage(req.user.userId, file);
     }
-    async changePassword(userId, dto) {
-        return this.usersService.changePassword(userId, dto);
+    async changePassword(req, dto) {
+        return this.usersService.changePassword(req.user.userId, dto);
     }
-    async changeEmail(userId, dto) {
-        return this.usersService.changeEmail(userId, dto);
+    async changeEmail(req, dto) {
+        return this.usersService.changeEmail(req.user.userId, dto);
     }
-    async getMedico(userId) {
-        return this.usersService.getMedicoByUserId(userId);
+    async getMedico(req) {
+        return this.usersService.getMedicoByUserId(req.user.userId);
     }
-    async getEmpresa(userId) {
-        return this.usersService.getEmpresaByUserId(userId);
+    async getEmpresa(req) {
+        return this.usersService.getEmpresaByUserId(req.user.userId);
     }
-    async getInstructor(userId) {
-        return this.usersService.getInstructorByUserId(userId);
+    async getInstructor(req) {
+        return this.usersService.getInstructorByUserId(req.user.userId);
     }
     async findUserById(id) {
         const user = await this.usersService.findUserById(id);
@@ -156,7 +156,25 @@ __decorate([
 ], UsersController.prototype, "updateMedico", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar una Empresa' }),
-    (0, swagger_1.ApiBody)({ type: update_empresa_dto_1.UpdateEmpresaDto }),
+    (0, swagger_1.ApiBody)({
+        type: update_empresa_dto_1.UpdateEmpresaDto,
+        examples: {
+            full: {
+                summary: 'Ejemplo completo',
+                value: {
+                    userId: 'cm4sths4i0008g1865nsbbh1l',
+                    name: 'DermaTech SA',
+                    dni: 'RFC-12345678',
+                    giro: 'EMPRESA_PROFESIONAL_PERFIL',
+                    subscription: 'ORO',
+                    bannerImage: 'https://cdn.miapp.com/banners/dermatech.jpg',
+                    logo: 'https://cdn.miapp.com/logos/dermatech.png',
+                    webUrl: 'https://dermatech.mx',
+                    followers: 300,
+                },
+            },
+        },
+    }),
     (0, common_1.Put)('empresa'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -165,7 +183,26 @@ __decorate([
 ], UsersController.prototype, "updateEmpresa", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar un Instructor' }),
-    (0, swagger_1.ApiBody)({ type: update_instructor_dto_1.UpdateInstructorDto }),
+    (0, swagger_1.ApiBody)({
+        type: update_instructor_dto_1.UpdateInstructorDto,
+        examples: {
+            basic: {
+                summary: 'Ejemplo básico',
+                value: {
+                    userId: 'cm4sths4i0008g1865nsbbh1l',
+                    profession: 'MEDICINA_ESTETICA',
+                    type: 'MEDICO',
+                    description: 'Especialista en peelings químicos',
+                    experienceYears: 5,
+                    certificationsUrl: 'https://cdn.miapp.com/certificaciones',
+                    status: 'active',
+                    bannerImage: 'https://cdn.miapp.com/banners/instructor.jpg',
+                    followers: 80,
+                    validated: false,
+                },
+            },
+        },
+    }),
     (0, common_1.Put)('instructor'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -177,12 +214,61 @@ __decorate([
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
-        description: 'Datos del usuario + secciones (medico, instructor, empresa) que apliquen. ' +
-            'Puedes adjuntar opcionalmente un archivo `file` (binary) para reemplazar el documento cargado al crear la cuenta.',
+        description: 'Envía los campos de usuario y las secciones (medico, instructor, empresa) que apliquen. ' +
+            'Para sustituir el documento de verificación adjunta opcionalmente `file` (binary).',
         schema: {
             type: 'object',
             properties: {
+                firstName: { type: 'string', example: 'María' },
+                lastName: { type: 'string', example: 'López' },
+                phone: { type: 'string', example: '+525511112233' },
+                medico: { $ref: (0, swagger_1.getSchemaPath)(update_medico_dto_1.UpdateMedicoDto) },
+                empresa: { $ref: (0, swagger_1.getSchemaPath)(update_empresa_dto_1.UpdateEmpresaDto) },
+                instructor: { $ref: (0, swagger_1.getSchemaPath)(update_instructor_dto_1.UpdateInstructorDto) },
                 file: { type: 'string', format: 'binary' },
+            },
+        },
+        examples: {
+            user: {
+                summary: 'Solo datos de usuario',
+                value: { firstName: 'María', lastName: 'López', phone: '+525511112233' },
+            },
+            medico: {
+                summary: 'Usuario MEDICO',
+                value: {
+                    firstName: 'Ana',
+                    lastName: 'Ramírez',
+                    medico: {
+                        userId: 'usr123',
+                        profession: 'MEDICO_MEDICINA_ESTETICA',
+                        type: 'MEDICO',
+                    },
+                },
+            },
+            instructor: {
+                summary: 'Usuario INSTRUCTOR',
+                value: {
+                    firstName: 'Carlos',
+                    lastName: 'Díaz',
+                    instructor: {
+                        userId: 'usr456',
+                        profession: 'MEDICINA_ESTETICA',
+                        type: 'MEDICO',
+                        description: 'Experto en láser dermatológico',
+                    },
+                },
+            },
+            empresa: {
+                summary: 'Usuario EMPRESA',
+                value: {
+                    firstName: 'Laura',
+                    lastName: 'Gómez',
+                    empresa: {
+                        userId: 'usr789',
+                        name: 'Spa Belleza',
+                        giro: 'EMPRESA_APARATOLOGIA_PERFIL',
+                    },
+                },
             },
         },
     }),
@@ -196,71 +282,89 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Upload or replace profile picture' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Upload/replace profile picture' }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
             required: ['file'],
-            properties: { file: { type: 'string', format: 'binary' } },
+            properties: {
+                file: { type: 'string', format: 'binary' },
+            },
         },
     }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    (0, common_1.Put)(':userId/profile-image'),
-    __param(0, (0, common_1.Param)('userId')),
+    (0, common_1.Put)('profile-image'),
+    __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "uploadProfileImage", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Change password' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
-    (0, swagger_1.ApiBody)({ type: change_password_dto_1.ChangePasswordDto }),
-    (0, common_1.Put)(':userId/change-password'),
-    __param(0, (0, common_1.Param)('userId')),
+    (0, swagger_1.ApiBody)({
+        type: change_password_dto_1.ChangePasswordDto,
+        examples: {
+            demo: {
+                summary: 'Ejemplo',
+                value: {
+                    currentPassword: 'OldPass123!',
+                    newPassword: 'NewPass456!',
+                },
+            },
+        },
+    }),
+    (0, common_1.Put)('change-password'),
+    __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, change_password_dto_1.ChangePasswordDto]),
+    __metadata("design:paramtypes", [Object, change_password_dto_1.ChangePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Change email' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
-    (0, swagger_1.ApiBody)({ type: change_email_dto_1.ChangeEmailDto }),
-    (0, common_1.Put)(':userId/change-email'),
-    __param(0, (0, common_1.Param)('userId')),
+    (0, swagger_1.ApiBody)({
+        type: change_email_dto_1.ChangeEmailDto,
+        examples: {
+            demo: {
+                summary: 'Ejemplo',
+                value: {
+                    password: 'MyPass123!',
+                    newEmail: 'nuevo@correo.com',
+                },
+            },
+        },
+    }),
+    (0, common_1.Put)('change-email'),
+    __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, change_email_dto_1.ChangeEmailDto]),
+    __metadata("design:paramtypes", [Object, change_email_dto_1.ChangeEmailDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changeEmail", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get MEDICO details for current user' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
-    (0, common_1.Get)(':userId/medico'),
-    __param(0, (0, common_1.Param)('userId')),
+    (0, common_1.Get)('medico'),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getMedico", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get EMPRESA details for current user' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
-    (0, common_1.Get)(':userId/empresa'),
-    __param(0, (0, common_1.Param)('userId')),
+    (0, common_1.Get)('empresa'),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getEmpresa", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Get INSTRUCTOR details for current user' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
-    (0, common_1.Get)(':userId/instructor'),
-    __param(0, (0, common_1.Param)('userId')),
+    (0, common_1.Get)('instructor'),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getInstructor", null);
 __decorate([
