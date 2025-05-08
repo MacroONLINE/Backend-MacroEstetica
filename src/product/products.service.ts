@@ -74,4 +74,17 @@ export class ProductService {
     await this.prisma.productReaction.create({ data: { userId, productId, type } })
     return { userId, productId, reacted: true, type }
   }
+
+  // ProductService – obtener productos con “like” (wishlist)
+async getLikedProducts(userId: string) {
+  return this.prisma.product.findMany({
+    where: {
+      reactions: {
+        some: { userId, type: ReactionType.LIKE },
+      },
+    },
+    include: { presentations: true },
+  })
+}
+
 }

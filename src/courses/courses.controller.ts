@@ -42,9 +42,7 @@ export class CoursesController {
 
   @Get('active')
   @ApiOperation({ summary: 'Get active courses card info for current user' })
-  @ApiBearerAuth()
   @ApiResponse({ status: 200, type: ActiveCoursesDto })
-  @UseGuards(JwtAuthGuard)
   async getActiveCourses(@Request() req) {
     return this.coursesService.getActiveCoursesCardInfo(req.user.userId)
   }
@@ -125,8 +123,6 @@ export class CoursesController {
   }
 
   @Post(':courseId/react')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
   @ApiOperation({
     summary: 'Toggle like/dislike for a course',
     description: 'If the user has not reacted, creates a like or dislike. If the same reaction exists, it is removed. If the opposite reaction exists, it is switched.',

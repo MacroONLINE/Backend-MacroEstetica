@@ -398,6 +398,26 @@ let CoursesService = class CoursesService {
         await this.prisma.courseReaction.create({ data: { userId, courseId, type } });
         return { userId, courseId, reacted: true, type };
     }
+    async getLikedCourses(userId) {
+        const liked = await this.prisma.course.findMany({
+            where: {
+                reactions: {
+                    some: { userId, type: client_1.ReactionType.LIKE },
+                },
+            },
+            include: {
+                category: true,
+                instructor: {
+                    include: {
+                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+                    },
+                },
+                modules: { include: { classes: { include: { classResources: true } } } },
+                resources: true,
+            },
+        });
+        return liked.map((c) => this.mapToCourseResponseDto(c));
+    }
 };
 exports.CoursesService = CoursesService;
 exports.CoursesService = CoursesService = __decorate([

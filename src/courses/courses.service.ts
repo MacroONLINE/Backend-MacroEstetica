@@ -411,4 +411,27 @@ export class CoursesService {
     await this.prisma.courseReaction.create({ data: { userId, courseId, type } })
     return { userId, courseId, reacted: true, type }
   }
+
+  // CoursesService – obtener cursos con “like” (wishlist)
+async getLikedCourses(userId: string) {
+  const liked = await this.prisma.course.findMany({
+    where: {
+      reactions: {
+        some: { userId, type: ReactionType.LIKE },
+      },
+    },
+    include: {
+      category: true,
+      instructor: {
+        include: {
+          user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+        },
+      },
+      modules: { include: { classes: { include: { classResources: true } } } },
+      resources: true,
+    },
+  })
+  return liked.map((c) => this.mapToCourseResponseDto(c))
+}
+
 }

@@ -56,6 +56,9 @@ let ProductController = class ProductController {
     async reactToProduct(productId, type, req) {
         return this.productService.toggleProductReaction(req.user.userId, productId, type || client_1.ReactionType.LIKE);
     }
+    async getProductWishlist(userId) {
+        return this.productService.getLikedProducts(userId);
+    }
 };
 exports.ProductController = ProductController;
 __decorate([
@@ -166,6 +169,16 @@ __decorate([
     __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "reactToProduct", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Productos a los que el usuario dio like (wishlist)' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'ID del usuario' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de productos con like' }),
+    (0, common_1.Get)('user/:userId/wishlist'),
+    __param(0, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], ProductController.prototype, "getProductWishlist", null);
 exports.ProductController = ProductController = __decorate([
     (0, swagger_1.ApiTags)('Products'),
     (0, common_1.Controller)('product'),

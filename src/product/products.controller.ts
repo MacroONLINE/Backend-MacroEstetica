@@ -136,4 +136,14 @@ export class ProductController {
       type || ReactionType.LIKE,
     )
   }
+
+  // ProductController – endpoint wishlist de productos
+@ApiOperation({ summary: 'Productos a los que el usuario dio like (wishlist)' })
+@ApiParam({ name: 'userId', description: 'ID del usuario' })
+@ApiResponse({ status: 200, description: 'Lista de productos con like' })
+@Get('user/:userId/wishlist')
+async getProductWishlist(@Param('userId') userId: string) {
+  return this.productService.getLikedProducts(userId)
+}
+
 }

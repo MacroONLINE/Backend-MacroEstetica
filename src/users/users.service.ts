@@ -103,24 +103,44 @@ export class UsersService {
     })
   }
 
-  /* ──────────────── ENDPOINT UNIFICADO PROFILE (JWT) ──────────────── */
+// users.service.ts  ➜  reemplaza únicamente el método updateProfile
 
-  async updateProfile(userId: string, dto: UpdateProfileDto) {
-    const { medico, empresa, instructor, ...userFields } = dto
-
-    await this.prisma.user.update({ where: { id: userId }, data: userFields })
-    const user = await this.prisma.user.findUnique({ where: { id: userId } })
-    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
-
-    if (user.role === Role.MEDICO && medico)
-      await this.createOrUpdateMedico(userId, medico)
-    if (user.role === Role.EMPRESA && empresa)
-      await this.createOrUpdateEmpresa(userId, empresa)
-    if (user.role === Role.INSTRUCTOR && instructor)
-      await this.createOrUpdateInstructor(userId, instructor)
-
-    return this.findUserById(userId)
+async updateProfile(
+  userId: string,
+  dto: UpdateProfileDto,
+  file?: Express.Multer.File,
+) {
+  let uploadedUrl: string | undefined
+  if (file) {
+    const up = await this.cloudinary.uploadImage(file)
+    uploadedUrl = up.secure_url
   }
+
+  const { medico, empresa, instructor, ...userFields } = dto
+  await this.prisma.user.update({ where: { id: userId }, data: userFields })
+
+  const user = await this.prisma.user.findUnique({ where: { id: userId } })
+  if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+
+  if (user.role === Role.MEDICO) {
+    const med: UpdateMedicoDto = {
+      userId,
+      ...(medico ?? {}),
+      ...(uploadedUrl ? { verification: uploadedUrl } : {}),
+    }
+    await this.createOrUpdateMedico(userId, med)
+  }
+
+  if (user.role === Role.EMPRESA && empresa)
+    await this.createOrUpdateEmpresa(userId, empresa)
+
+  if (user.role === Role.INSTRUCTOR && instructor)
+    await this.createOrUpdateInstructor(userId, instructor)
+
+  return this.findUserById(userId)
+}
+
+
 
   /* ──────────────── FOTO DE PERFIL ──────────────── */
 

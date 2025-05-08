@@ -188,4 +188,34 @@ export declare class ProductService {
         reacted: boolean;
         type: import(".prisma/client").$Enums.ReactionType;
     }>;
+    getLikedProducts(userId: string): Promise<({
+        presentations: {
+            id: number;
+            description: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            productId: string;
+            size: import("@prisma/client/runtime/library").Decimal;
+            unit: import(".prisma/client").$Enums.Unit;
+            price: number | null;
+        }[];
+    } & {
+        id: string;
+        name: string;
+        description: string;
+        companyId: string;
+        createdAt: Date;
+        updatedAt: Date;
+        isFeatured: boolean | null;
+        activeIngredients: string[];
+        benefits: string[];
+        categoryId: number;
+        features: string[];
+        imageGallery: string[];
+        imageMain: string | null;
+        isBestSeller: boolean | null;
+        isOnSale: boolean | null;
+        lab: string | null;
+        problemAddressed: string | null;
+    })[]>;
 }

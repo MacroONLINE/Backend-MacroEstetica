@@ -55,10 +55,10 @@ export declare class UsersController {
         userId: string;
     }>;
     updateEmpresa(dto: UpdateEmpresaDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
@@ -95,7 +95,7 @@ export declare class UsersController {
         genero: import(".prisma/client").$Enums.Gender | null;
         validated: boolean | null;
     }>;
-    updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
+    updateProfile(userId: string, dto: UpdateProfileDto, file?: Express.Multer.File): Promise<{
         id: string;
         firstName: string | null;
         lastName: string | null;
@@ -117,7 +117,7 @@ export declare class UsersController {
         userSubscription: string | null;
         profileImageUrl: string | null;
     }>;
-    uploadProfileImage(req: any, file: Express.Multer.File): Promise<{
+    uploadProfileImage(userId: string, file: Express.Multer.File): Promise<{
         id: string;
         firstName: string | null;
         lastName: string | null;
@@ -139,13 +139,13 @@ export declare class UsersController {
         userSubscription: string | null;
         profileImageUrl: string | null;
     }>;
-    changePassword(req: any, dto: ChangePasswordDto): Promise<{
+    changePassword(userId: string, dto: ChangePasswordDto): Promise<{
         message: string;
     }>;
-    changeEmail(req: any, dto: ChangeEmailDto): Promise<{
+    changeEmail(userId: string, dto: ChangeEmailDto): Promise<{
         message: string;
     }>;
-    getMedico(req: any): Promise<{
+    getMedico(userId: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -154,11 +154,11 @@ export declare class UsersController {
         verification: string;
         userId: string;
     }>;
-    getEmpresa(req: any): Promise<{
+    getEmpresa(userId: string): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         userId: string;
         dni: string | null;
         giro: import(".prisma/client").$Enums.Giro;
@@ -175,7 +175,7 @@ export declare class UsersController {
         webUrl: string | null;
         legalName: string | null;
     }>;
-    getInstructor(req: any): Promise<{
+    getInstructor(userId: string): Promise<{
         id: string;
         status: string;
         createdAt: Date;

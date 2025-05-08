@@ -283,4 +283,5 @@ export declare class CoursesService {
         reacted: boolean;
         type: import(".prisma/client").$Enums.ReactionType;
     }>;
+    getLikedCourses(userId: string): Promise<CourseResponseDto[]>;
 }

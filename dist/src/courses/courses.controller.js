@@ -22,7 +22,6 @@ const create_comment_dto_1 = require("./dto/create-comment.dto");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const client_1 = require("@prisma/client");
 const swagger_1 = require("@nestjs/swagger");
-const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const active_courses_dto_1 = require("./dto/course-card.dto/active-courses.dto");
 let CoursesController = class CoursesController {
     constructor(coursesService) {
@@ -111,9 +110,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('active'),
     (0, swagger_1.ApiOperation)({ summary: 'Get active courses card info for current user' }),
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiResponse)({ status: 200, type: active_courses_dto_1.ActiveCoursesDto }),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -214,8 +211,6 @@ __decorate([
 ], CoursesController.prototype, "getCourseById", null);
 __decorate([
     (0, common_1.Post)(':courseId/react'),
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Toggle like/dislike for a course',
         description: 'If the user has not reacted, creates a like or dislike. If the same reaction exists, it is removed. If the opposite reaction exists, it is switched.',

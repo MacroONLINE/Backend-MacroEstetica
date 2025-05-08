@@ -16,22 +16,22 @@ export declare class UsersService {
     createOrUpdateMedico(userId: string, dto: UpdateMedicoDto): Promise<Medico>;
     createOrUpdateEmpresa(userId: string, dto: UpdateEmpresaDto): Promise<Empresa>;
     createOrUpdateInstructor(userId: string, dto: UpdateInstructorDto): Promise<Instructor>;
-    updateProfile(userId: string, dto: UpdateProfileDto): Promise<{
-        status: boolean;
+    updateProfile(userId: string, dto: UpdateProfileDto, file?: Express.Multer.File): Promise<{
+        id: string;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
+        email: string;
+        emailVerified: Date | null;
         address: string | null;
         province: string | null;
         city: string | null;
         country: string | null;
         countryCode: string | null;
         zipCode: string | null;
-        id: string;
-        email: string;
-        emailVerified: Date | null;
         role: import(".prisma/client").$Enums.Role;
         password: string;
+        status: boolean;
         createdAt: Date;
         updatedAt: Date;
         newsletter: boolean;
@@ -39,21 +39,21 @@ export declare class UsersService {
         profileImageUrl: string | null;
     }>;
     updateProfileImage(userId: string, file: Express.Multer.File): Promise<{
-        status: boolean;
+        id: string;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
+        email: string;
+        emailVerified: Date | null;
         address: string | null;
         province: string | null;
         city: string | null;
         country: string | null;
         countryCode: string | null;
         zipCode: string | null;
-        id: string;
-        email: string;
-        emailVerified: Date | null;
         role: import(".prisma/client").$Enums.Role;
         password: string;
+        status: boolean;
         createdAt: Date;
         updatedAt: Date;
         newsletter: boolean;
@@ -74,20 +74,20 @@ export declare class UsersService {
     checkUserExistsByEmail(email: string): Promise<{
         exists: boolean;
         user: {
-            status: boolean;
+            id: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
+            emailVerified: Date | null;
             address: string | null;
             province: string | null;
             city: string | null;
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            id: string;
-            email: string;
-            emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            status: boolean;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -99,21 +99,21 @@ export declare class UsersService {
         user?: undefined;
     }>;
     checkEmail(email: string): Promise<{
-        status: boolean;
+        id: string;
         firstName: string | null;
         lastName: string | null;
         phone: string | null;
+        email: string;
+        emailVerified: Date | null;
         address: string | null;
         province: string | null;
         city: string | null;
         country: string | null;
         countryCode: string | null;
         zipCode: string | null;
-        id: string;
-        email: string;
-        emailVerified: Date | null;
         role: import(".prisma/client").$Enums.Role;
         password: string;
+        status: boolean;
         createdAt: Date;
         updatedAt: Date;
         newsletter: boolean;

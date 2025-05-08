@@ -78,6 +78,16 @@ let ProductService = class ProductService {
         await this.prisma.productReaction.create({ data: { userId, productId, type } });
         return { userId, productId, reacted: true, type };
     }
+    async getLikedProducts(userId) {
+        return this.prisma.product.findMany({
+            where: {
+                reactions: {
+                    some: { userId, type: client_1.ReactionType.LIKE },
+                },
+            },
+            include: { presentations: true },
+        });
+    }
 };
 exports.ProductService = ProductService;
 exports.ProductService = ProductService = __decorate([
