@@ -227,60 +227,53 @@ async updateProfile(
 }
 
 
-
-  @ApiOperation({ summary: 'Upload/replace profile picture' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['file'],
-      properties: {
-        file: { type: 'string', format: 'binary' },
-      },
+/* ---------- upload profile picture ---------- */
+@ApiOperation({ summary: 'Upload or replace profile picture' })
+@ApiParam({ name: 'userId', description: 'User ID' })
+@ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    required: ['file'],
+    properties: {
+      file: { type: 'string', format: 'binary', description: 'Imagen a subir' },
     },
-  })
-  @UseInterceptors(FileInterceptor('file'))
-  @Put('profile-image')
-  async uploadProfileImage(@Req() req, @UploadedFile() file: Express.Multer.File) {
-    if (!file) throw new HttpException('File required', HttpStatus.BAD_REQUEST)
-    return this.usersService.updateProfileImage(req.user.userId, file)
-  }
+  },
+})
+@UseInterceptors(FileInterceptor('file'))
+@Put(':userId/profile-image')
+async uploadProfileImage(
+  @Param('userId') userId: string,
+  @UploadedFile() file: Express.Multer.File,
+) {
+  if (!file) throw new HttpException('File required', HttpStatus.BAD_REQUEST)
+  return this.usersService.updateProfileImage(userId, file)
+}
 
-  @ApiOperation({ summary: 'Change password' })
-  @ApiBody({
-    type: ChangePasswordDto,
-    examples: {
-      demo: {
-        summary: 'Ejemplo',
-        value: {
-          currentPassword: 'OldPass123!',
-          newPassword: 'NewPass456!',
-        },
-      },
-    },
-  })
-  @Put('change-password')
-  async changePassword(@Req() req, @Body() dto: ChangePasswordDto) {
-    return this.usersService.changePassword(req.user.userId, dto)
-  }
+/* ---------- change password ---------- */
+@ApiOperation({ summary: 'Change password' })
+@ApiParam({ name: 'userId', description: 'User ID' })
+@ApiBody({ type: ChangePasswordDto })
+@Put(':userId/change-password')
+async changePassword(
+  @Param('userId') userId: string,
+  @Body() dto: ChangePasswordDto,
+) {
+  return this.usersService.changePassword(userId, dto)
+}
 
-  @ApiOperation({ summary: 'Change email' })
-  @ApiBody({
-    type: ChangeEmailDto,
-    examples: {
-      demo: {
-        summary: 'Ejemplo',
-        value: {
-          password: 'MyPass123!',
-          newEmail: 'nuevo@correo.com',
-        },
-      },
-    },
-  })
-  @Put('change-email')
-  async changeEmail(@Req() req, @Body() dto: ChangeEmailDto) {
-    return this.usersService.changeEmail(req.user.userId, dto)
-  }
+/* ---------- change email ---------- */
+@ApiOperation({ summary: 'Change email' })
+@ApiParam({ name: 'userId', description: 'User ID' })
+@ApiBody({ type: ChangeEmailDto })
+@Put(':userId/change-email')
+async changeEmail(
+  @Param('userId') userId: string,
+  @Body() dto: ChangeEmailDto,
+) {
+  return this.usersService.changeEmail(userId, dto)
+}
+
 
   @ApiOperation({ summary: 'Get MEDICO details for current user' })
   @Get('medico')

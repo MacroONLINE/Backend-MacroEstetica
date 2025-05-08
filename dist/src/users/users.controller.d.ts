@@ -117,7 +117,7 @@ export declare class UsersController {
         userSubscription: string | null;
         profileImageUrl: string | null;
     }>;
-    uploadProfileImage(req: any, file: Express.Multer.File): Promise<{
+    uploadProfileImage(userId: string, file: Express.Multer.File): Promise<{
         id: string;
         firstName: string | null;
         lastName: string | null;
@@ -139,10 +139,10 @@ export declare class UsersController {
         userSubscription: string | null;
         profileImageUrl: string | null;
     }>;
-    changePassword(req: any, dto: ChangePasswordDto): Promise<{
+    changePassword(userId: string, dto: ChangePasswordDto): Promise<{
         message: string;
     }>;
-    changeEmail(req: any, dto: ChangeEmailDto): Promise<{
+    changeEmail(userId: string, dto: ChangeEmailDto): Promise<{
         message: string;
     }>;
     getMedico(req: any): Promise<{

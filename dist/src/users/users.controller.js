@@ -71,16 +71,16 @@ let UsersController = UsersController_1 = class UsersController {
     async updateProfile(userId, dto, file) {
         return this.usersService.updateProfile(userId, dto, file);
     }
-    async uploadProfileImage(req, file) {
+    async uploadProfileImage(userId, file) {
         if (!file)
             throw new common_1.HttpException('File required', common_1.HttpStatus.BAD_REQUEST);
-        return this.usersService.updateProfileImage(req.user.userId, file);
+        return this.usersService.updateProfileImage(userId, file);
     }
-    async changePassword(req, dto) {
-        return this.usersService.changePassword(req.user.userId, dto);
+    async changePassword(userId, dto) {
+        return this.usersService.changePassword(userId, dto);
     }
-    async changeEmail(req, dto) {
-        return this.usersService.changeEmail(req.user.userId, dto);
+    async changeEmail(userId, dto) {
+        return this.usersService.changeEmail(userId, dto);
     }
     async getMedico(req) {
         return this.usersService.getMedicoByUserId(req.user.userId);
@@ -282,65 +282,46 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Upload/replace profile picture' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Upload or replace profile picture' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
             required: ['file'],
             properties: {
-                file: { type: 'string', format: 'binary' },
+                file: { type: 'string', format: 'binary', description: 'Imagen a subir' },
             },
         },
     }),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
-    (0, common_1.Put)('profile-image'),
-    __param(0, (0, common_1.Req)()),
+    (0, common_1.Put)(':userId/profile-image'),
+    __param(0, (0, common_1.Param)('userId')),
     __param(1, (0, common_1.UploadedFile)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "uploadProfileImage", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Change password' }),
-    (0, swagger_1.ApiBody)({
-        type: change_password_dto_1.ChangePasswordDto,
-        examples: {
-            demo: {
-                summary: 'Ejemplo',
-                value: {
-                    currentPassword: 'OldPass123!',
-                    newPassword: 'NewPass456!',
-                },
-            },
-        },
-    }),
-    (0, common_1.Put)('change-password'),
-    __param(0, (0, common_1.Req)()),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
+    (0, swagger_1.ApiBody)({ type: change_password_dto_1.ChangePasswordDto }),
+    (0, common_1.Put)(':userId/change-password'),
+    __param(0, (0, common_1.Param)('userId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, change_password_dto_1.ChangePasswordDto]),
+    __metadata("design:paramtypes", [String, change_password_dto_1.ChangePasswordDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changePassword", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Change email' }),
-    (0, swagger_1.ApiBody)({
-        type: change_email_dto_1.ChangeEmailDto,
-        examples: {
-            demo: {
-                summary: 'Ejemplo',
-                value: {
-                    password: 'MyPass123!',
-                    newEmail: 'nuevo@correo.com',
-                },
-            },
-        },
-    }),
-    (0, common_1.Put)('change-email'),
-    __param(0, (0, common_1.Req)()),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
+    (0, swagger_1.ApiBody)({ type: change_email_dto_1.ChangeEmailDto }),
+    (0, common_1.Put)(':userId/change-email'),
+    __param(0, (0, common_1.Param)('userId')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, change_email_dto_1.ChangeEmailDto]),
+    __metadata("design:paramtypes", [String, change_email_dto_1.ChangeEmailDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changeEmail", null);
 __decorate([
