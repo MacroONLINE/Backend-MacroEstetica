@@ -177,7 +177,7 @@ export declare class ProductController {
     remove(id: string): Promise<{
         message: string;
     }>;
-    reactToProduct(productId: string, type: ReactionType, req: any): Promise<{
+    reactToProduct(productId: string, userId: string, type: ReactionType): Promise<{
         userId: string;
         productId: string;
         reacted: boolean;

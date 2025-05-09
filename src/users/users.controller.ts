@@ -275,23 +275,35 @@ async changeEmail(
 }
 
 
-  @ApiOperation({ summary: 'Get MEDICO details for current user' })
-  @Get('medico')
-  async getMedico(@Req() req) {
-    return this.usersService.getMedicoByUserId(req.user.userId)
-  }
+  /* ---------- queries por rol SIN bearer ---------- */
 
-  @ApiOperation({ summary: 'Get EMPRESA details for current user' })
-  @Get('empresa')
-  async getEmpresa(@Req() req) {
-    return this.usersService.getEmpresaByUserId(req.user.userId)
-  }
+/* ---- MEDICO ---- */
+@ApiOperation({ summary: 'Get MEDICO details of a user' })
+@ApiParam({ name: 'userId', description: 'User ID' })
+@ApiResponse({ status: 200, description: 'Detalles del médico o null' })
+@Get(':userId/medico')
+async getMedico(@Param('userId') userId: string) {
+  return this.usersService.getMedicoByUserId(userId)
+}
 
-  @ApiOperation({ summary: 'Get INSTRUCTOR details for current user' })
-  @Get('instructor')
-  async getInstructor(@Req() req) {
-    return this.usersService.getInstructorByUserId(req.user.userId)
-  }
+/* ---- EMPRESA ---- */
+@ApiOperation({ summary: 'Get EMPRESA details of a user' })
+@ApiParam({ name: 'userId', description: 'User ID' })
+@ApiResponse({ status: 200, description: 'Detalles de la empresa o null' })
+@Get(':userId/empresa')
+async getEmpresa(@Param('userId') userId: string) {
+  return this.usersService.getEmpresaByUserId(userId)
+}
+
+/* ---- INSTRUCTOR ---- */
+@ApiOperation({ summary: 'Get INSTRUCTOR details of a user' })
+@ApiParam({ name: 'userId', description: 'User ID' })
+@ApiResponse({ status: 200, description: 'Detalles del instructor o null' })
+@Get(':userId/instructor')
+async getInstructor(@Param('userId') userId: string) {
+  return this.usersService.getInstructorByUserId(userId)
+}
+
 
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })

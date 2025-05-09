@@ -35,8 +35,9 @@ let ProductController = class ProductController {
         if (!companyId)
             throw new common_1.NotFoundException('Debe especificar un ID de empresa');
         const products = await this.productService.findByCategory(companyId, Number(categoryId));
-        if (!products.length)
+        if (!products.length) {
             throw new common_1.NotFoundException(`No se encontraron productos para la categoría ${categoryId} en la empresa ${companyId}`);
+        }
         return products;
     }
     async findFeatured(companyId) {
@@ -53,8 +54,8 @@ let ProductController = class ProductController {
     async remove(id) {
         return this.productService.remove(id);
     }
-    async reactToProduct(productId, type, req) {
-        return this.productService.toggleProductReaction(req.user.userId, productId, type || client_1.ReactionType.LIKE);
+    async reactToProduct(productId, userId, type) {
+        return this.productService.toggleProductReaction(userId, productId, type || client_1.ReactionType.LIKE);
     }
     async getProductWishlist(userId) {
         return this.productService.getLikedProducts(userId);
@@ -74,7 +75,6 @@ __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener todos los productos de una empresa' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: true }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de productos.' }),
     __param(0, (0, common_1.Query)('companyId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -85,7 +85,6 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener productos por categoría dentro de una empresa' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: true }),
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: true }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista filtrada de productos.' }),
     __param(0, (0, common_1.Query)('companyId')),
     __param(1, (0, common_1.Query)('categoryId')),
     __metadata("design:type", Function),
@@ -96,7 +95,6 @@ __decorate([
     (0, common_1.Get)('featured'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener productos destacados de una empresa' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: true }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de productos destacados.' }),
     __param(0, (0, common_1.Query)('companyId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -106,7 +104,6 @@ __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener un producto por ID' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del producto' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Detalle del producto.' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -116,7 +113,6 @@ __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Actualizar un producto' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del producto' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Producto actualizado.' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -127,53 +123,40 @@ __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Eliminar un producto' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del producto' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Producto eliminado correctamente.' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "remove", null);
 __decorate([
-    (0, common_1.Post)(':productId/react'),
+    (0, common_1.Post)(':productId/user/:userId/react'),
     (0, swagger_1.ApiOperation)({
         summary: 'Like/Dislike para un producto',
         description: 'Si no existe reacción, se crea. Si existe la misma, se elimina. Si existe la opuesta, se cambia.',
     }),
     (0, swagger_1.ApiParam)({ name: 'productId', description: 'ID del producto' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'ID del usuario' }),
     (0, swagger_1.ApiBody)({
-        description: '`type` puede ser "LIKE" o "DISLIKE".',
-        required: true,
         schema: {
             type: 'object',
             required: ['type'],
-            properties: { type: { type: 'string', enum: ['LIKE', 'DISLIKE'], example: 'LIKE' } },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Resultado del toggle de reacción.',
-        schema: {
-            type: 'object',
             properties: {
-                userId: { type: 'string', example: 'usr123' },
-                productId: { type: 'string', example: 'prd789' },
-                reacted: { type: 'boolean', example: true },
                 type: { type: 'string', enum: ['LIKE', 'DISLIKE'], example: 'LIKE' },
             },
         },
     }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Reacción procesada.' }),
     __param(0, (0, common_1.Param)('productId')),
-    __param(1, (0, common_1.Body)('type')),
-    __param(2, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('userId')),
+    __param(2, (0, common_1.Body)('type')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "reactToProduct", null);
 __decorate([
+    (0, common_1.Get)('user/:userId/wishlist'),
     (0, swagger_1.ApiOperation)({ summary: 'Productos a los que el usuario dio like (wishlist)' }),
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'ID del usuario' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de productos con like' }),
-    (0, common_1.Get)('user/:userId/wishlist'),
     __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

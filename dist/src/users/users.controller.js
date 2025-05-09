@@ -82,14 +82,14 @@ let UsersController = UsersController_1 = class UsersController {
     async changeEmail(userId, dto) {
         return this.usersService.changeEmail(userId, dto);
     }
-    async getMedico(req) {
-        return this.usersService.getMedicoByUserId(req.user.userId);
+    async getMedico(userId) {
+        return this.usersService.getMedicoByUserId(userId);
     }
-    async getEmpresa(req) {
-        return this.usersService.getEmpresaByUserId(req.user.userId);
+    async getEmpresa(userId) {
+        return this.usersService.getEmpresaByUserId(userId);
     }
-    async getInstructor(req) {
-        return this.usersService.getInstructorByUserId(req.user.userId);
+    async getInstructor(userId) {
+        return this.usersService.getInstructorByUserId(userId);
     }
     async findUserById(id) {
         const user = await this.usersService.findUserById(id);
@@ -325,27 +325,33 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "changeEmail", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get MEDICO details for current user' }),
-    (0, common_1.Get)('medico'),
-    __param(0, (0, common_1.Req)()),
+    (0, swagger_1.ApiOperation)({ summary: 'Get MEDICO details of a user' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Detalles del médico o null' }),
+    (0, common_1.Get)(':userId/medico'),
+    __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getMedico", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get EMPRESA details for current user' }),
-    (0, common_1.Get)('empresa'),
-    __param(0, (0, common_1.Req)()),
+    (0, swagger_1.ApiOperation)({ summary: 'Get EMPRESA details of a user' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Detalles de la empresa o null' }),
+    (0, common_1.Get)(':userId/empresa'),
+    __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getEmpresa", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Get INSTRUCTOR details for current user' }),
-    (0, common_1.Get)('instructor'),
-    __param(0, (0, common_1.Req)()),
+    (0, swagger_1.ApiOperation)({ summary: 'Get INSTRUCTOR details of a user' }),
+    (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Detalles del instructor o null' }),
+    (0, common_1.Get)(':userId/instructor'),
+    __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "getInstructor", null);
 __decorate([

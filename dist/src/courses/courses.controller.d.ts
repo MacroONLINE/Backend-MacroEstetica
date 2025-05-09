@@ -4,12 +4,12 @@ import { CreateModuleDto } from './dto/create-module.dto';
 import { CreateClassDto } from './dto/create-class.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { Target, ReactionType } from '@prisma/client';
 import { ActiveCoursesDto } from './dto/course-card.dto/active-courses.dto';
+import { Target, ReactionType } from '@prisma/client';
 export declare class CoursesController {
     private readonly coursesService;
     constructor(coursesService: CoursesService);
-    createCourse(createCourseDto: CreateCourseDto): Promise<{
+    createCourse(dto: CreateCourseDto): Promise<{
         id: string;
         title: string;
         bannerUrl: string;
@@ -34,15 +34,15 @@ export declare class CoursesController {
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         introductoryVideoUrl: string | null;
     }>;
-    getActiveCourses(req: any): Promise<ActiveCoursesDto>;
-    createModule(createModuleDto: CreateModuleDto): Promise<{
+    getActiveCourses(userId: string): Promise<ActiveCoursesDto>;
+    createModule(dto: CreateModuleDto): Promise<{
         id: string;
         description: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
     }>;
-    createClass(createClassDto: CreateClassDto): Promise<{
+    createClass(dto: CreateClassDto): Promise<{
         id: string;
         title: string;
         description: string;
@@ -52,7 +52,7 @@ export declare class CoursesController {
         videoUrl: string | null;
         imageUrl: string | null;
     }>;
-    createComment(createCommentDto: CreateCommentDto): Promise<{
+    createComment(dto: CreateCommentDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -61,7 +61,7 @@ export declare class CoursesController {
         parentCommentId: string | null;
         content: string;
     }>;
-    createCategory(createCategoryDto: CreateCategoryDto): Promise<{
+    createCategory(dto: CreateCategoryDto): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -74,8 +74,7 @@ export declare class CoursesController {
     getCoursesByCategory(categoryId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
     getCoursesByInstructor(instructorId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
     getCoursesByTarget(target: Target): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
-    getCourseById(courseId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto>;
-    reactToCourse(courseId: string, type: ReactionType, req: any): Promise<{
+    reactToCourse(courseId: string, userId: string, type: ReactionType): Promise<{
         userId: string;
         courseId: string;
         reacted: boolean;
@@ -86,18 +85,18 @@ export declare class CoursesController {
         reacted: boolean;
         type: import(".prisma/client").$Enums.ReactionType;
     }>;
-    getUserCourses(userId: string, req: any): Promise<any[]>;
-    getUserCourseProgress(userId: string, courseId: string, req: any): Promise<{
+    getUserCourses(userId: string): Promise<any[]>;
+    getUserCourseProgress(userId: string, courseId: string): Promise<{
         courseId: string;
         totalClasses: number;
         completedClasses: number;
         completedClassIds: string[];
         isCompleted: boolean;
     }>;
-    isUserEnrolled(courseId: string, userId: string, req: any): Promise<{
+    isUserEnrolled(courseId: string, userId: string): Promise<{
         enrolled: boolean;
     }>;
-    getUserModuleProgress(moduleId: string, userId: string, req: any): Promise<{
+    getUserModuleProgress(moduleId: string, userId: string): Promise<{
         classId: string;
         description: string;
         completed: boolean;
@@ -110,7 +109,7 @@ export declare class CoursesController {
             fileUrl: string;
         }[];
     }[]>;
-    markClassAsCompleted(classId: string, userId: string, req: any): Promise<{
+    markClassAsCompleted(classId: string, userId: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -118,4 +117,6 @@ export declare class CoursesController {
         classId: string;
         completed: boolean;
     }>;
+    getCourseWishlist(userId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
+    getCourseById(courseId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto>;
 }

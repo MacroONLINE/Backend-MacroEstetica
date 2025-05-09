@@ -145,7 +145,7 @@ export declare class UsersController {
     changeEmail(userId: string, dto: ChangeEmailDto): Promise<{
         message: string;
     }>;
-    getMedico(req: any): Promise<{
+    getMedico(userId: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -154,7 +154,7 @@ export declare class UsersController {
         verification: string;
         userId: string;
     }>;
-    getEmpresa(req: any): Promise<{
+    getEmpresa(userId: string): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -175,7 +175,7 @@ export declare class UsersController {
         webUrl: string | null;
         legalName: string | null;
     }>;
-    getInstructor(req: any): Promise<{
+    getInstructor(userId: string): Promise<{
         id: string;
         status: string;
         createdAt: Date;
