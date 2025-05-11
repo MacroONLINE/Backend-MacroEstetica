@@ -467,6 +467,7 @@ model BlogPost {
   averageRating  Float          @default(0)
   totalRatings   Int            @default(0)
   description    String         @default("")
+  keywords       String?        @default("") 
   notUsefulCount Int?           @default(0)
   totalReaders   Int?           @default(0)
   usefulCount    Int?           @default(0)

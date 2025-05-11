@@ -166,32 +166,22 @@ let BlogService = class BlogService {
         return data.map((item) => this.formatBlogDates(item));
     }
     async searchBlogs(query) {
-        const normalizedQuery = query
+        const normalized = query
             .normalize('NFD')
             .replace(/[\u0300-\u036f]/g, '');
-        const data = await this.prisma.blogPost.findMany({
+        const posts = await this.prisma.blogPost.findMany({
             where: {
                 OR: [
                     {
                         title: {
-                            contains: normalizedQuery,
+                            contains: normalized,
                             mode: 'insensitive',
                         },
                     },
                     {
-                        content: {
-                            contains: normalizedQuery,
+                        keywords: {
+                            contains: normalized,
                             mode: 'insensitive',
-                        },
-                    },
-                    {
-                        categories: {
-                            some: {
-                                name: {
-                                    contains: normalizedQuery,
-                                    mode: 'insensitive',
-                                },
-                            },
                         },
                     },
                 ],
@@ -201,11 +191,7 @@ let BlogService = class BlogService {
                 author: {
                     include: {
                         user: {
-                            select: {
-                                firstName: true,
-                                lastName: true,
-                                profileImageUrl: true,
-                            },
+                            select: { firstName: true, lastName: true, profileImageUrl: true },
                         },
                     },
                 },
@@ -213,7 +199,7 @@ let BlogService = class BlogService {
                 categories: true,
             },
         });
-        return data.map((item) => this.formatBlogDates(item));
+        return posts.map((item) => this.formatBlogDates(item));
     }
     async voteAndComment(postId, userId, useful, commentContent) {
         const existingComment = await this.prisma.blogComment.findFirst({

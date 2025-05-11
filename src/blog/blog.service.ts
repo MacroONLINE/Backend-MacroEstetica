@@ -163,33 +163,29 @@ export class BlogService {
     return data.map((item) => this.formatBlogDates(item));
   }
 
-  async searchBlogs(query: string) {
-    const normalizedQuery = query
+   /**
+   * Busca posts cuyo título o campo `keywords`
+   * contengan el texto proporcionado (insensible a mayúsculas y acentos).
+   */
+   async searchBlogs(query: string) {
+    // Normaliza eliminando acentos
+    const normalized = query
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
-    const data = await this.prisma.blogPost.findMany({
+
+    const posts = await this.prisma.blogPost.findMany({
       where: {
         OR: [
           {
             title: {
-              contains: normalizedQuery,
+              contains: normalized,
               mode: 'insensitive',
             },
           },
           {
-            content: {
-              contains: normalizedQuery,
+            keywords: {
+              contains: normalized,
               mode: 'insensitive',
-            },
-          },
-          {
-            categories: {
-              some: {
-                name: {
-                  contains: normalizedQuery,
-                  mode: 'insensitive',
-                },
-              },
             },
           },
         ],
@@ -199,11 +195,7 @@ export class BlogService {
         author: {
           include: {
             user: {
-              select: {
-                firstName: true,
-                lastName: true,
-                profileImageUrl: true,
-              },
+              select: { firstName: true, lastName: true, profileImageUrl: true },
             },
           },
         },
@@ -211,7 +203,9 @@ export class BlogService {
         categories: true,
       },
     });
-    return data.map((item) => this.formatBlogDates(item));
+
+    // Formatea las fechas igual que en los demás listados
+    return posts.map((item) => this.formatBlogDates(item));
   }
 
   async voteAndComment(

@@ -99,20 +99,23 @@ export class BlogController {
     return this.blogService.getRecentBlogs();
   }
 
+  /**
+   * Buscar blogs por título o palabras clave (keywords),
+   * sin importar acentos ni mayúsculas.
+   */
   @Get('busqueda')
   @ApiOperation({
-    summary:
-      'Buscar blogs por título, contenido o nombre de categoría (sin importar acentos ni mayúsculas)',
+    summary: 'Buscar blogs por título o keywords',
   })
   @ApiQuery({
     name: 'query',
-    description: 'Texto de búsqueda',
+    description: 'Texto a buscar en título o keywords',
     required: true,
     example: 'dermatologia',
   })
   @ApiResponse({
     status: 200,
-    description: 'Lista de blogs filtrados por la búsqueda',
+    description: 'Lista de blogs que coinciden con la búsqueda',
   })
   async searchBlogs(@Query('query') query: string) {
     return this.blogService.searchBlogs(query);

@@ -15,10 +15,10 @@ export declare class BlogService {
         message: string;
     }>;
     getAllCategories(): Promise<{
-        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
+        name: string;
         colorHex: string;
         iconUrl: string | null;
     }[]>;

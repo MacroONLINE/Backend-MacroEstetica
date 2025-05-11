@@ -230,9 +230,11 @@ export class InstructorService {
     if (!user) throw new NotFoundException('Usuario no encontrado')
     const exists = await this.prisma.instructor.findUnique({ where: { userId } })
     if (exists) throw new ConflictException('El usuario ya es instructor')
-  
     const title = `${user.firstName || ''} ${user.lastName || ''}`.trim()
-  
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { role: 'INSTRUCTOR' },
+    })
     return this.prisma.instructor.create({
       data: {
         userId,
@@ -249,6 +251,7 @@ export class InstructorService {
       },
     })
   }
+  
   
   
   

@@ -149,17 +149,17 @@ __decorate([
 __decorate([
     (0, common_1.Get)('busqueda'),
     (0, swagger_1.ApiOperation)({
-        summary: 'Buscar blogs por título, contenido o nombre de categoría (sin importar acentos ni mayúsculas)',
+        summary: 'Buscar blogs por título o keywords',
     }),
     (0, swagger_1.ApiQuery)({
         name: 'query',
-        description: 'Texto de búsqueda',
+        description: 'Texto a buscar en título o keywords',
         required: true,
         example: 'dermatologia',
     }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Lista de blogs filtrados por la búsqueda',
+        description: 'Lista de blogs que coinciden con la búsqueda',
     }),
     __param(0, (0, common_1.Query)('query')),
     __metadata("design:type", Function),

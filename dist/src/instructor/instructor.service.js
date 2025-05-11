@@ -231,6 +231,10 @@ let InstructorService = class InstructorService {
         if (exists)
             throw new common_1.ConflictException('El usuario ya es instructor');
         const title = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: { role: 'INSTRUCTOR' },
+        });
         return this.prisma.instructor.create({
             data: {
                 userId,
