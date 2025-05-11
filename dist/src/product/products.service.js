@@ -20,23 +20,35 @@ let ProductService = class ProductService {
     async create(dto) {
         return this.prisma.product.create({ data: dto });
     }
-    async findAll(companyId) {
-        return this.prisma.product.findMany({
+    async findAll(companyId, userId) {
+        const products = await this.prisma.product.findMany({
             where: { companyId },
             include: { presentations: true },
         });
+        if (!userId)
+            return products;
+        const liked = await this.getLikedProductIds(userId);
+        return products.map((p) => ({ ...p, liked: liked.includes(p.id) }));
     }
-    async findByCategory(companyId, categoryId) {
-        return this.prisma.product.findMany({
-            where: { companyId, categoryId: Number(categoryId) },
+    async findByCategory(companyId, categoryId, userId) {
+        const products = await this.prisma.product.findMany({
+            where: { companyId, categoryId },
             include: { presentations: true },
         });
+        if (!userId)
+            return products;
+        const liked = await this.getLikedProductIds(userId);
+        return products.map((p) => ({ ...p, liked: liked.includes(p.id) }));
     }
-    async findFeaturedByCompany(companyId) {
-        return this.prisma.product.findMany({
+    async findFeaturedByCompany(companyId, userId) {
+        const products = await this.prisma.product.findMany({
             where: { companyId, isFeatured: true },
             include: { presentations: true },
         });
+        if (!userId)
+            return products;
+        const liked = await this.getLikedProductIds(userId);
+        return products.map((p) => ({ ...p, liked: liked.includes(p.id) }));
     }
     async findById(id) {
         const product = await this.prisma.product.findUnique({
@@ -79,7 +91,7 @@ let ProductService = class ProductService {
         return { userId, productId, reacted: true, type };
     }
     async getLikedProducts(userId) {
-        return this.prisma.product.findMany({
+        const liked = await this.prisma.product.findMany({
             where: {
                 reactions: {
                     some: { userId, type: client_1.ReactionType.LIKE },
@@ -87,6 +99,14 @@ let ProductService = class ProductService {
             },
             include: { presentations: true },
         });
+        return liked.map((p) => ({ ...p, liked: true }));
+    }
+    async getLikedProductIds(userId) {
+        const reactions = await this.prisma.productReaction.findMany({
+            where: { userId, type: client_1.ReactionType.LIKE },
+            select: { productId: true },
+        });
+        return reactions.map((r) => r.productId);
     }
 };
 exports.ProductService = ProductService;

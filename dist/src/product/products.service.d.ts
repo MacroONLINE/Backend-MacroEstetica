@@ -24,7 +24,7 @@ export declare class ProductService {
         lab: string | null;
         problemAddressed: string | null;
     }>;
-    findAll(companyId: string): Promise<({
+    findAll(companyId: string, userId?: string): Promise<({
         presentations: {
             id: number;
             description: string | null;
@@ -54,7 +54,7 @@ export declare class ProductService {
         lab: string | null;
         problemAddressed: string | null;
     })[]>;
-    findByCategory(companyId: string, categoryId: number): Promise<({
+    findByCategory(companyId: string, categoryId: number, userId?: string): Promise<({
         presentations: {
             id: number;
             description: string | null;
@@ -84,7 +84,7 @@ export declare class ProductService {
         lab: string | null;
         problemAddressed: string | null;
     })[]>;
-    findFeaturedByCompany(companyId: string): Promise<({
+    findFeaturedByCompany(companyId: string, userId?: string): Promise<({
         presentations: {
             id: number;
             description: string | null;
@@ -188,7 +188,8 @@ export declare class ProductService {
         reacted: boolean;
         type: import(".prisma/client").$Enums.ReactionType;
     }>;
-    getLikedProducts(userId: string): Promise<({
+    getLikedProducts(userId: string): Promise<{
+        liked: boolean;
         presentations: {
             id: number;
             description: string | null;
@@ -199,7 +200,6 @@ export declare class ProductService {
             unit: import(".prisma/client").$Enums.Unit;
             price: number | null;
         }[];
-    } & {
         id: string;
         name: string;
         description: string;
@@ -217,5 +217,6 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
-    })[]>;
+    }[]>;
+    private getLikedProductIds;
 }

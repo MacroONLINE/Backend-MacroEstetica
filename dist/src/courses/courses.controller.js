@@ -45,20 +45,20 @@ let CoursesController = class CoursesController {
     async createCategory(dto) {
         return this.coursesService.createCategory(dto);
     }
-    async getAllCourses() {
-        return this.coursesService.getAllCourses();
+    async getAllCourses(userId) {
+        return this.coursesService.getAllCourses(userId);
     }
-    async getFeaturedCourses() {
-        return this.coursesService.getFeaturedCourses();
+    async getFeaturedCourses(userId) {
+        return this.coursesService.getFeaturedCourses(userId);
     }
-    async getCoursesByCategory(categoryId) {
-        return this.coursesService.getCoursesByCategory(categoryId);
+    async getCoursesByCategory(categoryId, userId) {
+        return this.coursesService.getCoursesByCategory(categoryId, userId);
     }
-    async getCoursesByInstructor(instructorId) {
-        return this.coursesService.getCoursesByInstructor(instructorId);
+    async getCoursesByInstructor(instructorId, userId) {
+        return this.coursesService.getCoursesByInstructor(instructorId, userId);
     }
-    async getCoursesByTarget(target) {
-        return this.coursesService.getCoursesByTarget(target);
+    async getCoursesByTarget(target, userId) {
+        return this.coursesService.getCoursesByTarget(target, userId);
     }
     async reactToCourse(courseId, userId, type) {
         return this.coursesService.toggleCourseReaction(userId, courseId, type || client_1.ReactionType.LIKE);
@@ -143,43 +143,53 @@ __decorate([
 ], CoursesController.prototype, "createCategory", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Get all courses with full details' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get all courses (optionally marks liked courses)' }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false, description: 'User ID → adds liked:boolean to each course' }),
+    __param(0, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getAllCourses", null);
 __decorate([
     (0, common_1.Get)('featured'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get featured courses' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get featured courses (optionally marks liked courses)' }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false }),
+    __param(0, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getFeaturedCourses", null);
 __decorate([
     (0, common_1.Get)('by-category/:categoryId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get courses by category ID' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get courses by category (optionally marks liked courses)' }),
     (0, swagger_1.ApiParam)({ name: 'categoryId', description: 'Category ID' }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false }),
     __param(0, (0, common_1.Param)('categoryId')),
+    __param(1, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getCoursesByCategory", null);
 __decorate([
     (0, common_1.Get)('by-instructor/:instructorId'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get courses by instructor ID' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get courses by instructor (optionally marks liked courses)' }),
     (0, swagger_1.ApiParam)({ name: 'instructorId', description: 'Instructor ID' }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false }),
     __param(0, (0, common_1.Param)('instructorId')),
+    __param(1, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getCoursesByInstructor", null);
 __decorate([
     (0, common_1.Get)('by-target/:target'),
-    (0, swagger_1.ApiOperation)({ summary: 'Get courses by target audience' }),
-    (0, swagger_1.ApiParam)({ name: 'target', description: 'Target (MEDICO | COSMETOLOGO)' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get courses by target (optionally marks liked courses)' }),
+    (0, swagger_1.ApiParam)({ name: 'target', description: 'MEDICO | COSMETOLOGO' }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false }),
     __param(0, (0, common_1.Param)('target')),
+    __param(1, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getCoursesByTarget", null);
 __decorate([

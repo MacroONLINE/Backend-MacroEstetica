@@ -1,9 +1,11 @@
+// src/courses/courses.controller.ts
 import {
   Controller,
   Get,
   Post,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
 } from '@nestjs/common'
@@ -13,6 +15,7 @@ import {
   ApiResponse,
   ApiParam,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger'
 
 import { CoursesService } from './courses.service'
@@ -78,39 +81,53 @@ export class CoursesController {
     return this.coursesService.createCategory(dto)
   }
 
-  /* ─────────────── LISTADOS ─────────────── */
+  /* ─────────────── LISTADOS (con liked opcional) ─────────────── */
 
   @Get()
-  @ApiOperation({ summary: 'Get all courses with full details' })
-  async getAllCourses() {
-    return this.coursesService.getAllCourses()
+  @ApiOperation({ summary: 'Get all courses (optionally marks liked courses)' })
+  @ApiQuery({ name: 'userId', required: false, description: 'User ID → adds liked:boolean to each course' })
+  async getAllCourses(@Query('userId') userId?: string) {
+    return this.coursesService.getAllCourses(userId)
   }
 
   @Get('featured')
-  @ApiOperation({ summary: 'Get featured courses' })
-  async getFeaturedCourses() {
-    return this.coursesService.getFeaturedCourses()
+  @ApiOperation({ summary: 'Get featured courses (optionally marks liked courses)' })
+  @ApiQuery({ name: 'userId', required: false })
+  async getFeaturedCourses(@Query('userId') userId?: string) {
+    return this.coursesService.getFeaturedCourses(userId)
   }
 
   @Get('by-category/:categoryId')
-  @ApiOperation({ summary: 'Get courses by category ID' })
+  @ApiOperation({ summary: 'Get courses by category (optionally marks liked courses)' })
   @ApiParam({ name: 'categoryId', description: 'Category ID' })
-  async getCoursesByCategory(@Param('categoryId') categoryId: string) {
-    return this.coursesService.getCoursesByCategory(categoryId)
+  @ApiQuery({ name: 'userId', required: false })
+  async getCoursesByCategory(
+    @Param('categoryId') categoryId: string,
+    @Query('userId') userId?: string,
+  ) {
+    return this.coursesService.getCoursesByCategory(categoryId, userId)
   }
 
   @Get('by-instructor/:instructorId')
-  @ApiOperation({ summary: 'Get courses by instructor ID' })
+  @ApiOperation({ summary: 'Get courses by instructor (optionally marks liked courses)' })
   @ApiParam({ name: 'instructorId', description: 'Instructor ID' })
-  async getCoursesByInstructor(@Param('instructorId') instructorId: string) {
-    return this.coursesService.getCoursesByInstructor(instructorId)
+  @ApiQuery({ name: 'userId', required: false })
+  async getCoursesByInstructor(
+    @Param('instructorId') instructorId: string,
+    @Query('userId') userId?: string,
+  ) {
+    return this.coursesService.getCoursesByInstructor(instructorId, userId)
   }
 
   @Get('by-target/:target')
-  @ApiOperation({ summary: 'Get courses by target audience' })
-  @ApiParam({ name: 'target', description: 'Target (MEDICO | COSMETOLOGO)' })
-  async getCoursesByTarget(@Param('target') target: Target) {
-    return this.coursesService.getCoursesByTarget(target)
+  @ApiOperation({ summary: 'Get courses by target (optionally marks liked courses)' })
+  @ApiParam({ name: 'target', description: 'MEDICO | COSMETOLOGO' })
+  @ApiQuery({ name: 'userId', required: false })
+  async getCoursesByTarget(
+    @Param('target') target: Target,
+    @Query('userId') userId?: string,
+  ) {
+    return this.coursesService.getCoursesByTarget(target, userId)
   }
 
   /* ─────────────── REACCIONES ─────────────── */

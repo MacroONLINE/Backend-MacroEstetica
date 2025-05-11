@@ -1,4 +1,3 @@
-// src/courses/courses.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { CreateCourseDto } from './dto/create-course.dto'
@@ -8,15 +7,32 @@ import { CreateCommentDto } from './dto/create-comment.dto'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { CourseResponseDto } from './response-dto/course-response.dto'
 import { CourseCardDto } from './dto/course-card.dto/course-card.dto'
-import { Target, ReactionType } from '@prisma/client'
 import { ActiveCoursesDto } from './dto/course-card.dto/active-courses.dto'
+import { Target, ReactionType } from '@prisma/client'
 
 @Injectable()
 export class CoursesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private mapToCourseResponseDto(course: any): CourseResponseDto {
+  /* ────────────────────────── HELPERS ────────────────────────── */
+
+  /** Devuelve un Set con los IDs de cursos que el usuario ha “likeado”. */
+  private async getLikedCourseIds(userId?: string): Promise<Set<string>> {
+    if (!userId) return new Set()
+    const rows = await this.prisma.courseReaction.findMany({
+      where: { userId, type: ReactionType.LIKE },
+      select: { courseId: true },
+    })
+    return new Set(rows.map((r) => r.courseId))
+  }
+
+  /** Mapea la entidad Prisma → DTO enriquecido con `liked`. */
+  private mapToCourseResponseDto(
+    course: any,
+    liked = false,
+  ): CourseResponseDto & { liked: boolean } {
     return {
+      /* datos principales */
       id: course.id,
       instructorId: course.instructorId || null,
       title: course.title,
@@ -34,15 +50,18 @@ export class CoursesService {
       aboutDescription: course.aboutDescription || '',
       whatYouWillLearn: course.whatYouWillLearn || [],
       requirements: course.requirements || [],
+      /* categoría */
       categoryName: course.category?.name || 'N/A',
       categoryColor: course.category?.colorHex || 'N/A',
       categoryIcon: course.category?.urlIcon || 'N/A',
+      /* instructor */
       instructorName:
         `${course.instructor?.user?.firstName || ''} ${course.instructor?.user?.lastName || ''}`.trim() ||
         'N/A',
       instructorExperience: course.instructor?.experienceYears || 0,
       instructorCertificationsUrl: course.instructor?.certificationsUrl || 'N/A',
       instructorStatus: course.instructor?.status || 'N/A',
+      /* estructura */
       modules:
         course.modules?.map((m: any) => ({
           id: m.id,
@@ -58,8 +77,12 @@ export class CoursesService {
       resources: course.resources || [],
       totalResources: course.resources?.length || 0,
       comments: [],
+      /* nuevo flag */
+      liked,
     }
   }
+
+  /* ────────────────────────── CREACIÓN ────────────────────────── */
 
   async createCourse(dto: CreateCourseDto) {
     const { instructorId, categoryId, ...rest } = dto
@@ -82,24 +105,110 @@ export class CoursesService {
     return this.prisma.category.create({ data: dto })
   }
 
-  async getAllCourses(): Promise<CourseResponseDto[]> {
+  /* ────────────────────────── LISTADOS (opcional userId) ────────────────────────── */
+
+  async getAllCourses(userId?: string) {
+    const likedIds = await this.getLikedCourseIds(userId)
     const courses = await this.prisma.course.findMany({
       include: {
         category: true,
-        instructor: { include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } } },
+        instructor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+          },
+        },
         modules: { include: { classes: { include: { classResources: true } } } },
         resources: true,
       },
     })
-    return courses.map((c) => this.mapToCourseResponseDto(c))
+    return courses.map((c) => this.mapToCourseResponseDto(c, likedIds.has(c.id)))
   }
+
+  async getFeaturedCourses(userId?: string) {
+    const likedIds = await this.getLikedCourseIds(userId)
+    const courses = await this.prisma.course.findMany({
+      where: { isFeatured: true },
+      include: {
+        category: true,
+        instructor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+          },
+        },
+        modules: { include: { classes: { include: { classResources: true } } } },
+        resources: true,
+      },
+    })
+    return courses.map((c) => this.mapToCourseResponseDto(c, likedIds.has(c.id)))
+  }
+
+  async getCoursesByCategory(categoryId: string, userId?: string) {
+    const likedIds = await this.getLikedCourseIds(userId)
+    const courses = await this.prisma.course.findMany({
+      where: { categoryId },
+      include: {
+        category: true,
+        instructor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+          },
+        },
+        modules: { include: { classes: { include: { classResources: true } } } },
+        resources: true,
+      },
+    })
+    return courses.map((c) => this.mapToCourseResponseDto(c, likedIds.has(c.id)))
+  }
+
+  async getCoursesByInstructor(instructorId: string, userId?: string) {
+    const likedIds = await this.getLikedCourseIds(userId)
+    const courses = await this.prisma.course.findMany({
+      where: { instructorId },
+      include: {
+        category: true,
+        instructor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+          },
+        },
+        modules: { include: { classes: { include: { classResources: true } } } },
+        resources: true,
+      },
+    })
+    return courses.map((c) => this.mapToCourseResponseDto(c, likedIds.has(c.id)))
+  }
+
+  async getCoursesByTarget(target: Target, userId?: string) {
+    const likedIds = await this.getLikedCourseIds(userId)
+    const valid = Object.values(Target).includes(target) ? target : Target.COSMETOLOGO
+    const courses = await this.prisma.course.findMany({
+      where: { target: valid },
+      include: {
+        category: true,
+        instructor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+          },
+        },
+        modules: { include: { classes: { include: { classResources: true } } } },
+        resources: true,
+      },
+    })
+    return courses.map((c) => this.mapToCourseResponseDto(c, likedIds.has(c.id)))
+  }
+
+  /* ────────────────────────── DETALLE ────────────────────────── */
 
   async getCourseById(courseId: string): Promise<CourseResponseDto> {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
       include: {
         category: true,
-        instructor: { include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } } },
+        instructor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+          },
+        },
         modules: { include: { classes: { include: { classResources: true } } } },
         resources: true,
       },
@@ -108,58 +217,7 @@ export class CoursesService {
     return this.mapToCourseResponseDto(course)
   }
 
-  async getFeaturedCourses(): Promise<CourseResponseDto[]> {
-    const courses = await this.prisma.course.findMany({
-      where: { isFeatured: true },
-      include: {
-        category: true,
-        instructor: { include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } } },
-        modules: { include: { classes: { include: { classResources: true } } } },
-        resources: true,
-      },
-    })
-    return courses.map((c) => this.mapToCourseResponseDto(c))
-  }
-
-  async getCoursesByCategory(categoryId: string): Promise<CourseResponseDto[]> {
-    const courses = await this.prisma.course.findMany({
-      where: { categoryId },
-      include: {
-        category: true,
-        instructor: { include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } } },
-        modules: { include: { classes: { include: { classResources: true } } } },
-        resources: true,
-      },
-    })
-    return courses.map((c) => this.mapToCourseResponseDto(c))
-  }
-
-  async getCoursesByInstructor(instructorId: string): Promise<CourseResponseDto[]> {
-    const courses = await this.prisma.course.findMany({
-      where: { instructorId },
-      include: {
-        category: true,
-        instructor: { include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } } },
-        modules: { include: { classes: { include: { classResources: true } } } },
-        resources: true,
-      },
-    })
-    return courses.map((c) => this.mapToCourseResponseDto(c))
-  }
-
-  async getCoursesByTarget(target: Target): Promise<CourseResponseDto[]> {
-    const valid = Object.values(Target).includes(target) ? target : Target.COSMETOLOGO
-    const courses = await this.prisma.course.findMany({
-      where: { target: valid },
-      include: {
-        category: true,
-        instructor: { include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } } },
-        modules: { include: { classes: { include: { classResources: true } } } },
-        resources: true,
-      },
-    })
-    return courses.map((c) => this.mapToCourseResponseDto(c))
-  }
+  /* ────────────────────────── PROGRESO & MATRÍCULA ────────────────────────── */
 
   async getUserCourses(userId: string) {
     const enrollments = await this.prisma.courseEnrollment.findMany({
@@ -334,6 +392,8 @@ export class CoursesService {
     })
   }
 
+  /* ────────────────────────── DASHBOARD CARD ────────────────────────── */
+
   async getActiveCoursesCardInfo(userId: string): Promise<ActiveCoursesDto> {
     const enrollments = await this.prisma.courseEnrollment.findMany({
       where: { userId },
@@ -396,6 +456,8 @@ export class CoursesService {
     return { userId, courses }
   }
 
+  /* ────────────────────────── REACCIONES ────────────────────────── */
+
   async toggleCourseReaction(userId: string, courseId: string, type: ReactionType = ReactionType.LIKE) {
     const existing = await this.prisma.courseReaction.findUnique({
       where: { userId_courseId: { userId, courseId } },
@@ -412,26 +474,24 @@ export class CoursesService {
     return { userId, courseId, reacted: true, type }
   }
 
-  // CoursesService – obtener cursos con “like” (wishlist)
-async getLikedCourses(userId: string) {
-  const liked = await this.prisma.course.findMany({
-    where: {
-      reactions: {
-        some: { userId, type: ReactionType.LIKE },
-      },
-    },
-    include: {
-      category: true,
-      instructor: {
-        include: {
-          user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
-        },
-      },
-      modules: { include: { classes: { include: { classResources: true } } } },
-      resources: true,
-    },
-  })
-  return liked.map((c) => this.mapToCourseResponseDto(c))
-}
+  /* ────────────────────────── WISHLIST ────────────────────────── */
 
+  async getLikedCourses(userId: string) {
+    const liked = await this.prisma.course.findMany({
+      where: {
+        reactions: { some: { userId, type: ReactionType.LIKE } },
+      },
+      include: {
+        category: true,
+        instructor: {
+          include: {
+            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+          },
+        },
+        modules: { include: { classes: { include: { classResources: true } } } },
+        resources: true,
+      },
+    })
+    return liked.map((c) => this.mapToCourseResponseDto(c, true))
+  }
 }

@@ -24,7 +24,7 @@ export declare class ProductController {
         lab: string | null;
         problemAddressed: string | null;
     }>;
-    findAll(companyId: string): Promise<({
+    findAll(companyId: string, userId?: string): Promise<({
         presentations: {
             id: number;
             description: string | null;
@@ -54,7 +54,7 @@ export declare class ProductController {
         lab: string | null;
         problemAddressed: string | null;
     })[]>;
-    findByCategory(companyId: string, categoryId: string): Promise<({
+    findByCategory(companyId: string, categoryId: string, userId?: string): Promise<({
         presentations: {
             id: number;
             description: string | null;
@@ -84,7 +84,7 @@ export declare class ProductController {
         lab: string | null;
         problemAddressed: string | null;
     })[]>;
-    findFeatured(companyId: string): Promise<({
+    findFeatured(companyId: string, userId?: string): Promise<({
         presentations: {
             id: number;
             description: string | null;
@@ -188,7 +188,8 @@ export declare class ProductController {
         reacted: boolean;
         type: import(".prisma/client").$Enums.ReactionType;
     }>;
-    getProductWishlist(userId: string): Promise<({
+    getProductWishlist(userId: string): Promise<{
+        liked: boolean;
         presentations: {
             id: number;
             description: string | null;
@@ -199,7 +200,6 @@ export declare class ProductController {
             unit: import(".prisma/client").$Enums.Unit;
             price: number | null;
         }[];
-    } & {
         id: string;
         name: string;
         description: string;
@@ -217,5 +217,5 @@ export declare class ProductController {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
-    })[]>;
+    }[]>;
 }

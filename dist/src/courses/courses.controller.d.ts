@@ -69,11 +69,21 @@ export declare class CoursesController {
         urlIcon: string;
         colorHex: string;
     }>;
-    getAllCourses(): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
-    getFeaturedCourses(): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
-    getCoursesByCategory(categoryId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
-    getCoursesByInstructor(instructorId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
-    getCoursesByTarget(target: Target): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
+    getAllCourses(userId?: string): Promise<(import("./response-dto/course-response.dto").CourseResponseDto & {
+        liked: boolean;
+    })[]>;
+    getFeaturedCourses(userId?: string): Promise<(import("./response-dto/course-response.dto").CourseResponseDto & {
+        liked: boolean;
+    })[]>;
+    getCoursesByCategory(categoryId: string, userId?: string): Promise<(import("./response-dto/course-response.dto").CourseResponseDto & {
+        liked: boolean;
+    })[]>;
+    getCoursesByInstructor(instructorId: string, userId?: string): Promise<(import("./response-dto/course-response.dto").CourseResponseDto & {
+        liked: boolean;
+    })[]>;
+    getCoursesByTarget(target: Target, userId?: string): Promise<(import("./response-dto/course-response.dto").CourseResponseDto & {
+        liked: boolean;
+    })[]>;
     reactToCourse(courseId: string, userId: string, type: ReactionType): Promise<{
         userId: string;
         courseId: string;
@@ -117,6 +127,8 @@ export declare class CoursesController {
         classId: string;
         completed: boolean;
     }>;
-    getCourseWishlist(userId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto[]>;
+    getCourseWishlist(userId: string): Promise<(import("./response-dto/course-response.dto").CourseResponseDto & {
+        liked: boolean;
+    })[]>;
     getCourseById(courseId: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto>;
 }

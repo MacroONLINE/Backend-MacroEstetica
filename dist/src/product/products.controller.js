@@ -26,24 +26,24 @@ let ProductController = class ProductController {
     async create(dto) {
         return this.productService.create(dto);
     }
-    async findAll(companyId) {
+    async findAll(companyId, userId) {
         if (!companyId)
             throw new common_1.NotFoundException('Debe especificar un ID de empresa');
-        return this.productService.findAll(companyId);
+        return this.productService.findAll(companyId, userId);
     }
-    async findByCategory(companyId, categoryId) {
+    async findByCategory(companyId, categoryId, userId) {
         if (!companyId)
             throw new common_1.NotFoundException('Debe especificar un ID de empresa');
-        const products = await this.productService.findByCategory(companyId, Number(categoryId));
+        const products = await this.productService.findByCategory(companyId, Number(categoryId), userId);
         if (!products.length) {
             throw new common_1.NotFoundException(`No se encontraron productos para la categoría ${categoryId} en la empresa ${companyId}`);
         }
         return products;
     }
-    async findFeatured(companyId) {
+    async findFeatured(companyId, userId) {
         if (!companyId)
             throw new common_1.NotFoundException('Debe especificar un ID de empresa');
-        return this.productService.findFeaturedByCompany(companyId);
+        return this.productService.findFeaturedByCompany(companyId, userId);
     }
     async findById(id) {
         return this.productService.findById(id);
@@ -75,9 +75,11 @@ __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener todos los productos de una empresa' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: true }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false }),
     __param(0, (0, common_1.Query)('companyId')),
+    __param(1, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findAll", null);
 __decorate([
@@ -85,19 +87,23 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener productos por categoría dentro de una empresa' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: true }),
     (0, swagger_1.ApiQuery)({ name: 'categoryId', required: true }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false }),
     __param(0, (0, common_1.Query)('companyId')),
     __param(1, (0, common_1.Query)('categoryId')),
+    __param(2, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findByCategory", null);
 __decorate([
     (0, common_1.Get)('featured'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener productos destacados de una empresa' }),
     (0, swagger_1.ApiQuery)({ name: 'companyId', required: true }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false }),
     __param(0, (0, common_1.Query)('companyId')),
+    __param(1, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findFeatured", null);
 __decorate([

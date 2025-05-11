@@ -5,11 +5,12 @@ import { CreateClassDto } from './dto/create-class.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { CourseResponseDto } from './response-dto/course-response.dto';
-import { Target, ReactionType } from '@prisma/client';
 import { ActiveCoursesDto } from './dto/course-card.dto/active-courses.dto';
+import { Target, ReactionType } from '@prisma/client';
 export declare class CoursesService {
     private readonly prisma;
     constructor(prisma: PrismaService);
+    private getLikedCourseIds;
     private mapToCourseResponseDto;
     createCourse(dto: CreateCourseDto): Promise<{
         id: string;
@@ -61,12 +62,22 @@ export declare class CoursesService {
         urlIcon: string;
         colorHex: string;
     }>;
-    getAllCourses(): Promise<CourseResponseDto[]>;
+    getAllCourses(userId?: string): Promise<(CourseResponseDto & {
+        liked: boolean;
+    })[]>;
+    getFeaturedCourses(userId?: string): Promise<(CourseResponseDto & {
+        liked: boolean;
+    })[]>;
+    getCoursesByCategory(categoryId: string, userId?: string): Promise<(CourseResponseDto & {
+        liked: boolean;
+    })[]>;
+    getCoursesByInstructor(instructorId: string, userId?: string): Promise<(CourseResponseDto & {
+        liked: boolean;
+    })[]>;
+    getCoursesByTarget(target: Target, userId?: string): Promise<(CourseResponseDto & {
+        liked: boolean;
+    })[]>;
     getCourseById(courseId: string): Promise<CourseResponseDto>;
-    getFeaturedCourses(): Promise<CourseResponseDto[]>;
-    getCoursesByCategory(categoryId: string): Promise<CourseResponseDto[]>;
-    getCoursesByInstructor(instructorId: string): Promise<CourseResponseDto[]>;
-    getCoursesByTarget(target: Target): Promise<CourseResponseDto[]>;
     getUserCourses(userId: string): Promise<any[]>;
     getUserCourseProgress(userId: string, courseId: string): Promise<{
         courseId: string;
@@ -283,5 +294,7 @@ export declare class CoursesService {
         reacted: boolean;
         type: import(".prisma/client").$Enums.ReactionType;
     }>;
-    getLikedCourses(userId: string): Promise<CourseResponseDto[]>;
+    getLikedCourses(userId: string): Promise<(CourseResponseDto & {
+        liked: boolean;
+    })[]>;
 }

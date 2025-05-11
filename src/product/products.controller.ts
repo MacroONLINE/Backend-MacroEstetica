@@ -28,7 +28,7 @@ import { ReactionType } from '@prisma/client'
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  /* ─────────────── CREAR ─────────────── */
+  /* ──────────────── CREAR ──────────────── */
 
   @Post()
   @ApiOperation({ summary: 'Crear un nuevo producto' })
@@ -37,26 +37,32 @@ export class ProductController {
     return this.productService.create(dto)
   }
 
-  /* ─────────────── LISTADOS ─────────────── */
+  /* ──────────────── LISTADOS ──────────────── */
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los productos de una empresa' })
   @ApiQuery({ name: 'companyId', required: true })
-  async findAll(@Query('companyId') companyId: string) {
+  @ApiQuery({ name: 'userId', required: false })
+  async findAll(
+    @Query('companyId') companyId: string,
+    @Query('userId') userId?: string,
+  ) {
     if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
-    return this.productService.findAll(companyId)
+    return this.productService.findAll(companyId, userId)
   }
 
   @Get('by-category')
   @ApiOperation({ summary: 'Obtener productos por categoría dentro de una empresa' })
   @ApiQuery({ name: 'companyId', required: true })
   @ApiQuery({ name: 'categoryId', required: true })
+  @ApiQuery({ name: 'userId', required: false })
   async findByCategory(
     @Query('companyId') companyId: string,
     @Query('categoryId') categoryId: string,
+    @Query('userId') userId?: string,
   ) {
     if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
-    const products = await this.productService.findByCategory(companyId, Number(categoryId))
+    const products = await this.productService.findByCategory(companyId, Number(categoryId), userId)
     if (!products.length) {
       throw new NotFoundException(
         `No se encontraron productos para la categoría ${categoryId} en la empresa ${companyId}`,
@@ -68,12 +74,16 @@ export class ProductController {
   @Get('featured')
   @ApiOperation({ summary: 'Obtener productos destacados de una empresa' })
   @ApiQuery({ name: 'companyId', required: true })
-  async findFeatured(@Query('companyId') companyId: string) {
+  @ApiQuery({ name: 'userId', required: false })
+  async findFeatured(
+    @Query('companyId') companyId: string,
+    @Query('userId') userId?: string,
+  ) {
     if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
-    return this.productService.findFeaturedByCompany(companyId)
+    return this.productService.findFeaturedByCompany(companyId, userId)
   }
 
-  /* ─────────────── DETALLE ─────────────── */
+  /* ──────────────── DETALLE ──────────────── */
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un producto por ID' })
@@ -82,7 +92,7 @@ export class ProductController {
     return this.productService.findById(id)
   }
 
-  /* ─────────────── ACTUALIZAR / ELIMINAR ─────────────── */
+  /* ──────────────── ACTUALIZAR / ELIMINAR ──────────────── */
 
   @Put(':id')
   @ApiOperation({ summary: 'Actualizar un producto' })
@@ -98,7 +108,7 @@ export class ProductController {
     return this.productService.remove(id)
   }
 
-  /* ─────────────── REACCIONES ─────────────── */
+  /* ──────────────── REACCIONES ──────────────── */
 
   @Post(':productId/user/:userId/react')
   @ApiOperation({
@@ -130,7 +140,7 @@ export class ProductController {
     )
   }
 
-  /* ─────────────── WISHLIST ─────────────── */
+  /* ──────────────── WISHLIST ──────────────── */
 
   @Get('user/:userId/wishlist')
   @ApiOperation({ summary: 'Productos a los que el usuario dio like (wishlist)' })
