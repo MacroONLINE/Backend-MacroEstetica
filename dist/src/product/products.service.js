@@ -50,14 +50,19 @@ let ProductService = class ProductService {
         const liked = await this.getLikedProductIds(userId);
         return products.map((p) => ({ ...p, liked: liked.includes(p.id) }));
     }
-    async findById(id) {
+    async findById(id, userId) {
         const product = await this.prisma.product.findUnique({
             where: { id },
             include: { presentations: true },
         });
         if (!product)
             throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
-        return product;
+        if (!userId)
+            return product;
+        const reaction = await this.prisma.productReaction.findUnique({
+            where: { userId_productId: { userId, productId: id } },
+        });
+        return { ...product, liked: reaction?.type === client_1.ReactionType.LIKE };
     }
     async update(id, dto) {
         const product = await this.prisma.product.update({

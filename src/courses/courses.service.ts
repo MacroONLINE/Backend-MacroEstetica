@@ -199,22 +199,22 @@ export class CoursesService {
 
   /* ────────────────────────── DETALLE ────────────────────────── */
 
-  async getCourseById(courseId: string): Promise<CourseResponseDto> {
+  async getCourseById(
+    courseId: string,
+    userId?: string,
+  ): Promise<CourseResponseDto & { liked: boolean }> {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
       include: {
         category: true,
-        instructor: {
-          include: {
-            user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
-          },
-        },
+        instructor: { include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } } },
         modules: { include: { classes: { include: { classResources: true } } } },
         resources: true,
       },
     })
     if (!course) throw new NotFoundException(`Course with ID ${courseId} not found.`)
-    return this.mapToCourseResponseDto(course)
+    const likedIds = await this.getLikedCourseIds(userId)
+    return this.mapToCourseResponseDto(course, likedIds.has(course.id))
   }
 
   /* ────────────────────────── PROGRESO & MATRÍCULA ────────────────────────── */

@@ -45,8 +45,8 @@ let ProductController = class ProductController {
             throw new common_1.NotFoundException('Debe especificar un ID de empresa');
         return this.productService.findFeaturedByCompany(companyId, userId);
     }
-    async findById(id) {
-        return this.productService.findById(id);
+    async findById(id, userId) {
+        return this.productService.findById(id, userId);
     }
     async update(id, dto) {
         return this.productService.update(id, dto);
@@ -110,9 +110,12 @@ __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener un producto por ID' }),
     (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del producto' }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false, description: 'ID del usuario para saber si lo ha dado like' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Detalle del producto, con campo liked opcional' }),
     __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], ProductController.prototype, "findById", null);
 __decorate([

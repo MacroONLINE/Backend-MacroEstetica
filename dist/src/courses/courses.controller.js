@@ -81,8 +81,8 @@ let CoursesController = class CoursesController {
     async getCourseWishlist(userId) {
         return this.coursesService.getLikedCourses(userId);
     }
-    async getCourseById(courseId) {
-        return this.coursesService.getCourseById(courseId);
+    async getCourseById(courseId, userId) {
+        return this.coursesService.getCourseById(courseId, userId);
     }
 };
 exports.CoursesController = CoursesController;
@@ -280,9 +280,12 @@ __decorate([
     (0, common_1.Get)(':courseId'),
     (0, swagger_1.ApiOperation)({ summary: 'Get a course by ID' }),
     (0, swagger_1.ApiParam)({ name: 'courseId', description: 'Course ID' }),
+    (0, swagger_1.ApiQuery)({ name: 'userId', required: false, description: 'User ID to mark liked' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Course details returned, with optional liked flag' }),
     __param(0, (0, common_1.Param)('courseId')),
+    __param(1, (0, common_1.Query)('userId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getCourseById", null);
 exports.CoursesController = CoursesController = __decorate([

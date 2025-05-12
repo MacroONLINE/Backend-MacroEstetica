@@ -173,23 +173,20 @@ let CoursesService = class CoursesService {
         });
         return courses.map((c) => this.mapToCourseResponseDto(c, likedIds.has(c.id)));
     }
-    async getCourseById(courseId) {
+    async getCourseById(courseId, userId) {
         const course = await this.prisma.course.findUnique({
             where: { id: courseId },
             include: {
                 category: true,
-                instructor: {
-                    include: {
-                        user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
-                    },
-                },
+                instructor: { include: { user: { select: { firstName: true, lastName: true, profileImageUrl: true } } } },
                 modules: { include: { classes: { include: { classResources: true } } } },
                 resources: true,
             },
         });
         if (!course)
             throw new common_1.NotFoundException(`Course with ID ${courseId} not found.`);
-        return this.mapToCourseResponseDto(course);
+        const likedIds = await this.getLikedCourseIds(userId);
+        return this.mapToCourseResponseDto(course, likedIds.has(course.id));
     }
     async getUserCourses(userId) {
         const enrollments = await this.prisma.courseEnrollment.findMany({

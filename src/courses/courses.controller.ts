@@ -222,10 +222,16 @@ export class CoursesController {
 
   /* ─────────────── DETALLE GENÉRICO ─────────────── */
 
-  @Get(':courseId')
-  @ApiOperation({ summary: 'Get a course by ID' })
-  @ApiParam({ name: 'courseId', description: 'Course ID' })
-  async getCourseById(@Param('courseId') courseId: string) {
-    return this.coursesService.getCourseById(courseId)
-  }
+  
+@Get(':courseId')
+@ApiOperation({ summary: 'Get a course by ID' })
+@ApiParam({ name: 'courseId', description: 'Course ID' })
+@ApiQuery({ name: 'userId', required: false, description: 'User ID to mark liked' })
+@ApiResponse({ status: 200, description: 'Course details returned, with optional liked flag' })
+async getCourseById(
+  @Param('courseId') courseId: string,
+  @Query('userId') userId?: string,
+) {
+  return this.coursesService.getCourseById(courseId, userId)
+}
 }
