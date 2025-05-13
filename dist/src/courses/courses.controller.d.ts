@@ -133,4 +133,61 @@ export declare class CoursesController {
     getCourseById(courseId: string, userId?: string): Promise<import("./response-dto/course-response.dto").CourseResponseDto & {
         liked: boolean;
     }>;
+    getModuleById(moduleId: string): Promise<{
+        classes: ({
+            classComments: ({
+                replies: ({
+                    user: {
+                        firstName: string;
+                        lastName: string;
+                        profileImageUrl: string;
+                    };
+                } & {
+                    id: string;
+                    createdAt: Date;
+                    updatedAt: Date;
+                    userId: string;
+                    classId: string;
+                    parentCommentId: string | null;
+                    content: string;
+                })[];
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
+            } & {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                userId: string;
+                classId: string;
+                parentCommentId: string | null;
+                content: string;
+            })[];
+            classResources: {
+                id: string;
+                title: string;
+                createdAt: Date;
+                updatedAt: Date;
+                classId: string;
+                fileUrl: string;
+            }[];
+        } & {
+            id: string;
+            title: string;
+            description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            moduleId: string | null;
+            videoUrl: string | null;
+            imageUrl: string | null;
+        })[];
+    } & {
+        id: string;
+        description: string;
+        createdAt: Date;
+        updatedAt: Date;
+        courseId: string | null;
+    }>;
 }

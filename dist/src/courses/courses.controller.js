@@ -84,6 +84,9 @@ let CoursesController = class CoursesController {
     async getCourseById(courseId, userId) {
         return this.coursesService.getCourseById(courseId, userId);
     }
+    async getModuleById(moduleId) {
+        return this.coursesService.getModuleById(moduleId);
+    }
 };
 exports.CoursesController = CoursesController;
 __decorate([
@@ -288,6 +291,17 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], CoursesController.prototype, "getCourseById", null);
+__decorate([
+    (0, common_1.Get)('module/:moduleId'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener un módulo por ID, con sus clases y curso asociado' }),
+    (0, swagger_1.ApiParam)({ name: 'moduleId', description: 'ID del módulo' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Módulo con clases y curso.' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Módulo no encontrado.' }),
+    __param(0, (0, common_1.Param)('moduleId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CoursesController.prototype, "getModuleById", null);
 exports.CoursesController = CoursesController = __decorate([
     (0, swagger_1.ApiTags)('Courses'),
     (0, common_1.Controller)('courses'),

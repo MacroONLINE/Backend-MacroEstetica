@@ -234,4 +234,19 @@ async getCourseById(
 ) {
   return this.coursesService.getCourseById(courseId, userId)
 }
+
+
+
+/*------------ MODULE BY ID -------*/
+
+@Get('module/:moduleId')
+@ApiOperation({ summary: 'Obtener un módulo por ID, con sus clases y curso asociado' })
+@ApiParam({ name: 'moduleId', description: 'ID del módulo' })
+@ApiResponse({ status: 200, description: 'Módulo con clases y curso.' })
+@ApiResponse({ status: 404, description: 'Módulo no encontrado.' })
+async getModuleById(@Param('moduleId') moduleId: string) {
+  return this.coursesService.getModuleById(moduleId)
+}
+
+
 }
