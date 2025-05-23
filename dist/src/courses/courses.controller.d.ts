@@ -10,62 +10,62 @@ export declare class CoursesController {
     private readonly coursesService;
     constructor(coursesService: CoursesService);
     createCourse(dto: CreateCourseDto): Promise<{
-        id: string;
-        title: string;
-        bannerUrl: string;
         description: string;
-        level: string;
-        rating: number;
-        commentsCount: number;
-        averageRating: number;
-        instructorId: string | null;
-        price: number;
-        discountPercentage: number | null;
-        participantsCount: number;
-        target: import(".prisma/client").$Enums.Target;
+        title: string;
+        categoryId: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoryId: string;
-        isFeatured: boolean | null;
+        rating: number;
+        price: number;
+        target: import(".prisma/client").$Enums.Target;
+        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        bannerUrl: string;
         courseImageUrl: string;
         aboutDescription: string | null;
-        requirements: import("@prisma/client/runtime/library").JsonValue | null;
         totalHours: number;
-        whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        level: string;
+        discountPercentage: number | null;
+        instructorId: string | null;
+        requirements: import("@prisma/client/runtime/library").JsonValue | null;
+        isFeatured: boolean | null;
+        participantsCount: number;
+        commentsCount: number;
+        averageRating: number;
         introductoryVideoUrl: string | null;
     }>;
     getActiveCourses(userId: string): Promise<ActiveCoursesDto>;
     createModule(dto: CreateModuleDto): Promise<{
-        id: string;
         description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
     }>;
     createClass(dto: CreateClassDto): Promise<{
-        id: string;
-        title: string;
         description: string;
+        title: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
+        imageUrl: string | null;
         moduleId: string | null;
         videoUrl: string | null;
-        imageUrl: string | null;
     }>;
     createComment(dto: CreateCommentDto): Promise<{
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
+        content: string;
         classId: string;
         parentCommentId: string | null;
-        content: string;
     }>;
     createCategory(dto: CreateCategoryDto): Promise<{
+        name: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        name: string;
         urlIcon: string;
         colorHex: string;
     }>;
@@ -111,8 +111,8 @@ export declare class CoursesController {
         description: string;
         completed: boolean;
         classResources: {
-            id: string;
             title: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
             classId: string;
@@ -120,10 +120,10 @@ export declare class CoursesController {
         }[];
     }[]>;
     markClassAsCompleted(classId: string, userId: string): Promise<{
+        userId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        userId: string;
         classId: string;
         completed: boolean;
     }>;
@@ -136,6 +136,11 @@ export declare class CoursesController {
     getModuleById(moduleId: string): Promise<{
         classes: ({
             classComments: ({
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
                 replies: ({
                     user: {
                         firstName: string;
@@ -143,49 +148,44 @@ export declare class CoursesController {
                         profileImageUrl: string;
                     };
                 } & {
+                    userId: string;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    userId: string;
+                    content: string;
                     classId: string;
                     parentCommentId: string | null;
-                    content: string;
                 })[];
-                user: {
-                    firstName: string;
-                    lastName: string;
-                    profileImageUrl: string;
-                };
             } & {
+                userId: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
+                content: string;
                 classId: string;
                 parentCommentId: string | null;
-                content: string;
             })[];
             classResources: {
-                id: string;
                 title: string;
+                id: string;
                 createdAt: Date;
                 updatedAt: Date;
                 classId: string;
                 fileUrl: string;
             }[];
         } & {
-            id: string;
-            title: string;
             description: string;
+            title: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            imageUrl: string | null;
             moduleId: string | null;
             videoUrl: string | null;
-            imageUrl: string | null;
         })[];
     } & {
-        id: string;
         description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
@@ -193,6 +193,11 @@ export declare class CoursesController {
     getModulesByCourse(courseId: string): Promise<({
         classes: ({
             classComments: ({
+                user: {
+                    firstName: string;
+                    lastName: string;
+                    profileImageUrl: string;
+                };
                 replies: ({
                     user: {
                         firstName: string;
@@ -200,49 +205,44 @@ export declare class CoursesController {
                         profileImageUrl: string;
                     };
                 } & {
+                    userId: string;
                     id: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    userId: string;
+                    content: string;
                     classId: string;
                     parentCommentId: string | null;
-                    content: string;
                 })[];
-                user: {
-                    firstName: string;
-                    lastName: string;
-                    profileImageUrl: string;
-                };
             } & {
+                userId: string;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                userId: string;
+                content: string;
                 classId: string;
                 parentCommentId: string | null;
-                content: string;
             })[];
             classResources: {
-                id: string;
                 title: string;
+                id: string;
                 createdAt: Date;
                 updatedAt: Date;
                 classId: string;
                 fileUrl: string;
             }[];
         } & {
-            id: string;
-            title: string;
             description: string;
+            title: string;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
+            imageUrl: string | null;
             moduleId: string | null;
             videoUrl: string | null;
-            imageUrl: string | null;
         })[];
     } & {
-        id: string;
         description: string;
+        id: string;
         createdAt: Date;
         updatedAt: Date;
         courseId: string | null;
