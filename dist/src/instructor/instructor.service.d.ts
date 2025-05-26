@@ -61,9 +61,9 @@ export declare class InstructorService {
             instructorId: string | null;
             requirements: Prisma.JsonValue | null;
             isFeatured: boolean | null;
+            participantsCount: number;
             commentsCount: number;
             averageRating: number;
-            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -142,9 +142,9 @@ export declare class InstructorService {
             instructorId: string | null;
             requirements: Prisma.JsonValue | null;
             isFeatured: boolean | null;
+            participantsCount: number;
             commentsCount: number;
             averageRating: number;
-            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -223,9 +223,9 @@ export declare class InstructorService {
             instructorId: string | null;
             requirements: Prisma.JsonValue | null;
             isFeatured: boolean | null;
+            participantsCount: number;
             commentsCount: number;
             averageRating: number;
-            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -304,9 +304,9 @@ export declare class InstructorService {
             instructorId: string | null;
             requirements: Prisma.JsonValue | null;
             isFeatured: boolean | null;
+            participantsCount: number;
             commentsCount: number;
             averageRating: number;
-            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -385,9 +385,9 @@ export declare class InstructorService {
             instructorId: string | null;
             requirements: Prisma.JsonValue | null;
             isFeatured: boolean | null;
+            participantsCount: number;
             commentsCount: number;
             averageRating: number;
-            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -466,9 +466,9 @@ export declare class InstructorService {
             instructorId: string | null;
             requirements: Prisma.JsonValue | null;
             isFeatured: boolean | null;
+            participantsCount: number;
             commentsCount: number;
             averageRating: number;
-            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -547,9 +547,9 @@ export declare class InstructorService {
             instructorId: string | null;
             requirements: Prisma.JsonValue | null;
             isFeatured: boolean | null;
+            participantsCount: number;
             commentsCount: number;
             averageRating: number;
-            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {

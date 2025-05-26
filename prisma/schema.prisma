@@ -48,7 +48,7 @@ model User {
   attendedStreams        EventStream[]           @relation("EventStreamAttendees")
   attendedWorkshops      Workshop[]              @relation("WorkshopAttendees")
 
-   courseReactions  CourseReaction[]
+  courseReactions  CourseReaction[]
   productReactions ProductReaction[]
 }
 
@@ -92,6 +92,7 @@ model Empresa {
   minisite             Minisite?
   productos            Product[]
   categorias           ProductCompanyCategory[]
+  companyUsages        CompanyUsage[]
 }
 
 model Subscription {
@@ -105,16 +106,16 @@ model Subscription {
 }
 
 enum SubscriptionInterval {
-  MONTHLY    
-  SEMIANNUAL 
-  ANNUAL     
+  MONTHLY
+  SEMIANNUAL
+  ANNUAL
 }
 
 model EmpresaSubscription {
   id             String                @id @default(cuid())
   empresaId      String
   subscriptionId String
-  interval       SubscriptionInterval?  
+  interval       SubscriptionInterval?
   startDate      DateTime              @default(now())
   endDate        DateTime
   status         String                @default("active")
@@ -153,7 +154,7 @@ model Course {
   enrollments          CourseEnrollment[]
   modules              Module[]
   resources            Resource[]
-  reactions CourseReaction[]
+  reactions            CourseReaction[]
 }
 
 model Resource {
@@ -474,7 +475,7 @@ model BlogPost {
   averageRating  Float          @default(0)
   totalRatings   Int            @default(0)
   description    String         @default("")
-  keywords       String?        @default("") 
+  keywords       String?        @default("")
   notUsefulCount Int?           @default(0)
   totalReaders   Int?           @default(0)
   usefulCount    Int?           @default(0)
@@ -706,7 +707,8 @@ model Product {
   presentations     Presentation[]             @relation("ProductPresentations")
   category          ProductCompanyCategory     @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
   company           Empresa                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
-reactions ProductReaction[]
+  reactions         ProductReaction[]
+
   @@unique([categoryId, name])
 }
 
@@ -860,8 +862,8 @@ model CourseReaction {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  user      User   @relation(fields: [userId],   references: [id], onDelete: Cascade)
-  course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
 }
@@ -874,8 +876,39 @@ model ProductReaction {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  user      User    @relation(fields: [userId],    references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
+}
+
+/// --- tablas de control de cuotas ----------------------------
+model PlanFeature {
+  id        String           @id @default(cuid())
+  plan      SubscriptionType
+  code      FeatureCode
+  limit     Int? // NULL = ilimitado
+  createdAt DateTime         @default(now())
+
+  @@unique([plan, code])
+}
+
+model CompanyUsage {
+  id        String      @id @default(cuid())
+  companyId String
+  code      FeatureCode
+  used      Int         @default(0)
+  updatedAt DateTime    @updatedAt
+  empresa   Empresa     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, code])
+}
+
+enum FeatureCode {
+  PRODUCTS_TOTAL
+  CATEGORIES_TOTAL
+  BANNER_PRODUCT_SLOTS
+  STATIC_IMAGES_TOTAL
+  FEATURED_PRODUCTS_TOTAL
+  CLASSROOM_TRANSMISSIONS_TOTAL
 }

@@ -12,6 +12,8 @@ const empresa_service_1 = require("./empresa.service");
 const empresa_controller_1 = require("./empresa.controller");
 const prisma_module_1 = require("../prisma/prisma.module");
 const cloudinary_module_1 = require("../cloudinary/cloudinary.module");
+const minisite_service_1 = require("./minisite.service");
+const minisite_controller_1 = require("./minisite.controller");
 let EmpresaModule = class EmpresaModule {
 };
 exports.EmpresaModule = EmpresaModule;
@@ -21,8 +23,8 @@ exports.EmpresaModule = EmpresaModule = __decorate([
             prisma_module_1.PrismaModule,
             cloudinary_module_1.CloudinaryModule,
         ],
-        controllers: [empresa_controller_1.EmpresaController],
-        providers: [empresa_service_1.EmpresaService],
+        controllers: [empresa_controller_1.EmpresaController, minisite_controller_1.MinisiteController],
+        providers: [empresa_service_1.EmpresaService, minisite_service_1.MinisiteService],
         exports: [empresa_service_1.EmpresaService],
     })
 ], EmpresaModule);

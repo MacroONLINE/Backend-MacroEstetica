@@ -13,16 +13,16 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
+        lab: string | null;
         activeIngredients: string[];
-        benefits: string[];
         features: string[];
-        imageGallery: string[];
+        benefits: string[];
+        problemAddressed: string | null;
         imageMain: string | null;
+        imageGallery: string[];
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
+        companyId: string;
     }>;
     findAll(companyId: string, userId?: string): Promise<({
         presentations: {
@@ -43,16 +43,16 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
+        lab: string | null;
         activeIngredients: string[];
-        benefits: string[];
         features: string[];
-        imageGallery: string[];
+        benefits: string[];
+        problemAddressed: string | null;
         imageMain: string | null;
+        imageGallery: string[];
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
+        companyId: string;
     })[]>;
     findByCategory(companyId: string, categoryId: string, userId?: string): Promise<({
         presentations: {
@@ -73,16 +73,16 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
+        lab: string | null;
         activeIngredients: string[];
-        benefits: string[];
         features: string[];
-        imageGallery: string[];
+        benefits: string[];
+        problemAddressed: string | null;
         imageMain: string | null;
+        imageGallery: string[];
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
+        companyId: string;
     })[]>;
     findFeatured(companyId: string, userId?: string): Promise<({
         presentations: {
@@ -103,16 +103,16 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
+        lab: string | null;
         activeIngredients: string[];
-        benefits: string[];
         features: string[];
-        imageGallery: string[];
+        benefits: string[];
+        problemAddressed: string | null;
         imageMain: string | null;
+        imageGallery: string[];
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
+        companyId: string;
     })[]>;
     findById(id: string, userId?: string): Promise<({
         presentations: {
@@ -133,16 +133,16 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
+        lab: string | null;
         activeIngredients: string[];
-        benefits: string[];
         features: string[];
-        imageGallery: string[];
+        benefits: string[];
+        problemAddressed: string | null;
         imageMain: string | null;
+        imageGallery: string[];
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
+        companyId: string;
     }) | {
         liked: boolean;
         presentations: {
@@ -162,16 +162,16 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
+        lab: string | null;
         activeIngredients: string[];
-        benefits: string[];
         features: string[];
-        imageGallery: string[];
+        benefits: string[];
+        problemAddressed: string | null;
         imageMain: string | null;
+        imageGallery: string[];
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
+        companyId: string;
     }>;
     update(id: string, dto: UpdateProductDto): Promise<{
         presentations: {
@@ -192,16 +192,16 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
+        lab: string | null;
         activeIngredients: string[];
-        benefits: string[];
         features: string[];
-        imageGallery: string[];
+        benefits: string[];
+        problemAddressed: string | null;
         imageMain: string | null;
+        imageGallery: string[];
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
+        companyId: string;
     }>;
     remove(id: string): Promise<{
         message: string;
@@ -236,15 +236,15 @@ export declare class ProductController {
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
+        lab: string | null;
         activeIngredients: string[];
-        benefits: string[];
         features: string[];
-        imageGallery: string[];
+        benefits: string[];
+        problemAddressed: string | null;
         imageMain: string | null;
+        imageGallery: string[];
         isBestSeller: boolean | null;
         isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
+        companyId: string;
     }[]>;
 }
