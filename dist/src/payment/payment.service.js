@@ -454,22 +454,33 @@ let PaymentService = PaymentService_1 = class PaymentService {
         return validValues.includes(subscriptionType);
     }
     async createEmpresaSubscription(empresaId, subscriptionType, transactionId, interval = 'MONTHLY') {
-        this.logger.log(`[DEBUG] Entrando a createEmpresaSubscription — empresaId=${empresaId}, subscriptionType=${subscriptionType}, transactionId=${transactionId}, interval=${interval}`);
+        this.logger.log(`🔨 [createEmpresaSubscription] inicio — empresaId=${empresaId}, type=${subscriptionType}, txId=${transactionId}, interval=${interval}`);
+        const plan = await this.prisma.subscription.findUnique({
+            where: { type: subscriptionType },
+        });
+        this.logger.debug(`🔍 [createEmpresaSubscription] subscription.findUnique() → ${plan ? 'encontrado' : 'NO encontrado'}`);
+        if (!plan) {
+            const msg = `Tipo de suscripción inválido: ${subscriptionType}`;
+            this.logger.error(`❌ [createEmpresaSubscription] ${msg}`);
+            throw new common_1.HttpException(msg, common_1.HttpStatus.BAD_REQUEST);
+        }
         const now = new Date();
         const monthsToAdd = interval === 'MONTHLY' ? 1 : interval === 'SEMIANNUAL' ? 6 : 12;
-        const end = new Date(now);
-        end.setMonth(end.getMonth() + monthsToAdd);
+        const endDate = new Date(now);
+        endDate.setMonth(endDate.getMonth() + monthsToAdd);
+        this.logger.log(`📅 [createEmpresaSubscription] startDate=${now.toISOString()}, endDate=${endDate.toISOString()}`);
         const created = await this.prisma.empresaSubscription.create({
             data: {
                 empresaId,
-                subscriptionId: (await this.prisma.subscription.findUnique({ where: { type: subscriptionType } })).id,
+                subscriptionId: plan.id,
                 interval,
                 startDate: now,
-                endDate: end,
+                endDate: endDate,
                 status: 'active',
             },
         });
-        this.logger.log(`[DEBUG] Filas insertadas en EmpresaSubscription: ${JSON.stringify(created)}`);
+        this.logger.log(`💾 [createEmpresaSubscription] EmpresaSubscription creada ID=${created.id}`);
+        this.logger.debug(`🗂️ [createEmpresaSubscription] registro completo: ${JSON.stringify(created)}`);
     }
     async cancelEmpresaSubscription(empresaId) {
         await this.prisma.empresaSubscription.updateMany({
