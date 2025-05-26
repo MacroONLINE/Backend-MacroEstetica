@@ -17,11 +17,11 @@ export declare class EmpresaService {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            password: string;
             id: string;
             email: string;
             emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            password: string;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -61,11 +61,11 @@ export declare class EmpresaService {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            password: string;
             id: string;
             email: string;
             emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            password: string;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -105,11 +105,11 @@ export declare class EmpresaService {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            password: string;
             id: string;
             email: string;
             emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            password: string;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -149,11 +149,11 @@ export declare class EmpresaService {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            password: string;
             id: string;
             email: string;
             emailVerified: Date | null;
             role: import(".prisma/client").$Enums.Role;
+            password: string;
             createdAt: Date;
             updatedAt: Date;
             newsletter: boolean;
@@ -200,16 +200,16 @@ export declare class EmpresaService {
                     createdAt: Date;
                     updatedAt: Date;
                     isFeatured: boolean | null;
-                    lab: string | null;
+                    companyId: string;
                     activeIngredients: string[];
-                    features: string[];
                     benefits: string[];
-                    problemAddressed: string | null;
-                    imageMain: string | null;
+                    features: string[];
                     imageGallery: string[];
+                    imageMain: string | null;
                     isBestSeller: boolean | null;
                     isOnSale: boolean | null;
-                    companyId: string;
+                    lab: string | null;
+                    problemAddressed: string | null;
                 };
             } & {
                 id: string;
@@ -230,16 +230,16 @@ export declare class EmpresaService {
                     createdAt: Date;
                     updatedAt: Date;
                     isFeatured: boolean | null;
-                    lab: string | null;
+                    companyId: string;
                     activeIngredients: string[];
-                    features: string[];
                     benefits: string[];
-                    problemAddressed: string | null;
-                    imageMain: string | null;
+                    features: string[];
                     imageGallery: string[];
+                    imageMain: string | null;
                     isBestSeller: boolean | null;
                     isOnSale: boolean | null;
-                    companyId: string;
+                    lab: string | null;
+                    problemAddressed: string | null;
                 };
             } & {
                 id: string;
@@ -340,16 +340,16 @@ export declare class EmpresaService {
             createdAt: Date;
             updatedAt: Date;
             isFeatured: boolean | null;
-            lab: string | null;
+            companyId: string;
             activeIngredients: string[];
-            features: string[];
             benefits: string[];
-            problemAddressed: string | null;
-            imageMain: string | null;
+            features: string[];
             imageGallery: string[];
+            imageMain: string | null;
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
-            companyId: string;
+            lab: string | null;
+            problemAddressed: string | null;
         }[];
         categorias: ({
             products: {
@@ -360,16 +360,16 @@ export declare class EmpresaService {
                 createdAt: Date;
                 updatedAt: Date;
                 isFeatured: boolean | null;
-                lab: string | null;
+                companyId: string;
                 activeIngredients: string[];
-                features: string[];
                 benefits: string[];
-                problemAddressed: string | null;
-                imageMain: string | null;
+                features: string[];
                 imageGallery: string[];
+                imageMain: string | null;
                 isBestSeller: boolean | null;
                 isOnSale: boolean | null;
-                companyId: string;
+                lab: string | null;
+                problemAddressed: string | null;
             }[];
         } & {
             name: string;
@@ -408,11 +408,15 @@ export declare class EmpresaService {
         catalogueUrl: string;
     }>;
     getPlanByUserId(userId: string): Promise<{
-        type: import(".prisma/client").$Enums.SubscriptionType;
-        description: string;
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        price: number;
+        plan: {
+            type: import(".prisma/client").$Enums.SubscriptionType;
+            description: string;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            price: number;
+        };
+        interval: import(".prisma/client").$Enums.SubscriptionInterval;
+        billingEnd: Date;
     }>;
 }

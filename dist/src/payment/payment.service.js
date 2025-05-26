@@ -453,23 +453,23 @@ let PaymentService = PaymentService_1 = class PaymentService {
         const validValues = ['BASICO', 'INTERMEDIO', 'PREMIUM'];
         return validValues.includes(subscriptionType);
     }
-    async createEmpresaSubscription(empresaId, subscriptionType, transactionId) {
-        const subscription = await this.prisma.subscription.findUnique({
-            where: { type: subscriptionType },
-        });
-        if (!subscription) {
-            throw new common_1.HttpException('Tipo de suscripción no válido', common_1.HttpStatus.BAD_REQUEST);
-        }
-        await this.prisma.empresaSubscription.create({
+    async createEmpresaSubscription(empresaId, subscriptionType, transactionId, interval = 'MONTHLY') {
+        this.logger.log(`[DEBUG] Entrando a createEmpresaSubscription — empresaId=${empresaId}, subscriptionType=${subscriptionType}, transactionId=${transactionId}, interval=${interval}`);
+        const now = new Date();
+        const monthsToAdd = interval === 'MONTHLY' ? 1 : interval === 'SEMIANNUAL' ? 6 : 12;
+        const end = new Date(now);
+        end.setMonth(end.getMonth() + monthsToAdd);
+        const created = await this.prisma.empresaSubscription.create({
             data: {
                 empresaId,
-                subscriptionId: subscription.id,
-                startDate: new Date(),
-                endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+                subscriptionId: (await this.prisma.subscription.findUnique({ where: { type: subscriptionType } })).id,
+                interval,
+                startDate: now,
+                endDate: end,
                 status: 'active',
             },
         });
-        this.logger.log(`Suscripción ${subscriptionType} creada/renovada para empresa ${empresaId}`);
+        this.logger.log(`[DEBUG] Filas insertadas en EmpresaSubscription: ${JSON.stringify(created)}`);
     }
     async cancelEmpresaSubscription(empresaId) {
         await this.prisma.empresaSubscription.updateMany({

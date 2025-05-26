@@ -230,4 +230,53 @@ export class PaymentController {
     this.logger.log(`Sesión de checkout (classroom) creada: ${JSON.stringify(session)}`);
     return { url: session.url };
   }
+
+  @Post('subscription/cancel')
+  @ApiOperation({ summary: 'Cancela la suscripción activa de la empresa' })
+  @ApiBody({
+    schema: {
+      properties: {
+        empresaId: {
+          type: 'string',
+          description: 'ID de la empresa cuya suscripción se va a cancelar',
+          example: 'company-001'
+        },
+      },
+      required: ['empresaId'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Suscripción cancelada correctamente',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Suscripción de la empresa company-001 cancelada correctamente.'
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 400, description: 'empresaId es requerido o inválido' })
+  async cancelCompanySubscription(
+    @Body('empresaId') empresaId: string,
+  ) {
+    if (!empresaId) {
+      throw new HttpException(
+        'El campo empresaId es requerido',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.paymentService.cancelEmpresaSubscription(empresaId);
+
+    this.logger.log(
+      `Suscripción de empresa cancelada: empresaId=${empresaId}`,
+    );
+
+    return {
+      message: `Suscripción de la empresa ${empresaId} cancelada correctamente.`,
+    };
+  }
 }

@@ -60,9 +60,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -141,9 +141,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -222,9 +222,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -303,9 +303,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -384,9 +384,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -465,9 +465,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -546,9 +546,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {

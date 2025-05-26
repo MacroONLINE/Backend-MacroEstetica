@@ -18,6 +18,7 @@ const swagger_1 = require("@nestjs/swagger");
 const empresa_service_1 = require("./empresa.service");
 const client_1 = require("@prisma/client");
 const platform_express_1 = require("@nestjs/platform-express");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let EmpresaController = class EmpresaController {
     constructor(empresaService) {
         this.empresaService = empresaService;
@@ -136,9 +137,61 @@ __decorate([
 ], EmpresaController.prototype, "uploadCatalogueFile", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener plan activo de la empresa por User ID' }),
-    (0, swagger_1.ApiParam)({ name: 'userId', description: 'ID del usuario relacionado a la empresa' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Plan encontrado', schema: { type: 'object', properties: { id: { type: 'string' }, type: { type: 'string' }, description: { type: 'string' }, price: { type: 'number' } } } }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Plan no encontrado' }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiParam)({
+        name: 'userId',
+        description: 'ID del usuario (empresa) del cual se consulta el plan',
+        example: 'cm4sths4i0008g1865nsbbh1l',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Plan encontrado y fecha de corte (billingEnd)',
+        schema: {
+            type: 'object',
+            properties: {
+                plan: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'string',
+                            example: 'ckl8x0q8g000v5185h1a9z4lw',
+                        },
+                        type: {
+                            type: 'string',
+                            enum: Object.values(client_1.SubscriptionType),
+                            example: 'BASICO',
+                        },
+                        description: {
+                            type: 'string',
+                            example: 'Plan Básico mensual',
+                        },
+                        price: {
+                            type: 'number',
+                            example: 100.0,
+                        },
+                    },
+                },
+                interval: {
+                    type: 'string',
+                    enum: ['MONTHLY', 'SEMIANNUAL', 'ANNUAL'],
+                    example: 'MONTHLY',
+                    description: 'Intervalo de la suscripción',
+                },
+                billingEnd: {
+                    type: 'string',
+                    format: 'date-time',
+                    example: '2025-06-25T00:00:00.000Z',
+                    description: 'Fecha en que expira el periodo de facturación actual',
+                },
+            },
+        },
+    }),
+    (0, swagger_1.ApiUnauthorizedResponse)({
+        description: 'No autorizado. Falta o es inválido el token JWT.',
+    }),
+    (0, swagger_1.ApiNotFoundResponse)({
+        description: 'Plan no encontrado para el userId proporcionado.',
+    }),
     (0, common_1.Get)('user/:userId/plan'),
     __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),

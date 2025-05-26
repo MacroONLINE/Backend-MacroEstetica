@@ -8,11 +8,13 @@ import {
   Put,
   UseInterceptors,
   UploadedFile,
+  UseGuards,
 } from '@nestjs/common';
-import { ApiOperation, ApiTags, ApiConsumes, ApiBody, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiTags, ApiConsumes, ApiBody, ApiParam, ApiResponse, ApiUnauthorizedResponse, ApiNotFoundResponse, ApiOkResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { EmpresaService } from './empresa.service';
-import { Giro, Target } from '@prisma/client';
+import { Giro, SubscriptionType, Target } from '@prisma/client';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('empresa')
 @Controller('empresa')
@@ -110,13 +112,64 @@ export class EmpresaController {
     return this.empresaService.uploadCatalogue(empresaId, file);
   }
 
-@ApiOperation({ summary: 'Obtener plan activo de la empresa por User ID' })
-@ApiParam({ name: 'userId', description: 'ID del usuario relacionado a la empresa' })
-@ApiResponse({ status: 200, description: 'Plan encontrado', schema: { type: 'object', properties: { id: { type: 'string' }, type: { type: 'string' }, description: { type: 'string' }, price: { type: 'number' } } } })
-@ApiResponse({ status: 404, description: 'Plan no encontrado' })
-@Get('user/:userId/plan')
-async getPlanByUserId(@Param('userId') userId: string) {
-  return this.empresaService.getPlanByUserId(userId)
-}
-
+  @ApiOperation({ summary: 'Obtener plan activo de la empresa por User ID' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiParam({
+    name: 'userId',
+    description: 'ID del usuario (empresa) del cual se consulta el plan',
+    example: 'cm4sths4i0008g1865nsbbh1l',
+  })
+  @ApiOkResponse({
+    description: 'Plan encontrado y fecha de corte (billingEnd)',
+    schema: {
+      type: 'object',
+      properties: {
+        plan: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              example: 'ckl8x0q8g000v5185h1a9z4lw',
+            },
+            type: {
+              type: 'string',
+              enum: Object.values(SubscriptionType),
+              example: 'BASICO',
+            },
+            description: {
+              type: 'string',
+              example: 'Plan Básico mensual',
+            },
+            price: {
+              type: 'number',
+              example: 100.0,
+            },
+          },
+        },
+        interval: {
+          type: 'string',
+          enum: ['MONTHLY', 'SEMIANNUAL', 'ANNUAL'],
+          example: 'MONTHLY',
+          description: 'Intervalo de la suscripción',
+        },
+        billingEnd: {
+          type: 'string',
+          format: 'date-time',
+          example: '2025-06-25T00:00:00.000Z',
+          description: 'Fecha en que expira el periodo de facturación actual',
+        },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'No autorizado. Falta o es inválido el token JWT.',
+  })
+  @ApiNotFoundResponse({
+    description: 'Plan no encontrado para el userId proporcionado.',
+  })
+  @Get('user/:userId/plan')
+  async getPlanByUserId(@Param('userId') userId: string) {
+    return this.empresaService.getPlanByUserId(userId);
+  }
 }

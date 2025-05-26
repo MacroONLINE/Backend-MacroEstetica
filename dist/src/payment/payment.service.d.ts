@@ -20,7 +20,7 @@ export declare class PaymentService {
     private processTransaction;
     private isValidCompanySubscription;
     private createEmpresaSubscription;
-    private cancelEmpresaSubscription;
+    cancelEmpresaSubscription(empresaId: string): Promise<void>;
     private enrollUserInCourse;
     private enrollUserInEvent;
     private enrollUserInWorkshop;

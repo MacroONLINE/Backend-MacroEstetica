@@ -149,7 +149,12 @@ let EmpresaService = class EmpresaService {
         if (!empresa || empresa.empresaSubscriptions.length === 0) {
             throw new common_1.HttpException('Plan no encontrado', common_1.HttpStatus.NOT_FOUND);
         }
-        return empresa.empresaSubscriptions[0].subscription;
+        const sub = empresa.empresaSubscriptions[0];
+        return {
+            plan: sub.subscription,
+            interval: sub.interval,
+            billingEnd: sub.endDate,
+        };
     }
 };
 exports.EmpresaService = EmpresaService;

@@ -86,6 +86,16 @@ let PaymentController = PaymentController_1 = class PaymentController {
         this.logger.log(`Sesión de checkout (classroom) creada: ${JSON.stringify(session)}`);
         return { url: session.url };
     }
+    async cancelCompanySubscription(empresaId) {
+        if (!empresaId) {
+            throw new common_1.HttpException('El campo empresaId es requerido', common_1.HttpStatus.BAD_REQUEST);
+        }
+        await this.paymentService.cancelEmpresaSubscription(empresaId);
+        this.logger.log(`Suscripción de empresa cancelada: empresaId=${empresaId}`);
+        return {
+            message: `Suscripción de la empresa ${empresaId} cancelada correctamente.`,
+        };
+    }
 };
 exports.PaymentController = PaymentController;
 __decorate([
@@ -226,6 +236,40 @@ __decorate([
     __metadata("design:paramtypes", [String, String, String]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "createClassroomCheckoutSession", null);
+__decorate([
+    (0, common_1.Post)('subscription/cancel'),
+    (0, swagger_1.ApiOperation)({ summary: 'Cancela la suscripción activa de la empresa' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            properties: {
+                empresaId: {
+                    type: 'string',
+                    description: 'ID de la empresa cuya suscripción se va a cancelar',
+                    example: 'company-001'
+                },
+            },
+            required: ['empresaId'],
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Suscripción cancelada correctamente',
+        schema: {
+            type: 'object',
+            properties: {
+                message: {
+                    type: 'string',
+                    example: 'Suscripción de la empresa company-001 cancelada correctamente.'
+                }
+            }
+        }
+    }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'empresaId es requerido o inválido' }),
+    __param(0, (0, common_1.Body)('empresaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "cancelCompanySubscription", null);
 exports.PaymentController = PaymentController = PaymentController_1 = __decorate([
     (0, swagger_1.ApiTags)('payment'),
     (0, common_1.Controller)('payment'),

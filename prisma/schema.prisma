@@ -104,17 +104,24 @@ model Subscription {
   subscriptions EmpresaSubscription[]
 }
 
+enum SubscriptionInterval {
+  MONTHLY    
+  SEMIANNUAL 
+  ANNUAL     
+}
+
 model EmpresaSubscription {
-  id             String       @id @default(cuid())
+  id             String                @id @default(cuid())
   empresaId      String
   subscriptionId String
-  startDate      DateTime     @default(now())
+  interval       SubscriptionInterval?  
+  startDate      DateTime              @default(now())
   endDate        DateTime
-  status         String       @default("active")
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @default(now())
-  empresa        Empresa      @relation(fields: [empresaId], references: [id], onDelete: Cascade)
-  subscription   Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  status         String                @default("active")
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @default(now())
+  empresa        Empresa               @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  subscription   Subscription          @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
 }
 
 model Course {

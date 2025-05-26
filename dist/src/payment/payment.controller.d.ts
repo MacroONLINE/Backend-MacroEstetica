@@ -23,4 +23,7 @@ export declare class PaymentController {
     createClassroomCheckoutSession(classroomId: string, userId: string, email: string): Promise<{
         url: string;
     }>;
+    cancelCompanySubscription(empresaId: string): Promise<{
+        message: string;
+    }>;
 }
