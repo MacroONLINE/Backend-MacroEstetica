@@ -6,16 +6,20 @@ import {
     ParseEnumPipe,
     Body,
     Put,
+    UploadedFiles,
+    UseInterceptors,
   } from '@nestjs/common';
   import {
     ApiBadRequestResponse,
     ApiBody,
+    ApiConsumes,
     ApiOkResponse,
     ApiOperation,
     ApiParam,
     ApiTags,
   } from '@nestjs/swagger';
-  import { FeatureCode } from '@prisma/client';
+  import { AnyFilesInterceptor } from '@nestjs/platform-express';
+  import { FeatureCode, Profession } from '@prisma/client';
   import { MinisiteService } from './minisite.service';
   import { UsageResponseDto } from './dto/minisite-quota.dto';
   
@@ -27,7 +31,7 @@ import {
     @ApiOperation({
       summary: 'Cuotas y objetos de todos los códigos',
       description:
-        'Array con cada `FeatureCode`, su límite (`limit`), lo usado (`used`) y los objetos (`items`).',
+        'Array con cada FeatureCode, su límite (limit), lo usado (used) y los objetos (items).',
     })
     @ApiParam({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' })
     @ApiOkResponse({ type: UsageResponseDto, isArray: true })
@@ -38,8 +42,7 @@ import {
   
     @ApiOperation({
       summary: 'Cuota y objetos de un código',
-      description:
-        'Devuelve límite, usado y objetos del `FeatureCode` solicitado.',
+      description: 'Devuelve límite, usado y objetos del FeatureCode solicitado.',
     })
     @ApiParam({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' })
     @ApiParam({
@@ -60,7 +63,7 @@ import {
     @ApiOperation({
       summary: 'Objetos de todos los códigos',
       description:
-        'Objeto donde cada clave es un `FeatureCode` y su valor el array de objetos.',
+        'Objeto donde cada clave es un FeatureCode y el valor es el array de objetos.',
     })
     @ApiParam({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' })
     @ApiOkResponse({
@@ -83,12 +86,19 @@ import {
       description: 'Array de objetos que consumen la cuota indicada.',
     })
     @ApiParam({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' })
-    @ApiParam({ name: 'code', enum: FeatureCode, example: FeatureCode.STATIC_IMAGES_TOTAL })
+    @ApiParam({
+      name: 'code',
+      enum: FeatureCode,
+      example: FeatureCode.STATIC_IMAGES_TOTAL,
+    })
     @ApiOkResponse({
       schema: {
         type: 'array',
         items: { type: 'object' },
-        example: [{ id: 'slide1', title: 'Promo', imageSrc: 'https://…' }],
+        example: [
+          { id: 'slide1', title: 'Promo', imageSrc: 'https://…' },
+          { id: 'slide2', title: 'Bienvenida', imageSrc: 'https://…' },
+        ],
       },
     })
     @Get(':empresaId/objects/:code')
@@ -105,7 +115,11 @@ import {
       schema: {
         type: 'object',
         properties: {
-          id: { type: 'string', example: 'prod123', description: 'Enviar para actualizar' },
+          id: {
+            type: 'string',
+            example: 'prod123',
+            description: 'Enviar para actualizar',
+          },
           name: { type: 'string', example: 'Serum Vitamina C' },
           description: { type: 'string', example: 'Potente antioxidante' },
           categoryId: { type: 'integer', example: 5 },
@@ -181,8 +195,14 @@ import {
             items: { type: 'string' },
             example: ['Alta concentración', 'Sin parabenos'],
           },
-          highlightDescription: { type: 'string', example: 'Nuevo lanzamiento' },
-          hoghlightImageUrl: { type: 'string', example: 'https://…/highlight.jpg' },
+          highlightDescription: {
+            type: 'string',
+            example: 'Nuevo lanzamiento',
+          },
+          hoghlightImageUrl: {
+            type: 'string',
+            example: 'https://…/highlight.jpg',
+          },
         },
         required: ['productId', 'highlightFeatures'],
       },
@@ -195,28 +215,80 @@ import {
       return this.minisite.upsertHighlight(empresaId, body);
     }
   
-    @ApiOperation({ summary: 'Crear o actualizar slide' })
+    @ApiOperation({
+      summary: 'Configurar info general, logo y lote de slides',
+      description:
+        'Multipart/form-data: nombre, descripción, categorías, slogan, logo (file), slides (file[]) y slidesMeta (JSON).',
+    })
+    @ApiConsumes('multipart/form-data')
     @ApiParam({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' })
     @ApiBody({
       schema: {
         type: 'object',
         properties: {
-          id: { type: 'string', example: 'slide01' },
-          title: { type: 'string', example: 'Bienvenida' },
-          description: { type: 'string', example: 'Conoce nuestra línea' },
-          cta: { type: 'string', example: 'Ver más' },
-          imageSrc: { type: 'string', example: 'https://…/slide.jpg' },
-          order: { type: 'integer', example: 2 },
+          name: { type: 'string', example: 'DermaCorp' },
+          description: {
+            type: 'string',
+            example: 'Laboratorio dermocosmético',
+          },
+          categories: {
+            type: 'string',
+            example: 'DERMATOLOGIA,COSMETOLOGIA',
+            description:
+              'Valores del enum Profession separados por comas',
+          },
+          slogan: {
+            type: 'string',
+            example: 'Belleza clínica al alcance',
+          },
+          slidesMeta: {
+            type: 'string',
+            example:
+              '[{"title":"Promo","description":"-20%","cta":"Comprar"}]',
+            description:
+              'JSON array de metadatos para cada slide',
+          },
+          logo: {
+            type: 'string',
+            format: 'binary',
+            description: 'PNG 200×200',
+          },
+          slides: {
+            type: 'array',
+            items: { type: 'string', format: 'binary' },
+            description: 'Imágenes (máx 10 MB c/u)',
+          },
         },
-        required: ['title'],
+        required: ['name', 'description', 'categories', 'slidesMeta'],
       },
     })
-    @Put(':empresaId/slide')
-    upsertSlide(
+    @UseInterceptors(AnyFilesInterceptor())
+    @Put(':empresaId/setup')
+    setup(
       @Param('empresaId') empresaId: string,
       @Body() body: any,
+      @UploadedFiles() files: Express.Multer.File[],
     ) {
-      return this.minisite.upsertSlide(empresaId, body);
+      const logo = files.find((f) => f.fieldname === 'logo');
+      const slides = files.filter((f) => f.fieldname === 'slides');
+      const slidesMeta = body.slidesMeta
+        ? JSON.parse(body.slidesMeta)
+        : [];
+      const categories = body.categories
+        .split(',')
+        .map((c: string) => c as Profession);
+  
+      return this.minisite.setupMinisite(
+        empresaId,
+        {
+          name: body.name,
+          description: body.description,
+          slogan: body.slogan,
+          categories,
+          slidesMeta,
+        },
+        { logo, slides },
+      );
     }
   }
   

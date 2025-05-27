@@ -12,9 +12,11 @@ import {
     Banner,
     MinisiteFeaturedProduct,
     MinisiteHighlightProduct,
-    MinisiteSlide,
+    Profession,
   } from '@prisma/client';
+  import { UploadApiResponse } from 'cloudinary';
   import { PrismaService } from '../prisma/prisma.service';
+  import { CloudinaryService } from '../cloudinary/cloudinary.service';
   
   export interface UsageResponse<T = any> {
     code: FeatureCode;
@@ -23,18 +25,21 @@ import {
     items: T[];
   }
   
-  type SlidePayload = {
-    id?: string;
+  type SlideMeta = {
     title: string;
     description?: string;
     cta?: string;
-    imageSrc?: string;
     order?: number;
   };
   
   @Injectable()
   export class MinisiteService {
-    constructor(private readonly prisma: PrismaService) {}
+    constructor(
+      private readonly prisma: PrismaService,
+      private readonly cloud: CloudinaryService,
+    ) {}
+  
+    /* ───────── cuotas & lecturas ───────── */
   
     async quotas(empresaId: string): Promise<UsageResponse[]> {
       const plan = await this.plan(empresaId);
@@ -47,10 +52,7 @@ import {
       return out;
     }
   
-    async quota(
-      empresaId: string,
-      code: FeatureCode,
-    ): Promise<UsageResponse> {
+    async quota(empresaId: string, code: FeatureCode): Promise<UsageResponse> {
       const plan = await this.plan(empresaId);
       const feature = await this.prisma.planFeature.findUnique({
         where: { plan_code: { plan, code } },
@@ -60,47 +62,35 @@ import {
       return { code, limit: feature.limit, used, items };
     }
   
-    async objects(
-      empresaId: string,
-    ): Promise<Record<FeatureCode, any[]>> {
+    async objects(empresaId: string) {
       const plan = await this.plan(empresaId);
       const codes = await this.prisma.planFeature.findMany({
         where: { plan },
         select: { code: true },
       });
-      const obj: Record<FeatureCode, any[]> = {} as any;
-      for (const { code } of codes) {
-        obj[code] = (await this.collect(empresaId, code)).items;
-      }
+      const obj = {} as Record<FeatureCode, any[]>;
+      for (const { code } of codes) obj[code] = (await this.collect(empresaId, code)).items;
       return obj;
     }
   
-    async objectsByCode(
-      empresaId: string,
-      code: FeatureCode,
-    ): Promise<any[]> {
+    async objectsByCode(empresaId: string, code: FeatureCode) {
       return (await this.collect(empresaId, code)).items;
     }
+  
+    /* ───────── upserts unitarios ───────── */
   
     async upsertProduct(
       empresaId: string,
       data: Omit<Prisma.ProductUncheckedCreateInput, 'companyId' | 'id'> &
         Partial<Prisma.ProductUncheckedUpdateInput> & { id?: string },
     ): Promise<Product> {
-      await this.checkQuota(
-        empresaId,
-        FeatureCode.PRODUCTS_TOTAL,
-        data.id ? 0 : 1,
-      );
+      await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, data.id ? 0 : 1);
       if (data.id) {
         const { id, ...upd } = data;
-        return this.prisma.product.update({
-          where: { id },
-          data: upd as Prisma.ProductUncheckedUpdateInput,
-        });
+        return this.prisma.product.update({ where: { id }, data: upd });
       }
       return this.prisma.product.create({
-        data: { ...data, companyId: empresaId } as Prisma.ProductUncheckedCreateInput,
+        data: { ...data, companyId: empresaId },
       });
     }
   
@@ -111,33 +101,23 @@ import {
     ): Promise<Banner> {
       const existing = await this.prisma.banner.findFirst({ where: { empresaId } });
       if (!data.id && existing) throw new BadRequestException('Ya existe un banner');
+  
       if (data.id) {
         const { id, ...upd } = data;
-        return this.prisma.banner.update({
-          where: { id },
-          data: upd as Prisma.BannerUncheckedUpdateInput,
-        });
+        return this.prisma.banner.update({ where: { id }, data: upd });
       }
       return this.prisma.banner.create({
-        data: { ...data, empresaId } as Prisma.BannerUncheckedCreateInput,
+        data: { ...data, empresaId },
       });
     }
   
     async upsertFeatured(
       empresaId: string,
-      data: {
-        id?: string;
-        productId: string;
-        order?: number;
-        tagline?: string;
-      },
+      data: { id?: string; productId: string; order?: number; tagline?: string },
     ): Promise<MinisiteFeaturedProduct> {
-      await this.checkQuota(
-        empresaId,
-        FeatureCode.FEATURED_PRODUCTS_TOTAL,
-        data.id ? 0 : 1,
-      );
+      await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, data.id ? 0 : 1);
       const minisiteId = await this.minisite(empresaId);
+  
       if (data.id) {
         const { id, ...upd } = data;
         return this.prisma.minisiteFeaturedProduct.update({
@@ -175,33 +155,71 @@ import {
       });
     }
   
-    async upsertSlide(
+    /* ───────── configuración general + lote de slides ───────── */
+  
+    async setupMinisite(
       empresaId: string,
-      payload: SlidePayload,
-    ): Promise<MinisiteSlide> {
-      await this.checkQuota(
-        empresaId,
-        FeatureCode.STATIC_IMAGES_TOTAL,
-        payload.id ? 0 : 1,
-      );
+      body: {
+        name: string;
+        description: string;
+        categories: Profession[];
+        slogan?: string;
+        slidesMeta: SlideMeta[];
+      },
+      files: { logo?: Express.Multer.File; slides?: Express.Multer.File[] },
+    ) {
+      /* logo */
+      let logoUrl: string | undefined;
+      if (files.logo) {
+        const res: UploadApiResponse = await this.cloud.uploadImage(files.logo);
+        logoUrl = res.secure_url;
+      }
+  
+      /* empresa */
+      await this.prisma.empresa.update({
+        where: { id: empresaId },
+        data: {
+          name: body.name,
+          profileImage: logoUrl,
+          title: body.slogan,
+          location: body.description,
+        },
+      });
+  
+      /* categorías */
       const minisiteId = await this.minisite(empresaId);
-      if (payload.id) {
-        const { id, ...upd } = payload;
-        return this.prisma.minisiteSlide.update({
-          where: { id },
-          data: upd,
+      await this.prisma.minisiteSpeciality.deleteMany({ where: { minisiteId } });
+      if (body.categories.length) {
+        await this.prisma.minisiteSpeciality.createMany({
+          data: body.categories.map((p) => ({ minisiteId, imageUrl: '', title: p })),
         });
       }
-      const createData: Prisma.MinisiteSlideUncheckedCreateInput = {
-        minisiteId,
-        title: payload.title,
-        description: payload.description ?? '',
-        cta: payload.cta ?? '',
-        imageSrc: payload.imageSrc ?? '',
-        order: payload.order ?? 0,
-      };
-      return this.prisma.minisiteSlide.create({ data: createData });
+  
+      /* slides */
+      const newSlides = files.slides ?? [];
+      await this.checkQuota(empresaId, FeatureCode.STATIC_IMAGES_TOTAL, newSlides.length);
+  
+      if (newSlides.length) {
+        const uploads: UploadApiResponse[] = await Promise.all(
+          newSlides.map((f) => this.cloud.uploadImage(f)),
+        );
+        const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map(
+          (u, idx) => ({
+            minisiteId,
+            imageSrc: u.secure_url,
+            title: body.slidesMeta[idx]?.title ?? '',
+            description: body.slidesMeta[idx]?.description ?? '',
+            cta: body.slidesMeta[idx]?.cta ?? '',
+            order: body.slidesMeta[idx]?.order ?? idx,
+          }),
+        );
+        await this.prisma.minisiteSlide.createMany({ data });
+      }
+  
+      return { ok: true };
     }
+  
+    /* ───────── helpers ───────── */
   
     private async plan(empresaId: string): Promise<SubscriptionType> {
       const e = await this.prisma.empresa.findUnique({
@@ -209,7 +227,7 @@ import {
         select: { subscription: true },
       });
       if (!e?.subscription) throw new BadRequestException('Empresa sin plan');
-      return e.subscription as SubscriptionType;
+      return e.subscription;
     }
   
     private async minisite(empresaId: string): Promise<string> {
@@ -225,11 +243,9 @@ import {
       empresaId: string,
       code: FeatureCode,
       increment = 1,
-    ): Promise<void> {
+    ) {
       const feature = await this.prisma.planFeature.findUnique({
-        where: {
-          plan_code: { plan: await this.plan(empresaId), code },
-        },
+        where: { plan_code: { plan: await this.plan(empresaId), code } },
       });
       if (!feature || feature.limit === null) return;
       const used = (await this.collect(empresaId, code)).used;
@@ -239,49 +255,66 @@ import {
     }
   
     private async collect(empresaId: string, code: FeatureCode) {
-      let items: any[] = [];
       switch (code) {
         case FeatureCode.PRODUCTS_TOTAL:
-          items = await this.prisma.product.findMany({
-            where: { companyId: empresaId },
-            select: { id: true, name: true, createdAt: true },
-          });
-          break;
+          return {
+            items: await this.prisma.product.findMany({
+              where: { companyId: empresaId },
+              select: { id: true, name: true },
+            }),
+            used: await this.prisma.product.count({ where: { companyId: empresaId } }),
+          };
         case FeatureCode.CATEGORIES_TOTAL:
-          items = await this.prisma.productCompanyCategory.findMany({
-            where: { companyId: empresaId },
-            select: { id: true, name: true },
-          });
-          break;
+          return {
+            items: await this.prisma.productCompanyCategory.findMany({
+              where: { companyId: empresaId },
+              select: { id: true, name: true },
+            }),
+            used: await this.prisma.productCompanyCategory.count({
+              where: { companyId: empresaId },
+            }),
+          };
         case FeatureCode.BANNER_PRODUCT_SLOTS:
-          items = await this.prisma.banner.findMany({
-            where: { empresaId },
-            select: { id: true, title: true, banner: true },
-          });
-          break;
+          return {
+            items: await this.prisma.banner.findMany({
+              where: { empresaId },
+              select: { id: true, title: true },
+            }),
+            used: await this.prisma.banner.count({ where: { empresaId } }),
+          };
         case FeatureCode.STATIC_IMAGES_TOTAL:
-          items = await this.prisma.minisiteSlide.findMany({
-            where: { minisite: { empresaId } },
-            select: { id: true, title: true, imageSrc: true },
-          });
-          break;
+          return {
+            items: await this.prisma.minisiteSlide.findMany({
+              where: { minisite: { empresaId } },
+              select: { id: true, title: true, imageSrc: true },
+            }),
+            used: await this.prisma.minisiteSlide.count({
+              where: { minisite: { empresaId } },
+            }),
+          };
         case FeatureCode.FEATURED_PRODUCTS_TOTAL:
-          items = await this.prisma.minisiteFeaturedProduct.findMany({
-            where: { minisite: { empresaId } },
-            select: { id: true, productId: true, order: true },
-          });
-          break;
+          return {
+            items: await this.prisma.minisiteFeaturedProduct.findMany({
+              where: { minisite: { empresaId } },
+              select: { id: true, productId: true },
+            }),
+            used: await this.prisma.minisiteFeaturedProduct.count({
+              where: { minisite: { empresaId } },
+            }),
+          };
         case FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL:
-          items = await this.prisma.classroom.findMany({
-            where: { orators: { some: { empresaId } } },
-            select: { id: true, title: true, startDateTime: true },
-          });
-          break;
+          return {
+            items: await this.prisma.classroom.findMany({
+              where: { orators: { some: { empresaId } } },
+              select: { id: true, title: true },
+            }),
+            used: await this.prisma.classroom.count({
+              where: { orators: { some: { empresaId } } },
+            }),
+          };
         default:
           throw new BadRequestException('Código no soportado');
       }
-      return { items, used: items.length };
     }
-    
   }
   

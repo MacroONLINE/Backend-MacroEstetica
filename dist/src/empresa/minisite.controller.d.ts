@@ -6,12 +6,24 @@ export declare class MinisiteController {
     getQuotas(empresaId: string): Promise<import("./minisite.service").UsageResponse<any>[]>;
     getQuota(empresaId: string, code: FeatureCode): Promise<import("./minisite.service").UsageResponse<any>>;
     getObjects(empresaId: string): Promise<Record<import(".prisma/client").$Enums.FeatureCode, any[]>>;
-    getObjectsByCode(empresaId: string, code: FeatureCode): Promise<any[]>;
+    getObjectsByCode(empresaId: string, code: FeatureCode): Promise<{
+        id: string;
+        name: string;
+    }[] | {
+        id: number;
+        name: string;
+    }[] | {
+        id: string;
+        title: string;
+    }[] | {
+        id: string;
+        productId: string;
+    }[]>;
     upsertProduct(empresaId: string, body: any): Promise<{
-        companyId: string;
         id: string;
         name: string;
         description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
@@ -31,21 +43,21 @@ export declare class MinisiteController {
         description: string;
         createdAt: Date;
         updatedAt: Date;
-        empresaId: string | null;
         banner: string;
         title: string;
         date: Date | null;
         cta_url: string | null;
         cta_button_text: string;
         logo: string;
+        empresaId: string | null;
     }>;
     upsertFeatured(empresaId: string, body: any): Promise<{
         id: string;
         createdAt: Date;
         updatedAt: Date;
         minisiteId: string;
-        productId: string;
         order: number | null;
+        productId: string;
         tagline: string | null;
     }>;
     upsertHighlight(empresaId: string, body: any): Promise<{
@@ -58,15 +70,7 @@ export declare class MinisiteController {
         highlightDescription: string | null;
         hoghlightImageUrl: string | null;
     }>;
-    upsertSlide(empresaId: string, body: any): Promise<{
-        id: string;
-        description: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        minisiteId: string;
-        order: number | null;
-        cta: string | null;
-        imageSrc: string | null;
+    setup(empresaId: string, body: any, files: Express.Multer.File[]): Promise<{
+        ok: boolean;
     }>;
 }
