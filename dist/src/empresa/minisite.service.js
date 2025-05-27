@@ -64,7 +64,9 @@ let MinisiteService = class MinisiteService {
         });
     }
     async upsertBanner(empresaId, data) {
-        const existing = await this.prisma.banner.findFirst({ where: { empresaId } });
+        const existing = await this.prisma.banner.findFirst({
+            where: { empresaId },
+        });
         if (!data.id && existing)
             throw new common_1.BadRequestException('Ya existe un banner');
         if (data.id) {
@@ -99,7 +101,9 @@ let MinisiteService = class MinisiteService {
             });
         }
         return this.prisma.minisiteHighlightProduct.upsert({
-            where: { minisiteId_productId: { minisiteId, productId: data.productId } },
+            where: {
+                minisiteId_productId: { minisiteId, productId: data.productId },
+            },
             update: { ...data },
             create: { ...data, minisiteId },
         });
@@ -117,19 +121,14 @@ let MinisiteService = class MinisiteService {
                 profileImage: logoUrl,
                 title: body.slogan,
                 location: body.description,
+                giro: body.giro,
             },
         });
-        const minisiteId = await this.minisite(empresaId);
-        await this.prisma.minisiteSpeciality.deleteMany({ where: { minisiteId } });
-        if (body.categories.length) {
-            await this.prisma.minisiteSpeciality.createMany({
-                data: body.categories.map((p) => ({ minisiteId, imageUrl: '', title: p })),
-            });
-        }
         const newSlides = files.slides ?? [];
         await this.checkQuota(empresaId, client_1.FeatureCode.STATIC_IMAGES_TOTAL, newSlides.length);
         if (newSlides.length) {
             const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)));
+            const minisiteId = await this.minisite(empresaId);
             const data = uploads.map((u, idx) => ({
                 minisiteId,
                 imageSrc: u.secure_url,
@@ -179,7 +178,9 @@ let MinisiteService = class MinisiteService {
                         where: { companyId: empresaId },
                         select: { id: true, name: true },
                     }),
-                    used: await this.prisma.product.count({ where: { companyId: empresaId } }),
+                    used: await this.prisma.product.count({
+                        where: { companyId: empresaId },
+                    }),
                 };
             case client_1.FeatureCode.CATEGORIES_TOTAL:
                 return {

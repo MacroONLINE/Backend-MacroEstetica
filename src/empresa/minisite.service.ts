@@ -12,7 +12,7 @@ import {
     Banner,
     MinisiteFeaturedProduct,
     MinisiteHighlightProduct,
-    Profession,
+    Giro,
   } from '@prisma/client';
   import { UploadApiResponse } from 'cloudinary';
   import { PrismaService } from '../prisma/prisma.service';
@@ -69,7 +69,8 @@ import {
         select: { code: true },
       });
       const obj = {} as Record<FeatureCode, any[]>;
-      for (const { code } of codes) obj[code] = (await this.collect(empresaId, code)).items;
+      for (const { code } of codes)
+        obj[code] = (await this.collect(empresaId, code)).items;
       return obj;
     }
   
@@ -84,7 +85,11 @@ import {
       data: Omit<Prisma.ProductUncheckedCreateInput, 'companyId' | 'id'> &
         Partial<Prisma.ProductUncheckedUpdateInput> & { id?: string },
     ): Promise<Product> {
-      await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, data.id ? 0 : 1);
+      await this.checkQuota(
+        empresaId,
+        FeatureCode.PRODUCTS_TOTAL,
+        data.id ? 0 : 1,
+      );
       if (data.id) {
         const { id, ...upd } = data;
         return this.prisma.product.update({ where: { id }, data: upd });
@@ -99,8 +104,11 @@ import {
       data: Omit<Prisma.BannerUncheckedCreateInput, 'empresaId' | 'id'> &
         Partial<Prisma.BannerUncheckedUpdateInput> & { id?: string },
     ): Promise<Banner> {
-      const existing = await this.prisma.banner.findFirst({ where: { empresaId } });
-      if (!data.id && existing) throw new BadRequestException('Ya existe un banner');
+      const existing = await this.prisma.banner.findFirst({
+        where: { empresaId },
+      });
+      if (!data.id && existing)
+        throw new BadRequestException('Ya existe un banner');
   
       if (data.id) {
         const { id, ...upd } = data;
@@ -115,7 +123,11 @@ import {
       empresaId: string,
       data: { id?: string; productId: string; order?: number; tagline?: string },
     ): Promise<MinisiteFeaturedProduct> {
-      await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, data.id ? 0 : 1);
+      await this.checkQuota(
+        empresaId,
+        FeatureCode.FEATURED_PRODUCTS_TOTAL,
+        data.id ? 0 : 1,
+      );
       const minisiteId = await this.minisite(empresaId);
   
       if (data.id) {
@@ -149,7 +161,9 @@ import {
         });
       }
       return this.prisma.minisiteHighlightProduct.upsert({
-        where: { minisiteId_productId: { minisiteId, productId: data.productId } },
+        where: {
+          minisiteId_productId: { minisiteId, productId: data.productId },
+        },
         update: { ...data },
         create: { ...data, minisiteId },
       });
@@ -162,7 +176,7 @@ import {
       body: {
         name: string;
         description: string;
-        categories: Profession[];
+        giro: Giro;
         slogan?: string;
         slidesMeta: SlideMeta[];
       },
@@ -183,26 +197,23 @@ import {
           profileImage: logoUrl,
           title: body.slogan,
           location: body.description,
+          giro: body.giro,
         },
       });
   
-      /* categorías */
-      const minisiteId = await this.minisite(empresaId);
-      await this.prisma.minisiteSpeciality.deleteMany({ where: { minisiteId } });
-      if (body.categories.length) {
-        await this.prisma.minisiteSpeciality.createMany({
-          data: body.categories.map((p) => ({ minisiteId, imageUrl: '', title: p })),
-        });
-      }
-  
       /* slides */
       const newSlides = files.slides ?? [];
-      await this.checkQuota(empresaId, FeatureCode.STATIC_IMAGES_TOTAL, newSlides.length);
+      await this.checkQuota(
+        empresaId,
+        FeatureCode.STATIC_IMAGES_TOTAL,
+        newSlides.length,
+      );
   
       if (newSlides.length) {
         const uploads: UploadApiResponse[] = await Promise.all(
           newSlides.map((f) => this.cloud.uploadImage(f)),
         );
+        const minisiteId = await this.minisite(empresaId);
         const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map(
           (u, idx) => ({
             minisiteId,
@@ -262,7 +273,9 @@ import {
               where: { companyId: empresaId },
               select: { id: true, name: true },
             }),
-            used: await this.prisma.product.count({ where: { companyId: empresaId } }),
+            used: await this.prisma.product.count({
+              where: { companyId: empresaId },
+            }),
           };
         case FeatureCode.CATEGORIES_TOTAL:
           return {

@@ -1,4 +1,4 @@
-import { Prisma, FeatureCode, Product, Banner, MinisiteFeaturedProduct, MinisiteHighlightProduct, Profession } from '@prisma/client';
+import { Prisma, FeatureCode, Product, Banner, MinisiteFeaturedProduct, MinisiteHighlightProduct, Giro } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 export interface UsageResponse<T = any> {
@@ -55,7 +55,7 @@ export declare class MinisiteService {
     setupMinisite(empresaId: string, body: {
         name: string;
         description: string;
-        categories: Profession[];
+        giro: Giro;
         slogan?: string;
         slidesMeta: SlideMeta[];
     }, files: {
