@@ -82,58 +82,65 @@ export class PaymentService {
     return session;
   }
 
-  /**
-   * CREA CHECKOUT SESSION PARA SUSCRIPCIÓN DE EMPRESA (PAGO RECURRENTE)
-   */
-  async createCompanySubscriptionCheckoutSession(
-    empresaId: string,
-    userId: string,
-    subscriptionType: SubscriptionType,
-    email: string,
-  ) {
-    this.validateSubscriptionType(subscriptionType);
-    const unitAmount = this.getSubscriptionPrice(subscriptionType);
+  // src/payment/payment.service.ts
 
-    const session = await this.stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            recurring: { interval: 'month' },
-            unit_amount: unitAmount,
-            product_data: {
-              name: `Suscripción ${subscriptionType}`,
-              description: `Suscripción ${subscriptionType} para empresa`,
-            },
-          },
-          quantity: 1,
+async createCompanySubscriptionCheckoutSession(
+  empresaId: string,
+  userId: string,
+  subscriptionType: SubscriptionType,
+  email: string,
+) {
+  this.validateSubscriptionType(subscriptionType);
+  const unitAmount = this.getSubscriptionPrice(subscriptionType);
+
+  const session = await this.stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    mode: 'subscription',
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        recurring: { interval: 'month' },
+        unit_amount: unitAmount,
+        product_data: {
+          name: `Suscripción ${subscriptionType}`,
+          description: `Suscripción ${subscriptionType} para empresa`,
         },
-      ],
-      customer_email: email,
+      },
+      quantity: 1,
+    }],
+    customer_email: email,
+
+    // ← metadata para la sesión (solo checkout)
+    metadata: {
+      checkoutSessionId: '',
+    },
+
+    // ← metadata para la suscripción en Stripe
+    subscription_data: {
       metadata: {
         empresaId,
         userId,
         subscriptionType,
-        checkoutSessionId: '',
       },
-      success_url: `${this.configService.get<string>('APP_URL')}/subscription/success`,
-      cancel_url: `${this.configService.get<string>('APP_URL')}/subscription/cancel`,
-    });
+    },
 
-    await this.stripe.checkout.sessions.update(session.id, {
-      metadata: {
-        empresaId,
-        userId,
-        subscriptionType,
-        checkoutSessionId: session.id,
-      },
-    });
+    success_url: `${this.configService.get<string>('APP_URL')}/subscription/success`,
+    cancel_url:  `${this.configService.get<string>('APP_URL')}/subscription/cancel`,
+  });
 
-    this.logger.log(`Sesión de suscripción de empresa creada: ${JSON.stringify(session)}`);
-    return session;
-  }
+  // luego guardamos el sessionId en la metadata de la sesión
+  await this.stripe.checkout.sessions.update(session.id, {
+    metadata: {
+      ...session.metadata,
+      checkoutSessionId: session.id
+    },
+  });
+
+  this.logger.log(`[createCompanySubscription] Sesión creada: ${session.id}`);
+  this.logger.debug(`[createCompanySubscription] session.metadata: ${JSON.stringify(session.metadata)}`);
+  return session;
+}
+
 
   /**
    * CREA CHECKOUT SESSION PARA LA SUSCRIPCIÓN "update" DE UN USUARIO

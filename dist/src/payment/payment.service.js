@@ -73,8 +73,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         const session = await this.stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             mode: 'subscription',
-            line_items: [
-                {
+            line_items: [{
                     price_data: {
                         currency: 'usd',
                         recurring: { interval: 'month' },
@@ -85,27 +84,29 @@ let PaymentService = PaymentService_1 = class PaymentService {
                         },
                     },
                     quantity: 1,
-                },
-            ],
+                }],
             customer_email: email,
             metadata: {
-                empresaId,
-                userId,
-                subscriptionType,
                 checkoutSessionId: '',
+            },
+            subscription_data: {
+                metadata: {
+                    empresaId,
+                    userId,
+                    subscriptionType,
+                },
             },
             success_url: `${this.configService.get('APP_URL')}/subscription/success`,
             cancel_url: `${this.configService.get('APP_URL')}/subscription/cancel`,
         });
         await this.stripe.checkout.sessions.update(session.id, {
             metadata: {
-                empresaId,
-                userId,
-                subscriptionType,
-                checkoutSessionId: session.id,
+                ...session.metadata,
+                checkoutSessionId: session.id
             },
         });
-        this.logger.log(`Sesión de suscripción de empresa creada: ${JSON.stringify(session)}`);
+        this.logger.log(`[createCompanySubscription] Sesión creada: ${session.id}`);
+        this.logger.debug(`[createCompanySubscription] session.metadata: ${JSON.stringify(session.metadata)}`);
         return session;
     }
     async createUserUpgradeCheckoutSession(userId, email) {
