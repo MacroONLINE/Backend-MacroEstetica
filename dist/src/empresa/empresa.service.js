@@ -139,7 +139,6 @@ let EmpresaService = class EmpresaService {
             where: { userId },
             include: {
                 empresaSubscriptions: {
-                    where: { status: 'active' },
                     include: { subscription: true },
                     orderBy: { startDate: 'desc' },
                     take: 1,
@@ -150,11 +149,26 @@ let EmpresaService = class EmpresaService {
             throw new common_1.HttpException('Plan no encontrado', common_1.HttpStatus.NOT_FOUND);
         }
         const sub = empresa.empresaSubscriptions[0];
+        const today = new Date();
+        const active = today <= sub.endDate;
         return {
             plan: sub.subscription,
             interval: sub.interval,
             billingEnd: sub.endDate,
+            active,
         };
+    }
+    async verifyEmpresa(empresaId) {
+        try {
+            return await this.prisma.empresa.update({
+                where: { id: empresaId },
+                data: { verified: true },
+                select: { id: true, name: true, verified: true },
+            });
+        }
+        catch (_err) {
+            throw new common_1.HttpException('Empresa no encontrada', common_1.HttpStatus.NOT_FOUND);
+        }
     }
 };
 exports.EmpresaService = EmpresaService;

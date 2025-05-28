@@ -30,6 +30,7 @@ export declare class InstructorController {
             updatedAt: Date;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
+            verified: boolean;
             legalName: string | null;
         };
         category: {
@@ -60,9 +61,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -111,6 +112,7 @@ export declare class InstructorController {
             updatedAt: Date;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
+            verified: boolean;
             legalName: string | null;
         };
         category: {
@@ -141,9 +143,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -192,6 +194,7 @@ export declare class InstructorController {
             updatedAt: Date;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
+            verified: boolean;
             legalName: string | null;
         };
         category: {
@@ -222,9 +225,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -273,6 +276,7 @@ export declare class InstructorController {
             updatedAt: Date;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
+            verified: boolean;
             legalName: string | null;
         };
         category: {
@@ -303,9 +307,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -354,6 +358,7 @@ export declare class InstructorController {
             updatedAt: Date;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
+            verified: boolean;
             legalName: string | null;
         };
         category: {
@@ -384,9 +389,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -435,6 +440,7 @@ export declare class InstructorController {
             updatedAt: Date;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
+            verified: boolean;
             legalName: string | null;
         };
         category: {
@@ -465,9 +471,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {
@@ -516,6 +522,7 @@ export declare class InstructorController {
             updatedAt: Date;
             categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
+            verified: boolean;
             legalName: string | null;
         };
         category: {
@@ -546,9 +553,9 @@ export declare class InstructorController {
             instructorId: string | null;
             requirements: import("@prisma/client/runtime/library").JsonValue | null;
             isFeatured: boolean | null;
-            participantsCount: number;
             commentsCount: number;
             averageRating: number;
+            participantsCount: number;
             introductoryVideoUrl: string | null;
         }[];
     } & {

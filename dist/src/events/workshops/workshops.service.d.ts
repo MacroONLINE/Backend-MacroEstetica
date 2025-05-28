@@ -48,11 +48,11 @@ export declare class WorkshopsService {
                 country: string | null;
                 countryCode: string | null;
                 zipCode: string | null;
-                password: string;
                 id: string;
                 email: string;
                 emailVerified: Date | null;
                 role: import(".prisma/client").$Enums.Role;
+                password: string;
                 createdAt: Date;
                 updatedAt: Date;
                 newsletter: boolean;
@@ -152,11 +152,11 @@ export declare class WorkshopsService {
                 country: string | null;
                 countryCode: string | null;
                 zipCode: string | null;
-                password: string;
                 id: string;
                 email: string;
                 emailVerified: Date | null;
                 role: import(".prisma/client").$Enums.Role;
+                password: string;
                 createdAt: Date;
                 updatedAt: Date;
                 newsletter: boolean;

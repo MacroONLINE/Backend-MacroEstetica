@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "FeatureCode" ADD VALUE 'HIGHLIGHT_PRODUCTS_TOTAL';
+
+-- AlterTable
+ALTER TABLE "Empresa" ADD COLUMN     "verified" BOOLEAN NOT NULL DEFAULT false;

@@ -13,6 +13,20 @@ type SlideMeta = {
     cta?: string;
     order?: number;
 };
+export interface BulkProductMeta {
+    alias: number;
+    id?: string;
+    type?: 'NORMAL' | 'FEATURED' | 'HIGHLIGHT' | 'OFFER';
+    name: string;
+    description?: string;
+    categoryId?: number;
+    order?: number;
+    tagline?: string;
+    highlightFeatures?: string[];
+    highlightDescription?: string;
+    title?: string;
+    offerDescription?: string;
+}
 export declare class MinisiteService {
     private readonly prisma;
     private readonly cloud;
@@ -68,5 +82,19 @@ export declare class MinisiteService {
     private minisite;
     private checkQuota;
     private collect;
+    bulkUpsertProducts(empresaId: string, meta: BulkProductMeta[], files: Record<string, {
+        main?: Express.Multer.File;
+        gallery: Express.Multer.File[];
+    }>): Promise<{
+        productId: string;
+        type: string;
+    }[]>;
+    bulkUpsertProductsIndexed(empresaId: string, meta: BulkProductMeta[], files: Record<number, {
+        main?: Express.Multer.File;
+        gallery: Express.Multer.File[];
+    }>): Promise<{
+        productId: string;
+        type: string;
+    }[]>;
 }
 export {};

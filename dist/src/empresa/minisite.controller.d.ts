@@ -73,4 +73,8 @@ export declare class MinisiteController {
     setup(empresaId: string, body: any, files: Express.Multer.File[]): Promise<{
         ok: boolean;
     }>;
+    bulkProducts(empresaId: string, productsRaw: string, rawFiles: Express.Multer.File[]): Promise<{
+        productId: string;
+        type: string;
+    }[]>;
 }

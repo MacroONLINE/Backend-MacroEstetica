@@ -15,10 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmpresaController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
-const empresa_service_1 = require("./empresa.service");
-const client_1 = require("@prisma/client");
 const platform_express_1 = require("@nestjs/platform-express");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const empresa_service_1 = require("./empresa.service");
+const client_1 = require("@prisma/client");
 let EmpresaController = class EmpresaController {
     constructor(empresaService) {
         this.empresaService = empresaService;
@@ -69,10 +69,14 @@ let EmpresaController = class EmpresaController {
     async getPlanByUserId(userId) {
         return this.empresaService.getPlanByUserId(userId);
     }
+    verifyEmpresa(empresaId) {
+        return this.empresaService.verifyEmpresa(empresaId);
+    }
 };
 exports.EmpresaController = EmpresaController;
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener empresas por categoría' }),
+    (0, swagger_1.ApiBadRequestResponse)(),
     (0, common_1.Get)('by-category'),
     __param(0, (0, common_1.Query)('category')),
     __metadata("design:type", Function),
@@ -81,6 +85,7 @@ __decorate([
 ], EmpresaController.prototype, "getAllByCategory", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener empresas por giro' }),
+    (0, swagger_1.ApiBadRequestResponse)(),
     (0, common_1.Get)('by-giro'),
     __param(0, (0, common_1.Query)('giro')),
     __metadata("design:type", Function),
@@ -89,6 +94,7 @@ __decorate([
 ], EmpresaController.prototype, "getAllByGiro", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener empresas por target' }),
+    (0, swagger_1.ApiBadRequestResponse)(),
     (0, common_1.Get)('by-target'),
     __param(0, (0, common_1.Query)('target')),
     __metadata("design:type", Function),
@@ -97,6 +103,7 @@ __decorate([
 ], EmpresaController.prototype, "getAllByTarget", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener empresas por giro y target' }),
+    (0, swagger_1.ApiBadRequestResponse)(),
     (0, common_1.Get)('by-giro-target'),
     __param(0, (0, common_1.Query)('giro')),
     __param(1, (0, common_1.Query)('target')),
@@ -105,7 +112,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "getAllByGiroAndTarget", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Obtener minisitio de una empresa' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener minisitio completo de una empresa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiNotFoundResponse)({ description: 'Empresa o minisitio no encontrado' }),
     (0, common_1.Get)(':empresaId/minisite'),
     __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),
@@ -113,8 +122,9 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "getMinisiteByEmpresaId", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Subir catálogo (PDF) al minisitio de la empresa' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Subir catálogo (PDF) al minisite de la empresa' }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
@@ -122,11 +132,22 @@ __decorate([
                 file: {
                     type: 'string',
                     format: 'binary',
-                    description: 'PDF a subir como catálogo',
+                    description: 'Archivo PDF',
                 },
+            },
+            required: ['file'],
+        },
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        schema: {
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'Catálogo subido correctamente' },
+                catalogueUrl: { type: 'string', example: 'https://res.cloudinary…/cat.pdf' },
             },
         },
     }),
+    (0, swagger_1.ApiBadRequestResponse)(),
     (0, common_1.Put)(':empresaId/minisite/catalogue'),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('file')),
     __param(0, (0, common_1.Param)('empresaId')),
@@ -136,68 +157,88 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "uploadCatalogueFile", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Obtener plan activo de la empresa por User ID' }),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Obtener plan activo de la empresa (por userId)',
+        description: 'Si el usuario canceló la suscripción pero el periodo pagado no ha vencido, `active` seguirá en `true`.',
+    }),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiParam)({
         name: 'userId',
-        description: 'ID del usuario (empresa) del cual se consulta el plan',
+        description: 'ID del usuario empresa',
         example: 'cm4sths4i0008g1865nsbbh1l',
     }),
     (0, swagger_1.ApiOkResponse)({
-        description: 'Plan encontrado y fecha de corte (billingEnd)',
+        description: 'Plan encontrado',
         schema: {
             type: 'object',
             properties: {
                 plan: {
                     type: 'object',
                     properties: {
-                        id: {
-                            type: 'string',
-                            example: 'ckl8x0q8g000v5185h1a9z4lw',
-                        },
+                        id: { type: 'string' },
                         type: {
                             type: 'string',
                             enum: Object.values(client_1.SubscriptionType),
-                            example: 'BASICO',
                         },
-                        description: {
-                            type: 'string',
-                            example: 'Plan Básico mensual',
-                        },
-                        price: {
-                            type: 'number',
-                            example: 100.0,
-                        },
+                        description: { type: 'string' },
+                        price: { type: 'number' },
                     },
                 },
                 interval: {
                     type: 'string',
                     enum: ['MONTHLY', 'SEMIANNUAL', 'ANNUAL'],
-                    example: 'MONTHLY',
-                    description: 'Intervalo de la suscripción',
                 },
                 billingEnd: {
                     type: 'string',
                     format: 'date-time',
-                    example: '2025-06-25T00:00:00.000Z',
-                    description: 'Fecha en que expira el periodo de facturación actual',
+                },
+                active: {
+                    type: 'boolean',
+                    example: true,
+                    description: 'TRUE si la fecha actual es menor o igual a billingEnd, incluso si la suscripción fue cancelada',
                 },
             },
         },
     }),
-    (0, swagger_1.ApiUnauthorizedResponse)({
-        description: 'No autorizado. Falta o es inválido el token JWT.',
-    }),
-    (0, swagger_1.ApiNotFoundResponse)({
-        description: 'Plan no encontrado para el userId proporcionado.',
-    }),
+    (0, swagger_1.ApiUnauthorizedResponse)({ description: 'Token JWT inválido o ausente' }),
+    (0, swagger_1.ApiNotFoundResponse)({ description: 'Plan no encontrado' }),
     (0, common_1.Get)('user/:userId/plan'),
     __param(0, (0, common_1.Param)('userId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], EmpresaController.prototype, "getPlanByUserId", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: 'Verificar empresa',
+        description: 'Marca la empresa como verificada (`verified = true`).',
+    }),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, swagger_1.ApiParam)({
+        name: 'empresaId',
+        example: 'ckqs889df0000g411o2o1p4sa',
+        description: 'ID de la empresa a verificar',
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Empresa verificada',
+        schema: {
+            type: 'object',
+            properties: {
+                id: { type: 'string', example: 'ckqs889df0000g411o2o1p4sa' },
+                name: { type: 'string', example: 'DermaCorp' },
+                verified: { type: 'boolean', example: true },
+            },
+        },
+    }),
+    (0, swagger_1.ApiNotFoundResponse)({ description: 'Empresa no encontrada' }),
+    (0, common_1.Put)(':empresaId/verify'),
+    __param(0, (0, common_1.Param)('empresaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], EmpresaController.prototype, "verifyEmpresa", null);
 exports.EmpresaController = EmpresaController = __decorate([
     (0, swagger_1.ApiTags)('empresa'),
     (0, common_1.Controller)('empresa'),

@@ -31,6 +31,21 @@ import {
     cta?: string;
     order?: number;
   };
+
+  export interface BulkProductMeta {
+    alias: number;
+    id?: string;
+    type?: 'NORMAL' | 'FEATURED' | 'HIGHLIGHT' | 'OFFER';
+    name: string;
+    description?: string;
+    categoryId?: number;
+    order?: number;
+    tagline?: string;
+    highlightFeatures?: string[];
+    highlightDescription?: string;
+    title?: string;
+    offerDescription?: string;
+  }
   
   @Injectable()
   export class MinisiteService {
@@ -329,5 +344,167 @@ import {
           throw new BadRequestException('Código no soportado');
       }
     }
+  
+    async bulkUpsertProducts(
+        empresaId: string,
+        meta: BulkProductMeta[],
+        files: Record<string, { main?: Express.Multer.File; gallery: Express.Multer.File[] }>,
+      ) {
+        const minisiteId = await this.minisite(empresaId);
+      
+        return this.prisma.$transaction(async (tx) => {
+          const results: Array<{ productId: string; type: string }> = [];
+          const toCreate = meta.filter((m) => !m.id).length;
+          await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, toCreate);
+      
+          for (const m of meta) {
+            const f = (files[m.alias] ?? { gallery: [] }) as {
+              main?: Express.Multer.File;
+              gallery: Express.Multer.File[];
+            };
+      
+            if (!f.main) throw new BadRequestException(`Missing main image for ${m.alias}`);
+      
+            const mainUrl = (await this.cloud.uploadImage(f.main)).secure_url;
+            const galleryUrls = await Promise.all(
+              f.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)),
+            );
+      
+            const baseData: Prisma.ProductUncheckedCreateInput = {
+              name: m.name,
+              description: m.description ?? '',
+              companyId: empresaId,
+              categoryId: m.categoryId ?? null,
+              imageMain: mainUrl,
+              imageGallery: galleryUrls,
+            };
+      
+            const product = m.id
+              ? await tx.product.update({ where: { id: m.id }, data: baseData })
+              : await tx.product.create({ data: baseData });
+      
+            const t = (m.type ?? 'NORMAL').toUpperCase();
+      
+            if (t === 'FEATURED') {
+              await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
+              await tx.minisiteFeaturedProduct.upsert({
+                where: { productId: product.id },
+                update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
+                create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
+              });
+            } else if (t === 'HIGHLIGHT') {
+              await this.checkQuota(empresaId, FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
+              await tx.minisiteHighlightProduct.upsert({
+                where: { minisiteId_productId: { minisiteId, productId: product.id } },
+                update: {
+                  highlightFeatures: m.highlightFeatures ?? [],
+                  highlightDescription: m.highlightDescription ?? '',
+                },
+                create: {
+                  minisiteId,
+                  productId: product.id,
+                  highlightFeatures: m.highlightFeatures ?? [],
+                  highlightDescription: m.highlightDescription ?? '',
+                },
+              });
+            } else if (t === 'OFFER') {
+                const offer = (tx as any).minisiteProductOffer;          
+                await offer.upsert({
+                  where: { minisiteId_productId: { minisiteId, productId: product.id } },
+                  update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
+                  create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
+                });
+              }
+      
+            results.push({ productId: product.id, type: t });
+          }
+      
+          return results;
+        });
+      }
+      
+      async bulkUpsertProductsIndexed(
+        empresaId: string,
+        meta: BulkProductMeta[],
+        files: Record<number, { main?: Express.Multer.File; gallery: Express.Multer.File[] }>,
+      ) {
+        const minisiteId = await this.minisite(empresaId);
+      
+        return this.prisma.$transaction(async (tx) => {
+          const toCreate = meta.filter((m) => !m.id).length;
+          await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, toCreate);
+      
+          const result: Array<{ productId: string; type: string }> = [];
+      
+          for (const [idx, m] of meta.entries()) {
+            const bucket = files[idx] ?? { gallery: [] };
+            if (!bucket.main) {
+              throw new BadRequestException(`main_${idx} es obligatorio`);
+            }
+      
+            const mainUrl     = (await this.cloud.uploadImage(bucket.main)).secure_url;
+            const galleryUrls = await Promise.all(
+              bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)),
+            );
+      
+            const productBase: Prisma.ProductUncheckedCreateInput = {
+              name         : m.name,
+              description  : m.description ?? '',
+              companyId    : empresaId,
+              categoryId   : m.categoryId ?? null,
+              imageMain    : mainUrl,
+              imageGallery : galleryUrls,
+            };
+      
+            const product = m.id
+              ? await tx.product.update({ where: { id: m.id }, data: productBase })
+              : await tx.product.create({ data: productBase });
+      
+            const type = (m.type ?? 'NORMAL').toUpperCase();
+      
+            if (type === 'FEATURED') {
+              await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
+              await tx.minisiteFeaturedProduct.upsert({
+                where : { productId: product.id },
+                update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
+                create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
+              });
+      
+            } else if (type === 'HIGHLIGHT') {
+              await this.checkQuota(empresaId, FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
+              await tx.minisiteHighlightProduct.upsert({
+                where : { minisiteId_productId: { minisiteId, productId: product.id } },
+                update: {
+                  highlightFeatures   : m.highlightFeatures ?? [],
+                  highlightDescription: m.highlightDescription ?? '',
+                },
+                create: {
+                  minisiteId,
+                  productId           : product.id,
+                  highlightFeatures   : m.highlightFeatures ?? [],
+                  highlightDescription: m.highlightDescription ?? '',
+                },
+              });
+      
+            } else if (type === 'OFFER') {
+              const offerDelegate = (tx as any).minisiteProductOffer;
+              await offerDelegate.upsert({
+                where : { minisiteId_productId: { minisiteId, productId: product.id } },
+                update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
+                create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
+              });
+            }
+      
+            result.push({ productId: product.id, type });
+          }
+      
+          return result;
+        });
+      }
+      
+      
+
+
+    
   }
   

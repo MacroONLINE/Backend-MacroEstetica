@@ -234,6 +234,129 @@ let MinisiteService = class MinisiteService {
                 throw new common_1.BadRequestException('Código no soportado');
         }
     }
+    async bulkUpsertProducts(empresaId, meta, files) {
+        const minisiteId = await this.minisite(empresaId);
+        return this.prisma.$transaction(async (tx) => {
+            const results = [];
+            const toCreate = meta.filter((m) => !m.id).length;
+            await this.checkQuota(empresaId, client_1.FeatureCode.PRODUCTS_TOTAL, toCreate);
+            for (const m of meta) {
+                const f = (files[m.alias] ?? { gallery: [] });
+                if (!f.main)
+                    throw new common_1.BadRequestException(`Missing main image for ${m.alias}`);
+                const mainUrl = (await this.cloud.uploadImage(f.main)).secure_url;
+                const galleryUrls = await Promise.all(f.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)));
+                const baseData = {
+                    name: m.name,
+                    description: m.description ?? '',
+                    companyId: empresaId,
+                    categoryId: m.categoryId ?? null,
+                    imageMain: mainUrl,
+                    imageGallery: galleryUrls,
+                };
+                const product = m.id
+                    ? await tx.product.update({ where: { id: m.id }, data: baseData })
+                    : await tx.product.create({ data: baseData });
+                const t = (m.type ?? 'NORMAL').toUpperCase();
+                if (t === 'FEATURED') {
+                    await this.checkQuota(empresaId, client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                    await tx.minisiteFeaturedProduct.upsert({
+                        where: { productId: product.id },
+                        update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
+                        create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
+                    });
+                }
+                else if (t === 'HIGHLIGHT') {
+                    await this.checkQuota(empresaId, client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                    await tx.minisiteHighlightProduct.upsert({
+                        where: { minisiteId_productId: { minisiteId, productId: product.id } },
+                        update: {
+                            highlightFeatures: m.highlightFeatures ?? [],
+                            highlightDescription: m.highlightDescription ?? '',
+                        },
+                        create: {
+                            minisiteId,
+                            productId: product.id,
+                            highlightFeatures: m.highlightFeatures ?? [],
+                            highlightDescription: m.highlightDescription ?? '',
+                        },
+                    });
+                }
+                else if (t === 'OFFER') {
+                    const offer = tx.minisiteProductOffer;
+                    await offer.upsert({
+                        where: { minisiteId_productId: { minisiteId, productId: product.id } },
+                        update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
+                        create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
+                    });
+                }
+                results.push({ productId: product.id, type: t });
+            }
+            return results;
+        });
+    }
+    async bulkUpsertProductsIndexed(empresaId, meta, files) {
+        const minisiteId = await this.minisite(empresaId);
+        return this.prisma.$transaction(async (tx) => {
+            const toCreate = meta.filter((m) => !m.id).length;
+            await this.checkQuota(empresaId, client_1.FeatureCode.PRODUCTS_TOTAL, toCreate);
+            const result = [];
+            for (const [idx, m] of meta.entries()) {
+                const bucket = files[idx] ?? { gallery: [] };
+                if (!bucket.main) {
+                    throw new common_1.BadRequestException(`main_${idx} es obligatorio`);
+                }
+                const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
+                const galleryUrls = await Promise.all(bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)));
+                const productBase = {
+                    name: m.name,
+                    description: m.description ?? '',
+                    companyId: empresaId,
+                    categoryId: m.categoryId ?? null,
+                    imageMain: mainUrl,
+                    imageGallery: galleryUrls,
+                };
+                const product = m.id
+                    ? await tx.product.update({ where: { id: m.id }, data: productBase })
+                    : await tx.product.create({ data: productBase });
+                const type = (m.type ?? 'NORMAL').toUpperCase();
+                if (type === 'FEATURED') {
+                    await this.checkQuota(empresaId, client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                    await tx.minisiteFeaturedProduct.upsert({
+                        where: { productId: product.id },
+                        update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
+                        create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
+                    });
+                }
+                else if (type === 'HIGHLIGHT') {
+                    await this.checkQuota(empresaId, client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                    await tx.minisiteHighlightProduct.upsert({
+                        where: { minisiteId_productId: { minisiteId, productId: product.id } },
+                        update: {
+                            highlightFeatures: m.highlightFeatures ?? [],
+                            highlightDescription: m.highlightDescription ?? '',
+                        },
+                        create: {
+                            minisiteId,
+                            productId: product.id,
+                            highlightFeatures: m.highlightFeatures ?? [],
+                            highlightDescription: m.highlightDescription ?? '',
+                        },
+                    });
+                }
+                else if (type === 'OFFER') {
+                    const offerDelegate = tx.minisiteProductOffer;
+                    await offerDelegate.upsert({
+                        where: { minisiteId_productId: { minisiteId, productId: product.id } },
+                        update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
+                        create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
+                    });
+                }
+                result.push({ productId: product.id, type });
+            }
+            return result;
+        });
+    }
 };
 exports.MinisiteService = MinisiteService;
 exports.MinisiteService = MinisiteService = __decorate([

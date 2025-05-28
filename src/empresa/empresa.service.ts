@@ -151,10 +151,9 @@ export class EmpresaService {
       where: { userId },
       include: {
         empresaSubscriptions: {
-          where   : { status: 'active' },
           include : { subscription: true },
           orderBy : { startDate: 'desc' },
-          take    : 1,
+          take    : 1,                           // última suscripción
         },
       },
     });
@@ -164,12 +163,27 @@ export class EmpresaService {
     }
   
     const sub = empresa.empresaSubscriptions[0];
+    const today = new Date();
+    const active = today <= sub.endDate;        
+  
     return {
-      plan       : sub.subscription,     
-      interval   : sub.interval,         
-      billingEnd : sub.endDate,          
+      plan       : sub.subscription,            
+      interval   : sub.interval,              
+      billingEnd : sub.endDate,
+      active,                                  
     };
   }
   
+  async verifyEmpresa(empresaId: string) {
+    try {
+      return await this.prisma.empresa.update({
+        where: { id: empresaId },
+        data : { verified: true },
+        select: { id: true, name: true, verified: true },
+      });
+    } catch (_err) {
+      throw new HttpException('Empresa no encontrada', HttpStatus.NOT_FOUND);
+    }
+  }
 
 }

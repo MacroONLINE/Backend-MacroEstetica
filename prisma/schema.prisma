@@ -78,6 +78,7 @@ model Empresa {
   ceoRole              String?
   followers            Int                      @default(0)
   location             String?
+  verified      Boolean  @default(false) 
   logo                 String?
   profileImage         String?
   title                String?

@@ -24,7 +24,7 @@ import {
     FeatureCode,
     Giro,
   } from '@prisma/client';
-  import { MinisiteService } from './minisite.service';
+  import { BulkProductMeta, MinisiteService } from './minisite.service';
   import { UsageResponseDto } from './dto/minisite-quota.dto';
   
   @ApiTags('Minisite')
@@ -231,5 +231,90 @@ import {
         { logo, slides },
       );
     }
+
+    @ApiOperation({
+        summary: 'Bulk-upsert de productos (NORMAL, FEATURED, HIGHLIGHT u OFFER)',
+        description: `
+      Envía multipart/form-data con:
+      - products: JSON array de metadatos de cada producto (misma posición que los archivos).
+      - Archivos nombrados main_i (imagen principal) y gallery_i (galería) por índice i.
+      
+      Campos específicos por tipo:
+      • NORMAL  
+        Ejemplo: { "name": "Producto A", "type": "NORMAL", "description": "Una crema hidratante" }
+      
+      • FEATURED  
+        Ejemplo: { "name": "Producto B", "type": "FEATURED", "order": 1, "tagline": "Top ventas" }
+      
+      • HIGHLIGHT  
+        Ejemplo: { "name": "Producto C", "type": "HIGHLIGHT", "highlightFeatures": ["Alta concentración","Sin parabenos"], "highlightDescription": "Nuevo lanzamiento" }
+      
+      • OFFER  
+        Ejemplo: { "name": "Producto D", "type": "OFFER", "title": "Descuento especial", "offerDescription": "20% de descuento" }
+      
+      Ejemplo completo de products:
+      [
+        { "name": "Producto A", "type": "NORMAL", "description": "Una crema hidratante" },
+        { "name": "Producto B", "type": "FEATURED", "order": 1, "tagline": "Top ventas" },
+        { "name": "Producto C", "type": "HIGHLIGHT", "highlightFeatures": ["Alta concentración","Sin parabenos"], "highlightDescription": "Nuevo lanzamiento" },
+        { "name": "Producto D", "type": "OFFER", "title": "Descuento especial", "offerDescription": "20% de descuento" }
+      ]
+      `
+      })           
+      @ApiConsumes('multipart/form-data')
+      @ApiParam({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' })
+      @ApiBody({
+        schema: {
+          type: 'object',
+          required: ['products'],
+          properties: {
+            products: {
+              type: 'string',
+              description: 'JSON array con la metadata de los productos en orden',
+              example:
+                `[{"name":"Producto A","type":"NORMAL"},` +
+                `{"name":"Producto B","type":"FEATURED","order":1,"tagline":"Top ventas"}]`,
+            },
+            main_0:    { type: 'string', format: 'binary', description: 'Imagen principal del producto 0' },
+            gallery_0: { type: 'array', items: { type: 'string', format: 'binary' }, description: 'Galería del producto 0' },
+            main_1:    { type: 'string', format: 'binary', description: 'Imagen principal del producto 1' },
+            gallery_1: { type: 'array', items: { type: 'string', format: 'binary' }, description: 'Galería del producto 1' },
+          },
+        },
+      })
+      @ApiOkResponse({
+        description: 'Lista con IDs y tipos de los productos procesados',
+        schema: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              productId: { type: 'string', example: 'ckxyz123' },
+              type: { type: 'string', enum: ['NORMAL', 'FEATURED', 'HIGHLIGHT', 'OFFER'] },
+            },
+          },
+        },
+      })
+      @UseInterceptors(AnyFilesInterceptor())
+      @Put(':empresaId/products')
+      async bulkProducts(
+        @Param('empresaId') empresaId: string,
+        @Body('products') productsRaw: string,
+        @UploadedFiles() rawFiles: Express.Multer.File[],
+      ) {
+        const meta = JSON.parse(productsRaw ?? '[]') as BulkProductMeta[];
+        const buckets: Record<number, { main?: Express.Multer.File; gallery: Express.Multer.File[] }> = {};
+        for (const f of rawFiles) {
+          const match = /^(.+)_(\d+)$/.exec(f.fieldname);
+          if (!match) continue;
+          const [, key, idxStr] = match;
+          const idx = Number(idxStr);
+          if (!buckets[idx]) buckets[idx] = { gallery: [] };
+          if (key === 'main') buckets[idx].main = f;
+          if (key === 'gallery') buckets[idx].gallery.push(f);
+        }
+        return this.minisite.bulkUpsertProductsIndexed(empresaId, meta, buckets);
+      }
+    
   }
   
