@@ -582,49 +582,65 @@ async createCompanySubscriptionCheckoutSession(
   }
 
   /**
-   * CREACIÓN de la suscripción en BD, con logs en cada paso
-   */
-  private async createEmpresaSubscription(
-    empresaId: string,
-    subscriptionType: SubscriptionType,
-    transactionId: string,
-    interval: 'MONTHLY' | 'SEMIANNUAL' | 'ANNUAL' = 'MONTHLY',
-  ) {
-    this.logger.log(`🔨 [createEmpresaSubscription] inicio — empresaId=${empresaId}, type=${subscriptionType}, txId=${transactionId}, interval=${interval}`);
+ * CREACIÓN de la suscripción en BD, con logs en cada paso
+ */
+private async createEmpresaSubscription(
+  empresaId: string,
+  subscriptionType: SubscriptionType,
+  transactionId: string,
+  interval: 'MONTHLY' | 'SEMIANNUAL' | 'ANNUAL' = 'MONTHLY',
+) {
+  this.logger.log(
+    `🔨 [createEmpresaSubscription] inicio — empresaId=${empresaId}, type=${subscriptionType}, txId=${transactionId}, interval=${interval}`
+  );
 
-    // 1) Consulta del plan
-    const plan = await this.prisma.subscription.findUnique({
-      where: { type: subscriptionType },
-    });
-    this.logger.debug(`🔍 [createEmpresaSubscription] subscription.findUnique() → ${plan ? 'encontrado' : 'NO encontrado'}`);
+  // 1) Consulta del plan
+  const plan = await this.prisma.subscription.findUnique({
+    where: { type: subscriptionType },
+  });
+  this.logger.debug(
+    `🔍 [createEmpresaSubscription] subscription.findUnique() → ${
+      plan ? 'encontrado' : 'NO encontrado'
+    }`
+  );
 
-    if (!plan) {
-      const msg = `Tipo de suscripción inválido: ${subscriptionType}`;
-      this.logger.error(`❌ [createEmpresaSubscription] ${msg}`);
-      throw new HttpException(msg, HttpStatus.BAD_REQUEST);
-    }
-
-    // 2) Cálculo de fechas
-    const now = new Date();
-    const monthsToAdd = interval === 'MONTHLY' ? 1 : interval === 'SEMIANNUAL' ? 6 : 12;
-    const endDate = new Date(now);
-    endDate.setMonth(endDate.getMonth() + monthsToAdd);
-    this.logger.log(`📅 [createEmpresaSubscription] startDate=${now.toISOString()}, endDate=${endDate.toISOString()}`);
-
-    // 3) Inserción en BD
-    const created = await this.prisma.empresaSubscription.create({
-      data: {
-        empresaId,
-        subscriptionId: plan.id,
-        interval,
-        startDate: now,
-        endDate: endDate,
-        status: 'active',
-      },
-    });
-    this.logger.log(`💾 [createEmpresaSubscription] EmpresaSubscription creada ID=${created.id}`);
-    this.logger.debug(`🗂️ [createEmpresaSubscription] registro completo: ${JSON.stringify(created)}`);
+  if (!plan) {
+    const msg = `Tipo de suscripción inválido: ${subscriptionType}`;
+    this.logger.error(`❌ [createEmpresaSubscription] ${msg}`);
+    throw new HttpException(msg, HttpStatus.BAD_REQUEST);
   }
+
+  // 2) Cálculo de fechas
+  const now = new Date();
+  const monthsToAdd =
+    interval === 'MONTHLY' ? 1 : interval === 'SEMIANNUAL' ? 6 : 12;
+  const endDate = new Date(now);
+  endDate.setMonth(endDate.getMonth() + monthsToAdd);
+  this.logger.log(
+    `📅 [createEmpresaSubscription] startDate=${now.toISOString()}, endDate=${endDate.toISOString()}`
+  );
+
+  // 3) Inserción en BD
+  const created = await this.prisma.empresaSubscription.create({
+    data: {
+      empresaId,
+      subscriptionId: plan.id,
+      interval,
+      startDate: now,
+      endDate: endDate,
+      status: 'active',
+    },
+  });
+  this.logger.log(
+    `💾 [createEmpresaSubscription] EmpresaSubscription creada ID=${created.id}`
+  );
+  this.logger.debug(
+    `🗂️ [createEmpresaSubscription] registro completo: ${JSON.stringify(
+      created
+    )}`
+  );
+}
+
   
 
    async cancelEmpresaSubscription(empresaId: string) {

@@ -274,34 +274,40 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: 'Bulk-upsert de productos (NORMAL, FEATURED, HIGHLIGHT u OFFER)',
         description: `
-      Envía multipart/form-data con:
-      - products: JSON array de metadatos de cada producto (misma posición que los archivos).
-      - Archivos nombrados main_i (imagen principal) y gallery_i (galería) por índice i.
-      
-      Campos específicos por tipo:
-      • NORMAL  
-        Ejemplo: { "name": "Producto A", "type": "NORMAL", "description": "Una crema hidratante" }
-      
-      • FEATURED  
-        Ejemplo: { "name": "Producto B", "type": "FEATURED", "order": 1, "tagline": "Top ventas" }
-      
-      • HIGHLIGHT  
-        Ejemplo: { "name": "Producto C", "type": "HIGHLIGHT", "highlightFeatures": ["Alta concentración","Sin parabenos"], "highlightDescription": "Nuevo lanzamiento" }
-      
-      • OFFER  
-        Ejemplo: { "name": "Producto D", "type": "OFFER", "title": "Descuento especial", "offerDescription": "20% de descuento" }
-      
-      Ejemplo completo de products:
-      [
-        { "name": "Producto A", "type": "NORMAL", "description": "Una crema hidratante" },
-        { "name": "Producto B", "type": "FEATURED", "order": 1, "tagline": "Top ventas" },
-        { "name": "Producto C", "type": "HIGHLIGHT", "highlightFeatures": ["Alta concentración","Sin parabenos"], "highlightDescription": "Nuevo lanzamiento" },
-        { "name": "Producto D", "type": "OFFER", "title": "Descuento especial", "offerDescription": "20% de descuento" }
-      ]
-      `
+  Envía multipart/form-data con:
+  - products: JSON array de metadatos de cada producto (misma posición que los archivos).
+  - Archivos nombrados main_i (imagen principal) y gallery_i (galería) por índice i.
+  
+  Campos específicos por tipo:
+  • NORMAL  
+    { "name": "Producto A", "type": "NORMAL", "description": "Una crema hidratante", "categoryId": 11 }
+  
+  • FEATURED  
+    { "name": "Producto B", "type": "FEATURED", "order": 1, "tagline": "Top ventas", "categoryId": 12 }
+  
+  • HIGHLIGHT  
+    { "name": "Producto C", "type": "HIGHLIGHT", "highlightFeatures": ["Alta concentración","Sin parabenos"], "highlightDescription": "Nuevo lanzamiento", "categoryId": 13 }
+  
+  • OFFER  
+    { "name": "Producto D", "type": "OFFER", "title": "Descuento especial", "offerDescription": "20% de descuento", "categoryId": 16 }
+  
+  Ejemplo completo de products:
+  [
+    { "name":"Producto A","type":"NORMAL","description":"Una crema","categoryId":11 },
+    { "name":"Producto B","type":"FEATURED","order":1,"tagline":"Top ventas","categoryId":12 },
+    { "name":"Producto C","type":"HIGHLIGHT","highlightFeatures":["Alta concentración","Sin parabenos"],"highlightDescription":"Nuevo","categoryId":13 },
+    { "name":"Producto D","type":"OFFER","title":"Oferta","offerDescription":"15% off","categoryId":16 }
+  ]
+    `,
     }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiConflictResponse)({
+        description: 'Se superó el cupo permitido para el plan (PRODUCTS_TOTAL, FEATURED_PRODUCTS_TOTAL, etc.)'
+    }),
+    (0, swagger_1.ApiUnprocessableEntityResponse)({
+        description: 'La categoría indicada ya contiene 12 productos'
+    }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'minisite-001' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
@@ -310,8 +316,6 @@ __decorate([
                 products: {
                     type: 'string',
                     description: 'JSON array con la metadata de los productos en orden',
-                    example: `[{"name":"Producto A","type":"NORMAL"},` +
-                        `{"name":"Producto B","type":"FEATURED","order":1,"tagline":"Top ventas"}]`,
                 },
                 main_0: { type: 'string', format: 'binary', description: 'Imagen principal del producto 0' },
                 gallery_0: { type: 'array', items: { type: 'string', format: 'binary' }, description: 'Galería del producto 0' },
@@ -320,6 +324,7 @@ __decorate([
             },
         },
     }),
+    (0, swagger_1.ApiBadRequestResponse)({ description: 'Límite por categoría o cupo general excedido' }),
     (0, swagger_1.ApiOkResponse)({
         description: 'Lista con IDs y tipos de los productos procesados',
         schema: {
@@ -327,7 +332,7 @@ __decorate([
             items: {
                 type: 'object',
                 properties: {
-                    productId: { type: 'string', example: 'ckxyz123' },
+                    productId: { type: 'string' },
                     type: { type: 'string', enum: ['NORMAL', 'FEATURED', 'HIGHLIGHT', 'OFFER'] },
                 },
             },

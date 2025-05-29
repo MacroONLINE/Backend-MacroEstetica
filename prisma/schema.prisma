@@ -78,7 +78,7 @@ model Empresa {
   ceoRole              String?
   followers            Int                      @default(0)
   location             String?
-  verified      Boolean  @default(false) 
+  verified             Boolean                  @default(false)
   logo                 String?
   profileImage         String?
   title                String?
@@ -583,9 +583,9 @@ model Minisite {
   benefits          MinisiteBenefit[]
   featuredProducts  MinisiteFeaturedProduct[]
   highlightProducts MinisiteHighlightProduct[]
-  offers            MinisiteOffer[]
   slides            MinisiteSlide[]
   specialities      MinisiteSpeciality[]
+  productOffers     MinisiteProductOffer[]
 }
 
 model MinisiteSlide {
@@ -611,24 +611,19 @@ model MinisiteBenefit {
   minisite    Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
 }
 
-model MinisiteOffer {
-  id           String                 @id @default(cuid())
-  minisiteId   String
-  sectionTitle String?
-  createdAt    DateTime               @default(now())
-  updatedAt    DateTime               @default(now())
-  minisite     Minisite               @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
-  products     MinisiteOfferProduct[]
-}
-
-model MinisiteOfferProduct {
-  id          String        @id @default(cuid())
-  offerId     String
+model MinisiteProductOffer {
+  id          String   @id @default(cuid())
+  minisiteId  String
+  productId   String
   title       String
-  description String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @default(now())
-  offer       MinisiteOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  minisite Minisite @relation(fields: [minisiteId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([minisiteId, productId])
 }
 
 model MinisiteFeaturedProduct {
@@ -691,11 +686,11 @@ model Product {
   description       String
   companyId         String
   createdAt         DateTime                   @default(now())
-  updatedAt         DateTime                   @default(now())
+  updatedAt         DateTime                   @updatedAt
   isFeatured        Boolean?                   @default(false)
   activeIngredients String[]
   benefits          String[]
-  categoryId        Int
+  categoryId        Int?
   features          String[]
   imageGallery      String[]
   imageMain         String?
@@ -706,7 +701,8 @@ model Product {
   featured          MinisiteFeaturedProduct?   @relation("FeaturedRelation")
   highlightProducts MinisiteHighlightProduct[]
   presentations     Presentation[]             @relation("ProductPresentations")
-  category          ProductCompanyCategory     @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
+  category          ProductCompanyCategory?    @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
+  offers            MinisiteProductOffer[] // relación a ofertas de minisite
   company           Empresa                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   reactions         ProductReaction[]
 
@@ -913,4 +909,5 @@ enum FeatureCode {
   FEATURED_PRODUCTS_TOTAL
   CLASSROOM_TRANSMISSIONS_TOTAL
   HIGHLIGHT_PRODUCTS_TOTAL
+  OFFER_PRODUCTS_TOTAL
 }

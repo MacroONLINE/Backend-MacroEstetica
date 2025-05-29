@@ -79,9 +79,9 @@ let EmpresaService = class EmpresaService {
                     include: {
                         slides: true,
                         benefits: true,
-                        offers: {
+                        productOffers: {
                             include: {
-                                products: true,
+                                product: true,
                             },
                         },
                         featuredProducts: {

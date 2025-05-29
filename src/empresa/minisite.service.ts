@@ -3,6 +3,7 @@ import {
     Injectable,
     BadRequestException,
     NotFoundException,
+    Logger,
   } from '@nestjs/common';
   import {
     Prisma,
@@ -12,6 +13,7 @@ import {
     Banner,
     MinisiteFeaturedProduct,
     MinisiteHighlightProduct,
+    CompanyUsage,
     Giro,
   } from '@prisma/client';
   import { UploadApiResponse } from 'cloudinary';
@@ -31,7 +33,7 @@ import {
     cta?: string;
     order?: number;
   };
-
+  
   export interface BulkProductMeta {
     alias: number;
     id?: string;
@@ -57,15 +59,39 @@ import {
     /* ───────── cuotas & lecturas ───────── */
   
     async quotas(empresaId: string): Promise<UsageResponse[]> {
-      const plan = await this.plan(empresaId);
-      const limits = await this.prisma.planFeature.findMany({ where: { plan } });
-      const out: UsageResponse[] = [];
-      for (const f of limits) {
-        const { items, used } = await this.collect(empresaId, f.code);
-        out.push({ code: f.code, limit: f.limit, used, items });
+        const log = new Logger('MinisiteService/quotas');
+      
+        log.verbose(`⏩  empresaId = ${empresaId}`);
+      
+        /* 1.  plan & límites declarados en PlanFeature */
+        const plan = await this.plan(empresaId);
+        log.debug(`Plan detectado → ${plan}`);
+      
+        const limits = await this.prisma.planFeature.findMany({ where: { plan } });
+        log.debug(`PlanFeature rows             : ${limits.length}`);
+        log.debug(
+          limits
+            .map((r) => `· ${r.code.padEnd(30)} – limit: ${r.limit ?? '∞'}`)
+            .join('\n'),
+        );
+      
+        /* 2.  recorrer cada código y calcular “used / items” */
+        const out: UsageResponse[] = [];
+        for (const f of limits) {
+          log.verbose(`↪️  procesando código: ${f.code}`);
+      
+          const { items, used } = await this.collect(empresaId, f.code);
+      
+          log.debug(
+            `code=${f.code}  limit=${f.limit ?? '∞'}  used=${used}  items=${items.length}`,
+          );
+      
+          out.push({ code: f.code, limit: f.limit, used, items });
+        }
+      
+        log.verbose(`✅  quotas listo → registros devueltos: ${out.length}`);
+        return out;
       }
-      return out;
-    }
   
     async quota(empresaId: string, code: FeatureCode): Promise<UsageResponse> {
       const plan = await this.plan(empresaId);
@@ -197,14 +223,12 @@ import {
       },
       files: { logo?: Express.Multer.File; slides?: Express.Multer.File[] },
     ) {
-      /* logo */
       let logoUrl: string | undefined;
       if (files.logo) {
         const res: UploadApiResponse = await this.cloud.uploadImage(files.logo);
         logoUrl = res.secure_url;
       }
   
-      /* empresa */
       await this.prisma.empresa.update({
         where: { id: empresaId },
         data: {
@@ -216,7 +240,6 @@ import {
         },
       });
   
-      /* slides */
       const newSlides = files.slides ?? [];
       await this.checkQuota(
         empresaId,
@@ -274,13 +297,23 @@ import {
         where: { plan_code: { plan: await this.plan(empresaId), code } },
       });
       if (!feature || feature.limit === null) return;
-      const used = (await this.collect(empresaId, code)).used;
-      if (used + increment > feature.limit) {
+  
+      const usedNow = await this.prisma.companyUsage.findUnique({
+        where: { companyId_code: { companyId: empresaId, code } },
+      });
+  
+      if ((usedNow?.used ?? 0) + increment > feature.limit) {
         throw new BadRequestException(`Límite de ${code} excedido`);
       }
     }
   
     private async collect(empresaId: string, code: FeatureCode) {
+      const usageRow = await this.prisma.companyUsage.findUnique({
+        where: { companyId_code: { companyId: empresaId, code } },
+      });
+  
+      const used = usageRow?.used ?? 0;
+  
       switch (code) {
         case FeatureCode.PRODUCTS_TOTAL:
           return {
@@ -288,9 +321,7 @@ import {
               where: { companyId: empresaId },
               select: { id: true, name: true },
             }),
-            used: await this.prisma.product.count({
-              where: { companyId: empresaId },
-            }),
+            used,
           };
         case FeatureCode.CATEGORIES_TOTAL:
           return {
@@ -298,9 +329,7 @@ import {
               where: { companyId: empresaId },
               select: { id: true, name: true },
             }),
-            used: await this.prisma.productCompanyCategory.count({
-              where: { companyId: empresaId },
-            }),
+            used,
           };
         case FeatureCode.BANNER_PRODUCT_SLOTS:
           return {
@@ -308,7 +337,7 @@ import {
               where: { empresaId },
               select: { id: true, title: true },
             }),
-            used: await this.prisma.banner.count({ where: { empresaId } }),
+            used,
           };
         case FeatureCode.STATIC_IMAGES_TOTAL:
           return {
@@ -316,9 +345,7 @@ import {
               where: { minisite: { empresaId } },
               select: { id: true, title: true, imageSrc: true },
             }),
-            used: await this.prisma.minisiteSlide.count({
-              where: { minisite: { empresaId } },
-            }),
+            used,
           };
         case FeatureCode.FEATURED_PRODUCTS_TOTAL:
           return {
@@ -326,9 +353,23 @@ import {
               where: { minisite: { empresaId } },
               select: { id: true, productId: true },
             }),
-            used: await this.prisma.minisiteFeaturedProduct.count({
+            used,
+          };
+        case FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL:
+          return {
+            items: await this.prisma.minisiteHighlightProduct.findMany({
               where: { minisite: { empresaId } },
+              select: { id: true, productId: true },
             }),
+            used,
+          };
+        case FeatureCode.OFFER_PRODUCTS_TOTAL:
+          return {
+            items: await this.prisma.minisiteProductOffer.findMany({
+              where: { minisite: { empresaId } },
+              select: { id: true, productId: true },
+            }),
+            used,
           };
         case FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL:
           return {
@@ -336,41 +377,65 @@ import {
               where: { orators: { some: { empresaId } } },
               select: { id: true, title: true },
             }),
-            used: await this.prisma.classroom.count({
-              where: { orators: { some: { empresaId } } },
-            }),
+            used,
           };
         default:
           throw new BadRequestException('Código no soportado');
       }
     }
   
-    async bulkUpsertProducts(
-        empresaId: string,
-        meta: BulkProductMeta[],
-        files: Record<string, { main?: Express.Multer.File; gallery: Express.Multer.File[] }>,
-      ) {
-        const minisiteId = await this.minisite(empresaId);
-      
-        return this.prisma.$transaction(async (tx) => {
-          const results: Array<{ productId: string; type: string }> = [];
-          const toCreate = meta.filter((m) => !m.id).length;
+    /* ───────── bulk products (con CompanyUsage) ───────── */
+  
+    async bulkUpsertProductsIndexed(
+      empresaId: string,
+      meta: BulkProductMeta[],
+      files: Record<number, { main?: Express.Multer.File; gallery: Express.Multer.File[] }>,
+    ) {
+      const minisiteId = await this.minisite(empresaId);
+  
+      const prepared = await Promise.all(
+        meta.map(async (m, idx) => {
+          const bucket = files[idx] ?? { gallery: [] };
+          if (!bucket.main) throw new BadRequestException(`main_${idx} es obligatorio`);
+  
+          const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
+          const galleryUrls = await Promise.all(
+            bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)),
+          );
+  
+          return { meta: m, mainUrl, galleryUrls };
+        }),
+      );
+  
+      return this.prisma.$transaction(
+        async (tx) => {
+          const toCreate = prepared.filter((p) => !p.meta.id).length;
           await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, toCreate);
-      
-          for (const m of meta) {
-            const f = (files[m.alias] ?? { gallery: [] }) as {
-              main?: Express.Multer.File;
-              gallery: Express.Multer.File[];
-            };
-      
-            if (!f.main) throw new BadRequestException(`Missing main image for ${m.alias}`);
-      
-            const mainUrl = (await this.cloud.uploadImage(f.main)).secure_url;
-            const galleryUrls = await Promise.all(
-              f.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)),
-            );
-      
-            const baseData: Prisma.ProductUncheckedCreateInput = {
+  
+          const delta: Record<FeatureCode, number> = {
+            [FeatureCode.PRODUCTS_TOTAL]: 0,
+            [FeatureCode.CATEGORIES_TOTAL]: 0,
+            [FeatureCode.BANNER_PRODUCT_SLOTS]: 0,
+            [FeatureCode.STATIC_IMAGES_TOTAL]: 0,
+            [FeatureCode.FEATURED_PRODUCTS_TOTAL]: 0,
+            [FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]: 0,
+            [FeatureCode.OFFER_PRODUCTS_TOTAL]: 0,
+            [FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL]: 0,
+          };
+  
+          const out: Array<{ productId: string; type: string }> = [];
+  
+          for (const { meta: m, mainUrl, galleryUrls } of prepared) {
+            if (!m.id && m.categoryId != null) {
+              const current = await tx.product.count({
+                where: { companyId: empresaId, categoryId: m.categoryId },
+              });
+              if (current >= 12) {
+                throw new BadRequestException(`Categoría #${m.categoryId} ya tiene 12 productos`);
+              }
+            }
+  
+            const productData: Prisma.ProductUncheckedCreateInput = {
               name: m.name,
               description: m.description ?? '',
               companyId: empresaId,
@@ -378,21 +443,25 @@ import {
               imageMain: mainUrl,
               imageGallery: galleryUrls,
             };
-      
+  
             const product = m.id
-              ? await tx.product.update({ where: { id: m.id }, data: baseData })
-              : await tx.product.create({ data: baseData });
-      
-            const t = (m.type ?? 'NORMAL').toUpperCase();
-      
-            if (t === 'FEATURED') {
+              ? await tx.product.update({ where: { id: m.id }, data: productData })
+              : await tx.product.create({ data: productData });
+  
+            if (!m.id) delta[FeatureCode.PRODUCTS_TOTAL]++;
+  
+            const type = (m.type ?? 'NORMAL').toUpperCase();
+  
+            if (type === 'FEATURED') {
               await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
               await tx.minisiteFeaturedProduct.upsert({
                 where: { productId: product.id },
                 update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
                 create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
               });
-            } else if (t === 'HIGHLIGHT') {
+              if (!m.id) delta[FeatureCode.FEATURED_PRODUCTS_TOTAL]++;
+  
+            } else if (type === 'HIGHLIGHT') {
               await this.checkQuota(empresaId, FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
               await tx.minisiteHighlightProduct.upsert({
                 where: { minisiteId_productId: { minisiteId, productId: product.id } },
@@ -407,104 +476,34 @@ import {
                   highlightDescription: m.highlightDescription ?? '',
                 },
               });
-            } else if (t === 'OFFER') {
-                const offer = (tx as any).minisiteProductOffer;          
-                await offer.upsert({
-                  where: { minisiteId_productId: { minisiteId, productId: product.id } },
-                  update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
-                  create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
-                });
-              }
-      
-            results.push({ productId: product.id, type: t });
-          }
-      
-          return results;
-        });
-      }
-      
-      async bulkUpsertProductsIndexed(
-        empresaId: string,
-        meta: BulkProductMeta[],
-        files: Record<number, { main?: Express.Multer.File; gallery: Express.Multer.File[] }>,
-      ) {
-        const minisiteId = await this.minisite(empresaId);
-      
-        return this.prisma.$transaction(async (tx) => {
-          const toCreate = meta.filter((m) => !m.id).length;
-          await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, toCreate);
-      
-          const result: Array<{ productId: string; type: string }> = [];
-      
-          for (const [idx, m] of meta.entries()) {
-            const bucket = files[idx] ?? { gallery: [] };
-            if (!bucket.main) {
-              throw new BadRequestException(`main_${idx} es obligatorio`);
-            }
-      
-            const mainUrl     = (await this.cloud.uploadImage(bucket.main)).secure_url;
-            const galleryUrls = await Promise.all(
-              bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)),
-            );
-      
-            const productBase: Prisma.ProductUncheckedCreateInput = {
-              name         : m.name,
-              description  : m.description ?? '',
-              companyId    : empresaId,
-              categoryId   : m.categoryId ?? null,
-              imageMain    : mainUrl,
-              imageGallery : galleryUrls,
-            };
-      
-            const product = m.id
-              ? await tx.product.update({ where: { id: m.id }, data: productBase })
-              : await tx.product.create({ data: productBase });
-      
-            const type = (m.type ?? 'NORMAL').toUpperCase();
-      
-            if (type === 'FEATURED') {
-              await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
-              await tx.minisiteFeaturedProduct.upsert({
-                where : { productId: product.id },
-                update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
-                create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
-              });
-      
-            } else if (type === 'HIGHLIGHT') {
-              await this.checkQuota(empresaId, FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
-              await tx.minisiteHighlightProduct.upsert({
-                where : { minisiteId_productId: { minisiteId, productId: product.id } },
-                update: {
-                  highlightFeatures   : m.highlightFeatures ?? [],
-                  highlightDescription: m.highlightDescription ?? '',
-                },
-                create: {
-                  minisiteId,
-                  productId           : product.id,
-                  highlightFeatures   : m.highlightFeatures ?? [],
-                  highlightDescription: m.highlightDescription ?? '',
-                },
-              });
-      
+              if (!m.id) delta[FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]++;
+  
             } else if (type === 'OFFER') {
-              const offerDelegate = (tx as any).minisiteProductOffer;
-              await offerDelegate.upsert({
-                where : { minisiteId_productId: { minisiteId, productId: product.id } },
+              await this.checkQuota(empresaId, FeatureCode.OFFER_PRODUCTS_TOTAL, m.id ? 0 : 1);
+              await tx.minisiteProductOffer.upsert({
+                where: { minisiteId_productId: { minisiteId, productId: product.id } },
                 update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
                 create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
               });
+              if (!m.id) delta[FeatureCode.OFFER_PRODUCTS_TOTAL]++;
             }
-      
-            result.push({ productId: product.id, type });
+  
+            out.push({ productId: product.id, type });
           }
-      
-          return result;
-        });
-      }
-      
-      
-
-
-    
+  
+          for (const [code, inc] of Object.entries(delta) as [FeatureCode, number][]) {
+            if (inc === 0) continue;
+            await tx.companyUsage.upsert({
+              where: { companyId_code: { companyId: empresaId, code } },
+              update: { used: { increment: inc } },
+              create: { companyId: empresaId, code, used: inc },
+            });
+          }
+  
+          return out;
+        },
+        { maxWait: 10_000, timeout: 60_000 },
+      );
+    }
   }
   

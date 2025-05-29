@@ -20,13 +20,23 @@ let MinisiteService = class MinisiteService {
         this.cloud = cloud;
     }
     async quotas(empresaId) {
+        const log = new common_1.Logger('MinisiteService/quotas');
+        log.verbose(`⏩  empresaId = ${empresaId}`);
         const plan = await this.plan(empresaId);
+        log.debug(`Plan detectado → ${plan}`);
         const limits = await this.prisma.planFeature.findMany({ where: { plan } });
+        log.debug(`PlanFeature rows             : ${limits.length}`);
+        log.debug(limits
+            .map((r) => `· ${r.code.padEnd(30)} – limit: ${r.limit ?? '∞'}`)
+            .join('\n'));
         const out = [];
         for (const f of limits) {
+            log.verbose(`↪️  procesando código: ${f.code}`);
             const { items, used } = await this.collect(empresaId, f.code);
+            log.debug(`code=${f.code}  limit=${f.limit ?? '∞'}  used=${used}  items=${items.length}`);
             out.push({ code: f.code, limit: f.limit, used, items });
         }
+        log.verbose(`✅  quotas listo → registros devueltos: ${out.length}`);
         return out;
     }
     async quota(empresaId, code) {
@@ -165,12 +175,18 @@ let MinisiteService = class MinisiteService {
         });
         if (!feature || feature.limit === null)
             return;
-        const used = (await this.collect(empresaId, code)).used;
-        if (used + increment > feature.limit) {
+        const usedNow = await this.prisma.companyUsage.findUnique({
+            where: { companyId_code: { companyId: empresaId, code } },
+        });
+        if ((usedNow?.used ?? 0) + increment > feature.limit) {
             throw new common_1.BadRequestException(`Límite de ${code} excedido`);
         }
     }
     async collect(empresaId, code) {
+        const usageRow = await this.prisma.companyUsage.findUnique({
+            where: { companyId_code: { companyId: empresaId, code } },
+        });
+        const used = usageRow?.used ?? 0;
         switch (code) {
             case client_1.FeatureCode.PRODUCTS_TOTAL:
                 return {
@@ -178,9 +194,7 @@ let MinisiteService = class MinisiteService {
                         where: { companyId: empresaId },
                         select: { id: true, name: true },
                     }),
-                    used: await this.prisma.product.count({
-                        where: { companyId: empresaId },
-                    }),
+                    used,
                 };
             case client_1.FeatureCode.CATEGORIES_TOTAL:
                 return {
@@ -188,9 +202,7 @@ let MinisiteService = class MinisiteService {
                         where: { companyId: empresaId },
                         select: { id: true, name: true },
                     }),
-                    used: await this.prisma.productCompanyCategory.count({
-                        where: { companyId: empresaId },
-                    }),
+                    used,
                 };
             case client_1.FeatureCode.BANNER_PRODUCT_SLOTS:
                 return {
@@ -198,7 +210,7 @@ let MinisiteService = class MinisiteService {
                         where: { empresaId },
                         select: { id: true, title: true },
                     }),
-                    used: await this.prisma.banner.count({ where: { empresaId } }),
+                    used,
                 };
             case client_1.FeatureCode.STATIC_IMAGES_TOTAL:
                 return {
@@ -206,9 +218,7 @@ let MinisiteService = class MinisiteService {
                         where: { minisite: { empresaId } },
                         select: { id: true, title: true, imageSrc: true },
                     }),
-                    used: await this.prisma.minisiteSlide.count({
-                        where: { minisite: { empresaId } },
-                    }),
+                    used,
                 };
             case client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL:
                 return {
@@ -216,9 +226,23 @@ let MinisiteService = class MinisiteService {
                         where: { minisite: { empresaId } },
                         select: { id: true, productId: true },
                     }),
-                    used: await this.prisma.minisiteFeaturedProduct.count({
+                    used,
+                };
+            case client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL:
+                return {
+                    items: await this.prisma.minisiteHighlightProduct.findMany({
                         where: { minisite: { empresaId } },
+                        select: { id: true, productId: true },
                     }),
+                    used,
+                };
+            case client_1.FeatureCode.OFFER_PRODUCTS_TOTAL:
+                return {
+                    items: await this.prisma.minisiteProductOffer.findMany({
+                        where: { minisite: { empresaId } },
+                        select: { id: true, productId: true },
+                    }),
+                    used,
                 };
             case client_1.FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL:
                 return {
@@ -226,89 +250,46 @@ let MinisiteService = class MinisiteService {
                         where: { orators: { some: { empresaId } } },
                         select: { id: true, title: true },
                     }),
-                    used: await this.prisma.classroom.count({
-                        where: { orators: { some: { empresaId } } },
-                    }),
+                    used,
                 };
             default:
                 throw new common_1.BadRequestException('Código no soportado');
         }
     }
-    async bulkUpsertProducts(empresaId, meta, files) {
-        const minisiteId = await this.minisite(empresaId);
-        return this.prisma.$transaction(async (tx) => {
-            const results = [];
-            const toCreate = meta.filter((m) => !m.id).length;
-            await this.checkQuota(empresaId, client_1.FeatureCode.PRODUCTS_TOTAL, toCreate);
-            for (const m of meta) {
-                const f = (files[m.alias] ?? { gallery: [] });
-                if (!f.main)
-                    throw new common_1.BadRequestException(`Missing main image for ${m.alias}`);
-                const mainUrl = (await this.cloud.uploadImage(f.main)).secure_url;
-                const galleryUrls = await Promise.all(f.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)));
-                const baseData = {
-                    name: m.name,
-                    description: m.description ?? '',
-                    companyId: empresaId,
-                    categoryId: m.categoryId ?? null,
-                    imageMain: mainUrl,
-                    imageGallery: galleryUrls,
-                };
-                const product = m.id
-                    ? await tx.product.update({ where: { id: m.id }, data: baseData })
-                    : await tx.product.create({ data: baseData });
-                const t = (m.type ?? 'NORMAL').toUpperCase();
-                if (t === 'FEATURED') {
-                    await this.checkQuota(empresaId, client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
-                    await tx.minisiteFeaturedProduct.upsert({
-                        where: { productId: product.id },
-                        update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
-                        create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
-                    });
-                }
-                else if (t === 'HIGHLIGHT') {
-                    await this.checkQuota(empresaId, client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
-                    await tx.minisiteHighlightProduct.upsert({
-                        where: { minisiteId_productId: { minisiteId, productId: product.id } },
-                        update: {
-                            highlightFeatures: m.highlightFeatures ?? [],
-                            highlightDescription: m.highlightDescription ?? '',
-                        },
-                        create: {
-                            minisiteId,
-                            productId: product.id,
-                            highlightFeatures: m.highlightFeatures ?? [],
-                            highlightDescription: m.highlightDescription ?? '',
-                        },
-                    });
-                }
-                else if (t === 'OFFER') {
-                    const offer = tx.minisiteProductOffer;
-                    await offer.upsert({
-                        where: { minisiteId_productId: { minisiteId, productId: product.id } },
-                        update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
-                        create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
-                    });
-                }
-                results.push({ productId: product.id, type: t });
-            }
-            return results;
-        });
-    }
     async bulkUpsertProductsIndexed(empresaId, meta, files) {
         const minisiteId = await this.minisite(empresaId);
+        const prepared = await Promise.all(meta.map(async (m, idx) => {
+            const bucket = files[idx] ?? { gallery: [] };
+            if (!bucket.main)
+                throw new common_1.BadRequestException(`main_${idx} es obligatorio`);
+            const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
+            const galleryUrls = await Promise.all(bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)));
+            return { meta: m, mainUrl, galleryUrls };
+        }));
         return this.prisma.$transaction(async (tx) => {
-            const toCreate = meta.filter((m) => !m.id).length;
+            const toCreate = prepared.filter((p) => !p.meta.id).length;
             await this.checkQuota(empresaId, client_1.FeatureCode.PRODUCTS_TOTAL, toCreate);
-            const result = [];
-            for (const [idx, m] of meta.entries()) {
-                const bucket = files[idx] ?? { gallery: [] };
-                if (!bucket.main) {
-                    throw new common_1.BadRequestException(`main_${idx} es obligatorio`);
+            const delta = {
+                [client_1.FeatureCode.PRODUCTS_TOTAL]: 0,
+                [client_1.FeatureCode.CATEGORIES_TOTAL]: 0,
+                [client_1.FeatureCode.BANNER_PRODUCT_SLOTS]: 0,
+                [client_1.FeatureCode.STATIC_IMAGES_TOTAL]: 0,
+                [client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL]: 0,
+                [client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]: 0,
+                [client_1.FeatureCode.OFFER_PRODUCTS_TOTAL]: 0,
+                [client_1.FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL]: 0,
+            };
+            const out = [];
+            for (const { meta: m, mainUrl, galleryUrls } of prepared) {
+                if (!m.id && m.categoryId != null) {
+                    const current = await tx.product.count({
+                        where: { companyId: empresaId, categoryId: m.categoryId },
+                    });
+                    if (current >= 12) {
+                        throw new common_1.BadRequestException(`Categoría #${m.categoryId} ya tiene 12 productos`);
+                    }
                 }
-                const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
-                const galleryUrls = await Promise.all(bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)));
-                const productBase = {
+                const productData = {
                     name: m.name,
                     description: m.description ?? '',
                     companyId: empresaId,
@@ -317,8 +298,10 @@ let MinisiteService = class MinisiteService {
                     imageGallery: galleryUrls,
                 };
                 const product = m.id
-                    ? await tx.product.update({ where: { id: m.id }, data: productBase })
-                    : await tx.product.create({ data: productBase });
+                    ? await tx.product.update({ where: { id: m.id }, data: productData })
+                    : await tx.product.create({ data: productData });
+                if (!m.id)
+                    delta[client_1.FeatureCode.PRODUCTS_TOTAL]++;
                 const type = (m.type ?? 'NORMAL').toUpperCase();
                 if (type === 'FEATURED') {
                     await this.checkQuota(empresaId, client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
@@ -327,6 +310,8 @@ let MinisiteService = class MinisiteService {
                         update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
                         create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
                     });
+                    if (!m.id)
+                        delta[client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL]++;
                 }
                 else if (type === 'HIGHLIGHT') {
                     await this.checkQuota(empresaId, client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
@@ -343,19 +328,32 @@ let MinisiteService = class MinisiteService {
                             highlightDescription: m.highlightDescription ?? '',
                         },
                     });
+                    if (!m.id)
+                        delta[client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]++;
                 }
                 else if (type === 'OFFER') {
-                    const offerDelegate = tx.minisiteProductOffer;
-                    await offerDelegate.upsert({
+                    await this.checkQuota(empresaId, client_1.FeatureCode.OFFER_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                    await tx.minisiteProductOffer.upsert({
                         where: { minisiteId_productId: { minisiteId, productId: product.id } },
                         update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
                         create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
                     });
+                    if (!m.id)
+                        delta[client_1.FeatureCode.OFFER_PRODUCTS_TOTAL]++;
                 }
-                result.push({ productId: product.id, type });
+                out.push({ productId: product.id, type });
             }
-            return result;
-        });
+            for (const [code, inc] of Object.entries(delta)) {
+                if (inc === 0)
+                    continue;
+                await tx.companyUsage.upsert({
+                    where: { companyId_code: { companyId: empresaId, code } },
+                    update: { used: { increment: inc } },
+                    create: { companyId: empresaId, code, used: inc },
+                });
+            }
+            return out;
+        }, { maxWait: 10_000, timeout: 60_000 });
     }
 };
 exports.MinisiteService = MinisiteService;

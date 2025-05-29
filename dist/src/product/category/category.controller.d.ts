@@ -86,21 +86,21 @@ export declare class CategoryController {
         products: {
             description: string;
             name: string;
-            categoryId: number;
+            categoryId: number | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
             isFeatured: boolean | null;
-            companyId: string;
+            lab: string | null;
             activeIngredients: string[];
-            benefits: string[];
             features: string[];
-            imageGallery: string[];
+            benefits: string[];
+            problemAddressed: string | null;
             imageMain: string | null;
+            imageGallery: string[];
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
-            lab: string | null;
-            problemAddressed: string | null;
+            companyId: string;
         }[];
     } & {
         name: string;

@@ -75,9 +75,9 @@ export class EmpresaService {
           include: {
             slides: true,
             benefits: true,
-            offers: {
+            productOffers: {
               include: {
-                products: true,
+                product: true,
               },
             },
             featuredProducts: {
@@ -96,6 +96,7 @@ export class EmpresaService {
       },
     });
   }
+  
 
   // -----------------------------------------------
   // NUEVO MÉTODO PARA SUBIR EL PDF A CLOUDINARY

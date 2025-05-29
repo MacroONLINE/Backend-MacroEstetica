@@ -35,14 +35,14 @@ export declare class MinisiteService {
     quota(empresaId: string, code: FeatureCode): Promise<UsageResponse>;
     objects(empresaId: string): Promise<Record<import(".prisma/client").$Enums.FeatureCode, any[]>>;
     objectsByCode(empresaId: string, code: FeatureCode): Promise<{
-        id: string;
         name: string;
+        id: string;
     }[] | {
+        name: string;
         id: number;
-        name: string;
     }[] | {
-        id: string;
         title: string;
+        id: string;
     }[] | {
         id: string;
         productId: string;
@@ -82,13 +82,6 @@ export declare class MinisiteService {
     private minisite;
     private checkQuota;
     private collect;
-    bulkUpsertProducts(empresaId: string, meta: BulkProductMeta[], files: Record<string, {
-        main?: Express.Multer.File;
-        gallery: Express.Multer.File[];
-    }>): Promise<{
-        productId: string;
-        type: string;
-    }[]>;
     bulkUpsertProductsIndexed(empresaId: string, meta: BulkProductMeta[], files: Record<number, {
         main?: Express.Multer.File;
         gallery: Express.Multer.File[];
