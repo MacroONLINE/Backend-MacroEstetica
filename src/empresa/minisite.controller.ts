@@ -178,33 +178,31 @@ import {
       return this.minisite.upsertHighlight(empresaId, body);
     }
   
-    @ApiOperation({
-      summary: 'Configurar información general, logo y slides',
-    })
+
+    @ApiOperation({ summary: 'Obtener configuración general del minisite' })
+    @ApiParam({ name: 'empresaId', example: 'company-001' })
+    @ApiOkResponse({ description: 'Datos del minisite, banners y uso de slots' })
+    @Get(':empresaId/setup')
+    getSetup(@Param('empresaId') empresaId: string) {
+      return this.minisite.getMinisiteSetup(empresaId);
+    }
+    
+    @ApiOperation({ summary: 'Configurar datos generales, color, logo y slides' })
     @ApiConsumes('multipart/form-data')
-    @ApiParam({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' })
+    @ApiParam({ name: 'empresaId', example: 'company-001' })
     @ApiBody({
       schema: {
         type: 'object',
         required: ['name', 'description', 'giro', 'slidesMeta'],
         properties: {
-          name: { type: 'string', example: 'DermaCorp' },
-          description: { type: 'string', example: 'Laboratorio dermocosmético' },
-          giro: {
-            type: 'string',
-            enum: Object.values(Giro),
-            example: Giro.EMPRESA_PROFESIONAL_PERFIL,
-          },
-                    slogan: { type: 'string', example: 'Belleza clínica al alcance' },
-          slidesMeta: {
-            type: 'string',
-            example: '[{"title":"Promo","description":"-20%","cta":"Comprar"}]',
-          },
+          name: { type: 'string' },
+          description: { type: 'string' },
+          giro: { type: 'string', enum: Object.values(Giro) },
+          slogan: { type: 'string' },
+          minisiteColor: { type: 'string' },
+          slidesMeta: { type: 'string' },
           logo: { type: 'string', format: 'binary' },
-          slides: {
-            type: 'array',
-            items: { type: 'string', format: 'binary' },
-          },
+          slides: { type: 'array', items: { type: 'string', format: 'binary' } },
         },
       },
     })
@@ -217,9 +215,6 @@ import {
     ) {
       const logo = files.find((f) => f.fieldname === 'logo');
       const slides = files.filter((f) => f.fieldname === 'slides');
-      if (!Object.values(Giro).includes(body.giro)) {
-        throw new BadRequestException('Giro inválido');
-      }
       const slidesMeta = body.slidesMeta ? JSON.parse(body.slidesMeta) : [];
       return this.minisite.setupMinisite(
         empresaId,
@@ -229,10 +224,14 @@ import {
           giro: body.giro as Giro,
           slogan: body.slogan,
           slidesMeta,
+          minisiteColor: body.minisiteColor,
         },
         { logo, slides },
       );
     }
+    
+
+    
 
    // src/empresa/minisite.controller.ts
 

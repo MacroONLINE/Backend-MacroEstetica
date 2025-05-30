@@ -47,12 +47,12 @@ let MinisiteController = class MinisiteController {
     upsertHighlight(empresaId, body) {
         return this.minisite.upsertHighlight(empresaId, body);
     }
+    getSetup(empresaId) {
+        return this.minisite.getMinisiteSetup(empresaId);
+    }
     async setup(empresaId, body, files) {
         const logo = files.find((f) => f.fieldname === 'logo');
         const slides = files.filter((f) => f.fieldname === 'slides');
-        if (!Object.values(client_1.Giro).includes(body.giro)) {
-            throw new common_1.BadRequestException('Giro inválido');
-        }
         const slidesMeta = body.slidesMeta ? JSON.parse(body.slidesMeta) : [];
         return this.minisite.setupMinisite(empresaId, {
             name: body.name,
@@ -60,6 +60,7 @@ let MinisiteController = class MinisiteController {
             giro: body.giro,
             slogan: body.slogan,
             slidesMeta,
+            minisiteColor: body.minisiteColor,
         }, { logo, slides });
     }
     async bulkProducts(empresaId, productsRaw, rawFiles) {
@@ -231,33 +232,32 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MinisiteController.prototype, "upsertHighlight", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({
-        summary: 'Configurar información general, logo y slides',
-    }),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener configuración general del minisite' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
+    (0, swagger_1.ApiOkResponse)({ description: 'Datos del minisite, banners y uso de slots' }),
+    (0, common_1.Get)(':empresaId/setup'),
+    __param(0, (0, common_1.Param)('empresaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], MinisiteController.prototype, "getSetup", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Configurar datos generales, color, logo y slides' }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
             required: ['name', 'description', 'giro', 'slidesMeta'],
             properties: {
-                name: { type: 'string', example: 'DermaCorp' },
-                description: { type: 'string', example: 'Laboratorio dermocosmético' },
-                giro: {
-                    type: 'string',
-                    enum: Object.values(client_1.Giro),
-                    example: client_1.Giro.EMPRESA_PROFESIONAL_PERFIL,
-                },
-                slogan: { type: 'string', example: 'Belleza clínica al alcance' },
-                slidesMeta: {
-                    type: 'string',
-                    example: '[{"title":"Promo","description":"-20%","cta":"Comprar"}]',
-                },
+                name: { type: 'string' },
+                description: { type: 'string' },
+                giro: { type: 'string', enum: Object.values(client_1.Giro) },
+                slogan: { type: 'string' },
+                minisiteColor: { type: 'string' },
+                slidesMeta: { type: 'string' },
                 logo: { type: 'string', format: 'binary' },
-                slides: {
-                    type: 'array',
-                    items: { type: 'string', format: 'binary' },
-                },
+                slides: { type: 'array', items: { type: 'string', format: 'binary' } },
             },
         },
     }),

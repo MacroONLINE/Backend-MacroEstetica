@@ -35,14 +35,14 @@ export declare class MinisiteService {
     quota(empresaId: string, code: FeatureCode): Promise<UsageResponse>;
     objects(empresaId: string): Promise<Record<import(".prisma/client").$Enums.FeatureCode, any[]>>;
     objectsByCode(empresaId: string, code: FeatureCode): Promise<{
-        name: string;
         id: string;
-    }[] | {
         name: string;
+    }[] | {
         id: number;
+        name: string;
     }[] | {
-        title: string;
         id: string;
+        title: string;
     }[] | {
         id: string;
         productId: string;
@@ -66,12 +66,50 @@ export declare class MinisiteService {
         highlightDescription?: string;
         hoghlightImageUrl?: string;
     }): Promise<MinisiteHighlightProduct>;
+    getMinisiteSetup(empresaId: string): Promise<{
+        company: {
+            name: string;
+            title: string;
+            minisite: {
+                minisiteColor: string;
+                slogan: string;
+            };
+            giro: import(".prisma/client").$Enums.Giro;
+            location: string;
+            profileImage: string;
+        };
+        minisiteColor: string;
+        slides: {
+            id: string;
+            title: string;
+            imageSrc: string;
+            order: number;
+        }[];
+        slideUsage: {
+            used: number;
+            limit: number;
+        };
+        banners: {
+            id: string;
+            description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            banner: string;
+            title: string;
+            date: Date | null;
+            cta_url: string | null;
+            cta_button_text: string;
+            logo: string;
+            empresaId: string | null;
+        }[];
+    }>;
     setupMinisite(empresaId: string, body: {
         name: string;
         description: string;
         giro: Giro;
         slogan?: string;
         slidesMeta: SlideMeta[];
+        minisiteColor?: string;
     }, files: {
         logo?: Express.Multer.File;
         slides?: Express.Multer.File[];

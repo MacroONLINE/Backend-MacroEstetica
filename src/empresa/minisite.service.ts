@@ -210,63 +210,112 @@ import {
       });
     }
   
-    /* ───────── configuración general + lote de slides ───────── */
-  
-    async setupMinisite(
-      empresaId: string,
-      body: {
-        name: string;
-        description: string;
-        giro: Giro;
-        slogan?: string;
-        slidesMeta: SlideMeta[];
-      },
-      files: { logo?: Express.Multer.File; slides?: Express.Multer.File[] },
-    ) {
-      let logoUrl: string | undefined;
-      if (files.logo) {
-        const res: UploadApiResponse = await this.cloud.uploadImage(files.logo);
-        logoUrl = res.secure_url;
+    async getMinisiteSetup(empresaId: string) {
+        const plan = await this.plan(empresaId);
+      
+        /* límite de slots de banner/slide para el plan del cliente */
+        const slotLimit = await this.prisma.planFeature.findUnique({
+          where: { plan_code: { plan, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
+          select: { limit: true },
+        });
+      
+        /* datos generales de la empresa + minisite (sin duplicar slides) */
+        const company = await this.prisma.empresa.findUnique({
+          where: { id: empresaId },
+          select: {
+            name: true,
+            location: true,
+            title: true,
+            giro: true,
+            profileImage: true,
+            minisite: {
+              select: {
+                minisiteColor: true,
+                slogan: true,
+              },
+            },
+          },
+        });
+        if (!company) throw new NotFoundException('Empresa no encontrada');
+      
+        /* slides y banners reales */
+        const slides  = await this.prisma.minisiteSlide.findMany({
+          where: { minisite: { empresaId } },
+          select: { id: true, title: true, imageSrc: true, order: true },
+        });
+      
+        const banners = await this.prisma.banner.findMany({
+          where: { empresaId },
+        });
+      
+        return {
+          company,
+          minisiteColor: company.minisite?.minisiteColor ?? null,
+          slides,
+          slideUsage: { used: slides.length, limit: slotLimit?.limit ?? null },
+          banners,
+        };
       }
-  
-      await this.prisma.empresa.update({
-        where: { id: empresaId },
-        data: {
-          name: body.name,
-          profileImage: logoUrl,
-          title: body.slogan,
-          location: body.description,
-          giro: body.giro,
+      
+      async setupMinisite(
+        empresaId: string,
+        body: {
+          name: string;
+          description: string;
+          giro: Giro;
+          slogan?: string;
+          slidesMeta: SlideMeta[];
+          minisiteColor?: string;
         },
-      });
-  
-      const newSlides = files.slides ?? [];
-      await this.checkQuota(
-        empresaId,
-        FeatureCode.STATIC_IMAGES_TOTAL,
-        newSlides.length,
-      );
-  
-      if (newSlides.length) {
-        const uploads: UploadApiResponse[] = await Promise.all(
-          newSlides.map((f) => this.cloud.uploadImage(f)),
-        );
-        const minisiteId = await this.minisite(empresaId);
-        const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map(
-          (u, idx) => ({
+        files: { logo?: Express.Multer.File; slides?: Express.Multer.File[] },
+      ) {
+        let logoUrl: string | undefined;
+        if (files.logo) {
+          const res: UploadApiResponse = await this.cloud.uploadImage(files.logo);
+          logoUrl = res.secure_url;
+        }
+      
+        await this.prisma.empresa.update({
+          where: { id: empresaId },
+          data: {
+            name: body.name,
+            profileImage: logoUrl,
+            title: body.slogan,
+            location: body.description,
+            giro: body.giro,
+          },
+        });
+      
+        await this.prisma.minisite.update({
+          where: { empresaId },
+          data: {
+            minisiteColor: body.minisiteColor ?? undefined,
+            slogan: body.slogan,
+          },
+        });
+      
+        const newSlides = files.slides ?? [];
+        await this.checkQuota(empresaId, FeatureCode.STATIC_IMAGES_TOTAL, newSlides.length);
+      
+        if (newSlides.length) {
+          const uploads = await Promise.all(
+            newSlides.map((f) => this.cloud.uploadImage(f)),
+          );
+          const minisiteId = await this.minisite(empresaId);
+          const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map((u, idx) => ({
             minisiteId,
             imageSrc: u.secure_url,
             title: body.slidesMeta[idx]?.title ?? '',
             description: body.slidesMeta[idx]?.description ?? '',
             cta: body.slidesMeta[idx]?.cta ?? '',
             order: body.slidesMeta[idx]?.order ?? idx,
-          }),
-        );
-        await this.prisma.minisiteSlide.createMany({ data });
+          }));
+          await this.prisma.minisiteSlide.createMany({ data });
+        }
+      
+        return { ok: true };
       }
-  
-      return { ok: true };
-    }
+
   
     /* ───────── helpers ───────── */
   

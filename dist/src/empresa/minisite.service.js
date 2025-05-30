@@ -118,6 +118,45 @@ let MinisiteService = class MinisiteService {
             create: { ...data, minisiteId },
         });
     }
+    async getMinisiteSetup(empresaId) {
+        const plan = await this.plan(empresaId);
+        const slotLimit = await this.prisma.planFeature.findUnique({
+            where: { plan_code: { plan, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
+            select: { limit: true },
+        });
+        const company = await this.prisma.empresa.findUnique({
+            where: { id: empresaId },
+            select: {
+                name: true,
+                location: true,
+                title: true,
+                giro: true,
+                profileImage: true,
+                minisite: {
+                    select: {
+                        minisiteColor: true,
+                        slogan: true,
+                    },
+                },
+            },
+        });
+        if (!company)
+            throw new common_1.NotFoundException('Empresa no encontrada');
+        const slides = await this.prisma.minisiteSlide.findMany({
+            where: { minisite: { empresaId } },
+            select: { id: true, title: true, imageSrc: true, order: true },
+        });
+        const banners = await this.prisma.banner.findMany({
+            where: { empresaId },
+        });
+        return {
+            company,
+            minisiteColor: company.minisite?.minisiteColor ?? null,
+            slides,
+            slideUsage: { used: slides.length, limit: slotLimit?.limit ?? null },
+            banners,
+        };
+    }
     async setupMinisite(empresaId, body, files) {
         let logoUrl;
         if (files.logo) {
@@ -132,6 +171,13 @@ let MinisiteService = class MinisiteService {
                 title: body.slogan,
                 location: body.description,
                 giro: body.giro,
+            },
+        });
+        await this.prisma.minisite.update({
+            where: { empresaId },
+            data: {
+                minisiteColor: body.minisiteColor ?? undefined,
+                slogan: body.slogan,
             },
         });
         const newSlides = files.slides ?? [];
