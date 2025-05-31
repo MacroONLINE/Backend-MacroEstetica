@@ -30,6 +30,7 @@ export interface BulkProductMeta {
 export declare class MinisiteService {
     private readonly prisma;
     private readonly cloud;
+    private readonly logger;
     constructor(prisma: PrismaService, cloud: CloudinaryService);
     quotas(empresaId: string): Promise<UsageResponse[]>;
     quota(empresaId: string, code: FeatureCode): Promise<UsageResponse>;
@@ -42,10 +43,10 @@ export declare class MinisiteService {
         name: string;
     }[] | {
         id: string;
-        title: string;
+        productId: string;
     }[] | {
         id: string;
-        productId: string;
+        title: string;
     }[]>;
     upsertProduct(empresaId: string, data: Omit<Prisma.ProductUncheckedCreateInput, 'companyId' | 'id'> & Partial<Prisma.ProductUncheckedUpdateInput> & {
         id?: string;
@@ -94,13 +95,13 @@ export declare class MinisiteService {
             description: string;
             createdAt: Date;
             updatedAt: Date;
-            banner: string;
             title: string;
+            empresaId: string | null;
+            logo: string;
+            banner: string;
             date: Date | null;
             cta_url: string | null;
             cta_button_text: string;
-            logo: string;
-            empresaId: string | null;
         }[];
     }>;
     setupMinisite(empresaId: string, body: {

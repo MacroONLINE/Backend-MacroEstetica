@@ -18,25 +18,20 @@ let MinisiteService = class MinisiteService {
     constructor(prisma, cloud) {
         this.prisma = prisma;
         this.cloud = cloud;
+        this.logger = new common_1.Logger('MinisiteService');
     }
     async quotas(empresaId) {
-        const log = new common_1.Logger('MinisiteService/quotas');
-        log.verbose(`⏩  empresaId = ${empresaId}`);
+        this.logger.verbose(`empresaId = ${empresaId}`);
         const plan = await this.plan(empresaId);
-        log.debug(`Plan detectado → ${plan}`);
         const limits = await this.prisma.planFeature.findMany({ where: { plan } });
-        log.debug(`PlanFeature rows             : ${limits.length}`);
-        log.debug(limits
-            .map((r) => `· ${r.code.padEnd(30)} – limit: ${r.limit ?? '∞'}`)
-            .join('\n'));
         const out = [];
         for (const f of limits) {
-            log.verbose(`↪️  procesando código: ${f.code}`);
+            this.logger.verbose(`procesando código: ${f.code}`);
             const { items, used } = await this.collect(empresaId, f.code);
-            log.debug(`code=${f.code}  limit=${f.limit ?? '∞'}  used=${used}  items=${items.length}`);
+            this.logger.debug(`code=${f.code} limit=${f.limit ?? '∞'} used=${used} items=${items.length}`);
             out.push({ code: f.code, limit: f.limit, used, items });
         }
-        log.verbose(`✅  quotas listo → registros devueltos: ${out.length}`);
+        this.logger.verbose(`quotas listo → registros devueltos: ${out.length}`);
         return out;
     }
     async quota(empresaId, code) {
@@ -69,23 +64,17 @@ let MinisiteService = class MinisiteService {
             const { id, ...upd } = data;
             return this.prisma.product.update({ where: { id }, data: upd });
         }
-        return this.prisma.product.create({
-            data: { ...data, companyId: empresaId },
-        });
+        return this.prisma.product.create({ data: { ...data, companyId: empresaId } });
     }
     async upsertBanner(empresaId, data) {
-        const existing = await this.prisma.banner.findFirst({
-            where: { empresaId },
-        });
+        const existing = await this.prisma.banner.findFirst({ where: { empresaId } });
         if (!data.id && existing)
             throw new common_1.BadRequestException('Ya existe un banner');
         if (data.id) {
             const { id, ...upd } = data;
             return this.prisma.banner.update({ where: { id }, data: upd });
         }
-        return this.prisma.banner.create({
-            data: { ...data, empresaId },
-        });
+        return this.prisma.banner.create({ data: { ...data, empresaId } });
     }
     async upsertFeatured(empresaId, data) {
         await this.checkQuota(empresaId, client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL, data.id ? 0 : 1);
@@ -111,16 +100,14 @@ let MinisiteService = class MinisiteService {
             });
         }
         return this.prisma.minisiteHighlightProduct.upsert({
-            where: {
-                minisiteId_productId: { minisiteId, productId: data.productId },
-            },
+            where: { minisiteId_productId: { minisiteId, productId: data.productId } },
             update: { ...data },
             create: { ...data, minisiteId },
         });
     }
     async getMinisiteSetup(empresaId) {
         const plan = await this.plan(empresaId);
-        const slotLimit = await this.prisma.planFeature.findUnique({
+        const slotLimitRow = await this.prisma.planFeature.findUnique({
             where: { plan_code: { plan, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
             select: { limit: true },
         });
@@ -132,12 +119,7 @@ let MinisiteService = class MinisiteService {
                 title: true,
                 giro: true,
                 profileImage: true,
-                minisite: {
-                    select: {
-                        minisiteColor: true,
-                        slogan: true,
-                    },
-                },
+                minisite: { select: { minisiteColor: true, slogan: true } },
             },
         });
         if (!company)
@@ -146,14 +128,12 @@ let MinisiteService = class MinisiteService {
             where: { minisite: { empresaId } },
             select: { id: true, title: true, imageSrc: true, order: true },
         });
-        const banners = await this.prisma.banner.findMany({
-            where: { empresaId },
-        });
+        const banners = await this.prisma.banner.findMany({ where: { empresaId } });
         return {
             company,
             minisiteColor: company.minisite?.minisiteColor ?? null,
             slides,
-            slideUsage: { used: slides.length, limit: slotLimit?.limit ?? null },
+            slideUsage: { used: slides.length, limit: slotLimitRow?.limit ?? null },
             banners,
         };
     }
@@ -180,11 +160,29 @@ let MinisiteService = class MinisiteService {
                 slogan: body.slogan,
             },
         });
+        const minisiteId = await this.minisite(empresaId);
+        const existingCount = await this.prisma.minisiteSlide.count({ where: { minisiteId } });
+        if (existingCount > 0) {
+            await this.prisma.minisiteSlide.deleteMany({ where: { minisiteId } });
+            await this.prisma.companyUsage.upsert({
+                where: { companyId_code: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
+                update: { used: 0 },
+                create: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS, used: 0 },
+            });
+        }
         const newSlides = files.slides ?? [];
-        await this.checkQuota(empresaId, client_1.FeatureCode.STATIC_IMAGES_TOTAL, newSlides.length);
-        if (newSlides.length) {
+        const plan = await this.plan(empresaId);
+        const slotLimitRow = await this.prisma.planFeature.findUnique({
+            where: { plan_code: { plan, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
+            select: { limit: true },
+        });
+        const limit = slotLimitRow?.limit ?? 0;
+        const newCount = newSlides.length;
+        if (newCount > limit) {
+            throw new common_1.BadRequestException(`Límite de slides excedido: máximo ${limit}`);
+        }
+        if (newCount > 0) {
             const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)));
-            const minisiteId = await this.minisite(empresaId);
             const data = uploads.map((u, idx) => ({
                 minisiteId,
                 imageSrc: u.secure_url,
@@ -194,6 +192,11 @@ let MinisiteService = class MinisiteService {
                 order: body.slidesMeta[idx]?.order ?? idx,
             }));
             await this.prisma.minisiteSlide.createMany({ data });
+            await this.prisma.companyUsage.upsert({
+                where: { companyId_code: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
+                update: { used: newCount },
+                create: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS, used: newCount },
+            });
         }
         return { ok: true };
     }
@@ -221,10 +224,11 @@ let MinisiteService = class MinisiteService {
         });
         if (!feature || feature.limit === null)
             return;
-        const usedNow = await this.prisma.companyUsage.findUnique({
+        const usageRow = await this.prisma.companyUsage.findUnique({
             where: { companyId_code: { companyId: empresaId, code } },
         });
-        if ((usedNow?.used ?? 0) + increment > feature.limit) {
+        const used = usageRow?.used ?? 0;
+        if (used + increment > feature.limit) {
             throw new common_1.BadRequestException(`Límite de ${code} excedido`);
         }
     }
@@ -252,9 +256,9 @@ let MinisiteService = class MinisiteService {
                 };
             case client_1.FeatureCode.BANNER_PRODUCT_SLOTS:
                 return {
-                    items: await this.prisma.banner.findMany({
-                        where: { empresaId },
-                        select: { id: true, title: true },
+                    items: await this.prisma.minisiteSlide.findMany({
+                        where: { minisite: { empresaId } },
+                        select: { id: true, title: true, imageSrc: true },
                     }),
                     used,
                 };
@@ -399,7 +403,7 @@ let MinisiteService = class MinisiteService {
                 });
             }
             return out;
-        }, { maxWait: 10_000, timeout: 60_000 });
+        }, { maxWait: 10000, timeout: 60000 });
     }
 };
 exports.MinisiteService = MinisiteService;

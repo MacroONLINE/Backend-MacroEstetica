@@ -22,6 +22,7 @@ const minisite_quota_dto_1 = require("./dto/minisite-quota.dto");
 let MinisiteController = class MinisiteController {
     constructor(minisite) {
         this.minisite = minisite;
+        this.logger = new common_1.Logger('MinisiteController');
     }
     getQuotas(empresaId) {
         return this.minisite.quotas(empresaId);
@@ -48,9 +49,11 @@ let MinisiteController = class MinisiteController {
         return this.minisite.upsertHighlight(empresaId, body);
     }
     getSetup(empresaId) {
+        this.logger.verbose(`GET /minisite/${empresaId}/setup`);
         return this.minisite.getMinisiteSetup(empresaId);
     }
     async setup(empresaId, body, files) {
+        this.logger.verbose(`PUT /minisite/${empresaId}/setup payload: ${JSON.stringify(body)}`);
         const logo = files.find((f) => f.fieldname === 'logo');
         const slides = files.filter((f) => f.fieldname === 'slides');
         const slidesMeta = body.slidesMeta ? JSON.parse(body.slidesMeta) : [];
@@ -84,10 +87,8 @@ let MinisiteController = class MinisiteController {
 };
 exports.MinisiteController = MinisiteController;
 __decorate([
-    (0, swagger_1.ApiOperation)({
-        summary: 'Cuotas y objetos de todos los códigos',
-    }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Cuotas y objetos de todos los códigos' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiOkResponse)({ type: minisite_quota_dto_1.UsageResponseDto, isArray: true }),
     (0, common_1.Get)(':empresaId/quotas'),
     __param(0, (0, common_1.Param)('empresaId')),
@@ -96,10 +97,8 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], MinisiteController.prototype, "getQuotas", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({
-        summary: 'Cuota y objetos de un código',
-    }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Cuota y objetos de un código' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiParam)({ name: 'code', enum: client_1.FeatureCode, example: client_1.FeatureCode.BANNER_PRODUCT_SLOTS }),
     (0, swagger_1.ApiOkResponse)({ type: minisite_quota_dto_1.UsageResponseDto }),
     (0, swagger_1.ApiBadRequestResponse)(),
@@ -112,7 +111,7 @@ __decorate([
 ], MinisiteController.prototype, "getQuota", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Objetos de todos los códigos' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiOkResponse)({
         schema: {
             type: 'object',
@@ -127,7 +126,7 @@ __decorate([
 ], MinisiteController.prototype, "getObjects", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Objetos de un código' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiParam)({ name: 'code', enum: client_1.FeatureCode, example: client_1.FeatureCode.STATIC_IMAGES_TOTAL }),
     (0, swagger_1.ApiOkResponse)({
         schema: { type: 'array', items: { type: 'object' } },
@@ -141,7 +140,7 @@ __decorate([
 ], MinisiteController.prototype, "getObjectsByCode", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar producto' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
@@ -164,7 +163,7 @@ __decorate([
 ], MinisiteController.prototype, "upsertProduct", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar banner' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
@@ -188,7 +187,7 @@ __decorate([
 ], MinisiteController.prototype, "upsertBanner", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar producto destacado' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
@@ -210,7 +209,7 @@ __decorate([
 ], MinisiteController.prototype, "upsertFeatured", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar producto highlight' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'ckqs889df0000g411o2o1p4sa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
@@ -274,40 +273,40 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: 'Bulk-upsert de productos (NORMAL, FEATURED, HIGHLIGHT u OFFER)',
         description: `
-  Envía multipart/form-data con:
-  - products: JSON array de metadatos de cada producto (misma posición que los archivos).
-  - Archivos nombrados main_i (imagen principal) y gallery_i (galería) por índice i.
-  
-  Campos específicos por tipo:
-  • NORMAL  
-    { "name": "Producto A", "type": "NORMAL", "description": "Una crema hidratante", "categoryId": 11 }
-  
-  • FEATURED  
-    { "name": "Producto B", "type": "FEATURED", "order": 1, "tagline": "Top ventas", "categoryId": 12 }
-  
-  • HIGHLIGHT  
-    { "name": "Producto C", "type": "HIGHLIGHT", "highlightFeatures": ["Alta concentración","Sin parabenos"], "highlightDescription": "Nuevo lanzamiento", "categoryId": 13 }
-  
-  • OFFER  
-    { "name": "Producto D", "type": "OFFER", "title": "Descuento especial", "offerDescription": "20% de descuento", "categoryId": 16 }
-  
-  Ejemplo completo de products:
-  [
-    { "name":"Producto A","type":"NORMAL","description":"Una crema","categoryId":11 },
-    { "name":"Producto B","type":"FEATURED","order":1,"tagline":"Top ventas","categoryId":12 },
-    { "name":"Producto C","type":"HIGHLIGHT","highlightFeatures":["Alta concentración","Sin parabenos"],"highlightDescription":"Nuevo","categoryId":13 },
-    { "name":"Producto D","type":"OFFER","title":"Oferta","offerDescription":"15% off","categoryId":16 }
-  ]
+Envía multipart/form-data con:
+- products: JSON array de metadatos de cada producto (misma posición que los archivos).
+- Archivos nombrados main_i (imagen principal) y gallery_i (galería) por índice i.
+
+Campos específicos por tipo:
+• NORMAL  
+  { "name": "Producto A", "type": "NORMAL", "description": "Una crema hidratante", "categoryId": 11 }
+
+• FEATURED  
+  { "name": "Producto B", "type": "FEATURED", "order": 1, "tagline": "Top ventas", "categoryId": 12 }
+
+• HIGHLIGHT  
+  { "name": "Producto C", "type": "HIGHLIGHT", "highlightFeatures": ["Alta concentración","Sin parabenos"], "highlightDescription": "Nuevo lanzamiento", "categoryId": 13 }
+
+• OFFER  
+  { "name": "Producto D", "type": "OFFER", "title": "Descuento especial", "offerDescription": "20% de descuento", "categoryId": 16 }
+
+Ejemplo completo de products:
+[
+  { "name":"Producto A","type":"NORMAL","description":"Una crema","categoryId":11 },
+  { "name":"Producto B","type":"FEATURED","order":1,"tagline":"Top ventas","categoryId":12 },
+  { "name":"Producto C","type":"HIGHLIGHT","highlightFeatures":["Alta concentración","Sin parabenos"],"highlightDescription":"Nuevo","categoryId":13 },
+  { "name":"Producto D","type":"OFFER","title":"Oferta","offerDescription":"15% off","categoryId":16 }
+]
     `,
     }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiConflictResponse)({
-        description: 'Se superó el cupo permitido para el plan (PRODUCTS_TOTAL, FEATURED_PRODUCTS_TOTAL, etc.)'
+        description: 'Se superó el cupo permitido para el plan (PRODUCTS_TOTAL, FEATURED_PRODUCTS_TOTAL, etc.)',
     }),
     (0, swagger_1.ApiUnprocessableEntityResponse)({
-        description: 'La categoría indicada ya contiene 12 productos'
+        description: 'La categoría indicada ya contiene 12 productos',
     }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'minisite-001' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',

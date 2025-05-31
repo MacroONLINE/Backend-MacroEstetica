@@ -2,6 +2,7 @@ import { FeatureCode } from '@prisma/client';
 import { MinisiteService } from './minisite.service';
 export declare class MinisiteController {
     private readonly minisite;
+    private readonly logger;
     constructor(minisite: MinisiteService);
     getQuotas(empresaId: string): Promise<import("./minisite.service").UsageResponse<any>[]>;
     getQuota(empresaId: string, code: FeatureCode): Promise<import("./minisite.service").UsageResponse<any>>;
@@ -14,10 +15,10 @@ export declare class MinisiteController {
         name: string;
     }[] | {
         id: string;
-        title: string;
+        productId: string;
     }[] | {
         id: string;
-        productId: string;
+        title: string;
     }[]>;
     upsertProduct(empresaId: string, body: any): Promise<{
         id: string;
@@ -43,13 +44,13 @@ export declare class MinisiteController {
         description: string;
         createdAt: Date;
         updatedAt: Date;
-        banner: string;
         title: string;
+        empresaId: string | null;
+        logo: string;
+        banner: string;
         date: Date | null;
         cta_url: string | null;
         cta_button_text: string;
-        logo: string;
-        empresaId: string | null;
     }>;
     upsertFeatured(empresaId: string, body: any): Promise<{
         id: string;
@@ -98,13 +99,13 @@ export declare class MinisiteController {
             description: string;
             createdAt: Date;
             updatedAt: Date;
-            banner: string;
             title: string;
+            empresaId: string | null;
+            logo: string;
+            banner: string;
             date: Date | null;
             cta_url: string | null;
             cta_button_text: string;
-            logo: string;
-            empresaId: string | null;
         }[];
     }>;
     setup(empresaId: string, body: any, files: Express.Multer.File[]): Promise<{
