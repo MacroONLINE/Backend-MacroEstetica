@@ -175,7 +175,58 @@ export class MinisiteController {
 
   @ApiOperation({ summary: 'Obtener configuración general del minisite' })
   @ApiParam({ name: 'empresaId', example: 'company-001' })
-  @ApiOkResponse({ description: 'Datos del minisite, banners y uso de slots' })
+  @ApiOkResponse({
+    description: 'Datos del minisite, banners y uso de slots',
+    schema: {
+      example: {
+        company: {
+          name: 'Empresa PRUEBA CA',
+          location: null,
+          title: null,
+          giro: 'EMPRESA_PROFESIONAL_PERFIL',
+          profileImage: 'https://res.cloudinary.com/dwcrzwawj/image/upload/v1735332034/11_que_es_un_cosmetico_lider_uy08ij.jpg',
+          minisite: {
+            minisiteColor: '#0000FF',
+            slogan: 'Lo esencial al mejor precio'
+          }
+        },
+        minisiteColor: '#0000FF',
+        slides: [
+          {
+            id: 'slide-001',
+            title: 'Bienvenido a Aromaterapia',
+            imageSrc: 'https://res.cloudinary.com/dwcrzwawj/image/upload/v1735332035/12_apartologia_peque_gkmvrb.png',
+            order: 1
+          },
+          {
+            id: 'slide-002',
+            title: 'Productos Destacados',
+            imageSrc: 'https://res.cloudinary.com/dwcrzwawj/image/upload/v1735332034/11_que_es_un_cosmetico_lider_uy08ij.jpg',
+            order: 2
+          }
+        ],
+        slideUsage: {
+          used: 2,
+          limit: 6
+        },
+        banners: [
+          {
+            id: 'banner-002',
+            banner: 'https://example.com/banner2.jpg',
+            title: 'Nuevo Taller',
+            description: 'Aprende de los mejores instructores',
+            date: '2025-01-06T00:42:42.213Z',
+            cta_url: 'http://example.com/cta2',
+            cta_button_text: 'Inscríbete',
+            logo: 'https://example.com/logo2.png',
+            empresaId: 'company-001',
+            createdAt: '2025-01-06T00:42:42.213Z',
+            updatedAt: '2025-01-06T00:42:42.213Z'
+          }
+        ]
+      }
+    }
+  })
   @Get(':empresaId/setup')
   getSetup(@Param('empresaId') empresaId: string) {
     this.logger.verbose(`GET /minisite/${empresaId}/setup`);
