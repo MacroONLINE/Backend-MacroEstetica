@@ -401,18 +401,15 @@ let MinisiteService = class MinisiteService {
                 throw new common_1.BadRequestException('Código no soportado');
         }
     }
-    async upsertVideo(empresaId, file) {
+    async upsertMinisiteVideo(empresaId, file) {
         if (!file)
-            throw new common_1.BadRequestException('Archivo de video requerido');
-        const res = await this.cloud.uploadVideo(file);
+            throw new common_1.BadRequestException('El archivo «video» es obligatorio');
+        const uploaded = await this.cloud.uploadVideo(file);
         await this.prisma.minisite.update({
             where: { empresaId },
-            data: { videoUrl: res.secure_url },
+            data: { videoUrl: uploaded.secure_url },
         });
-        return { videoUrl: res.secure_url };
-    }
-    async uploadVideo(file) {
-        return this.upload(file, { resource_type: 'video' });
+        return { videoUrl: uploaded.secure_url };
     }
 };
 exports.MinisiteService = MinisiteService;

@@ -66,5 +66,7 @@ export declare class MinisiteController {
         productId: string;
         type: string;
     }[]>;
-    uploadVideo(empresaId: string, video: Express.Multer.File): Promise<any>;
+    uploadVideo(empresaId: string, video: Express.Multer.File): Promise<{
+        videoUrl: string;
+    }>;
 }
