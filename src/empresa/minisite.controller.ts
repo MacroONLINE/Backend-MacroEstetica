@@ -300,6 +300,7 @@ Envía **multipart/form-data** con:
     "isFeatured": false,
     "isBestSeller": true,
     "isOnSale": false,
+    "presentations": "50 ml, 100 ml, 250 ml",
     "lab": "DermaCare Labs",
     "problemAddressed": "Acné leve"
   },

@@ -698,9 +698,9 @@ model Product {
   isOnSale          Boolean?                   @default(false)
   lab               String?
   problemAddressed  String?
+  presentations     String[]    
   featured          MinisiteFeaturedProduct?   @relation("FeaturedRelation")
   highlightProducts MinisiteHighlightProduct[]
-  presentations     Presentation[]             @relation("ProductPresentations")
   category          ProductCompanyCategory?    @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
   offers            MinisiteProductOffer[] // relación a ofertas de minisite
   company           Empresa                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
@@ -717,7 +717,7 @@ model Presentation {
   price       Float?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
-  product     Product  @relation("ProductPresentations", fields: [productId], references: [id], onDelete: Cascade)
+  //product     Product  @relation("ProductPresentations", fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
 }

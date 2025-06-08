@@ -413,115 +413,147 @@ export class MinisiteService {
     }
   }
 
-  async bulkUpsertProductsIndexed(
-    empresaId: string,
-    meta: BulkProductMeta[],
-    files: Record<number, { main?: Express.Multer.File; gallery: Express.Multer.File[] }>,
-  ) {
-    const minisiteId = await this.minisite(empresaId);
-    const prepared = await Promise.all(
-      meta.map(async (m, idx) => {
-        const bucket = files[idx] ?? { gallery: [] };
-        if (!bucket.main) throw new BadRequestException(`main_${idx} es obligatorio`);
-        const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
-        const galleryUrls = await Promise.all(
-          bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)),
-        );
-        return { meta: m, mainUrl, galleryUrls };
-      }),
-    );
-    return this.prisma.$transaction(
-      async (tx) => {
-        const toCreate = prepared.filter((p) => !p.meta.id).length;
-        await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, toCreate);
-        const delta: Record<FeatureCode, number> = {
-          [FeatureCode.PRODUCTS_TOTAL]: 0,
-          [FeatureCode.CATEGORIES_TOTAL]: 0,
-          [FeatureCode.BANNER_PRODUCT_SLOTS]: 0,
-          [FeatureCode.STATIC_IMAGES_TOTAL]: 0,
-          [FeatureCode.FEATURED_PRODUCTS_TOTAL]: 0,
-          [FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]: 0,
-          [FeatureCode.OFFER_PRODUCTS_TOTAL]: 0,
-          [FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL]: 0,
-        };
-        const out: Array<{ productId: string; type: string }> = [];
-        for (const { meta: m, mainUrl, galleryUrls } of prepared) {
-          if (!m.id && m.categoryId != null) {
-            const current = await tx.product.count({
-              where: { companyId: empresaId, categoryId: m.categoryId },
-            });
-            if (current >= 12) {
-              throw new BadRequestException(`Categoría #${m.categoryId} ya tiene 12 productos`);
-            }
-          }
-          const productData: Prisma.ProductUncheckedCreateInput = {
-            name: m.name,
-            description: m.description,
-            companyId: empresaId,
-            categoryId: m.categoryId ?? null,
-            activeIngredients: m.activeIngredients ?? [],
-            benefits: m.benefits ?? [],
-            features: m.features ?? [],
-            isFeatured: m.isFeatured,
-            isBestSeller: m.isBestSeller,
-            isOnSale: m.isOnSale,
-            lab: m.lab,
-            problemAddressed: m.problemAddressed,
-            imageMain: mainUrl,
-            imageGallery: galleryUrls,
-          };
-          const product = m.id
-            ? await tx.product.update({ where: { id: m.id }, data: productData })
-            : await tx.product.create({ data: productData });
-          if (!m.id) delta[FeatureCode.PRODUCTS_TOTAL]++;
-          const type = (m.type ?? 'NORMAL').toUpperCase();
-          if (type === 'FEATURED') {
-            await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
-            await tx.minisiteFeaturedProduct.upsert({
-              where: { productId: product.id },
-              update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
-              create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
-            });
-            if (!m.id) delta[FeatureCode.FEATURED_PRODUCTS_TOTAL]++;
-          } else if (type === 'HIGHLIGHT') {
-            await this.checkQuota(empresaId, FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
-            await tx.minisiteHighlightProduct.upsert({
-              where: { minisiteId_productId: { minisiteId, productId: product.id } },
-              update: {
-                highlightFeatures: m.highlightFeatures ?? [],
-                highlightDescription: m.highlightDescription ?? '',
-              },
-              create: {
-                minisiteId,
-                productId: product.id,
-                highlightFeatures: m.highlightFeatures ?? [],
-                highlightDescription: m.highlightDescription ?? '',
-              },
-            });
-            if (!m.id) delta[FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]++;
-          } else if (type === 'OFFER') {
-            await this.checkQuota(empresaId, FeatureCode.OFFER_PRODUCTS_TOTAL, m.id ? 0 : 1);
-            await tx.minisiteProductOffer.upsert({
-              where: { minisiteId_productId: { minisiteId, productId: product.id } },
-              update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
-              create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
-            });
-            if (!m.id) delta[FeatureCode.OFFER_PRODUCTS_TOTAL]++;
-          }
-          out.push({ productId: product.id, type });
-        }
-        for (const [code, inc] of Object.entries(delta) as [FeatureCode, number][]) {
-          if (inc === 0) continue;
-          await tx.companyUsage.upsert({
-            where: { companyId_code: { companyId: empresaId, code } },
-            update: { used: { increment: inc } },
-            create: { companyId: empresaId, code, used: inc },
+  /** bulkUpsertProductsIndexed — guarda productos + imágenes + relaciones minisite
+ *  Ahora interpreta `presentations` (string separado por comas) -> String[]
+ */
+async bulkUpsertProductsIndexed(
+  empresaId: string,
+  meta: BulkProductMeta[],
+  files: Record<number, { main?: Express.Multer.File; gallery: Express.Multer.File[] }>,
+) {
+  const minisiteId = await this.minisite(empresaId);
+
+  /* 1️⃣  Sube imágenes y agrupa la metadata */
+  const prepared = await Promise.all(
+    meta.map(async (m, idx) => {
+      const bucket = files[idx] ?? { gallery: [] };
+      if (!bucket.main) throw new BadRequestException(`main_${idx} es obligatorio`);
+
+      const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
+      const galleryUrls = await Promise.all(
+        bucket.gallery.map(g => this.cloud.uploadImage(g).then(r => r.secure_url)),
+      );
+      return { meta: m, mainUrl, galleryUrls };
+    }),
+  );
+
+  /* 2️⃣  Transacción principal */
+  return this.prisma.$transaction(
+    async tx => {
+      const toCreate = prepared.filter(p => !p.meta.id).length;
+      await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, toCreate);
+
+      const delta: Record<FeatureCode, number> = {
+        [FeatureCode.PRODUCTS_TOTAL]: 0,
+        [FeatureCode.CATEGORIES_TOTAL]: 0,
+        [FeatureCode.BANNER_PRODUCT_SLOTS]: 0,
+        [FeatureCode.STATIC_IMAGES_TOTAL]: 0,
+        [FeatureCode.FEATURED_PRODUCTS_TOTAL]: 0,
+        [FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]: 0,
+        [FeatureCode.OFFER_PRODUCTS_TOTAL]: 0,
+        [FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL]: 0,
+      };
+
+      const out: Array<{ productId: string; type: string }> = [];
+
+      for (const { meta: m, mainUrl, galleryUrls } of prepared) {
+        /* 2.1 › límite por categoría */
+        if (!m.id && m.categoryId != null) {
+          const current = await tx.product.count({
+            where: { companyId: empresaId, categoryId: m.categoryId },
           });
+          if (current >= 12) {
+            throw new BadRequestException(`Categoría #${m.categoryId} ya tiene 12 productos`);
+          }
         }
-        return out;
-      },
-      { maxWait: 10_000, timeout: 120_000 },
-    );
-  }
+
+        /* 2.2 › normaliza presentations  */
+        const presentationsArr =
+          typeof (m as any).presentations === 'string'
+            ? (m as any).presentations.split(',').map(s => s.trim()).filter(Boolean)
+            : (m as any).presentations ?? [];
+
+        /* 2.3 › datos base del producto */
+        const productData: Prisma.ProductUncheckedCreateInput = {
+          name: m.name,
+          description: m.description,
+          companyId: empresaId,
+          categoryId: m.categoryId ?? null,
+          activeIngredients: m.activeIngredients ?? [],
+          benefits: m.benefits ?? [],
+          features: m.features ?? [],
+          presentations: presentationsArr,         // ⬅️  nuevo campo
+          isFeatured: m.isFeatured,
+          isBestSeller: m.isBestSeller,
+          isOnSale: m.isOnSale,
+          lab: m.lab,
+          problemAddressed: m.problemAddressed,
+          imageMain: mainUrl,
+          imageGallery: galleryUrls,
+        };
+
+        /* 2.4 › upsert producto */
+        const product = m.id
+          ? await tx.product.update({ where: { id: m.id }, data: productData })
+          : await tx.product.create({ data: productData });
+
+        if (!m.id) delta[FeatureCode.PRODUCTS_TOTAL]++;
+
+        /* 2.5 › relaciones minisite según tipo */
+        const type = (m.type ?? 'NORMAL').toUpperCase();
+
+        if (type === 'FEATURED') {
+          await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
+          await tx.minisiteFeaturedProduct.upsert({
+            where: { productId: product.id },
+            update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
+            create: { minisiteId, productId: product.id, order: m.order ?? 0, tagline: m.tagline ?? '' },
+          });
+          if (!m.id) delta[FeatureCode.FEATURED_PRODUCTS_TOTAL]++;
+        } else if (type === 'HIGHLIGHT') {
+          await this.checkQuota(empresaId, FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
+          await tx.minisiteHighlightProduct.upsert({
+            where: { minisiteId_productId: { minisiteId, productId: product.id } },
+            update: {
+              highlightFeatures: m.highlightFeatures ?? [],
+              highlightDescription: m.highlightDescription ?? '',
+            },
+            create: {
+              minisiteId,
+              productId: product.id,
+              highlightFeatures: m.highlightFeatures ?? [],
+              highlightDescription: m.highlightDescription ?? '',
+            },
+          });
+          if (!m.id) delta[FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]++;
+        } else if (type === 'OFFER') {
+          await this.checkQuota(empresaId, FeatureCode.OFFER_PRODUCTS_TOTAL, m.id ? 0 : 1);
+          await tx.minisiteProductOffer.upsert({
+            where: { minisiteId_productId: { minisiteId, productId: product.id } },
+            update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
+            create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
+          });
+          if (!m.id) delta[FeatureCode.OFFER_PRODUCTS_TOTAL]++;
+        }
+
+        out.push({ productId: product.id, type });
+      }
+
+      /* 2.6 › actualiza usos */
+      for (const [code, inc] of Object.entries(delta) as [FeatureCode, number][]) {
+        if (inc === 0) continue;
+        await tx.companyUsage.upsert({
+          where: { companyId_code: { companyId: empresaId, code } },
+          update: { used: { increment: inc } },
+          create: { companyId: empresaId, code, used: inc },
+        });
+      }
+
+      return out;
+    },
+    { maxWait: 10_000, timeout: 120_000 },
+  );
+}
+
   
 }

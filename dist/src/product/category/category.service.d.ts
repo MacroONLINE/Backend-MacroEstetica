@@ -101,6 +101,7 @@ export declare class CategoryService {
             isOnSale: boolean | null;
             lab: string | null;
             problemAddressed: string | null;
+            presentations: string[];
         }[];
     } & {
         name: string;

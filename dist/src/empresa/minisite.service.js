@@ -317,11 +317,11 @@ let MinisiteService = class MinisiteService {
             if (!bucket.main)
                 throw new common_1.BadRequestException(`main_${idx} es obligatorio`);
             const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
-            const galleryUrls = await Promise.all(bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)));
+            const galleryUrls = await Promise.all(bucket.gallery.map(g => this.cloud.uploadImage(g).then(r => r.secure_url)));
             return { meta: m, mainUrl, galleryUrls };
         }));
         return this.prisma.$transaction(async (tx) => {
-            const toCreate = prepared.filter((p) => !p.meta.id).length;
+            const toCreate = prepared.filter(p => !p.meta.id).length;
             await this.checkQuota(empresaId, client_1.FeatureCode.PRODUCTS_TOTAL, toCreate);
             const delta = {
                 [client_1.FeatureCode.PRODUCTS_TOTAL]: 0,
@@ -343,6 +343,9 @@ let MinisiteService = class MinisiteService {
                         throw new common_1.BadRequestException(`Categoría #${m.categoryId} ya tiene 12 productos`);
                     }
                 }
+                const presentationsArr = typeof m.presentations === 'string'
+                    ? m.presentations.split(',').map(s => s.trim()).filter(Boolean)
+                    : m.presentations ?? [];
                 const productData = {
                     name: m.name,
                     description: m.description,
@@ -351,6 +354,7 @@ let MinisiteService = class MinisiteService {
                     activeIngredients: m.activeIngredients ?? [],
                     benefits: m.benefits ?? [],
                     features: m.features ?? [],
+                    presentations: presentationsArr,
                     isFeatured: m.isFeatured,
                     isBestSeller: m.isBestSeller,
                     isOnSale: m.isOnSale,

@@ -211,6 +211,7 @@ export declare class EmpresaController {
                     isOnSale: boolean | null;
                     lab: string | null;
                     problemAddressed: string | null;
+                    presentations: string[];
                 };
             } & {
                 id: string;
@@ -241,6 +242,7 @@ export declare class EmpresaController {
                     isOnSale: boolean | null;
                     lab: string | null;
                     problemAddressed: string | null;
+                    presentations: string[];
                 };
             } & {
                 id: string;
@@ -289,6 +291,7 @@ export declare class EmpresaController {
                     isOnSale: boolean | null;
                     lab: string | null;
                     problemAddressed: string | null;
+                    presentations: string[];
                 };
             } & {
                 description: string | null;
@@ -364,6 +367,7 @@ export declare class EmpresaController {
             isOnSale: boolean | null;
             lab: string | null;
             problemAddressed: string | null;
+            presentations: string[];
         }[];
         categorias: ({
             products: {
@@ -384,6 +388,7 @@ export declare class EmpresaController {
                 isOnSale: boolean | null;
                 lab: string | null;
                 problemAddressed: string | null;
+                presentations: string[];
             }[];
         } & {
             name: string;

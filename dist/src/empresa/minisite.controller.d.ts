@@ -38,6 +38,7 @@ export declare class MinisiteController {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
+        presentations: string[];
     }>;
     upsertBanner(empresaId: string, body: any): Promise<{
         id: string;

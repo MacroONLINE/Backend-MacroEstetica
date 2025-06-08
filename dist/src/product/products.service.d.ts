@@ -23,19 +23,9 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
+        presentations: string[];
     }>;
-    findAll(companyId: string, userId?: string): Promise<({
-        presentations: {
-            description: string | null;
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            price: number | null;
-            productId: string;
-            size: import("@prisma/client/runtime/library").Decimal;
-            unit: import(".prisma/client").$Enums.Unit;
-        }[];
-    } & {
+    findAll(companyId: string, userId?: string): Promise<{
         description: string;
         name: string;
         categoryId: number | null;
@@ -53,19 +43,9 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
-    })[]>;
-    findByCategory(companyId: string, categoryId: number, userId?: string): Promise<({
-        presentations: {
-            description: string | null;
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            price: number | null;
-            productId: string;
-            size: import("@prisma/client/runtime/library").Decimal;
-            unit: import(".prisma/client").$Enums.Unit;
-        }[];
-    } & {
+        presentations: string[];
+    }[]>;
+    findByCategory(companyId: string, categoryId: number, userId?: string): Promise<{
         description: string;
         name: string;
         categoryId: number | null;
@@ -83,19 +63,9 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
-    })[]>;
-    findFeaturedByCompany(companyId: string, userId?: string): Promise<({
-        presentations: {
-            description: string | null;
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            price: number | null;
-            productId: string;
-            size: import("@prisma/client/runtime/library").Decimal;
-            unit: import(".prisma/client").$Enums.Unit;
-        }[];
-    } & {
+        presentations: string[];
+    }[]>;
+    findFeaturedByCompany(companyId: string, userId?: string): Promise<{
         description: string;
         name: string;
         categoryId: number | null;
@@ -113,19 +83,9 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
-    })[]>;
-    findById(id: string, userId?: string): Promise<({
-        presentations: {
-            description: string | null;
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            price: number | null;
-            productId: string;
-            size: import("@prisma/client/runtime/library").Decimal;
-            unit: import(".prisma/client").$Enums.Unit;
-        }[];
-    } & {
+        presentations: string[];
+    }[]>;
+    findById(id: string, userId?: string): Promise<{
         description: string;
         name: string;
         categoryId: number | null;
@@ -143,18 +103,9 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
-    }) | {
+        presentations: string[];
+    } | {
         liked: boolean;
-        presentations: {
-            description: string | null;
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            price: number | null;
-            productId: string;
-            size: import("@prisma/client/runtime/library").Decimal;
-            unit: import(".prisma/client").$Enums.Unit;
-        }[];
         description: string;
         name: string;
         categoryId: number | null;
@@ -172,19 +123,9 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
+        presentations: string[];
     }>;
     update(id: string, dto: UpdateProductDto): Promise<{
-        presentations: {
-            description: string | null;
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            price: number | null;
-            productId: string;
-            size: import("@prisma/client/runtime/library").Decimal;
-            unit: import(".prisma/client").$Enums.Unit;
-        }[];
-    } & {
         description: string;
         name: string;
         categoryId: number | null;
@@ -202,6 +143,7 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
+        presentations: string[];
     }>;
     remove(id: string): Promise<{
         message: string;
@@ -219,16 +161,6 @@ export declare class ProductService {
     }>;
     getLikedProducts(userId: string): Promise<{
         liked: boolean;
-        presentations: {
-            description: string | null;
-            id: number;
-            createdAt: Date;
-            updatedAt: Date;
-            price: number | null;
-            productId: string;
-            size: import("@prisma/client/runtime/library").Decimal;
-            unit: import(".prisma/client").$Enums.Unit;
-        }[];
         description: string;
         name: string;
         categoryId: number | null;
@@ -246,6 +178,7 @@ export declare class ProductService {
         isOnSale: boolean | null;
         lab: string | null;
         problemAddressed: string | null;
+        presentations: string[];
     }[]>;
     private getLikedProductIds;
 }
