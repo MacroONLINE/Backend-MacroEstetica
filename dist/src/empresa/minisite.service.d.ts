@@ -91,7 +91,9 @@ export declare class MinisiteService {
         minisiteColor: string;
         slides: {
             id: string;
+            description: string;
             title: string;
+            cta: string;
             imageSrc: string;
             order: number;
         }[];
@@ -126,10 +128,6 @@ export declare class MinisiteService {
     }): Promise<{
         ok: boolean;
     }>;
-    private plan;
-    private minisite;
-    private checkQuota;
-    private collect;
     bulkUpsertProductsIndexed(empresaId: string, meta: BulkProductMeta[], files: Record<number, {
         main?: Express.Multer.File;
         gallery: Express.Multer.File[];
@@ -137,5 +135,21 @@ export declare class MinisiteService {
         productId: string;
         type: string;
     }[]>;
+    getSpecialities(empresaId: string): Promise<{
+        id: string;
+        title: string;
+        imageUrl: string;
+    }[]>;
+    registerSpecialities(empresaId: string, body: {
+        specialitiesMeta: string;
+    }, files: Express.Multer.File[]): Promise<{
+        id: string;
+        title: string;
+        imageUrl: string;
+    }[]>;
+    private plan;
+    private minisite;
+    private checkQuota;
+    private collect;
 }
 export {};

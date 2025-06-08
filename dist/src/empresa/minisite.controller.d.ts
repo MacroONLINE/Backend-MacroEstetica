@@ -87,7 +87,9 @@ export declare class MinisiteController {
         minisiteColor: string;
         slides: {
             id: string;
+            description: string;
             title: string;
+            cta: string;
             imageSrc: string;
             order: number;
         }[];

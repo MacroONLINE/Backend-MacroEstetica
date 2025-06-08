@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "FeatureCode" ADD VALUE 'SPECIALITY_IMAGES_TOTAL';
