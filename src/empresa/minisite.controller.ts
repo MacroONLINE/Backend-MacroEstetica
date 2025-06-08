@@ -10,6 +10,7 @@ import {
   UseInterceptors,
   BadRequestException,
   Logger,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -22,7 +23,7 @@ import {
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { Giro, FeatureCode } from '@prisma/client';
 import { BulkProductMeta, MinisiteService } from './minisite.service';
 import { UsageResponseDto } from './dto/minisite-quota.dto';
@@ -81,97 +82,8 @@ export class MinisiteController {
     return this.minisite.objectsByCode(empresaId, code);
   }
 
-  @ApiOperation({ summary: 'Crear o actualizar producto' })
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['name', 'categoryId'],
-      properties: {
-        id: { type: 'string', example: 'prod123' },
-        name: { type: 'string' },
-        description: { type: 'string' },
-        categoryId: { type: 'integer' },
-        imageMain: { type: 'string' },
-      },
-    },
-  })
-  @Put(':empresaId/product')
-  upsertProduct(
-    @Param('empresaId') empresaId: string,
-    @Body() body: any,
-  ) {
-    return this.minisite.upsertProduct(empresaId, body);
-  }
+ 
 
-  @ApiOperation({ summary: 'Crear o actualizar banner' })
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['title', 'banner'],
-      properties: {
-        id: { type: 'string', example: 'ban01' },
-        title: { type: 'string' },
-        banner: { type: 'string' },
-        description: { type: 'string' },
-        cta_button_text: { type: 'string' },
-        cta_url: { type: 'string' },
-      },
-    },
-  })
-  @Put(':empresaId/banner')
-  upsertBanner(
-    @Param('empresaId') empresaId: string,
-    @Body() body: any,
-  ) {
-    return this.minisite.upsertBanner(empresaId, body);
-  }
-
-  @ApiOperation({ summary: 'Crear o actualizar producto destacado' })
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['productId'],
-      properties: {
-        id: { type: 'string', example: 'feat01' },
-        productId: { type: 'string' },
-        order: { type: 'integer' },
-        tagline: { type: 'string' },
-      },
-    },
-  })
-  @Put(':empresaId/featured')
-  upsertFeatured(
-    @Param('empresaId') empresaId: string,
-    @Body() body: any,
-  ) {
-    return this.minisite.upsertFeatured(empresaId, body);
-  }
-
-  @ApiOperation({ summary: 'Crear o actualizar producto highlight' })
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['productId', 'highlightFeatures'],
-      properties: {
-        id: { type: 'string', example: 'high01' },
-        productId: { type: 'string' },
-        highlightFeatures: { type: 'array', items: { type: 'string' } },
-        highlightDescription: { type: 'string' },
-        hoghlightImageUrl: { type: 'string' },
-      },
-    },
-  })
-  @Put(':empresaId/highlight')
-  upsertHighlight(
-    @Param('empresaId') empresaId: string,
-    @Body() body: any,
-  ) {
-    return this.minisite.upsertHighlight(empresaId, body);
-  }
 
   @ApiOperation({ summary: 'Obtener configuración general del minisite' })
   @ApiParam({ name: 'empresaId', example: 'company-001' })
@@ -394,4 +306,33 @@ Envía **multipart/form-data** con:
     }
     return this.minisite.bulkUpsertProductsIndexed(empresaId, meta, buckets);
   }
+
+  
+@ApiOperation({
+  summary: 'Subir / actualizar video de presentación del minisite',
+  description: 'Sobrescribe la URL de video almacenada en el minisite con el nuevo archivo subido.',
+})
+@ApiConsumes('multipart/form-data')
+@ApiParam({ name: 'empresaId', example: 'company-001' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    required: ['video'],
+    properties: {
+      video: { type: 'string', format: 'binary', description: 'Archivo de video MP4/WEBM' },
+    },
+  },
+})
+@ApiOkResponse({
+  description: 'URL del video guardado',
+  schema: { type: 'object', properties: { videoUrl: { type: 'string' } } },
+})
+@UseInterceptors(FileInterceptor('video'))
+@Put(':empresaId/video')
+async uploadVideo(
+  @Param('empresaId') empresaId: string,
+  @UploadedFile() video: Express.Multer.File,
+) {
+  return this.minisite.upsertMinisiteVideo(empresaId, video)
+}
 }

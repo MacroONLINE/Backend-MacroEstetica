@@ -485,4 +485,28 @@ async registerSpecialities(
         throw new BadRequestException('Código no soportado')
     }
   }
+
+  /** Sube (o reemplaza) el video de presentación del minisite y guarda la URL */
+async upsertVideo(
+  empresaId: string,
+  file: Express.Multer.File,
+): Promise<{ videoUrl: string }> {
+  if (!file) throw new BadRequestException('Archivo de video requerido')
+
+  /* Usa el mismo servicio de subida que ya empleas para las imágenes.
+     Si tu CloudinaryService sólo tiene `uploadImage`, basta con exponer
+     también `uploadVideo` (mismo código pero con resource_type: 'video'). */
+  const res: UploadApiResponse = await this.cloud.uploadVideo(file)
+
+  await this.prisma.minisite.update({
+    where: { empresaId },
+    data: { videoUrl: res.secure_url },
+  })
+
+  return { videoUrl: res.secure_url }
+}
+
+async uploadVideo(file: Express.Multer.File): Promise<UploadApiResponse> {
+  return this.upload(file, { resource_type: 'video' })   // mismo helper que usas internamente
+}
 }

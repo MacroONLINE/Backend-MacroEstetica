@@ -21,4 +21,18 @@ export class CloudinaryService {
       streamifier.createReadStream(file.buffer).pipe(uploadStream);
     });
   }
+
+  async uploadVideo(file: Express.Multer.File): Promise<UploadApiResponse> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: 'videos', resource_type: 'video' },
+        (error: UploadApiErrorResponse, result: UploadApiResponse) => {
+          if (result) resolve(result)
+          else reject(error)
+        },
+      )
+      streamifier.createReadStream(file.buffer).pipe(uploadStream)
+    })
+  }
+  
 }

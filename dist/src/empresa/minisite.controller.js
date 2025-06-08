@@ -36,18 +36,6 @@ let MinisiteController = class MinisiteController {
     getObjectsByCode(empresaId, code) {
         return this.minisite.objectsByCode(empresaId, code);
     }
-    upsertProduct(empresaId, body) {
-        return this.minisite.upsertProduct(empresaId, body);
-    }
-    upsertBanner(empresaId, body) {
-        return this.minisite.upsertBanner(empresaId, body);
-    }
-    upsertFeatured(empresaId, body) {
-        return this.minisite.upsertFeatured(empresaId, body);
-    }
-    upsertHighlight(empresaId, body) {
-        return this.minisite.upsertHighlight(empresaId, body);
-    }
     getSetup(empresaId) {
         this.logger.verbose(`GET /minisite/${empresaId}/setup`);
         return this.minisite.getMinisiteSetup(empresaId);
@@ -83,6 +71,9 @@ let MinisiteController = class MinisiteController {
                 buckets[idx].gallery.push(f);
         }
         return this.minisite.bulkUpsertProductsIndexed(empresaId, meta, buckets);
+    }
+    async uploadVideo(empresaId, video) {
+        return this.minisite.upsertMinisiteVideo(empresaId, video);
     }
 };
 exports.MinisiteController = MinisiteController;
@@ -138,98 +129,6 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], MinisiteController.prototype, "getObjectsByCode", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar producto' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            required: ['name', 'categoryId'],
-            properties: {
-                id: { type: 'string', example: 'prod123' },
-                name: { type: 'string' },
-                description: { type: 'string' },
-                categoryId: { type: 'integer' },
-                imageMain: { type: 'string' },
-            },
-        },
-    }),
-    (0, common_1.Put)(':empresaId/product'),
-    __param(0, (0, common_1.Param)('empresaId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], MinisiteController.prototype, "upsertProduct", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar banner' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            required: ['title', 'banner'],
-            properties: {
-                id: { type: 'string', example: 'ban01' },
-                title: { type: 'string' },
-                banner: { type: 'string' },
-                description: { type: 'string' },
-                cta_button_text: { type: 'string' },
-                cta_url: { type: 'string' },
-            },
-        },
-    }),
-    (0, common_1.Put)(':empresaId/banner'),
-    __param(0, (0, common_1.Param)('empresaId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], MinisiteController.prototype, "upsertBanner", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar producto destacado' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            required: ['productId'],
-            properties: {
-                id: { type: 'string', example: 'feat01' },
-                productId: { type: 'string' },
-                order: { type: 'integer' },
-                tagline: { type: 'string' },
-            },
-        },
-    }),
-    (0, common_1.Put)(':empresaId/featured'),
-    __param(0, (0, common_1.Param)('empresaId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], MinisiteController.prototype, "upsertFeatured", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Crear o actualizar producto highlight' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            required: ['productId', 'highlightFeatures'],
-            properties: {
-                id: { type: 'string', example: 'high01' },
-                productId: { type: 'string' },
-                highlightFeatures: { type: 'array', items: { type: 'string' } },
-                highlightDescription: { type: 'string' },
-                hoghlightImageUrl: { type: 'string' },
-            },
-        },
-    }),
-    (0, common_1.Put)(':empresaId/highlight'),
-    __param(0, (0, common_1.Param)('empresaId')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", void 0)
-], MinisiteController.prototype, "upsertHighlight", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener configuración general del minisite' }),
     (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
@@ -427,6 +326,34 @@ Envía **multipart/form-data** con:
     __metadata("design:paramtypes", [String, String, Array]),
     __metadata("design:returntype", Promise)
 ], MinisiteController.prototype, "bulkProducts", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({
+        summary: 'Subir / actualizar video de presentación del minisite',
+        description: 'Sobrescribe la URL de video almacenada en el minisite con el nuevo archivo subido.',
+    }),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            type: 'object',
+            required: ['video'],
+            properties: {
+                video: { type: 'string', format: 'binary', description: 'Archivo de video MP4/WEBM' },
+            },
+        },
+    }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'URL del video guardado',
+        schema: { type: 'object', properties: { videoUrl: { type: 'string' } } },
+    }),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)('video')),
+    (0, common_1.Put)(':empresaId/video'),
+    __param(0, (0, common_1.Param)('empresaId')),
+    __param(1, (0, common_1.UploadedFile)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], MinisiteController.prototype, "uploadVideo", null);
 exports.MinisiteController = MinisiteController = __decorate([
     (0, swagger_1.ApiTags)('Minisite'),
     (0, common_1.Controller)('minisite'),

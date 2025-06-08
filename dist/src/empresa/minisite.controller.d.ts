@@ -20,58 +20,6 @@ export declare class MinisiteController {
         id: string;
         productId: string;
     }[]>;
-    upsertProduct(empresaId: string, body: any): Promise<{
-        id: string;
-        name: string;
-        description: string;
-        companyId: string;
-        createdAt: Date;
-        updatedAt: Date;
-        isFeatured: boolean | null;
-        activeIngredients: string[];
-        benefits: string[];
-        categoryId: number | null;
-        features: string[];
-        imageGallery: string[];
-        imageMain: string | null;
-        isBestSeller: boolean | null;
-        isOnSale: boolean | null;
-        lab: string | null;
-        problemAddressed: string | null;
-        presentations: string[];
-    }>;
-    upsertBanner(empresaId: string, body: any): Promise<{
-        id: string;
-        description: string;
-        createdAt: Date;
-        updatedAt: Date;
-        title: string;
-        empresaId: string | null;
-        logo: string;
-        banner: string;
-        date: Date | null;
-        cta_url: string | null;
-        cta_button_text: string;
-    }>;
-    upsertFeatured(empresaId: string, body: any): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        minisiteId: string;
-        order: number | null;
-        productId: string;
-        tagline: string | null;
-    }>;
-    upsertHighlight(empresaId: string, body: any): Promise<{
-        id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        minisiteId: string;
-        productId: string;
-        highlightFeatures: string[];
-        highlightDescription: string | null;
-        hoghlightImageUrl: string | null;
-    }>;
     getSetup(empresaId: string): Promise<{
         company: {
             name: string;
@@ -118,4 +66,5 @@ export declare class MinisiteController {
         productId: string;
         type: string;
     }[]>;
+    uploadVideo(empresaId: string, video: Express.Multer.File): Promise<any>;
 }

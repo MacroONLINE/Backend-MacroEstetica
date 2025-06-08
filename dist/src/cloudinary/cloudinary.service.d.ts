@@ -3,4 +3,5 @@ export declare class CloudinaryService {
     private readonly cloudinary;
     constructor(cloudinary: any);
     uploadImage(file: Express.Multer.File): Promise<UploadApiResponse>;
+    uploadVideo(file: Express.Multer.File): Promise<UploadApiResponse>;
 }

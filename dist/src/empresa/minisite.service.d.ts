@@ -1,4 +1,5 @@
 import { Prisma, FeatureCode, Product, Banner, MinisiteFeaturedProduct, MinisiteHighlightProduct, Giro } from '@prisma/client';
+import { UploadApiResponse } from 'cloudinary';
 import { PrismaService } from '../prisma/prisma.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 export interface UsageResponse<T = any> {
@@ -151,5 +152,9 @@ export declare class MinisiteService {
     private minisite;
     private checkQuota;
     private collect;
+    upsertVideo(empresaId: string, file: Express.Multer.File): Promise<{
+        videoUrl: string;
+    }>;
+    uploadVideo(file: Express.Multer.File): Promise<UploadApiResponse>;
 }
 export {};

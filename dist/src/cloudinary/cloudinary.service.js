@@ -33,6 +33,17 @@ let CloudinaryService = class CloudinaryService {
             streamifier.createReadStream(file.buffer).pipe(uploadStream);
         });
     }
+    async uploadVideo(file) {
+        return new Promise((resolve, reject) => {
+            const uploadStream = cloudinary_1.v2.uploader.upload_stream({ folder: 'videos', resource_type: 'video' }, (error, result) => {
+                if (result)
+                    resolve(result);
+                else
+                    reject(error);
+            });
+            streamifier.createReadStream(file.buffer).pipe(uploadStream);
+        });
+    }
 };
 exports.CloudinaryService = CloudinaryService;
 exports.CloudinaryService = CloudinaryService = __decorate([
