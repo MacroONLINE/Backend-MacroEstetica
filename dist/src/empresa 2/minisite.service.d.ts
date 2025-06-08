@@ -18,16 +18,8 @@ export interface BulkProductMeta {
     id?: string;
     type?: 'NORMAL' | 'FEATURED' | 'HIGHLIGHT' | 'OFFER';
     name: string;
-    description: string;
+    description?: string;
     categoryId?: number;
-    activeIngredients?: string[];
-    benefits?: string[];
-    features?: string[];
-    isFeatured?: boolean;
-    isBestSeller?: boolean;
-    isOnSale?: boolean;
-    lab?: string;
-    problemAddressed?: string;
     order?: number;
     tagline?: string;
     highlightFeatures?: string[];
@@ -38,23 +30,23 @@ export interface BulkProductMeta {
 export declare class MinisiteService {
     private readonly prisma;
     private readonly cloud;
-    private readonly log;
+    private readonly logger;
     constructor(prisma: PrismaService, cloud: CloudinaryService);
     quotas(empresaId: string): Promise<UsageResponse[]>;
     quota(empresaId: string, code: FeatureCode): Promise<UsageResponse>;
     objects(empresaId: string): Promise<Record<import(".prisma/client").$Enums.FeatureCode, any[]>>;
     objectsByCode(empresaId: string, code: FeatureCode): Promise<{
-        name: string;
         id: string;
-    }[] | {
         name: string;
+    }[] | {
         id: number;
-    }[] | {
-        title: string;
-        id: string;
+        name: string;
     }[] | {
         id: string;
         productId: string;
+    }[] | {
+        id: string;
+        title: string;
     }[]>;
     upsertProduct(empresaId: string, data: Omit<Prisma.ProductUncheckedCreateInput, 'companyId' | 'id'> & Partial<Prisma.ProductUncheckedUpdateInput> & {
         id?: string;
@@ -77,20 +69,20 @@ export declare class MinisiteService {
     }): Promise<MinisiteHighlightProduct>;
     getMinisiteSetup(empresaId: string): Promise<{
         company: {
+            name: string;
+            title: string;
             minisite: {
                 minisiteColor: string;
                 slogan: string;
             };
-            title: string;
-            name: string;
             giro: import(".prisma/client").$Enums.Giro;
-            profileImage: string;
             location: string;
+            profileImage: string;
         };
         minisiteColor: string;
         slides: {
-            title: string;
             id: string;
+            title: string;
             imageSrc: string;
             order: number;
         }[];
@@ -99,14 +91,14 @@ export declare class MinisiteService {
             limit: number;
         };
         banners: {
-            banner: string;
-            description: string;
-            title: string;
-            logo: string;
-            empresaId: string | null;
             id: string;
+            description: string;
             createdAt: Date;
             updatedAt: Date;
+            title: string;
+            empresaId: string | null;
+            logo: string;
+            banner: string;
             date: Date | null;
             cta_url: string | null;
             cta_button_text: string;

@@ -15,10 +15,10 @@ export declare class MinisiteController {
         name: string;
     }[] | {
         id: string;
-        title: string;
+        productId: string;
     }[] | {
         id: string;
-        productId: string;
+        title: string;
     }[]>;
     upsertProduct(empresaId: string, body: any): Promise<{
         id: string;

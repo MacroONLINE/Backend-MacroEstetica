@@ -1,5 +1,10 @@
 // src/empresa/minisite.service.ts
-import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import {
   Prisma,
   FeatureCode,
@@ -8,7 +13,6 @@ import {
   Banner,
   MinisiteFeaturedProduct,
   MinisiteHighlightProduct,
-  CompanyUsage,
   Giro,
 } from '@prisma/client';
 import { UploadApiResponse } from 'cloudinary';
@@ -34,8 +38,16 @@ export interface BulkProductMeta {
   id?: string;
   type?: 'NORMAL' | 'FEATURED' | 'HIGHLIGHT' | 'OFFER';
   name: string;
-  description?: string;
+  description: string;
   categoryId?: number;
+  activeIngredients?: string[];
+  benefits?: string[];
+  features?: string[];
+  isFeatured?: boolean;
+  isBestSeller?: boolean;
+  isOnSale?: boolean;
+  lab?: string;
+  problemAddressed?: string;
   order?: number;
   tagline?: string;
   highlightFeatures?: string[];
@@ -46,7 +58,7 @@ export interface BulkProductMeta {
 
 @Injectable()
 export class MinisiteService {
-  private readonly logger = new Logger('MinisiteService');
+  private readonly log = new Logger('MinisiteService');
 
   constructor(
     private readonly prisma: PrismaService,
@@ -54,17 +66,13 @@ export class MinisiteService {
   ) {}
 
   async quotas(empresaId: string): Promise<UsageResponse[]> {
-    this.logger.verbose(`empresaId = ${empresaId}`);
     const plan = await this.plan(empresaId);
     const limits = await this.prisma.planFeature.findMany({ where: { plan } });
     const out: UsageResponse[] = [];
     for (const f of limits) {
-      this.logger.verbose(`procesando código: ${f.code}`);
       const { items, used } = await this.collect(empresaId, f.code);
-      this.logger.debug(`code=${f.code} limit=${f.limit ?? '∞'} used=${used} items=${items.length}`);
       out.push({ code: f.code, limit: f.limit, used, items });
     }
-    this.logger.verbose(`quotas listo → registros devueltos: ${out.length}`);
     return out;
   }
 
@@ -85,7 +93,8 @@ export class MinisiteService {
       select: { code: true },
     });
     const obj = {} as Record<FeatureCode, any[]>;
-    for (const { code } of codes) obj[code] = (await this.collect(empresaId, code)).items;
+    for (const { code } of codes)
+      obj[code] = (await this.collect(empresaId, code)).items;
     return obj;
   }
 
@@ -98,12 +107,18 @@ export class MinisiteService {
     data: Omit<Prisma.ProductUncheckedCreateInput, 'companyId' | 'id'> &
       Partial<Prisma.ProductUncheckedUpdateInput> & { id?: string },
   ): Promise<Product> {
-    await this.checkQuota(empresaId, FeatureCode.PRODUCTS_TOTAL, data.id ? 0 : 1);
+    await this.checkQuota(
+      empresaId,
+      FeatureCode.PRODUCTS_TOTAL,
+      data.id ? 0 : 1,
+    );
     if (data.id) {
       const { id, ...upd } = data;
       return this.prisma.product.update({ where: { id }, data: upd });
     }
-    return this.prisma.product.create({ data: { ...data, companyId: empresaId } });
+    return this.prisma.product.create({
+      data: { ...data, companyId: empresaId },
+    });
   }
 
   async upsertBanner(
@@ -111,20 +126,29 @@ export class MinisiteService {
     data: Omit<Prisma.BannerUncheckedCreateInput, 'empresaId' | 'id'> &
       Partial<Prisma.BannerUncheckedUpdateInput> & { id?: string },
   ): Promise<Banner> {
-    const existing = await this.prisma.banner.findFirst({ where: { empresaId } });
-    if (!data.id && existing) throw new BadRequestException('Ya existe un banner');
+    const existing = await this.prisma.banner.findFirst({
+      where: { empresaId },
+    });
+    if (!data.id && existing)
+      throw new BadRequestException('Ya existe un banner');
     if (data.id) {
       const { id, ...upd } = data;
       return this.prisma.banner.update({ where: { id }, data: upd });
     }
-    return this.prisma.banner.create({ data: { ...data, empresaId } });
+    return this.prisma.banner.create({
+      data: { ...data, empresaId },
+    });
   }
 
   async upsertFeatured(
     empresaId: string,
     data: { id?: string; productId: string; order?: number; tagline?: string },
   ): Promise<MinisiteFeaturedProduct> {
-    await this.checkQuota(empresaId, FeatureCode.FEATURED_PRODUCTS_TOTAL, data.id ? 0 : 1);
+    await this.checkQuota(
+      empresaId,
+      FeatureCode.FEATURED_PRODUCTS_TOTAL,
+      data.id ? 0 : 1,
+    );
     const minisiteId = await this.minisite(empresaId);
     if (data.id) {
       const { id, ...upd } = data;
@@ -157,7 +181,9 @@ export class MinisiteService {
       });
     }
     return this.prisma.minisiteHighlightProduct.upsert({
-      where: { minisiteId_productId: { minisiteId, productId: data.productId } },
+      where: {
+        minisiteId_productId: { minisiteId, productId: data.productId },
+      },
       update: { ...data },
       create: { ...data, minisiteId },
     });
@@ -165,7 +191,7 @@ export class MinisiteService {
 
   async getMinisiteSetup(empresaId: string) {
     const plan = await this.plan(empresaId);
-    const slotLimitRow = await this.prisma.planFeature.findUnique({
+    const slotLimit = await this.prisma.planFeature.findUnique({
       where: { plan_code: { plan, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
       select: { limit: true },
     });
@@ -190,7 +216,7 @@ export class MinisiteService {
       company,
       minisiteColor: company.minisite?.minisiteColor ?? null,
       slides,
-      slideUsage: { used: slides.length, limit: slotLimitRow?.limit ?? null },
+      slideUsage: { used: slides.length, limit: slotLimit?.limit ?? null },
       banners,
     };
   }
@@ -229,44 +255,51 @@ export class MinisiteService {
         slogan: body.slogan,
       },
     });
-    const minisiteId = await this.minisite(empresaId);
-    const existingCount = await this.prisma.minisiteSlide.count({ where: { minisiteId } });
-    if (existingCount > 0) {
-      await this.prisma.minisiteSlide.deleteMany({ where: { minisiteId } });
-      await this.prisma.companyUsage.upsert({
-        where: { companyId_code: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
-        update: { used: 0 },
-        create: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS, used: 0 },
-      });
-    }
     const newSlides = files.slides ?? [];
     const plan = await this.plan(empresaId);
-    const slotLimitRow = await this.prisma.planFeature.findUnique({
+    const limitRow = await this.prisma.planFeature.findUnique({
       where: { plan_code: { plan, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
-      select: { limit: true },
     });
-    const limit = slotLimitRow?.limit ?? 0;
-    const newCount = newSlides.length;
-    if (newCount > limit) {
-      throw new BadRequestException(`Límite de slides excedido: máximo ${limit}`);
-    }
-    if (newCount > 0) {
-      const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)));
-      const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map((u, idx) => ({
-        minisiteId,
-        imageSrc: u.secure_url,
-        title: body.slidesMeta[idx]?.title ?? '',
-        description: body.slidesMeta[idx]?.description ?? '',
-        cta: body.slidesMeta[idx]?.cta ?? '',
-        order: body.slidesMeta[idx]?.order ?? idx,
-      }));
-      await this.prisma.minisiteSlide.createMany({ data });
-      await this.prisma.companyUsage.upsert({
-        where: { companyId_code: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
-        update: { used: newCount },
-        create: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS, used: newCount },
+    if (limitRow?.limit != null && newSlides.length > limitRow.limit)
+      throw new BadRequestException(
+        `Máximo ${limitRow.limit} slides permitidos`,
+      );
+    const minisiteId = await this.minisite(empresaId);
+    const existingCount = await this.prisma.minisiteSlide.count({
+      where: { minisiteId },
+    });
+    await this.prisma.$transaction(async (tx) => {
+      if (existingCount) {
+        await tx.minisiteSlide.deleteMany({ where: { minisiteId } });
+      }
+      if (newSlides.length) {
+        const uploads = await Promise.all(
+          newSlides.map((f) => this.cloud.uploadImage(f)),
+        );
+        const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map(
+          (u, idx) => ({
+            minisiteId,
+            imageSrc: u.secure_url,
+            title: body.slidesMeta[idx]?.title ?? '',
+            description: body.slidesMeta[idx]?.description ?? '',
+            cta: body.slidesMeta[idx]?.cta ?? '',
+            order: body.slidesMeta[idx]?.order ?? idx,
+          }),
+        );
+        await tx.minisiteSlide.createMany({ data });
+      }
+      await tx.companyUsage.upsert({
+        where: {
+          companyId_code: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS },
+        },
+        update: { used: newSlides.length },
+        create: {
+          companyId: empresaId,
+          code: FeatureCode.BANNER_PRODUCT_SLOTS,
+          used: newSlides.length,
+        },
       });
-    }
+    });
     return { ok: true };
   }
 
@@ -288,16 +321,19 @@ export class MinisiteService {
     return m.id;
   }
 
-  private async checkQuota(empresaId: string, code: FeatureCode, increment = 1) {
+  private async checkQuota(
+    empresaId: string,
+    code: FeatureCode,
+    increment = 1,
+  ) {
     const feature = await this.prisma.planFeature.findUnique({
       where: { plan_code: { plan: await this.plan(empresaId), code } },
     });
     if (!feature || feature.limit === null) return;
-    const usageRow = await this.prisma.companyUsage.findUnique({
+    const usedNow = await this.prisma.companyUsage.findUnique({
       where: { companyId_code: { companyId: empresaId, code } },
     });
-    const used = usageRow?.used ?? 0;
-    if (used + increment > feature.limit) {
+    if ((usedNow?.used ?? 0) + increment > feature.limit) {
       throw new BadRequestException(`Límite de ${code} excedido`);
     }
   }
@@ -328,7 +364,7 @@ export class MinisiteService {
         return {
           items: await this.prisma.minisiteSlide.findMany({
             where: { minisite: { empresaId } },
-            select: { id: true, title: true, imageSrc: true },
+            select: { id: true, title: true },
           }),
           used,
         };
@@ -420,9 +456,17 @@ export class MinisiteService {
           }
           const productData: Prisma.ProductUncheckedCreateInput = {
             name: m.name,
-            description: m.description ?? '',
+            description: m.description,
             companyId: empresaId,
             categoryId: m.categoryId ?? null,
+            activeIngredients: m.activeIngredients ?? [],
+            benefits: m.benefits ?? [],
+            features: m.features ?? [],
+            isFeatured: m.isFeatured,
+            isBestSeller: m.isBestSeller,
+            isOnSale: m.isOnSale,
+            lab: m.lab,
+            problemAddressed: m.problemAddressed,
             imageMain: mainUrl,
             imageGallery: galleryUrls,
           };
@@ -476,7 +520,7 @@ export class MinisiteService {
         }
         return out;
       },
-      { maxWait: 10000, timeout: 60000 },
+      { maxWait: 10_000, timeout: 60_000 },
     );
   }
 }
