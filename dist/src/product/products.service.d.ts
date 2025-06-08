@@ -6,16 +6,16 @@ export declare class ProductService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(dto: CreateProductDto): Promise<{
-        description: string;
-        name: string;
-        categoryId: number | null;
         id: string;
+        name: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -26,16 +26,16 @@ export declare class ProductService {
         presentations: string[];
     }>;
     findAll(companyId: string, userId?: string): Promise<{
-        description: string;
-        name: string;
-        categoryId: number | null;
         id: string;
+        name: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -46,16 +46,16 @@ export declare class ProductService {
         presentations: string[];
     }[]>;
     findByCategory(companyId: string, categoryId: number, userId?: string): Promise<{
-        description: string;
-        name: string;
-        categoryId: number | null;
         id: string;
+        name: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -66,16 +66,16 @@ export declare class ProductService {
         presentations: string[];
     }[]>;
     findFeaturedByCompany(companyId: string, userId?: string): Promise<{
-        description: string;
-        name: string;
-        categoryId: number | null;
         id: string;
+        name: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -86,16 +86,16 @@ export declare class ProductService {
         presentations: string[];
     }[]>;
     findById(id: string, userId?: string): Promise<{
-        description: string;
-        name: string;
-        categoryId: number | null;
         id: string;
+        name: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -106,16 +106,16 @@ export declare class ProductService {
         presentations: string[];
     } | {
         liked: boolean;
-        description: string;
-        name: string;
-        categoryId: number | null;
         id: string;
+        name: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -126,16 +126,16 @@ export declare class ProductService {
         presentations: string[];
     }>;
     update(id: string, dto: UpdateProductDto): Promise<{
-        description: string;
-        name: string;
-        categoryId: number | null;
         id: string;
+        name: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -161,16 +161,16 @@ export declare class ProductService {
     }>;
     getLikedProducts(userId: string): Promise<{
         liked: boolean;
-        description: string;
-        name: string;
-        categoryId: number | null;
         id: string;
+        name: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;

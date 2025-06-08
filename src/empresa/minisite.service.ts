@@ -44,6 +44,7 @@ export interface BulkProductMeta {
   benefits?: string[];
   features?: string[];
   isFeatured?: boolean;
+  presentations?: string[];
   isBestSeller?: boolean;
   isOnSale?: boolean;
   lab?: string;

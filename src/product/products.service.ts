@@ -1,3 +1,4 @@
+// src/product/products.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateProductDto } from './dto/create-product.dto'
@@ -8,6 +9,8 @@ import { ReactionType } from '@prisma/client'
 export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /* ─────────────  CRUD BÁSICO  ───────────── */
+
   async create(dto: CreateProductDto) {
     return this.prisma.product.create({ data: dto })
   }
@@ -15,7 +18,6 @@ export class ProductService {
   async findAll(companyId: string, userId?: string) {
     const products = await this.prisma.product.findMany({
       where: { companyId },
-      include: { presentations: true },
     })
 
     if (!userId) return products
@@ -27,7 +29,6 @@ export class ProductService {
   async findByCategory(companyId: string, categoryId: number, userId?: string) {
     const products = await this.prisma.product.findMany({
       where: { companyId, categoryId },
-      include: { presentations: true },
     })
 
     if (!userId) return products
@@ -39,7 +40,6 @@ export class ProductService {
   async findFeaturedByCompany(companyId: string, userId?: string) {
     const products = await this.prisma.product.findMany({
       where: { companyId, isFeatured: true },
-      include: { presentations: true },
     })
 
     if (!userId) return products
@@ -49,15 +49,15 @@ export class ProductService {
   }
 
   async findById(id: string, userId?: string) {
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-      include: { presentations: true },
-    })
+    const product = await this.prisma.product.findUnique({ where: { id } })
     if (!product) throw new NotFoundException(`Producto con ID ${id} no encontrado`)
+
     if (!userId) return product
+
     const reaction = await this.prisma.productReaction.findUnique({
       where: { userId_productId: { userId, productId: id } },
     })
+
     return { ...product, liked: reaction?.type === ReactionType.LIKE }
   }
 
@@ -65,7 +65,6 @@ export class ProductService {
     const product = await this.prisma.product.update({
       where: { id },
       data: dto,
-      include: { presentations: true },
     })
     if (!product) throw new NotFoundException(`Producto con ID ${id} no encontrado`)
     return product
@@ -77,7 +76,13 @@ export class ProductService {
     return { message: 'Producto eliminado correctamente' }
   }
 
-  async toggleProductReaction(userId: string, productId: string, type: ReactionType = ReactionType.LIKE) {
+  /* ─────────────  REACCIONES  ───────────── */
+
+  async toggleProductReaction(
+    userId: string,
+    productId: string,
+    type: ReactionType = ReactionType.LIKE,
+  ) {
     const existing = await this.prisma.productReaction.findUnique({
       where: { userId_productId: { userId, productId } },
     })
@@ -87,25 +92,27 @@ export class ProductService {
         await this.prisma.productReaction.delete({ where: { id: existing.id } })
         return { userId, productId, reacted: false }
       }
-      await this.prisma.productReaction.update({ where: { id: existing.id }, data: { type } })
+      await this.prisma.productReaction.update({
+        where: { id: existing.id },
+        data: { type },
+      })
       return { userId, productId, reacted: true, type }
     }
 
-    await this.prisma.productReaction.create({ data: { userId, productId, type } })
+    await this.prisma.productReaction.create({
+      data: { userId, productId, type },
+    })
     return { userId, productId, reacted: true, type }
   }
 
   async getLikedProducts(userId: string) {
     const liked = await this.prisma.product.findMany({
-      where: {
-        reactions: {
-          some: { userId, type: ReactionType.LIKE },
-        },
-      },
-      include: { presentations: true },
+      where: { reactions: { some: { userId, type: ReactionType.LIKE } } },
     })
     return liked.map((p) => ({ ...p, liked: true }))
   }
+
+  /* ─────────────  HELPERS  ───────────── */
 
   private async getLikedProductIds(userId: string): Promise<string[]> {
     const reactions = await this.prisma.productReaction.findMany({
