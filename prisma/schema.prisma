@@ -706,7 +706,6 @@ model Product {
   company           Empresa                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   reactions         ProductReaction[]
 
-  @@unique([categoryId, name])
 }
 
 model Presentation {

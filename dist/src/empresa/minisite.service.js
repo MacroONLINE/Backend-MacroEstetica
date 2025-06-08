@@ -415,7 +415,7 @@ let MinisiteService = class MinisiteService {
                 });
             }
             return out;
-        }, { maxWait: 10_000, timeout: 60_000 });
+        }, { maxWait: 10_000, timeout: 120_000 });
     }
 };
 exports.MinisiteService = MinisiteService;

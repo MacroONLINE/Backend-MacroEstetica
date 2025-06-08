@@ -520,7 +520,8 @@ export class MinisiteService {
         }
         return out;
       },
-      { maxWait: 10_000, timeout: 60_000 },
+      { maxWait: 10_000, timeout: 120_000 },
     );
   }
+  
 }

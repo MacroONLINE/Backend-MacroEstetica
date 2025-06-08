@@ -70,10 +70,10 @@ let MinisiteController = class MinisiteController {
         const meta = JSON.parse(productsRaw ?? '[]');
         const buckets = {};
         for (const f of rawFiles) {
-            const match = /^(.+)_(\d+)$/.exec(f.fieldname);
-            if (!match)
+            const m = /^(.+)_(\d+)$/.exec(f.fieldname);
+            if (!m)
                 continue;
-            const [, key, idxStr] = match;
+            const [, key, idxStr] = m;
             const idx = Number(idxStr);
             if (!buckets[idx])
                 buckets[idx] = { gallery: [] };
@@ -324,30 +324,59 @@ __decorate([
     (0, swagger_1.ApiOperation)({
         summary: 'Bulk-upsert de productos (NORMAL, FEATURED, HIGHLIGHT u OFFER)',
         description: `
-Envía multipart/form-data con:
-- products: JSON array de metadatos de cada producto (misma posición que los archivos).
-- Archivos nombrados main_i (imagen principal) y gallery_i (galería) por índice i.
+Envía **multipart/form-data** con:
 
-Campos específicos por tipo:
-• NORMAL  
-  { "name": "Producto A", "type": "NORMAL", "description": "Una crema hidratante", "categoryId": 11 }
+- **products**: string (JSON.stringify de un array con la metadata – misma posición que los archivos).
+- Archivos nombrados **main_i** (imagen principal) y **gallery_i** (galería) por índice **i**.
 
-• FEATURED  
-  { "name": "Producto B", "type": "FEATURED", "order": 1, "tagline": "Top ventas", "categoryId": 12 }
+### Ejemplos de objetos **products**
 
-• HIGHLIGHT  
-  { "name": "Producto C", "type": "HIGHLIGHT", "highlightFeatures": ["Alta concentración","Sin parabenos"], "highlightDescription": "Nuevo lanzamiento", "categoryId": 13 }
-
-• OFFER  
-  { "name": "Producto D", "type": "OFFER", "title": "Descuento especial", "offerDescription": "20% de descuento", "categoryId": 16 }
-
-Ejemplo completo de products:
+\`\`\`json
 [
-  { "name":"Producto A","type":"NORMAL","description":"Una crema","categoryId":11 },
-  { "name":"Producto B","type":"FEATURED","order":1,"tagline":"Top ventas","categoryId":12 },
-  { "name":"Producto C","type":"HIGHLIGHT","highlightFeatures":["Alta concentración","Sin parabenos"],"highlightDescription":"Nuevo","categoryId":13 },
-  { "name":"Producto D","type":"OFFER","title":"Oferta","offerDescription":"15% off","categoryId":16 }
+  {
+    "name": "Gel Limpiador Facial",
+    "type": "NORMAL",
+    "description": "Limpieza profunda sin resecar la piel",
+    "categoryId": 11,
+    "activeIngredients": ["Ácido salicílico 2 %", "Zinc PCA"],
+    "benefits": ["Regula sebo", "Desobstruye poros"],
+    "features": ["pH 5.5", "Sin sulfatos", "No comedogénico"],
+    "isFeatured": false,
+    "isBestSeller": true,
+    "isOnSale": false,
+    "lab": "DermaCare Labs",
+    "problemAddressed": "Acné leve"
+  },
+  {
+    "name": "Ampolla Rejuvenecedora",
+    "type": "FEATURED",
+    "order": 1,
+    "tagline": "Efecto flash inmediato",
+    "description": "Con péptidos y factor de crecimiento",
+    "categoryId": 12,
+    "activeIngredients": ["Péptidos", "Ácido hialurónico"],
+    "benefits": ["Tensa", "Ilumina"],
+    "features": ["Uso profesional"],
+    "lab": "BeautyScience"
+  },
+  {
+    "name": "Crema Reparadora Noche",
+    "type": "HIGHLIGHT",
+    "highlightFeatures": ["Retinol 0.3 %", "Ceramidas", "Niacinamida"],
+    "highlightDescription": "Renueva barrera cutánea mientras duermes",
+    "categoryId": 13,
+    "description": "Nutrición intensiva"
+  },
+  {
+    "name": "Serum Vitamina C 20 %",
+    "type": "OFFER",
+    "title": "2×1 de lanzamiento",
+    "offerDescription": "Promoción válida hasta el 31/12",
+    "categoryId": 14,
+    "description": "Antioxidante de alta potencia"
+  }
 ]
+\`\`\`
     `,
     }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),

@@ -91,16 +91,16 @@ export declare class CategoryService {
             createdAt: Date;
             updatedAt: Date;
             isFeatured: boolean | null;
-            lab: string | null;
+            companyId: string;
             activeIngredients: string[];
-            features: string[];
             benefits: string[];
-            problemAddressed: string | null;
-            imageMain: string | null;
+            features: string[];
             imageGallery: string[];
+            imageMain: string | null;
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
-            companyId: string;
+            lab: string | null;
+            problemAddressed: string | null;
         }[];
     } & {
         name: string;
