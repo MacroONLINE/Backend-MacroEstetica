@@ -66,6 +66,16 @@ export declare class MinisiteController {
         productId: string;
         type: string;
     }[]>;
+    getSpecialities(empresaId: string): Promise<{
+        id: string;
+        title: string;
+        imageUrl: string;
+    }[]>;
+    registerSpecialities(empresaId: string, specialitiesMeta: string, images: Express.Multer.File[]): Promise<{
+        id: string;
+        title: string;
+        imageUrl: string;
+    }[]>;
     uploadVideo(empresaId: string, video: Express.Multer.File): Promise<{
         videoUrl: string;
     }>;
