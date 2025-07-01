@@ -91,16 +91,16 @@ export declare class CategoryController {
             createdAt: Date;
             updatedAt: Date;
             isFeatured: boolean | null;
-            companyId: string;
+            lab: string | null;
             activeIngredients: string[];
-            benefits: string[];
             features: string[];
-            imageGallery: string[];
+            benefits: string[];
+            problemAddressed: string | null;
             imageMain: string | null;
+            imageGallery: string[];
             isBestSeller: boolean | null;
             isOnSale: boolean | null;
-            lab: string | null;
-            problemAddressed: string | null;
+            companyId: string;
             presentations: string[];
         }[];
     } & {

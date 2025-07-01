@@ -35,14 +35,14 @@ let ClassroomController = class ClassroomController {
     async getLiveClassrooms() {
         const classrooms = await this.classroomService.getLiveClassrooms();
         if (!classrooms || classrooms.length === 0) {
-            throw new common_1.NotFoundException('No hay Classrooms en vivo en este momento');
+            throw new common_1.NotFoundException('There are no live classrooms at this moment');
         }
         return classrooms;
     }
     async getClassroomById(id) {
         const classroom = await this.classroomService.getClassroomById(id);
         if (!classroom)
-            throw new common_1.NotFoundException('Classroom no encontrado');
+            throw new common_1.NotFoundException('Classroom not found');
         return classroom;
     }
     async addOrator(id, body) {
@@ -55,9 +55,43 @@ let ClassroomController = class ClassroomController {
 exports.ClassroomController = ClassroomController;
 __decorate([
     (0, common_1.Post)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Crea un nuevo Classroom' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Classroom creado correctamente' }),
-    (0, swagger_1.ApiResponse)({ status: 400, description: 'Datos inválidos para la creación del classroom' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Create a new classroom' }),
+    (0, swagger_1.ApiBody)({
+        description: 'JSON payload containing basic classroom data',
+        schema: {
+            example: {
+                title: 'Advanced Aesthetics Marathon',
+                description: 'Full day of hands-on aesthetic procedures.',
+                price: 49.99,
+                startDateTime: '2025-03-20T15:00:00Z',
+                endDateTime: '2025-03-20T21:00:00Z',
+                imageUrl: 'https://cdn.example.com/img/banner.jpg',
+                channelName: 'classroom-aesthetics-001',
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 201,
+        description: 'Classroom successfully created',
+        schema: {
+            example: {
+                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+                title: 'Advanced Aesthetics Marathon',
+                description: 'Full day of hands-on aesthetic procedures.',
+                price: 49.99,
+                startDateTime: '2025-03-20T15:00:00.000Z',
+                endDateTime: '2025-03-20T21:00:00.000Z',
+                imageUrl: 'https://cdn.example.com/img/banner.jpg',
+                channelName: 'classroom-aesthetics-001',
+                createdAt: '2025-01-18T09:55:34.000Z',
+                updatedAt: '2025-01-18T09:55:34.000Z',
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 400,
+        description: 'Invalid data supplied for classroom creation',
+    }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -65,10 +99,49 @@ __decorate([
 ], ClassroomController.prototype, "createClassroom", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Actualiza un Classroom existente' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom a actualizar' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Classroom actualizado correctamente' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Update an existing classroom' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Classroom ID to update',
+        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+    }),
+    (0, swagger_1.ApiBody)({
+        description: 'Fields to update (partial payload allowed)',
+        schema: {
+            example: {
+                title: 'Advanced Aesthetics Marathon – Updated',
+                description: 'Updated short description',
+                price: 59.99,
+                startDateTime: '2025-03-20T16:00:00Z',
+                endDateTime: '2025-03-20T22:00:00Z',
+                imageUrl: 'https://cdn.example.com/img/banner_v2.jpg',
+                channelName: 'classroom-aesthetics-001',
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Classroom successfully updated',
+        schema: {
+            example: {
+                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+                title: 'Advanced Aesthetics Marathon – Updated',
+                description: 'Updated short description',
+                price: 59.99,
+                startDateTime: '2025-03-20T16:00:00.000Z',
+                endDateTime: '2025-03-20T22:00:00.000Z',
+                imageUrl: 'https://cdn.example.com/img/banner_v2.jpg',
+                channelName: 'classroom-aesthetics-001',
+                orators: [],
+                attendees: [],
+                enrollments: [],
+                isLive: false,
+                createdAt: '2025-01-18T09:55:34.000Z',
+                updatedAt: '2025-01-18T10:30:41.000Z',
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom not found' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -77,10 +150,18 @@ __decorate([
 ], ClassroomController.prototype, "updateClassroom", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Elimina un Classroom por ID' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom a eliminar' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Classroom eliminado correctamente' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete a classroom by ID' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Classroom ID to delete',
+        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Classroom successfully deleted',
+        schema: { example: { message: 'Classroom deleted successfully' } },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom not found' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -88,27 +169,79 @@ __decorate([
 ], ClassroomController.prototype, "deleteClassroom", null);
 __decorate([
     (0, common_1.Get)('upcoming'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los Classrooms que aún no han iniciado' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de Classrooms futuros' }),
+    (0, swagger_1.ApiOperation)({ summary: 'List all classrooms that have not started yet' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Array of upcoming classrooms',
+        schema: {
+            example: [
+                {
+                    id: 'cls_upcoming_001',
+                    title: 'Laser Physics 101',
+                    startDateTime: '2025-04-01T14:00:00.000Z',
+                    endDateTime: '2025-04-01T18:00:00.000Z',
+                    isLive: false,
+                },
+            ],
+        },
+    }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ClassroomController.prototype, "getUpcomingClassrooms", null);
 __decorate([
     (0, common_1.Get)('live'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene todos los Classrooms en vivo en este momento' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Lista de Classrooms en vivo' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'No hay Classrooms en vivo en este momento' }),
+    (0, swagger_1.ApiOperation)({ summary: 'List all classrooms currently live' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Array of live classrooms',
+        schema: {
+            example: [
+                {
+                    id: 'cls_live_001',
+                    title: 'Dermatology Morning Session',
+                    startDateTime: '2025-01-18T08:00:00.000Z',
+                    endDateTime: '2025-01-18T12:00:00.000Z',
+                    isLive: true,
+                },
+            ],
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 404,
+        description: 'No live classrooms at this moment',
+    }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ClassroomController.prototype, "getLiveClassrooms", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtiene un Classroom por su ID' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom a buscar' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Retorna el Classroom si existe' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Retrieve a classroom by ID' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Classroom ID to fetch',
+        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Classroom detail',
+        schema: {
+            example: {
+                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+                title: 'Advanced Aesthetics Marathon',
+                description: 'Full day of hands-on aesthetic procedures.',
+                price: 49.99,
+                startDateTime: '2025-03-20T15:00:00.000Z',
+                endDateTime: '2025-03-20T21:00:00.000Z',
+                isLive: false,
+                orators: [],
+                attendees: [],
+                enrollments: [],
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom not found' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -116,10 +249,29 @@ __decorate([
 ], ClassroomController.prototype, "getClassroomById", null);
 __decorate([
     (0, common_1.Patch)(':id/add-orator'),
-    (0, swagger_1.ApiOperation)({ summary: 'Agrega un orador (Instructor) a un Classroom' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom donde se agregará el orador' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Orador agregado correctamente' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom no encontrado' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Add an instructor (orator) to a classroom' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Classroom ID to attach the instructor to',
+        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+    }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            description: 'Payload containing the instructor ID',
+            example: { instructorId: 'instr_01HTX40T5AJ2Z6QXN3JJ68X3DH' },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Instructor successfully linked to classroom',
+        schema: {
+            example: {
+                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+                orators: [{ id: 'instr_01HTX40T5AJ2Z6QXN3JJ68X3DH', name: 'Dr. Jane Doe' }],
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom not found' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -128,10 +280,29 @@ __decorate([
 ], ClassroomController.prototype, "addOrator", null);
 __decorate([
     (0, common_1.Patch)(':id/remove-orator'),
-    (0, swagger_1.ApiOperation)({ summary: 'Quita un orador (Instructor) de un Classroom' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del Classroom donde se quitará el orador' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Orador removido correctamente' }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom o Instructor no encontrado' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Remove an instructor (orator) from a classroom' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'Classroom ID to detach the instructor from',
+        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+    }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            description: 'Payload containing the instructor ID',
+            example: { instructorId: 'instr_01HTX40T5AJ2Z6QXN3JJ68X3DH' },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        description: 'Instructor successfully removed from classroom',
+        schema: {
+            example: {
+                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
+                orators: [],
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom or instructor not found' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
