@@ -5,21 +5,23 @@ export interface CreateClassroomDto {
     title: string;
     description: string;
     price: number;
-    startDateTime: string;
-    endDateTime: string;
-    imageUrl?: string;
+    startDateTime: Date;
+    endDateTime: Date;
     channelName?: string;
     categories?: $Enums.Profession[];
     oratorIds?: Ids;
     attendeeIds?: Ids;
+    image?: Express.Multer.File;
 }
 export interface UpdateClassroomDto extends Partial<CreateClassroomDto> {
 }
 export declare class ClassroomService {
     private readonly prisma;
     constructor(prisma: PrismaService);
+    private uploadImage;
     private connect;
     private set;
+    private markLive;
     createClassroom(dto: CreateClassroomDto): Promise<{
         id: string;
         title: string;

@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClassroomService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
-const baseSelect = {
+const selectBase = {
     id: true,
     title: true,
     description: true,
@@ -24,18 +24,17 @@ const baseSelect = {
     categories: true,
     orators: { select: { id: true } },
     attendees: { select: { id: true } },
-};
-const markLive = (data) => {
-    const now = new Date();
-    const flag = (c) => {
-        ;
-        c.isLive = now >= c.startDateTime && now <= c.endDateTime;
-    };
-    Array.isArray(data) ? data.forEach(flag) : flag(data);
+    enrollments: { select: { id: true, userId: true, status: true } },
 };
 let ClassroomService = class ClassroomService {
     constructor(prisma) {
         this.prisma = prisma;
+    }
+    async uploadImage(file) {
+        if (!file)
+            return undefined;
+        const fakeUrl = `https://cdn.example.com/uploads/${file.originalname}`;
+        return fakeUrl;
     }
     connect(ids) {
         return ids?.length ? { connect: ids.map((id) => ({ id })) } : undefined;
@@ -43,7 +42,13 @@ let ClassroomService = class ClassroomService {
     set(ids) {
         return ids ? { set: ids.map((id) => ({ id })) } : undefined;
     }
+    markLive(data) {
+        const now = new Date();
+        const flag = (c) => (c.isLive = now >= c.startDateTime && now <= c.endDateTime);
+        Array.isArray(data) ? data.forEach(flag) : flag(data);
+    }
     async createClassroom(dto) {
+        const imageUrl = await this.uploadImage(dto.image);
         const created = await this.prisma.classroom.create({
             data: {
                 title: dto.title,
@@ -51,29 +56,30 @@ let ClassroomService = class ClassroomService {
                 price: dto.price,
                 startDateTime: dto.startDateTime,
                 endDateTime: dto.endDateTime,
-                imageUrl: dto.imageUrl,
                 channelName: dto.channelName,
+                imageUrl,
                 categories: dto.categories,
                 orators: this.connect(dto.oratorIds),
                 attendees: this.connect(dto.attendeeIds),
             },
-            select: baseSelect,
+            select: selectBase,
         });
-        markLive(created);
+        this.markLive(created);
         return created;
     }
     async getClassroomById(id) {
         const classroom = await this.prisma.classroom.findUnique({
             where: { id },
-            select: baseSelect,
+            select: selectBase,
         });
         if (!classroom)
-            throw new common_1.NotFoundException('Classroom no encontrado');
-        markLive(classroom);
+            throw new common_1.NotFoundException('Classroom not found');
+        this.markLive(classroom);
         return classroom;
     }
     async updateClassroom(id, dto) {
         await this.prisma.classroom.findUniqueOrThrow({ where: { id } });
+        const imageUrl = dto.image ? await this.uploadImage(dto.image) : undefined;
         const updated = await this.prisma.classroom.update({
             where: { id },
             data: {
@@ -82,15 +88,15 @@ let ClassroomService = class ClassroomService {
                 price: dto.price,
                 startDateTime: dto.startDateTime,
                 endDateTime: dto.endDateTime,
-                imageUrl: dto.imageUrl,
                 channelName: dto.channelName,
+                imageUrl,
                 categories: dto.categories ? { set: dto.categories } : undefined,
                 orators: this.set(dto.oratorIds),
                 attendees: this.set(dto.attendeeIds),
             },
-            select: baseSelect,
+            select: selectBase,
         });
-        markLive(updated);
+        this.markLive(updated);
         return updated;
     }
     async deleteClassroom(id) {
@@ -102,18 +108,18 @@ let ClassroomService = class ClassroomService {
         const now = new Date();
         const list = await this.prisma.classroom.findMany({
             where: { startDateTime: { gte: now } },
-            select: baseSelect,
+            select: selectBase,
         });
-        markLive(list);
+        this.markLive(list);
         return list;
     }
     async getLiveClassrooms() {
         const now = new Date();
         const list = await this.prisma.classroom.findMany({
             where: { startDateTime: { lte: now }, endDateTime: { gte: now } },
-            select: baseSelect,
+            select: selectBase,
         });
-        markLive(list);
+        this.markLive(list);
         return list;
     }
     async addOrator(classroomId, instructorId) {

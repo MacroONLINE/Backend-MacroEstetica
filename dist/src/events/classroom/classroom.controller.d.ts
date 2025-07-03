@@ -1,25 +1,26 @@
 import { ClassroomService } from './classroom.service';
+import { $Enums } from '@prisma/client';
 declare class CreateClassroomDto {
     title: string;
     description: string;
     price: number;
-    startDateTime: string;
-    endDateTime: string;
-    imageUrl?: string;
+    startDateTime: Date;
+    endDateTime: Date;
     channelName?: string;
-    categoriesIds?: string[];
+    categories?: $Enums.Profession[];
     oratorIds?: string[];
     attendeeIds?: string[];
 }
-declare class UpdateClassroomDto extends CreateClassroomDto {
+declare const UpdateClassroomDto_base: import("@nestjs/mapped-types").MappedType<Partial<CreateClassroomDto>>;
+declare class UpdateClassroomDto extends UpdateClassroomDto_base {
 }
 declare class OratorDto {
     instructorId: string;
 }
 export declare class ClassroomController {
-    private readonly classroomService;
-    constructor(classroomService: ClassroomService);
-    create(dto: CreateClassroomDto): Promise<{
+    private readonly service;
+    constructor(service: ClassroomService);
+    create(dto: CreateClassroomDto, image?: Express.Multer.File): Promise<{
         id: string;
         title: string;
         description: string;
@@ -30,7 +31,7 @@ export declare class ClassroomController {
         imageUrl: string;
         price: number;
         startDateTime: Date;
-        categories: import(".prisma/client").$Enums.Profession[];
+        categories: $Enums.Profession[];
         isFree: boolean;
         enrollments: {
             id: string;
@@ -56,7 +57,7 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            role: import(".prisma/client").$Enums.Role;
+            role: $Enums.Role;
             password: string;
             newsletter: boolean;
             userSubscription: string | null;
@@ -69,8 +70,8 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -79,7 +80,7 @@ export declare class ClassroomController {
             bannerImage: string | null;
             followers: number | null;
             experienceDescription: string;
-            genero: import(".prisma/client").$Enums.Gender | null;
+            genero: $Enums.Gender | null;
             validated: boolean | null;
         }[];
         _count: {
@@ -88,7 +89,7 @@ export declare class ClassroomController {
             orators: number;
         };
     }>;
-    update(id: string, dto: UpdateClassroomDto): Promise<{
+    update(id: string, dto: UpdateClassroomDto, image?: Express.Multer.File): Promise<{
         id: string;
         title: string;
         description: string;
@@ -99,7 +100,7 @@ export declare class ClassroomController {
         imageUrl: string;
         price: number;
         startDateTime: Date;
-        categories: import(".prisma/client").$Enums.Profession[];
+        categories: $Enums.Profession[];
         isFree: boolean;
         enrollments: {
             id: string;
@@ -125,7 +126,7 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            role: import(".prisma/client").$Enums.Role;
+            role: $Enums.Role;
             password: string;
             newsletter: boolean;
             userSubscription: string | null;
@@ -138,8 +139,8 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -148,7 +149,7 @@ export declare class ClassroomController {
             bannerImage: string | null;
             followers: number | null;
             experienceDescription: string;
-            genero: import(".prisma/client").$Enums.Gender | null;
+            genero: $Enums.Gender | null;
             validated: boolean | null;
         }[];
         _count: {
@@ -171,7 +172,7 @@ export declare class ClassroomController {
         imageUrl: string;
         price: number;
         startDateTime: Date;
-        categories: import(".prisma/client").$Enums.Profession[];
+        categories: $Enums.Profession[];
         isFree: boolean;
         enrollments: {
             id: string;
@@ -197,7 +198,7 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            role: import(".prisma/client").$Enums.Role;
+            role: $Enums.Role;
             password: string;
             newsletter: boolean;
             userSubscription: string | null;
@@ -210,8 +211,8 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -220,7 +221,7 @@ export declare class ClassroomController {
             bannerImage: string | null;
             followers: number | null;
             experienceDescription: string;
-            genero: import(".prisma/client").$Enums.Gender | null;
+            genero: $Enums.Gender | null;
             validated: boolean | null;
         }[];
         _count: {
@@ -240,7 +241,7 @@ export declare class ClassroomController {
         imageUrl: string;
         price: number;
         startDateTime: Date;
-        categories: import(".prisma/client").$Enums.Profession[];
+        categories: $Enums.Profession[];
         isFree: boolean;
         enrollments: {
             id: string;
@@ -266,7 +267,7 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            role: import(".prisma/client").$Enums.Role;
+            role: $Enums.Role;
             password: string;
             newsletter: boolean;
             userSubscription: string | null;
@@ -279,8 +280,8 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -289,7 +290,7 @@ export declare class ClassroomController {
             bannerImage: string | null;
             followers: number | null;
             experienceDescription: string;
-            genero: import(".prisma/client").$Enums.Gender | null;
+            genero: $Enums.Gender | null;
             validated: boolean | null;
         }[];
         _count: {
@@ -309,7 +310,7 @@ export declare class ClassroomController {
         imageUrl: string;
         price: number;
         startDateTime: Date;
-        categories: import(".prisma/client").$Enums.Profession[];
+        categories: $Enums.Profession[];
         isFree: boolean;
         enrollments: {
             id: string;
@@ -335,7 +336,7 @@ export declare class ClassroomController {
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            role: import(".prisma/client").$Enums.Role;
+            role: $Enums.Role;
             password: string;
             newsletter: boolean;
             userSubscription: string | null;
@@ -348,8 +349,8 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             userId: string;
-            profession: import(".prisma/client").$Enums.Profession;
-            type: import(".prisma/client").$Enums.ProfessionType;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
             experienceYears: number;
             certificationsUrl: string;
             status: string;
@@ -358,7 +359,7 @@ export declare class ClassroomController {
             bannerImage: string | null;
             followers: number | null;
             experienceDescription: string;
-            genero: import(".prisma/client").$Enums.Gender | null;
+            genero: $Enums.Gender | null;
             validated: boolean | null;
         }[];
         _count: {

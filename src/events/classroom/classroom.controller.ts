@@ -8,136 +8,151 @@ import {
   Param,
   Patch,
   Post,
+  UploadedFile,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common'
+import { FileInterceptor } from '@nestjs/platform-express'
 import {
   ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger'
+import { Type } from 'class-transformer'
 import {
+  ArrayUnique,
   IsArray,
-  IsDateString,
+  IsDate,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
-  ArrayNotEmpty,
-  ArrayUnique,
 } from 'class-validator'
+import { PartialType } from '@nestjs/mapped-types'
 import { ClassroomService } from './classroom.service'
+import { $Enums } from '@prisma/client'
 
 class CreateClassroomDto {
   @IsString() title: string
   @IsString() description: string
   @IsNumber() price: number
-  @IsDateString() startDateTime: string
-  @IsDateString() endDateTime: string
-  @IsOptional() @IsString() imageUrl?: string
+  @Type(() => Date) @IsDate() startDateTime: Date
+  @Type(() => Date) @IsDate() endDateTime: Date
   @IsOptional() @IsString() channelName?: string
-  @IsOptional() @IsArray() @ArrayUnique() categoriesIds?: string[]     // profesión IDs
-  @IsOptional() @IsArray() @ArrayUnique() oratorIds?: string[]        // instructor IDs
-  @IsOptional() @IsArray() @ArrayUnique() attendeeIds?: string[]      // user IDs
+  @IsOptional() @IsArray() @ArrayUnique() @IsEnum($Enums.Profession, { each: true }) categories?: $Enums.Profession[]
+  @IsOptional() @IsArray() @ArrayUnique() oratorIds?: string[]
+  @IsOptional() @IsArray() @ArrayUnique() attendeeIds?: string[]
 }
 
-class UpdateClassroomDto extends CreateClassroomDto {}
+class UpdateClassroomDto extends PartialType(CreateClassroomDto) {}
 
-class OratorDto {
-  @IsString() instructorId: string
-}
+class OratorDto { @IsString() instructorId: string }
 
 @ApiTags('Classrooms')
 @Controller('classroom')
 @UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 export class ClassroomController {
-  constructor(private readonly classroomService: ClassroomService) {}
-
-  /* --------------------------------------------------------------------- */
-  /* CREATE ---------------------------------------------------------------- */
-  /* --------------------------------------------------------------------- */
+  constructor(private readonly service: ClassroomService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create classroom' })
-  @ApiBody({ type: CreateClassroomDto })
-  @ApiResponse({
-    status: 201,
-    description: 'Created classroom (IDs only)',
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiBody({
     schema: {
-      example: {
-        id: 'cls_001',
-        title: 'Botulinum Toxin Masterclass',
-        description: 'Hands-on training with live patients',
-        price: 120,
-        startDateTime: '2025-06-10T14:00:00.000Z',
-        endDateTime: '2025-06-10T17:00:00.000Z',
-        imageUrl: 'https://cdn.example.com/classrooms/btx.jpg',
-        channelName: 'classroom-btx-001',
-        categoriesIds: ['DERMATOLOGIA', 'MEDICINA_ESTETICA'],
-        oratorIds: ['instr_001'],
-        attendeeIds: ['user_001'],
-        isLive: false,
-        createdAt: '2025-05-01T09:00:00.000Z',
-        updatedAt: '2025-05-01T09:00:00.000Z',
+      type: 'object',
+      required: ['title', 'description', 'price', 'startDateTime', 'endDateTime'],
+      properties: {
+        title: { type: 'string', example: 'Botox Masterclass' },
+        description: { type: 'string', example: 'Hands-on training' },
+        price: { type: 'number', example: 120 },
+        startDateTime: { type: 'string', format: 'date-time', example: '2025-06-10T14:00:00.000Z' },
+        endDateTime: { type: 'string', format: 'date-time', example: '2025-06-10T17:00:00.000Z' },
+        channelName: { type: 'string', example: 'classroom-btx-001' },
+        categories: { type: 'array', items: { type: 'string', enum: Object.values($Enums.Profession) }, example: ['DERMATOLOGIA'] },
+        oratorIds: { type: 'array', items: { type: 'string' }, example: ['instr_001'] },
+        attendeeIds: { type: 'array', items: { type: 'string' }, example: ['user_001'] },
+        image: { type: 'string', format: 'binary' },
       },
     },
   })
-  @ApiResponse({ status: 400, description: 'Invalid payload' })
-  create(@Body() dto: CreateClassroomDto) {
-    return this.classroomService.createClassroom(dto)
-  }
-
-  /* --------------------------------------------------------------------- */
-  /* UPDATE ---------------------------------------------------------------- */
-  /* --------------------------------------------------------------------- */
-
-  @Patch(':id')
-  @ApiOperation({ summary: 'Update classroom' })
-  @ApiParam({ name: 'id', description: 'Classroom ID' })
-  @ApiBody({ type: UpdateClassroomDto })
   @ApiResponse({
-    status: 200,
-    description: 'Updated classroom (IDs only)',
+    status: 201,
     schema: {
       example: {
         id: 'cls_001',
-        title: 'Masterclass – Updated',
-        description: 'Extended Q&A',
-        price: 150,
-        startDateTime: '2025-06-10T15:00:00.000Z',
-        endDateTime: '2025-06-10T18:00:00.000Z',
-        categoriesIds: ['DERMATOLOGIA'],
+        title: 'Botox Masterclass',
+        description: 'Hands-on training',
+        price: 120,
+        startDateTime: '2025-06-10T14:00:00.000Z',
+        endDateTime: '2025-06-10T17:00:00.000Z',
+        channelName: 'classroom-btx-001',
+        categories: ['DERMATOLOGIA'],
+        oratorIds: ['instr_001'],
+        attendeeIds: ['user_001'],
+        imageUrl: 'https://cdn.example.com/uploads/btx.jpg',
+        isLive: false,
+      },
+    },
+  })
+  create(@Body() dto: CreateClassroomDto, @UploadedFile() image?: Express.Multer.File) {
+    return this.service.createClassroom({ ...dto, image })
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update classroom' })
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiParam({ name: 'id', description: 'Classroom ID' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', example: 'New title' },
+        description: { type: 'string', example: 'New description' },
+        price: { type: 'number', example: 150 },
+        startDateTime: { type: 'string', format: 'date-time', example: '2025-06-10T15:00:00.000Z' },
+        endDateTime: { type: 'string', format: 'date-time', example: '2025-06-10T18:00:00.000Z' },
+        channelName: { type: 'string', example: 'classroom-btx-001' },
+        categories: { type: 'array', items: { type: 'string', enum: Object.values($Enums.Profession) }, example: ['DERMATOLOGIA'] },
+        oratorIds: { type: 'array', items: { type: 'string' }, example: ['instr_001', 'instr_002'] },
+        attendeeIds: { type: 'array', items: { type: 'string' }, example: [] },
+        image: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      example: {
+        id: 'cls_001',
+        title: 'New title',
+        categories: ['DERMATOLOGIA'],
         oratorIds: ['instr_001', 'instr_002'],
         attendeeIds: [],
         isLive: false,
       },
     },
   })
-  @ApiResponse({ status: 404, description: 'Classroom not found' })
-  update(@Param('id') id: string, @Body() dto: UpdateClassroomDto) {
-    return this.classroomService.updateClassroom(id, dto)
+  update(
+    @Param('id') id: string,
+    @Body() dto: UpdateClassroomDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return this.service.updateClassroom(id, { ...dto, image })
   }
-
-  /* --------------------------------------------------------------------- */
-  /* DELETE ---------------------------------------------------------------- */
-  /* --------------------------------------------------------------------- */
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete classroom' })
   @ApiParam({ name: 'id', description: 'Classroom ID' })
-  @ApiResponse({
-    status: 200,
-    schema: { example: { message: 'Classroom eliminado correctamente' } },
-  })
-  @ApiResponse({ status: 404, description: 'Classroom not found' })
+  @ApiResponse({ status: 200, schema: { example: { message: 'Classroom eliminado correctamente' } } })
   remove(@Param('id') id: string) {
-    return this.classroomService.deleteClassroom(id)
+    return this.service.deleteClassroom(id)
   }
-
-  /* --------------------------------------------------------------------- */
-  /* UPCOMING / LIVE ------------------------------------------------------ */
-  /* --------------------------------------------------------------------- */
 
   @Get('upcoming')
   @ApiOperation({ summary: 'Upcoming classrooms' })
@@ -147,7 +162,7 @@ export class ClassroomController {
       example: [
         {
           id: 'cls_002',
-          title: 'Laser Safety Basics',
+          title: 'Laser Basics',
           startDateTime: '2025-07-01T14:00:00.000Z',
           endDateTime: '2025-07-01T17:00:00.000Z',
           isLive: false,
@@ -156,7 +171,7 @@ export class ClassroomController {
     },
   })
   upcoming() {
-    return this.classroomService.getUpcomingClassrooms()
+    return this.service.getUpcomingClassrooms()
   }
 
   @Get('live')
@@ -167,7 +182,7 @@ export class ClassroomController {
       example: [
         {
           id: 'cls_003',
-          title: 'Dermatologic Suturing Techniques',
+          title: 'Derm Sutures',
           startDateTime: '2025-05-20T08:00:00.000Z',
           endDateTime: '2025-05-20T11:00:00.000Z',
           isLive: true,
@@ -177,78 +192,66 @@ export class ClassroomController {
   })
   @ApiResponse({ status: 404, description: 'No live classrooms' })
   async live() {
-    const list = await this.classroomService.getLiveClassrooms()
-    if (list.length === 0)
-      throw new NotFoundException('No live classrooms at this moment')
+    const list = await this.service.getLiveClassrooms()
+    if (list.length === 0) throw new NotFoundException('No live classrooms at this moment')
     return list
   }
 
-  /* --------------------------------------------------------------------- */
-  /* DETAIL ---------------------------------------------------------------- */
-  /* --------------------------------------------------------------------- */
-
   @Get(':id')
-  @ApiOperation({ summary: 'Get classroom detail (IDs only)' })
+  @ApiOperation({ summary: 'Get classroom detail' })
   @ApiParam({ name: 'id', description: 'Classroom ID' })
   @ApiResponse({
     status: 200,
     schema: {
       example: {
         id: 'cls_001',
-        title: 'Botulinum Toxin Masterclass',
-        description: 'Hands-on training with live patients',
+        title: 'Botox Masterclass',
         price: 120,
-        startDateTime: '2025-06-10T14:00:00.000Z',
-        endDateTime: '2025-06-10T17:00:00.000Z',
-        categoriesIds: ['DERMATOLOGIA', 'MEDICINA_ESTETICA'],
         oratorIds: ['instr_001'],
         attendeeIds: ['user_001'],
+        categories: ['DERMATOLOGIA'],
         isLive: false,
       },
     },
   })
   @ApiResponse({ status: 404, description: 'Classroom not found' })
   findOne(@Param('id') id: string) {
-    return this.classroomService.getClassroomById(id)
+    return this.service.getClassroomById(id)
   }
-
-  /* --------------------------------------------------------------------- */
-  /* ORATOR MANAGEMENT ---------------------------------------------------- */
-  /* --------------------------------------------------------------------- */
 
   @Patch(':id/add-orator')
   @ApiOperation({ summary: 'Add instructor to classroom' })
   @ApiParam({ name: 'id', description: 'Classroom ID' })
-  @ApiBody({ type: OratorDto })
-  @ApiResponse({
-    status: 200,
+  @ApiBody({
     schema: {
-      example: {
-        id: 'cls_001',
-        oratorIds: ['instr_001', 'instr_002'],
-      },
+      type: 'object',
+      required: ['instructorId'],
+      properties: { instructorId: { type: 'string', example: 'instr_002' } },
     },
   })
-  @ApiResponse({ status: 404, description: 'Classroom or instructor not found' })
+  @ApiResponse({
+    status: 200,
+    schema: { example: { id: 'cls_001', oratorIds: ['instr_001', 'instr_002'] } },
+  })
   addOrator(@Param('id') id: string, @Body() dto: OratorDto) {
-    return this.classroomService.addOrator(id, dto.instructorId)
+    return this.service.addOrator(id, dto.instructorId)
   }
 
   @Patch(':id/remove-orator')
   @ApiOperation({ summary: 'Remove instructor from classroom' })
   @ApiParam({ name: 'id', description: 'Classroom ID' })
-  @ApiBody({ type: OratorDto })
-  @ApiResponse({
-    status: 200,
+  @ApiBody({
     schema: {
-      example: {
-        id: 'cls_001',
-        oratorIds: ['instr_001'],
-      },
+      type: 'object',
+      required: ['instructorId'],
+      properties: { instructorId: { type: 'string', example: 'instr_002' } },
     },
   })
-  @ApiResponse({ status: 404, description: 'Classroom or instructor not found' })
+  @ApiResponse({
+    status: 200,
+    schema: { example: { id: 'cls_001', oratorIds: ['instr_001'] } },
+  })
   removeOrator(@Param('id') id: string, @Body() dto: OratorDto) {
-    return this.classroomService.removeOrator(id, dto.instructorId)
+    return this.service.removeOrator(id, dto.instructorId)
   }
 }
