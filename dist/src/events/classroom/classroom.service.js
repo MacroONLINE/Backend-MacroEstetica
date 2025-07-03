@@ -12,136 +12,126 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClassroomService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
+const baseSelect = {
+    id: true,
+    title: true,
+    description: true,
+    price: true,
+    startDateTime: true,
+    endDateTime: true,
+    imageUrl: true,
+    channelName: true,
+    categories: true,
+    orators: { select: { id: true } },
+    attendees: { select: { id: true } },
+};
+const markLive = (data) => {
+    const now = new Date();
+    const flag = (c) => {
+        ;
+        c.isLive = now >= c.startDateTime && now <= c.endDateTime;
+    };
+    Array.isArray(data) ? data.forEach(flag) : flag(data);
+};
 let ClassroomService = class ClassroomService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    setIsLiveOnClassrooms(classrooms) {
-        const now = new Date();
-        if (Array.isArray(classrooms)) {
-            for (const cls of classrooms) {
-                cls.isLive = now >= cls.startDateTime && now <= cls.endDateTime;
-            }
-        }
-        else if (classrooms) {
-            classrooms.isLive = now >= classrooms.startDateTime && now <= classrooms.endDateTime;
-        }
+    connect(ids) {
+        return ids?.length ? { connect: ids.map((id) => ({ id })) } : undefined;
     }
-    async createClassroom(data) {
-        return this.prisma.classroom.create({
+    set(ids) {
+        return ids ? { set: ids.map((id) => ({ id })) } : undefined;
+    }
+    async createClassroom(dto) {
+        const created = await this.prisma.classroom.create({
             data: {
-                title: data.title,
-                description: data.description,
-                price: data.price,
-                startDateTime: data.startDateTime,
-                endDateTime: data.endDateTime,
-                imageUrl: data.imageUrl,
-                channelName: data.channelName,
+                title: dto.title,
+                description: dto.description,
+                price: dto.price,
+                startDateTime: dto.startDateTime,
+                endDateTime: dto.endDateTime,
+                imageUrl: dto.imageUrl,
+                channelName: dto.channelName,
+                categories: dto.categories,
+                orators: this.connect(dto.oratorIds),
+                attendees: this.connect(dto.attendeeIds),
             },
+            select: baseSelect,
         });
+        markLive(created);
+        return created;
     }
     async getClassroomById(id) {
         const classroom = await this.prisma.classroom.findUnique({
             where: { id },
-            include: {
-                orators: true,
-                attendees: true,
-                enrollments: true,
-            },
+            select: baseSelect,
         });
         if (!classroom)
             throw new common_1.NotFoundException('Classroom no encontrado');
-        this.setIsLiveOnClassrooms(classroom);
+        markLive(classroom);
         return classroom;
     }
-    async updateClassroom(id, data) {
-        const classroom = await this.prisma.classroom.findUnique({ where: { id } });
-        if (!classroom)
-            throw new common_1.NotFoundException('Classroom no encontrado');
+    async updateClassroom(id, dto) {
+        await this.prisma.classroom.findUniqueOrThrow({ where: { id } });
         const updated = await this.prisma.classroom.update({
             where: { id },
             data: {
-                title: data.title,
-                description: data.description,
-                price: data.price,
-                startDateTime: data.startDateTime,
-                endDateTime: data.endDateTime,
-                imageUrl: data.imageUrl,
-                channelName: data.channelName,
+                title: dto.title,
+                description: dto.description,
+                price: dto.price,
+                startDateTime: dto.startDateTime,
+                endDateTime: dto.endDateTime,
+                imageUrl: dto.imageUrl,
+                channelName: dto.channelName,
+                categories: dto.categories ? { set: dto.categories } : undefined,
+                orators: this.set(dto.oratorIds),
+                attendees: this.set(dto.attendeeIds),
             },
-            include: {
-                orators: true,
-                attendees: true,
-                enrollments: true,
-            },
+            select: baseSelect,
         });
-        this.setIsLiveOnClassrooms(updated);
+        markLive(updated);
         return updated;
     }
     async deleteClassroom(id) {
-        const classroom = await this.prisma.classroom.findUnique({ where: { id } });
-        if (!classroom)
-            throw new common_1.NotFoundException('Classroom no encontrado');
+        await this.prisma.classroom.findUniqueOrThrow({ where: { id } });
         await this.prisma.classroom.delete({ where: { id } });
         return { message: 'Classroom eliminado correctamente' };
     }
     async getUpcomingClassrooms() {
         const now = new Date();
-        const classrooms = await this.prisma.classroom.findMany({
+        const list = await this.prisma.classroom.findMany({
             where: { startDateTime: { gte: now } },
-            include: { orators: true, attendees: true, enrollments: true },
+            select: baseSelect,
         });
-        this.setIsLiveOnClassrooms(classrooms);
-        return classrooms;
+        markLive(list);
+        return list;
     }
     async getLiveClassrooms() {
         const now = new Date();
-        const classrooms = await this.prisma.classroom.findMany({
-            where: {
-                startDateTime: { lte: now },
-                endDateTime: { gte: now },
-            },
-            include: { orators: true, attendees: true, enrollments: true },
+        const list = await this.prisma.classroom.findMany({
+            where: { startDateTime: { lte: now }, endDateTime: { gte: now } },
+            select: baseSelect,
         });
-        this.setIsLiveOnClassrooms(classrooms);
-        return classrooms;
+        markLive(list);
+        return list;
     }
     async addOrator(classroomId, instructorId) {
-        const classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
-        if (!classroom)
-            throw new common_1.NotFoundException('Classroom no encontrado');
-        const instructor = await this.prisma.instructor.findUnique({ where: { id: instructorId } });
-        if (!instructor)
-            throw new common_1.NotFoundException('Instructor no encontrado');
+        await this.prisma.classroom.findUniqueOrThrow({ where: { id: classroomId } });
+        await this.prisma.instructor.findUniqueOrThrow({ where: { id: instructorId } });
         return this.prisma.classroom.update({
             where: { id: classroomId },
-            data: {
-                orators: {
-                    connect: { id: instructorId },
-                },
-            },
-            include: {
-                orators: true,
-            },
+            data: { orators: { connect: { id: instructorId } } },
+            select: { id: true, orators: { select: { id: true } } },
         });
     }
     async removeOrator(classroomId, instructorId) {
-        const classroom = await this.prisma.classroom.findUnique({ where: { id: classroomId } });
-        if (!classroom)
-            throw new common_1.NotFoundException('Classroom no encontrado');
-        const instructor = await this.prisma.instructor.findUnique({ where: { id: instructorId } });
-        if (!instructor)
-            throw new common_1.NotFoundException('Instructor no encontrado');
+        await this.prisma.classroom.findUniqueOrThrow({ where: { id: classroomId } });
+        await this.prisma.instructor.findUniqueOrThrow({ where: { id: instructorId } });
         return this.prisma.classroom.update({
             where: { id: classroomId },
-            data: {
-                orators: {
-                    disconnect: { id: instructorId },
-                },
-            },
-            include: {
-                orators: true,
-            },
+            data: { orators: { disconnect: { id: instructorId } } },
+            select: { id: true, orators: { select: { id: true } } },
         });
     }
 };

@@ -15,129 +15,151 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClassroomController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 const classroom_service_1 = require("./classroom.service");
+class CreateClassroomDto {
+}
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateClassroomDto.prototype, "title", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateClassroomDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateClassroomDto.prototype, "price", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateClassroomDto.prototype, "startDateTime", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], CreateClassroomDto.prototype, "endDateTime", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateClassroomDto.prototype, "imageUrl", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateClassroomDto.prototype, "channelName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayUnique)(),
+    __metadata("design:type", Array)
+], CreateClassroomDto.prototype, "categoriesIds", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayUnique)(),
+    __metadata("design:type", Array)
+], CreateClassroomDto.prototype, "oratorIds", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ArrayUnique)(),
+    __metadata("design:type", Array)
+], CreateClassroomDto.prototype, "attendeeIds", void 0);
+class UpdateClassroomDto extends CreateClassroomDto {
+}
+class OratorDto {
+}
+__decorate([
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], OratorDto.prototype, "instructorId", void 0);
 let ClassroomController = class ClassroomController {
     constructor(classroomService) {
         this.classroomService = classroomService;
     }
-    async createClassroom(body) {
-        return this.classroomService.createClassroom(body);
+    create(dto) {
+        return this.classroomService.createClassroom(dto);
     }
-    async updateClassroom(id, body) {
-        return this.classroomService.updateClassroom(id, body);
+    update(id, dto) {
+        return this.classroomService.updateClassroom(id, dto);
     }
-    async deleteClassroom(id) {
+    remove(id) {
         return this.classroomService.deleteClassroom(id);
     }
-    async getUpcomingClassrooms() {
+    upcoming() {
         return this.classroomService.getUpcomingClassrooms();
     }
-    async getLiveClassrooms() {
-        const classrooms = await this.classroomService.getLiveClassrooms();
-        if (!classrooms || classrooms.length === 0) {
-            throw new common_1.NotFoundException('There are no live classrooms at this moment');
-        }
-        return classrooms;
+    async live() {
+        const list = await this.classroomService.getLiveClassrooms();
+        if (list.length === 0)
+            throw new common_1.NotFoundException('No live classrooms at this moment');
+        return list;
     }
-    async getClassroomById(id) {
-        const classroom = await this.classroomService.getClassroomById(id);
-        if (!classroom)
-            throw new common_1.NotFoundException('Classroom not found');
-        return classroom;
+    findOne(id) {
+        return this.classroomService.getClassroomById(id);
     }
-    async addOrator(id, body) {
-        return this.classroomService.addOrator(id, body.instructorId);
+    addOrator(id, dto) {
+        return this.classroomService.addOrator(id, dto.instructorId);
     }
-    async removeOrator(id, body) {
-        return this.classroomService.removeOrator(id, body.instructorId);
+    removeOrator(id, dto) {
+        return this.classroomService.removeOrator(id, dto.instructorId);
     }
 };
 exports.ClassroomController = ClassroomController;
 __decorate([
     (0, common_1.Post)(),
-    (0, swagger_1.ApiOperation)({ summary: 'Create a new classroom' }),
-    (0, swagger_1.ApiBody)({
-        description: 'JSON payload containing basic classroom data',
-        schema: {
-            example: {
-                title: 'Advanced Aesthetics Marathon',
-                description: 'Full day of hands-on aesthetic procedures.',
-                price: 49.99,
-                startDateTime: '2025-03-20T15:00:00Z',
-                endDateTime: '2025-03-20T21:00:00Z',
-                imageUrl: 'https://cdn.example.com/img/banner.jpg',
-                channelName: 'classroom-aesthetics-001',
-            },
-        },
-    }),
+    (0, swagger_1.ApiOperation)({ summary: 'Create classroom' }),
+    (0, swagger_1.ApiBody)({ type: CreateClassroomDto }),
     (0, swagger_1.ApiResponse)({
         status: 201,
-        description: 'Classroom successfully created',
+        description: 'Created classroom (IDs only)',
         schema: {
             example: {
-                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-                title: 'Advanced Aesthetics Marathon',
-                description: 'Full day of hands-on aesthetic procedures.',
-                price: 49.99,
-                startDateTime: '2025-03-20T15:00:00.000Z',
-                endDateTime: '2025-03-20T21:00:00.000Z',
-                imageUrl: 'https://cdn.example.com/img/banner.jpg',
-                channelName: 'classroom-aesthetics-001',
-                createdAt: '2025-01-18T09:55:34.000Z',
-                updatedAt: '2025-01-18T09:55:34.000Z',
+                id: 'cls_001',
+                title: 'Botulinum Toxin Masterclass',
+                description: 'Hands-on training with live patients',
+                price: 120,
+                startDateTime: '2025-06-10T14:00:00.000Z',
+                endDateTime: '2025-06-10T17:00:00.000Z',
+                imageUrl: 'https://cdn.example.com/classrooms/btx.jpg',
+                channelName: 'classroom-btx-001',
+                categoriesIds: ['DERMATOLOGIA', 'MEDICINA_ESTETICA'],
+                oratorIds: ['instr_001'],
+                attendeeIds: ['user_001'],
+                isLive: false,
+                createdAt: '2025-05-01T09:00:00.000Z',
+                updatedAt: '2025-05-01T09:00:00.000Z',
             },
         },
     }),
-    (0, swagger_1.ApiResponse)({
-        status: 400,
-        description: 'Invalid data supplied for classroom creation',
-    }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Invalid payload' }),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "createClassroom", null);
+    __metadata("design:paramtypes", [CreateClassroomDto]),
+    __metadata("design:returntype", void 0)
+], ClassroomController.prototype, "create", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Update an existing classroom' }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Classroom ID to update',
-        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-    }),
-    (0, swagger_1.ApiBody)({
-        description: 'Fields to update (partial payload allowed)',
-        schema: {
-            example: {
-                title: 'Advanced Aesthetics Marathon – Updated',
-                description: 'Updated short description',
-                price: 59.99,
-                startDateTime: '2025-03-20T16:00:00Z',
-                endDateTime: '2025-03-20T22:00:00Z',
-                imageUrl: 'https://cdn.example.com/img/banner_v2.jpg',
-                channelName: 'classroom-aesthetics-001',
-            },
-        },
-    }),
+    (0, swagger_1.ApiOperation)({ summary: 'Update classroom' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Classroom ID' }),
+    (0, swagger_1.ApiBody)({ type: UpdateClassroomDto }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Classroom successfully updated',
+        description: 'Updated classroom (IDs only)',
         schema: {
             example: {
-                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-                title: 'Advanced Aesthetics Marathon – Updated',
-                description: 'Updated short description',
-                price: 59.99,
-                startDateTime: '2025-03-20T16:00:00.000Z',
-                endDateTime: '2025-03-20T22:00:00.000Z',
-                imageUrl: 'https://cdn.example.com/img/banner_v2.jpg',
-                channelName: 'classroom-aesthetics-001',
-                orators: [],
-                attendees: [],
-                enrollments: [],
+                id: 'cls_001',
+                title: 'Masterclass – Updated',
+                description: 'Extended Q&A',
+                price: 150,
+                startDateTime: '2025-06-10T15:00:00.000Z',
+                endDateTime: '2025-06-10T18:00:00.000Z',
+                categoriesIds: ['DERMATOLOGIA'],
+                oratorIds: ['instr_001', 'instr_002'],
+                attendeeIds: [],
                 isLive: false,
-                createdAt: '2025-01-18T09:55:34.000Z',
-                updatedAt: '2025-01-18T10:30:41.000Z',
             },
         },
     }),
@@ -145,41 +167,35 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "updateClassroom", null);
+    __metadata("design:paramtypes", [String, UpdateClassroomDto]),
+    __metadata("design:returntype", void 0)
+], ClassroomController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Delete a classroom by ID' }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Classroom ID to delete',
-        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-    }),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete classroom' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Classroom ID' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Classroom successfully deleted',
-        schema: { example: { message: 'Classroom deleted successfully' } },
+        schema: { example: { message: 'Classroom eliminado correctamente' } },
     }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom not found' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "deleteClassroom", null);
+    __metadata("design:returntype", void 0)
+], ClassroomController.prototype, "remove", null);
 __decorate([
     (0, common_1.Get)('upcoming'),
-    (0, swagger_1.ApiOperation)({ summary: 'List all classrooms that have not started yet' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Upcoming classrooms' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Array of upcoming classrooms',
         schema: {
             example: [
                 {
-                    id: 'cls_upcoming_001',
-                    title: 'Laser Physics 101',
-                    startDateTime: '2025-04-01T14:00:00.000Z',
-                    endDateTime: '2025-04-01T18:00:00.000Z',
+                    id: 'cls_002',
+                    title: 'Laser Safety Basics',
+                    startDateTime: '2025-07-01T14:00:00.000Z',
+                    endDateTime: '2025-07-01T17:00:00.000Z',
                     isLive: false,
                 },
             ],
@@ -187,57 +203,48 @@ __decorate([
     }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "getUpcomingClassrooms", null);
+    __metadata("design:returntype", void 0)
+], ClassroomController.prototype, "upcoming", null);
 __decorate([
     (0, common_1.Get)('live'),
-    (0, swagger_1.ApiOperation)({ summary: 'List all classrooms currently live' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Live classrooms' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Array of live classrooms',
         schema: {
             example: [
                 {
-                    id: 'cls_live_001',
-                    title: 'Dermatology Morning Session',
-                    startDateTime: '2025-01-18T08:00:00.000Z',
-                    endDateTime: '2025-01-18T12:00:00.000Z',
+                    id: 'cls_003',
+                    title: 'Dermatologic Suturing Techniques',
+                    startDateTime: '2025-05-20T08:00:00.000Z',
+                    endDateTime: '2025-05-20T11:00:00.000Z',
                     isLive: true,
                 },
             ],
         },
     }),
-    (0, swagger_1.ApiResponse)({
-        status: 404,
-        description: 'No live classrooms at this moment',
-    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'No live classrooms' }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "getLiveClassrooms", null);
+], ClassroomController.prototype, "live", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    (0, swagger_1.ApiOperation)({ summary: 'Retrieve a classroom by ID' }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Classroom ID to fetch',
-        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-    }),
+    (0, swagger_1.ApiOperation)({ summary: 'Get classroom detail (IDs only)' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Classroom ID' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Classroom detail',
         schema: {
             example: {
-                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-                title: 'Advanced Aesthetics Marathon',
-                description: 'Full day of hands-on aesthetic procedures.',
-                price: 49.99,
-                startDateTime: '2025-03-20T15:00:00.000Z',
-                endDateTime: '2025-03-20T21:00:00.000Z',
+                id: 'cls_001',
+                title: 'Botulinum Toxin Masterclass',
+                description: 'Hands-on training with live patients',
+                price: 120,
+                startDateTime: '2025-06-10T14:00:00.000Z',
+                endDateTime: '2025-06-10T17:00:00.000Z',
+                categoriesIds: ['DERMATOLOGIA', 'MEDICINA_ESTETICA'],
+                oratorIds: ['instr_001'],
+                attendeeIds: ['user_001'],
                 isLive: false,
-                orators: [],
-                attendees: [],
-                enrollments: [],
             },
         },
     }),
@@ -245,60 +252,19 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "getClassroomById", null);
+    __metadata("design:returntype", void 0)
+], ClassroomController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id/add-orator'),
-    (0, swagger_1.ApiOperation)({ summary: 'Add an instructor (orator) to a classroom' }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Classroom ID to attach the instructor to',
-        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-    }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            description: 'Payload containing the instructor ID',
-            example: { instructorId: 'instr_01HTX40T5AJ2Z6QXN3JJ68X3DH' },
-        },
-    }),
+    (0, swagger_1.ApiOperation)({ summary: 'Add instructor to classroom' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Classroom ID' }),
+    (0, swagger_1.ApiBody)({ type: OratorDto }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Instructor successfully linked to classroom',
         schema: {
             example: {
-                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-                orators: [{ id: 'instr_01HTX40T5AJ2Z6QXN3JJ68X3DH', name: 'Dr. Jane Doe' }],
-            },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom not found' }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
-], ClassroomController.prototype, "addOrator", null);
-__decorate([
-    (0, common_1.Patch)(':id/remove-orator'),
-    (0, swagger_1.ApiOperation)({ summary: 'Remove an instructor (orator) from a classroom' }),
-    (0, swagger_1.ApiParam)({
-        name: 'id',
-        description: 'Classroom ID to detach the instructor from',
-        example: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-    }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            description: 'Payload containing the instructor ID',
-            example: { instructorId: 'instr_01HTX40T5AJ2Z6QXN3JJ68X3DH' },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Instructor successfully removed from classroom',
-        schema: {
-            example: {
-                id: 'cls_01HTX3C21TEY5Q9Y25E4ARQ1KZ',
-                orators: [],
+                id: 'cls_001',
+                oratorIds: ['instr_001', 'instr_002'],
             },
         },
     }),
@@ -306,12 +272,34 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:paramtypes", [String, OratorDto]),
+    __metadata("design:returntype", void 0)
+], ClassroomController.prototype, "addOrator", null);
+__decorate([
+    (0, common_1.Patch)(':id/remove-orator'),
+    (0, swagger_1.ApiOperation)({ summary: 'Remove instructor from classroom' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'Classroom ID' }),
+    (0, swagger_1.ApiBody)({ type: OratorDto }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        schema: {
+            example: {
+                id: 'cls_001',
+                oratorIds: ['instr_001'],
+            },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Classroom or instructor not found' }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, OratorDto]),
+    __metadata("design:returntype", void 0)
 ], ClassroomController.prototype, "removeOrator", null);
 exports.ClassroomController = ClassroomController = __decorate([
     (0, swagger_1.ApiTags)('Classrooms'),
     (0, common_1.Controller)('classroom'),
+    (0, common_1.UsePipes)(new common_1.ValidationPipe({ whitelist: true, transform: true })),
     __metadata("design:paramtypes", [classroom_service_1.ClassroomService])
 ], ClassroomController);
 //# sourceMappingURL=classroom.controller.js.map

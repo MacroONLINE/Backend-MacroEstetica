@@ -39,7 +39,7 @@ async function bootstrap() {
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('api-docs', app, document);
     logger.log('✅ Swagger configurado en /api-docs.');
-    await app.listen(3001);
+    await app.listen(3010);
     logger.log('🚀 Aplicación escuchando en http://localhost:3001');
     logger.log('📡 WebSocket activo en ws://localhost:3001');
 }
