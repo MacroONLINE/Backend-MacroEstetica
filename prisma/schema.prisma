@@ -190,6 +190,7 @@ model Instructor {
   category              Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   empresa               Empresa?       @relation("EmpresaInstructors", fields: [empresaId], references: [id], onDelete: Cascade)
   user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  classrooms            Classroom[]    @relation("ClassroomInstructors")
   streams               EventStream[]  @relation("StreamOrators")
   workshops             Workshop[]     @relation("WorkshopInstructors")
 }
@@ -268,7 +269,7 @@ model Classroom {
   isFree        Boolean               @default(false)
   enrollments   ClassroomEnrollment[]
   attendees     User[]                @relation("ClassroomAttendees")
-  oratorNames   String?               @db.VarChar(500)
+  orators       Instructor[]          @relation("ClassroomInstructors")
 }
 
 model ClassroomEnrollment {
