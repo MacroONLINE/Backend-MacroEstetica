@@ -22,7 +22,7 @@ const selectBase = {
     imageUrl: true,
     channelName: true,
     categories: true,
-    oratorNames: true,
+    orators: { select: { id: true } },
     attendees: { select: { id: true } },
     enrollments: { select: { id: true, userId: true, status: true } },
 };
@@ -33,7 +33,8 @@ let ClassroomService = class ClassroomService {
     async uploadImage(file) {
         if (!file)
             return undefined;
-        return `https://cdn.example.com/uploads/${file.originalname}`;
+        const fakeUrl = `https://cdn.example.com/uploads/${file.originalname}`;
+        return fakeUrl;
     }
     connect(ids) {
         return ids?.length ? { connect: ids.map((id) => ({ id })) } : undefined;
@@ -58,7 +59,7 @@ let ClassroomService = class ClassroomService {
                 channelName: dto.channelName,
                 imageUrl,
                 categories: dto.categories,
-                oratorNames: dto.oratorNames,
+                orators: this.connect(dto.oratorIds),
                 attendees: this.connect(dto.attendeeIds),
             },
             select: selectBase,
@@ -90,7 +91,7 @@ let ClassroomService = class ClassroomService {
                 channelName: dto.channelName,
                 imageUrl,
                 categories: dto.categories ? { set: dto.categories } : undefined,
-                oratorNames: dto.oratorNames,
+                orators: this.set(dto.oratorIds),
                 attendees: this.set(dto.attendeeIds),
             },
             select: selectBase,
@@ -120,6 +121,24 @@ let ClassroomService = class ClassroomService {
         });
         this.markLive(list);
         return list;
+    }
+    async addOrator(classroomId, instructorId) {
+        await this.prisma.classroom.findUniqueOrThrow({ where: { id: classroomId } });
+        await this.prisma.instructor.findUniqueOrThrow({ where: { id: instructorId } });
+        return this.prisma.classroom.update({
+            where: { id: classroomId },
+            data: { orators: { connect: { id: instructorId } } },
+            select: { id: true, orators: { select: { id: true } } },
+        });
+    }
+    async removeOrator(classroomId, instructorId) {
+        await this.prisma.classroom.findUniqueOrThrow({ where: { id: classroomId } });
+        await this.prisma.instructor.findUniqueOrThrow({ where: { id: instructorId } });
+        return this.prisma.classroom.update({
+            where: { id: classroomId },
+            data: { orators: { disconnect: { id: instructorId } } },
+            select: { id: true, orators: { select: { id: true } } },
+        });
     }
 };
 exports.ClassroomService = ClassroomService;

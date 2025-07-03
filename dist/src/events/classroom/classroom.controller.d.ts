@@ -8,65 +8,165 @@ declare class CreateClassroomDto {
     endDateTime: Date;
     channelName?: string;
     categories?: $Enums.Profession[];
-    oratorNames?: string;
+    oratorIds?: string[];
     attendeeIds?: string[];
 }
 declare const UpdateClassroomDto_base: import("@nestjs/mapped-types").MappedType<Partial<CreateClassroomDto>>;
 declare class UpdateClassroomDto extends UpdateClassroomDto_base {
 }
+declare class OratorDto {
+    instructorId: string;
+}
 export declare class ClassroomController {
     private readonly service;
     constructor(service: ClassroomService);
     create(dto: CreateClassroomDto, image?: Express.Multer.File): Promise<{
-        description: string;
-        title: string;
         id: string;
+        title: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        channelName: string | null;
+        channelName: string;
         endDateTime: Date;
-        imageUrl: string | null;
-        price: number | null;
+        imageUrl: string;
+        price: number;
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
+        enrollments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            status: string;
+            classroomId: string;
+        }[];
+        attendees: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            status: boolean;
+            email: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: $Enums.Role;
+            password: string;
+            newsletter: boolean;
+            userSubscription: string | null;
+            profileImageUrl: string | null;
+        }[];
+        orators: {
+            id: string;
+            title: string | null;
+            description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
+            experienceYears: number;
+            certificationsUrl: string;
+            status: string;
+            empresaId: string | null;
+            categoryId: string | null;
+            bannerImage: string | null;
+            followers: number | null;
+            experienceDescription: string;
+            genero: $Enums.Gender | null;
+            validated: boolean | null;
+        }[];
+        _count: {
+            enrollments: number;
+            attendees: number;
+            orators: number;
+        };
     }>;
     update(id: string, dto: UpdateClassroomDto, image?: Express.Multer.File): Promise<{
-        description: string;
-        title: string;
         id: string;
+        title: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        channelName: string | null;
+        channelName: string;
         endDateTime: Date;
-        imageUrl: string | null;
-        price: number | null;
+        imageUrl: string;
+        price: number;
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
+        enrollments: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            status: string;
+            classroomId: string;
+        }[];
+        attendees: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            status: boolean;
+            email: string;
+            firstName: string | null;
+            lastName: string | null;
+            phone: string | null;
+            emailVerified: Date | null;
+            address: string | null;
+            province: string | null;
+            city: string | null;
+            country: string | null;
+            countryCode: string | null;
+            zipCode: string | null;
+            role: $Enums.Role;
+            password: string;
+            newsletter: boolean;
+            userSubscription: string | null;
+            profileImageUrl: string | null;
+        }[];
+        orators: {
+            id: string;
+            title: string | null;
+            description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
+            experienceYears: number;
+            certificationsUrl: string;
+            status: string;
+            empresaId: string | null;
+            categoryId: string | null;
+            bannerImage: string | null;
+            followers: number | null;
+            experienceDescription: string;
+            genero: $Enums.Gender | null;
+            validated: boolean | null;
+        }[];
+        _count: {
+            enrollments: number;
+            attendees: number;
+            orators: number;
+        };
     }>;
     remove(id: string): Promise<{
         message: string;
     }>;
     upcoming(): Promise<{
-        description: string;
-        title: string;
         id: string;
+        title: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        enrollments: {
-            userId: string;
-            status: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            classroomId: string;
-        }[];
-        _count: {
-            enrollments: number;
-            attendees: number;
-            orators: number;
-        };
         channelName: string;
         endDateTime: Date;
         imageUrl: string;
@@ -74,68 +174,68 @@ export declare class ClassroomController {
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
-        orators: {
-            userId: string;
-            type: $Enums.ProfessionType;
-            description: string;
-            title: string | null;
-            profession: $Enums.Profession;
-            bannerImage: string | null;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            validated: boolean | null;
+        enrollments: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            followers: number | null;
-            experienceDescription: string;
-            genero: $Enums.Gender | null;
+            userId: string;
+            status: string;
+            classroomId: string;
         }[];
         attendees: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             status: boolean;
+            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            emailVerified: Date | null;
             address: string | null;
             province: string | null;
             city: string | null;
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            id: string;
-            email: string;
-            emailVerified: Date | null;
             role: $Enums.Role;
             password: string;
-            createdAt: Date;
-            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
             profileImageUrl: string | null;
         }[];
+        orators: {
+            id: string;
+            title: string | null;
+            description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
+            experienceYears: number;
+            certificationsUrl: string;
+            status: string;
+            empresaId: string | null;
+            categoryId: string | null;
+            bannerImage: string | null;
+            followers: number | null;
+            experienceDescription: string;
+            genero: $Enums.Gender | null;
+            validated: boolean | null;
+        }[];
+        _count: {
+            enrollments: number;
+            attendees: number;
+            orators: number;
+        };
     }[]>;
     live(): Promise<{
-        description: string;
-        title: string;
         id: string;
+        title: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        enrollments: {
-            userId: string;
-            status: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            classroomId: string;
-        }[];
-        _count: {
-            enrollments: number;
-            attendees: number;
-            orators: number;
-        };
         channelName: string;
         endDateTime: Date;
         imageUrl: string;
@@ -143,68 +243,68 @@ export declare class ClassroomController {
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
-        orators: {
-            userId: string;
-            type: $Enums.ProfessionType;
-            description: string;
-            title: string | null;
-            profession: $Enums.Profession;
-            bannerImage: string | null;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            validated: boolean | null;
+        enrollments: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            followers: number | null;
-            experienceDescription: string;
-            genero: $Enums.Gender | null;
+            userId: string;
+            status: string;
+            classroomId: string;
         }[];
         attendees: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             status: boolean;
+            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            emailVerified: Date | null;
             address: string | null;
             province: string | null;
             city: string | null;
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            id: string;
-            email: string;
-            emailVerified: Date | null;
             role: $Enums.Role;
             password: string;
-            createdAt: Date;
-            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
             profileImageUrl: string | null;
         }[];
+        orators: {
+            id: string;
+            title: string | null;
+            description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
+            experienceYears: number;
+            certificationsUrl: string;
+            status: string;
+            empresaId: string | null;
+            categoryId: string | null;
+            bannerImage: string | null;
+            followers: number | null;
+            experienceDescription: string;
+            genero: $Enums.Gender | null;
+            validated: boolean | null;
+        }[];
+        _count: {
+            enrollments: number;
+            attendees: number;
+            orators: number;
+        };
     }[]>;
     findOne(id: string): Promise<{
-        description: string;
-        title: string;
         id: string;
+        title: string;
+        description: string;
         createdAt: Date;
         updatedAt: Date;
-        enrollments: {
-            userId: string;
-            status: string;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            classroomId: string;
-        }[];
-        _count: {
-            enrollments: number;
-            attendees: number;
-            orators: number;
-        };
         channelName: string;
         endDateTime: Date;
         imageUrl: string;
@@ -212,47 +312,72 @@ export declare class ClassroomController {
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
-        orators: {
-            userId: string;
-            type: $Enums.ProfessionType;
-            description: string;
-            title: string | null;
-            profession: $Enums.Profession;
-            bannerImage: string | null;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            validated: boolean | null;
+        enrollments: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            followers: number | null;
-            experienceDescription: string;
-            genero: $Enums.Gender | null;
+            userId: string;
+            status: string;
+            classroomId: string;
         }[];
         attendees: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
             status: boolean;
+            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            emailVerified: Date | null;
             address: string | null;
             province: string | null;
             city: string | null;
             country: string | null;
             countryCode: string | null;
             zipCode: string | null;
-            id: string;
-            email: string;
-            emailVerified: Date | null;
             role: $Enums.Role;
             password: string;
-            createdAt: Date;
-            updatedAt: Date;
             newsletter: boolean;
             userSubscription: string | null;
             profileImageUrl: string | null;
+        }[];
+        orators: {
+            id: string;
+            title: string | null;
+            description: string;
+            createdAt: Date;
+            updatedAt: Date;
+            userId: string;
+            profession: $Enums.Profession;
+            type: $Enums.ProfessionType;
+            experienceYears: number;
+            certificationsUrl: string;
+            status: string;
+            empresaId: string | null;
+            categoryId: string | null;
+            bannerImage: string | null;
+            followers: number | null;
+            experienceDescription: string;
+            genero: $Enums.Gender | null;
+            validated: boolean | null;
+        }[];
+        _count: {
+            enrollments: number;
+            attendees: number;
+            orators: number;
+        };
+    }>;
+    addOrator(id: string, dto: OratorDto): Promise<{
+        id: string;
+        orators: {
+            id: string;
+        }[];
+    }>;
+    removeOrator(id: string, dto: OratorDto): Promise<{
+        id: string;
+        orators: {
+            id: string;
         }[];
     }>;
 }

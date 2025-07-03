@@ -58,6 +58,7 @@ export class AgoraController {
       this.prisma.classroom.findUnique({
         where: { channelName },
         include: {
+          orators: { select: { userId: true } },
           enrollments: { select: { userId: true } },
         },
       }),
@@ -80,6 +81,7 @@ export class AgoraController {
       );
     }
 
+    const isInstructor = session.orators.some((o) => o.userId === uid);
     const isEnrolled = session.enrollments.some((e) => e.userId === uid);
     if (!isInstructor && !isEnrolled) {
       throw new ForbiddenException('No tienes acceso a esta sesión como instructor ni como usuario inscrito');
