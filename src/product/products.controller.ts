@@ -98,14 +98,43 @@ async findById(
 }
 
 
-  /* ──────────────── ACTUALIZAR / ELIMINAR ──────────────── */
+   /* ──────────────── ACTUALIZAR / ELIMINAR ──────────────── */
 
-  @Put(':id')
-  @ApiOperation({ summary: 'Actualizar un producto' })
-  @ApiParam({ name: 'id', description: 'ID del producto' })
-  async update(@Param('id') id: string, @Body() dto: UpdateProductDto) {
-    return this.productService.update(id, dto)
-  }
+   @Put(':id')
+   @ApiOperation({ summary: 'Actualizar un producto' })
+   @ApiParam({ name: 'id', description: 'ID del producto' })
+   @ApiBody({
+     description: 'Ejemplo de payload para actualizar un producto',
+     schema: {
+       example: {
+         name: 'Nuevo Nombre del Producto',
+         description: 'Descripción actualizada del producto',
+         lab: 'Laboratorio XYZ',
+         activeIngredients: ['Ingrediente A', 'Ingrediente B'],
+         features: ['Característica 1', 'Característica 2'],
+         benefits: ['Beneficio 1', 'Beneficio 2'],
+         problemAddressed: 'Problema que resuelve',
+         imageMain: 'https://cdn.ejemplo.com/images/main.jpg',
+         imageGallery: [
+           'https://cdn.ejemplo.com/images/1.jpg',
+           'https://cdn.ejemplo.com/images/2.jpg'
+         ],
+         isFeatured: true,
+         isBestSeller: false,
+         isOnSale: false,
+         categoryId: 5,
+         companyId: '123e4567-e89b-12d3-a456-426614174000'
+       }
+     }
+   })
+   @ApiResponse({ status: 200, description: 'Producto actualizado correctamente.' })
+   async update(
+     @Param('id') id: string,
+     @Body() dto: UpdateProductDto
+   ) {
+     return this.productService.update(id, dto)
+   }
+ 
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar un producto' })
