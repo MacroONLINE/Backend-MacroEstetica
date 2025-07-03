@@ -184,6 +184,8 @@ export class MinisiteService {
     }
   }
 
+  // src/empresa/minisite.service.ts
+
   async setupMinisite(
     empresaId: string,
     body: { name: string; description: string; giro: Giro; slogan?: string; slidesMeta: SlideMeta[]; minisiteColor?: string },
@@ -202,35 +204,48 @@ export class MinisiteService {
       where: { empresaId },
       data: { minisiteColor: body.minisiteColor ?? undefined, slogan: body.slogan },
     })
-    const newSlides = files.slides ?? []
-    const plan = await this.plan(empresaId)
-    const limitRow = await this.prisma.planFeature.findUnique({
-      where: { plan_code: { plan, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
-    })
-    if (limitRow?.limit != null && newSlides.length > limitRow.limit)
-      throw new BadRequestException(`Máximo ${limitRow.limit} slides permitidos`)
-    const minisiteId = await this.minisite(empresaId)
-    const existingCount = await this.prisma.minisiteSlide.count({ where: { minisiteId } })
-    await this.prisma.$transaction(async (tx) => {
-      if (existingCount) await tx.minisiteSlide.deleteMany({ where: { minisiteId } })
-      if (newSlides.length) {
-        const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)))
-        const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map((u, idx) => ({
-          minisiteId,
-          imageSrc: u.secure_url,
-          title: body.slidesMeta[idx]?.title ?? '',
-          description: body.slidesMeta[idx]?.description ?? '',
-          cta: body.slidesMeta[idx]?.cta ?? '',
-          order: body.slidesMeta[idx]?.order ?? idx,
-        }))
-        await tx.minisiteSlide.createMany({ data })
-      }
-      await tx.companyUsage.upsert({
-        where: { companyId_code: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
-        update: { used: newSlides.length },
-        create: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS, used: newSlides.length },
+
+    // ✅ **INICIO DE LA CORRECCIÓN**
+    // Solo ejecutar la lógica de reemplazo de slides si se enviaron archivos.
+    if (files.slides) {
+      const newSlides = files.slides
+      const plan = await this.plan(empresaId)
+      const limitRow = await this.prisma.planFeature.findUnique({
+        where: { plan_code: { plan, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
       })
-    })
+
+      if (limitRow?.limit != null && newSlides.length > limitRow.limit)
+        throw new BadRequestException(`Máximo ${limitRow.limit} slides permitidos`)
+
+      const minisiteId = await this.minisite(empresaId)
+
+      await this.prisma.$transaction(async (tx) => {
+        // Ahora es seguro borrar, porque sabemos que la intención es reemplazar.
+        await tx.minisiteSlide.deleteMany({ where: { minisiteId } })
+
+        if (newSlides.length) {
+          const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)))
+          const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map((u, idx) => ({
+            minisiteId,
+            imageSrc: u.secure_url,
+            title: body.slidesMeta[idx]?.title ?? '',
+            description: body.slidesMeta[idx]?.description ?? '',
+            cta: body.slidesMeta[idx]?.cta ?? '',
+            order: body.slidesMeta[idx]?.order ?? idx,
+          }))
+          await tx.minisiteSlide.createMany({ data })
+        }
+
+        // Actualizar el contador de uso también dentro de la condición.
+        await tx.companyUsage.upsert({
+          where: { companyId_code: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
+          update: { used: newSlides.length },
+          create: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS, used: newSlides.length },
+        })
+      })
+    }
+    // ✅ **FIN DE LA CORRECCIÓN**
+
     return { ok: true }
   }
 

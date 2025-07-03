@@ -8,35 +8,35 @@ export declare class MinisiteController {
     getQuota(empresaId: string, code: FeatureCode): Promise<import("./minisite.service").UsageResponse<any>>;
     getObjects(empresaId: string): Promise<Record<import(".prisma/client").$Enums.FeatureCode, any[]>>;
     getObjectsByCode(empresaId: string, code: FeatureCode): Promise<{
-        name: string;
         id: string;
-    }[] | {
         name: string;
+    }[] | {
         id: number;
+        name: string;
     }[] | {
-        title: string;
         id: string;
+        title: string;
     }[] | {
         id: string;
         productId: string;
     }[]>;
     getSetup(empresaId: string): Promise<{
         company: {
+            name: string;
+            title: string;
             minisite: {
                 minisiteColor: string;
                 slogan: string;
             };
-            title: string;
-            name: string;
             giro: import(".prisma/client").$Enums.Giro;
-            profileImage: string;
             location: string;
+            profileImage: string;
         };
         minisiteColor: string;
         slides: {
+            id: string;
             description: string;
             title: string;
-            id: string;
             cta: string;
             imageSrc: string;
             order: number;
@@ -46,14 +46,14 @@ export declare class MinisiteController {
             limit: number;
         };
         banners: {
-            banner: string;
-            description: string;
-            title: string;
-            logo: string;
-            empresaId: string | null;
             id: string;
+            description: string;
             createdAt: Date;
             updatedAt: Date;
+            title: string;
+            empresaId: string | null;
+            logo: string;
+            banner: string;
             date: Date | null;
             cta_url: string | null;
             cta_button_text: string;
@@ -67,13 +67,13 @@ export declare class MinisiteController {
         type: string;
     }[]>;
     getSpecialities(empresaId: string): Promise<{
-        title: string;
         id: string;
+        title: string;
         imageUrl: string;
     }[]>;
     registerSpecialities(empresaId: string, specialitiesMeta: string, images: Express.Multer.File[]): Promise<{
-        title: string;
         id: string;
+        title: string;
         imageUrl: string;
     }[]>;
     uploadVideo(empresaId: string, video: Express.Multer.File): Promise<{
