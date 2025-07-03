@@ -468,7 +468,6 @@ async registerSpecialities(
       case FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL:
         return {
           items: await this.prisma.classroom.findMany({
-            where: { orators: { some: { empresaId } } },
             select: { id: true, title: true },
           }),
           used,

@@ -190,7 +190,6 @@ model Instructor {
   category              Category?      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   empresa               Empresa?       @relation("EmpresaInstructors", fields: [empresaId], references: [id], onDelete: Cascade)
   user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  classrooms            Classroom[]    @relation("ClassroomInstructors")
   streams               EventStream[]  @relation("StreamOrators")
   workshops             Workshop[]     @relation("WorkshopInstructors")
 }
@@ -269,7 +268,7 @@ model Classroom {
   isFree        Boolean               @default(false)
   enrollments   ClassroomEnrollment[]
   attendees     User[]                @relation("ClassroomAttendees")
-  orators       Instructor[]          @relation("ClassroomInstructors")
+  oratorNames   String?               @db.VarChar(500)
 }
 
 model ClassroomEnrollment {
@@ -698,14 +697,13 @@ model Product {
   isOnSale          Boolean?                   @default(false)
   lab               String?
   problemAddressed  String?
-  presentations     String[]    
+  presentations     String[]
   featured          MinisiteFeaturedProduct?   @relation("FeaturedRelation")
   highlightProducts MinisiteHighlightProduct[]
   category          ProductCompanyCategory?    @relation("CategoryProducts", fields: [categoryId], references: [id], onDelete: Cascade)
   offers            MinisiteProductOffer[] // relación a ofertas de minisite
   company           Empresa                    @relation(fields: [companyId], references: [id], onDelete: Cascade)
   reactions         ProductReaction[]
-
 }
 
 model Presentation {
@@ -909,5 +907,5 @@ enum FeatureCode {
   CLASSROOM_TRANSMISSIONS_TOTAL
   HIGHLIGHT_PRODUCTS_TOTAL
   OFFER_PRODUCTS_TOTAL
-  SPECIALITY_IMAGES_TOTAL 
+  SPECIALITY_IMAGES_TOTAL
 }

@@ -35,25 +35,6 @@ export declare class EventsController {
     getOratorsByChannel(channelName: string): Promise<{
         type: string;
         entityId: string;
-        orators: {
-            userId: string;
-            type: import(".prisma/client").$Enums.ProfessionType;
-            description: string;
-            title: string | null;
-            profession: import(".prisma/client").$Enums.Profession;
-            bannerImage: string | null;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            validated: boolean | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            followers: number | null;
-            experienceDescription: string;
-            genero: import(".prisma/client").$Enums.Gender | null;
-        }[];
+        orators: any;
     }>;
 }

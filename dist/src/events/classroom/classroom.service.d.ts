@@ -9,8 +9,8 @@ export interface CreateClassroomDto {
     endDateTime: Date;
     channelName?: string;
     categories?: $Enums.Profession[];
-    oratorIds?: Ids;
     attendeeIds?: Ids;
+    oratorNames?: string;
     image?: Express.Multer.File;
 }
 export interface UpdateClassroomDto extends Partial<CreateClassroomDto> {
@@ -35,19 +35,19 @@ export declare class ClassroomService {
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
+        oratorNames: string;
         enrollments: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
             status: string;
             classroomId: string;
+            userId: string;
         }[];
         attendees: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            status: boolean;
             email: string;
             firstName: string | null;
             lastName: string | null;
@@ -61,34 +61,14 @@ export declare class ClassroomService {
             zipCode: string | null;
             role: $Enums.Role;
             password: string;
+            status: boolean;
             newsletter: boolean;
             userSubscription: string | null;
             profileImageUrl: string | null;
         }[];
-        orators: {
-            id: string;
-            title: string | null;
-            description: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            profession: $Enums.Profession;
-            type: $Enums.ProfessionType;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            bannerImage: string | null;
-            followers: number | null;
-            experienceDescription: string;
-            genero: $Enums.Gender | null;
-            validated: boolean | null;
-        }[];
         _count: {
             enrollments: number;
             attendees: number;
-            orators: number;
         };
     }>;
     getClassroomById(id: string): Promise<{
@@ -104,19 +84,19 @@ export declare class ClassroomService {
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
+        oratorNames: string;
         enrollments: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
             status: string;
             classroomId: string;
+            userId: string;
         }[];
         attendees: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            status: boolean;
             email: string;
             firstName: string | null;
             lastName: string | null;
@@ -130,34 +110,14 @@ export declare class ClassroomService {
             zipCode: string | null;
             role: $Enums.Role;
             password: string;
+            status: boolean;
             newsletter: boolean;
             userSubscription: string | null;
             profileImageUrl: string | null;
         }[];
-        orators: {
-            id: string;
-            title: string | null;
-            description: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            profession: $Enums.Profession;
-            type: $Enums.ProfessionType;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            bannerImage: string | null;
-            followers: number | null;
-            experienceDescription: string;
-            genero: $Enums.Gender | null;
-            validated: boolean | null;
-        }[];
         _count: {
             enrollments: number;
             attendees: number;
-            orators: number;
         };
     }>;
     updateClassroom(id: string, dto: UpdateClassroomDto): Promise<{
@@ -173,19 +133,19 @@ export declare class ClassroomService {
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
+        oratorNames: string;
         enrollments: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
             status: string;
             classroomId: string;
+            userId: string;
         }[];
         attendees: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            status: boolean;
             email: string;
             firstName: string | null;
             lastName: string | null;
@@ -199,34 +159,14 @@ export declare class ClassroomService {
             zipCode: string | null;
             role: $Enums.Role;
             password: string;
+            status: boolean;
             newsletter: boolean;
             userSubscription: string | null;
             profileImageUrl: string | null;
         }[];
-        orators: {
-            id: string;
-            title: string | null;
-            description: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            profession: $Enums.Profession;
-            type: $Enums.ProfessionType;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            bannerImage: string | null;
-            followers: number | null;
-            experienceDescription: string;
-            genero: $Enums.Gender | null;
-            validated: boolean | null;
-        }[];
         _count: {
             enrollments: number;
             attendees: number;
-            orators: number;
         };
     }>;
     deleteClassroom(id: string): Promise<{
@@ -245,19 +185,19 @@ export declare class ClassroomService {
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
+        oratorNames: string;
         enrollments: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
             status: string;
             classroomId: string;
+            userId: string;
         }[];
         attendees: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            status: boolean;
             email: string;
             firstName: string | null;
             lastName: string | null;
@@ -271,34 +211,14 @@ export declare class ClassroomService {
             zipCode: string | null;
             role: $Enums.Role;
             password: string;
+            status: boolean;
             newsletter: boolean;
             userSubscription: string | null;
             profileImageUrl: string | null;
         }[];
-        orators: {
-            id: string;
-            title: string | null;
-            description: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            profession: $Enums.Profession;
-            type: $Enums.ProfessionType;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            bannerImage: string | null;
-            followers: number | null;
-            experienceDescription: string;
-            genero: $Enums.Gender | null;
-            validated: boolean | null;
-        }[];
         _count: {
             enrollments: number;
             attendees: number;
-            orators: number;
         };
     }[]>;
     getLiveClassrooms(): Promise<{
@@ -314,19 +234,19 @@ export declare class ClassroomService {
         startDateTime: Date;
         categories: $Enums.Profession[];
         isFree: boolean;
+        oratorNames: string;
         enrollments: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            userId: string;
             status: string;
             classroomId: string;
+            userId: string;
         }[];
         attendees: {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            status: boolean;
             email: string;
             firstName: string | null;
             lastName: string | null;
@@ -340,47 +260,15 @@ export declare class ClassroomService {
             zipCode: string | null;
             role: $Enums.Role;
             password: string;
+            status: boolean;
             newsletter: boolean;
             userSubscription: string | null;
             profileImageUrl: string | null;
         }[];
-        orators: {
-            id: string;
-            title: string | null;
-            description: string;
-            createdAt: Date;
-            updatedAt: Date;
-            userId: string;
-            profession: $Enums.Profession;
-            type: $Enums.ProfessionType;
-            experienceYears: number;
-            certificationsUrl: string;
-            status: string;
-            empresaId: string | null;
-            categoryId: string | null;
-            bannerImage: string | null;
-            followers: number | null;
-            experienceDescription: string;
-            genero: $Enums.Gender | null;
-            validated: boolean | null;
-        }[];
         _count: {
             enrollments: number;
             attendees: number;
-            orators: number;
         };
     }[]>;
-    addOrator(classroomId: string, instructorId: string): Promise<{
-        id: string;
-        orators: {
-            id: string;
-        }[];
-    }>;
-    removeOrator(classroomId: string, instructorId: string): Promise<{
-        id: string;
-        orators: {
-            id: string;
-        }[];
-    }>;
 }
 export {};
