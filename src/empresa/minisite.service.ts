@@ -188,66 +188,91 @@ export class MinisiteService {
 
   async setupMinisite(
     empresaId: string,
-    body: { name: string; description: string; giro: Giro; slogan?: string; slidesMeta: SlideMeta[]; minisiteColor?: string },
+    body: {
+      name: string;
+      description: string;
+      giro: Giro;
+      slogan?: string;
+      slidesMeta: SlideMeta[];
+      minisiteColor?: string;
+    },
     files: { logo?: Express.Multer.File; slides?: Express.Multer.File[] },
   ) {
-    let logoUrl: string | undefined
+    // 1) Subida del logo si viene
+    let logoUrl: string | undefined;
     if (files.logo) {
-      const res: UploadApiResponse = await this.cloud.uploadImage(files.logo)
-      logoUrl = res.secure_url
+      const res: UploadApiResponse = await this.cloud.uploadImage(files.logo);
+      logoUrl = res.secure_url;
     }
+  
+    // 2) Actualizar datos de la empresa y minisite
     await this.prisma.empresa.update({
       where: { id: empresaId },
-      data: { name: body.name, profileImage: logoUrl, title: body.slogan, location: body.description, giro: body.giro },
-    })
+      data: {
+        name: body.name,
+        profileImage: logoUrl,
+        title: body.slogan,
+        location: body.description,
+        giro: body.giro,
+      },
+    });
     await this.prisma.minisite.update({
       where: { empresaId },
-      data: { minisiteColor: body.minisiteColor ?? undefined, slogan: body.slogan },
-    })
-
-    // ✅ **INICIO DE LA CORRECCIÓN**
-    // Solo ejecutar la lógica de reemplazo de slides si se enviaron archivos.
-    if (files.slides) {
-      const newSlides = files.slides
-      const plan = await this.plan(empresaId)
+      data: {
+        minisiteColor: body.minisiteColor ?? undefined,
+        slogan: body.slogan,
+      },
+    });
+  
+    // 3) Preparar slides nuevos
+    const newSlides = files.slides ?? [];
+  
+    // 4) Chequeo de cuota si vienen slides
+    if (newSlides.length) {
+      const plan = await this.plan(empresaId);
       const limitRow = await this.prisma.planFeature.findUnique({
         where: { plan_code: { plan, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
-      })
-
-      if (limitRow?.limit != null && newSlides.length > limitRow.limit)
-        throw new BadRequestException(`Máximo ${limitRow.limit} slides permitidos`)
-
-      const minisiteId = await this.minisite(empresaId)
-
-      await this.prisma.$transaction(async (tx) => {
-        // Ahora es seguro borrar, porque sabemos que la intención es reemplazar.
-        await tx.minisiteSlide.deleteMany({ where: { minisiteId } })
-
-        if (newSlides.length) {
-          const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)))
-          const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map((u, idx) => ({
-            minisiteId,
-            imageSrc: u.secure_url,
-            title: body.slidesMeta[idx]?.title ?? '',
-            description: body.slidesMeta[idx]?.description ?? '',
-            cta: body.slidesMeta[idx]?.cta ?? '',
-            order: body.slidesMeta[idx]?.order ?? idx,
-          }))
-          await tx.minisiteSlide.createMany({ data })
+      });
+      if (limitRow?.limit != null && newSlides.length > limitRow.limit) {
+        throw new BadRequestException(`Máximo ${limitRow.limit} slides permitidos`);
+      }
+    }
+  
+    const minisiteId = await this.minisite(empresaId);
+    const existingCount = await this.prisma.minisiteSlide.count({ where: { minisiteId } });
+  
+    // 5) Transacción: solo borrar/crear slides si hay archivos nuevos
+    await this.prisma.$transaction(async (tx) => {
+      if (newSlides.length) {
+        // Eliminar las existentes
+        if (existingCount) {
+          await tx.minisiteSlide.deleteMany({ where: { minisiteId } });
         }
-
-        // Actualizar el contador de uso también dentro de la condición.
+  
+        // Subir y crear las nuevas
+        const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)));
+        const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map((u, idx) => ({
+          minisiteId,
+          imageSrc: u.secure_url,
+          title: body.slidesMeta[idx]?.title ?? '',
+          description: body.slidesMeta[idx]?.description ?? '',
+          cta: body.slidesMeta[idx]?.cta ?? '',
+          order: body.slidesMeta[idx]?.order ?? idx,
+        }));
+        await tx.minisiteSlide.createMany({ data });
+  
+        // Actualizar el contador de uso
         await tx.companyUsage.upsert({
           where: { companyId_code: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
           update: { used: newSlides.length },
           create: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS, used: newSlides.length },
-        })
-      })
-    }
-    // ✅ **FIN DE LA CORRECCIÓN**
-
-    return { ok: true }
+        });
+      }
+    });
+  
+    return { ok: true };
   }
+  
 
   async bulkUpsertProductsIndexed(
     empresaId: string,

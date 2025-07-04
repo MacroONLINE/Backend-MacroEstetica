@@ -128,42 +128,55 @@ let MinisiteService = class MinisiteService {
         }
         await this.prisma.empresa.update({
             where: { id: empresaId },
-            data: { name: body.name, profileImage: logoUrl, title: body.slogan, location: body.description, giro: body.giro },
+            data: {
+                name: body.name,
+                profileImage: logoUrl,
+                title: body.slogan,
+                location: body.description,
+                giro: body.giro,
+            },
         });
         await this.prisma.minisite.update({
             where: { empresaId },
-            data: { minisiteColor: body.minisiteColor ?? undefined, slogan: body.slogan },
+            data: {
+                minisiteColor: body.minisiteColor ?? undefined,
+                slogan: body.slogan,
+            },
         });
-        if (files.slides) {
-            const newSlides = files.slides;
+        const newSlides = files.slides ?? [];
+        if (newSlides.length) {
             const plan = await this.plan(empresaId);
             const limitRow = await this.prisma.planFeature.findUnique({
                 where: { plan_code: { plan, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
             });
-            if (limitRow?.limit != null && newSlides.length > limitRow.limit)
+            if (limitRow?.limit != null && newSlides.length > limitRow.limit) {
                 throw new common_1.BadRequestException(`Máximo ${limitRow.limit} slides permitidos`);
-            const minisiteId = await this.minisite(empresaId);
-            await this.prisma.$transaction(async (tx) => {
-                await tx.minisiteSlide.deleteMany({ where: { minisiteId } });
-                if (newSlides.length) {
-                    const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)));
-                    const data = uploads.map((u, idx) => ({
-                        minisiteId,
-                        imageSrc: u.secure_url,
-                        title: body.slidesMeta[idx]?.title ?? '',
-                        description: body.slidesMeta[idx]?.description ?? '',
-                        cta: body.slidesMeta[idx]?.cta ?? '',
-                        order: body.slidesMeta[idx]?.order ?? idx,
-                    }));
-                    await tx.minisiteSlide.createMany({ data });
+            }
+        }
+        const minisiteId = await this.minisite(empresaId);
+        const existingCount = await this.prisma.minisiteSlide.count({ where: { minisiteId } });
+        await this.prisma.$transaction(async (tx) => {
+            if (newSlides.length) {
+                if (existingCount) {
+                    await tx.minisiteSlide.deleteMany({ where: { minisiteId } });
                 }
+                const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)));
+                const data = uploads.map((u, idx) => ({
+                    minisiteId,
+                    imageSrc: u.secure_url,
+                    title: body.slidesMeta[idx]?.title ?? '',
+                    description: body.slidesMeta[idx]?.description ?? '',
+                    cta: body.slidesMeta[idx]?.cta ?? '',
+                    order: body.slidesMeta[idx]?.order ?? idx,
+                }));
+                await tx.minisiteSlide.createMany({ data });
                 await tx.companyUsage.upsert({
                     where: { companyId_code: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
                     update: { used: newSlides.length },
                     create: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS, used: newSlides.length },
                 });
-            });
-        }
+            }
+        });
         return { ok: true };
     }
     async bulkUpsertProductsIndexed(empresaId, meta, files) {
