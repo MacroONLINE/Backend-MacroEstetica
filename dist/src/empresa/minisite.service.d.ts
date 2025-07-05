@@ -154,5 +154,8 @@ export declare class MinisiteService {
     upsertMinisiteVideo(empresaId: string, file: Express.Multer.File): Promise<{
         videoUrl: string;
     }>;
+    getMinisiteVideo(minisiteId: string): Promise<{
+        videoUrl: string;
+    }>;
 }
 export {};

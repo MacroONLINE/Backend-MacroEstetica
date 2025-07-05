@@ -40,6 +40,9 @@ let CategoryController = class CategoryController {
     findAllByEmpresa(empresaId) {
         return this.categoryService.findAllByEmpresa(empresaId);
     }
+    findCategoriesByEmpresa(empresaId) {
+        return this.categoryService.findCategoriesByEmpresa(empresaId);
+    }
 };
 exports.CategoryController = CategoryController;
 __decorate([
@@ -67,7 +70,7 @@ __decorate([
 ], CategoryController.prototype, "findOne", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Actualizar una categoría' }),
-    (0, common_1.Patch)(':id'),
+    (0, common_1.Put)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -90,6 +93,34 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], CategoryController.prototype, "findAllByEmpresa", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener categorías de una empresa (sin productos)' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', description: 'ID de la empresa', example: 'company-001' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Listado de categorías',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    name: 'Cosmiatría y Cosmetología',
+                    bannerImageUrl: 'https://example.com/images/banner.jpg',
+                    miniSiteImageUrl: 'https://example.com/images/minisite.jpg'
+                },
+                {
+                    id: 2,
+                    name: 'Dermatología Avanzada',
+                    bannerImageUrl: 'https://example.com/images/banner2.jpg',
+                    miniSiteImageUrl: 'https://example.com/images/minisite2.jpg'
+                }
+            ]
+        }
+    }),
+    (0, common_1.Get)('empresa/:empresaId/categories'),
+    __param(0, (0, common_1.Param)('empresaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], CategoryController.prototype, "findCategoriesByEmpresa", null);
 exports.CategoryController = CategoryController = __decorate([
     (0, swagger_1.ApiTags)('product-categories'),
     (0, common_1.Controller)('product/categories'),

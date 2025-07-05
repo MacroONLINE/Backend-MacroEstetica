@@ -42,16 +42,34 @@ let MinisiteController = class MinisiteController {
         return this.minisite.getMinisiteSetup(empresaId);
     }
     async setup(empresaId, body, files) {
-        this.logger.verbose(`PUT /minisite/${empresaId}/setup payload: ${JSON.stringify(body)}`);
-        const logo = files.find((f) => f.fieldname === 'logo');
-        const slides = files.filter((f) => f.fieldname === 'slides');
-        const slidesMeta = body.slidesMeta ? JSON.parse(body.slidesMeta) : [];
+        const logo = files.find(f => f.fieldname === 'logo');
+        const indexed = {};
+        const plain = [];
+        files
+            .filter(f => f !== logo)
+            .forEach(f => {
+            const m = /slides(?:\D+)?(\d+)/.exec(f.fieldname);
+            if (m)
+                indexed[Number(m[1])] = f;
+            else
+                plain.push(f);
+        });
+        const slides = [
+            ...Object.keys(indexed)
+                .map(Number)
+                .sort((a, b) => a - b)
+                .map(i => indexed[i]),
+            ...plain,
+        ];
+        this.logger.debug(`files logo=${logo ? logo.originalname : '∅'} slides=[${slides
+            .map(f => `${f.fieldname}:${f.originalname}`)
+            .join(', ')}]`);
         return this.minisite.setupMinisite(empresaId, {
             name: body.name,
             description: body.description,
             giro: body.giro,
             slogan: body.slogan,
-            slidesMeta,
+            slidesMeta: body.slidesMeta ? JSON.parse(body.slidesMeta) : [],
             minisiteColor: body.minisiteColor,
         }, { logo, slides });
     }
@@ -81,6 +99,9 @@ let MinisiteController = class MinisiteController {
     }
     async uploadVideo(empresaId, video) {
         return this.minisite.upsertMinisiteVideo(empresaId, video);
+    }
+    async getVideo(minisiteId) {
+        return this.minisite.getMinisiteVideo(minisiteId);
     }
 };
 exports.MinisiteController = MinisiteController;
@@ -432,6 +453,22 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], MinisiteController.prototype, "uploadVideo", null);
+__decorate([
+    (0, common_1.Get)(':minisiteId/video'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener URL de video del minisite' }),
+    (0, swagger_1.ApiParam)({ name: 'minisiteId', description: 'ID del minisite', example: 'ms_01HTX3C21TEY5Q9Y25E4ARQ1KZ' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        schema: {
+            example: { videoUrl: 'https://cdn.example.com/videos/intro.mp4' },
+        },
+    }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Minisite no encontrado o sin video' }),
+    __param(0, (0, common_1.Param)('minisiteId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], MinisiteController.prototype, "getVideo", null);
 exports.MinisiteController = MinisiteController = __decorate([
     (0, swagger_1.ApiTags)('Minisite'),
     (0, swagger_1.ApiBearerAuth)(),

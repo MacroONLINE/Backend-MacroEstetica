@@ -9,11 +9,11 @@ export declare class CategoryController {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -24,11 +24,11 @@ export declare class CategoryController {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -39,11 +39,11 @@ export declare class CategoryController {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -54,11 +54,11 @@ export declare class CategoryController {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -69,31 +69,28 @@ export declare class CategoryController {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
     findAllByEmpresa(empresaId: string): Promise<({
-        company: {
-            logo: string;
-        };
         products: {
-            description: string;
-            name: string;
-            categoryId: number | null;
             id: string;
+            name: string;
+            companyId: string;
             createdAt: Date;
             updatedAt: Date;
+            description: string;
             isFeatured: boolean | null;
-            companyId: string;
             activeIngredients: string[];
             benefits: string[];
+            categoryId: number | null;
             features: string[];
             imageGallery: string[];
             imageMain: string | null;
@@ -103,15 +100,24 @@ export declare class CategoryController {
             problemAddressed: string | null;
             presentations: string[];
         }[];
+        company: {
+            logo: string;
+        };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
     })[]>;
+    findCategoriesByEmpresa(empresaId: string): Promise<{
+        id: number;
+        name: string;
+        bannerImageUrl: string;
+        miniSiteImageUrl: string;
+    }[]>;
 }

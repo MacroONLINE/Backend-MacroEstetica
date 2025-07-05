@@ -97,4 +97,23 @@ export class CategoryService {
       },
     });
   }
+
+  async findCategoriesByEmpresa(empresaId: string) {
+    return this.prisma.productCompanyCategory.findMany({
+      where: { companyId: empresaId },
+      select: {
+        id: true,
+        name: true,
+        bannerImageUrl: true,
+        miniSiteImageUrl: true
+      }
+    });
+  }
+
+
+
+
+
 }
+
+

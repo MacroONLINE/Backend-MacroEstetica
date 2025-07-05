@@ -96,6 +96,17 @@ let CategoryService = class CategoryService {
             },
         });
     }
+    async findCategoriesByEmpresa(empresaId) {
+        return this.prisma.productCompanyCategory.findMany({
+            where: { companyId: empresaId },
+            select: {
+                id: true,
+                name: true,
+                bannerImageUrl: true,
+                miniSiteImageUrl: true
+            }
+        });
+    }
 };
 exports.CategoryService = CategoryService;
 exports.CategoryService = CategoryService = __decorate([

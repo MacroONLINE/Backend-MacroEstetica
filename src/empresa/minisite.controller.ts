@@ -22,10 +22,11 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiResponse,
   ApiTags,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { AnyFilesInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { Giro, FeatureCode } from '@prisma/client';
 import { BulkProductMeta, MinisiteService } from './minisite.service';
 import { UsageResponseDto } from './dto/minisite-quota.dto';
@@ -151,48 +152,75 @@ export class MinisiteController {
   }
 
   @ApiOperation({ summary: 'Configurar datos generales, color, logo y slides' })
-  @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['name', 'description', 'giro', 'slidesMeta'],
-      properties: {
-        name: { type: 'string' },
-        description: { type: 'string' },
-        giro: { type: 'string', enum: Object.values(Giro) },
-        slogan: { type: 'string' },
-        minisiteColor: { type: 'string' },
-        slidesMeta: { type: 'string' },
-        logo: { type: 'string', format: 'binary' },
-        slides: { type: 'array', items: { type: 'string', format: 'binary' } },
-      },
+@ApiConsumes('multipart/form-data')
+@ApiParam({ name: 'empresaId', example: 'company-001' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    required: ['name', 'description', 'giro', 'slidesMeta'],
+    properties: {
+      name: { type: 'string' },
+      description: { type: 'string' },
+      giro: { type: 'string', enum: Object.values(Giro) },
+      slogan: { type: 'string' },
+      minisiteColor: { type: 'string' },
+      slidesMeta: { type: 'string' },
+      logo: { type: 'string', format: 'binary' },
+      slides: { type: 'array', items: { type: 'string', format: 'binary' } },
     },
-  })
-  @UseInterceptors(AnyFilesInterceptor())
-  @Put(':empresaId/setup')
-  async setup(
-    @Param('empresaId') empresaId: string,
-    @Body() body: any,
-    @UploadedFiles() files: Express.Multer.File[],
-  ) {
-    this.logger.verbose(`PUT /minisite/${empresaId}/setup payload: ${JSON.stringify(body)}`);
-    const logo = files.find((f) => f.fieldname === 'logo');
-    const slides = files.filter((f) => f.fieldname === 'slides');
-    const slidesMeta = body.slidesMeta ? JSON.parse(body.slidesMeta) : [];
-    return this.minisite.setupMinisite(
-      empresaId,
-      {
-        name: body.name,
-        description: body.description,
-        giro: body.giro as Giro,
-        slogan: body.slogan,
-        slidesMeta,
-        minisiteColor: body.minisiteColor,
-      },
-      { logo, slides },
-    );
-  }
+  },
+})
+// minisite.controller.ts  – solo este handler cambia
+@UseInterceptors(AnyFilesInterceptor())
+@Put(':empresaId/setup')
+async setup(
+  @Param('empresaId') empresaId: string,
+  @Body() body: any,
+  @UploadedFiles() files: Express.Multer.File[],
+) {
+  const logo = files.find(f => f.fieldname === 'logo')
+
+  const indexed: Record<number, Express.Multer.File> = {}
+  const plain: Express.Multer.File[] = []
+
+  files
+    .filter(f => f !== logo)
+    .forEach(f => {
+      const m = /slides(?:\D+)?(\d+)/.exec(f.fieldname)
+      if (m) indexed[Number(m[1])] = f
+      else plain.push(f)
+    })
+
+  const slides = [
+    ...Object.keys(indexed)
+      .map(Number)
+      .sort((a, b) => a - b)
+      .map(i => indexed[i]),
+    ...plain,
+  ]
+
+  this.logger.debug(
+    `files logo=${logo ? logo.originalname : '∅'} slides=[${slides
+      .map(f => `${f.fieldname}:${f.originalname}`)
+      .join(', ')}]`,
+  )
+
+  return this.minisite.setupMinisite(
+    empresaId,
+    {
+      name: body.name,
+      description: body.description,
+      giro: body.giro as Giro,
+      slogan: body.slogan,
+      slidesMeta: body.slidesMeta ? JSON.parse(body.slidesMeta) : [],
+      minisiteColor: body.minisiteColor,
+    },
+    { logo, slides },
+  )
+}
+
+
+
 
   @ApiOperation({
     summary: 'Bulk-upsert de productos (NORMAL, FEATURED, HIGHLIGHT u OFFER)',
@@ -417,4 +445,31 @@ async uploadVideo(
 ) {
   return this.minisite.upsertMinisiteVideo(empresaId, video)
 }
+
+
+
+@Get(':minisiteId/video')
+@ApiOperation({ summary: 'Obtener URL de video del minisite' })
+@ApiParam({ name: 'minisiteId', description: 'ID del minisite', example: 'ms_01HTX3C21TEY5Q9Y25E4ARQ1KZ' })
+@ApiResponse({
+  status: 200,
+  schema: {
+    example: { videoUrl: 'https://cdn.example.com/videos/intro.mp4' },
+  },
+})
+@ApiResponse({ status: 404, description: 'Minisite no encontrado o sin video' })
+async getVideo(@Param('minisiteId') minisiteId: string) {
+  return this.minisite.getMinisiteVideo(minisiteId)
 }
+
+
+
+
+
+
+
+
+
+
+}
+

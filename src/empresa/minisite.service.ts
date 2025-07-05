@@ -185,27 +185,28 @@ export class MinisiteService {
   }
 
   // src/empresa/minisite.service.ts
-
   async setupMinisite(
     empresaId: string,
     body: {
-      name: string;
-      description: string;
-      giro: Giro;
-      slogan?: string;
-      slidesMeta: SlideMeta[];
-      minisiteColor?: string;
+      name: string
+      description: string
+      giro: Giro
+      slogan?: string
+      slidesMeta: SlideMeta[]
+      minisiteColor?: string
     },
     files: { logo?: Express.Multer.File; slides?: Express.Multer.File[] },
   ) {
-    // 1) Subida del logo si viene
-    let logoUrl: string | undefined;
+    this.log.verbose(`setupMinisite → empresa=${empresaId}`)
+    const metaCount = Array.isArray(body.slidesMeta) ? body.slidesMeta.length : 0
+    this.log.debug(`metaCount=${metaCount}`)
+  
+    let logoUrl: string | undefined
     if (files.logo) {
-      const res: UploadApiResponse = await this.cloud.uploadImage(files.logo);
-      logoUrl = res.secure_url;
+      const res = await this.cloud.uploadImage(files.logo)
+      logoUrl = res.secure_url
     }
   
-    // 2) Actualizar datos de la empresa y minisite
     await this.prisma.empresa.update({
       where: { id: empresaId },
       data: {
@@ -215,63 +216,67 @@ export class MinisiteService {
         location: body.description,
         giro: body.giro,
       },
-    });
+    })
+  
     await this.prisma.minisite.update({
       where: { empresaId },
-      data: {
-        minisiteColor: body.minisiteColor ?? undefined,
-        slogan: body.slogan,
-      },
-    });
+      data: { minisiteColor: body.minisiteColor ?? undefined, slogan: body.slogan },
+    })
   
-    // 3) Preparar slides nuevos
-    const newSlides = files.slides ?? [];
-  
-    // 4) Chequeo de cuota si vienen slides
-    if (newSlides.length) {
-      const plan = await this.plan(empresaId);
-      const limitRow = await this.prisma.planFeature.findUnique({
-        where: { plan_code: { plan, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
-      });
-      if (limitRow?.limit != null && newSlides.length > limitRow.limit) {
-        throw new BadRequestException(`Máximo ${limitRow.limit} slides permitidos`);
-      }
+    const newSlides = files.slides ?? []
+    if (newSlides.length > metaCount) {
+      throw new BadRequestException('Demasiados archivos para slidesMeta')
+    }
+    const plan = await this.plan(empresaId)
+    const limitRow = await this.prisma.planFeature.findUnique({
+      where: { plan_code: { plan, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
+    })
+    if (limitRow?.limit != null && metaCount > limitRow.limit) {
+      throw new BadRequestException(`Máximo ${limitRow.limit} slides permitidos`)
     }
   
-    const minisiteId = await this.minisite(empresaId);
-    const existingCount = await this.prisma.minisiteSlide.count({ where: { minisiteId } });
+    const minisiteId = await this.minisite(empresaId)
   
-    // 5) Transacción: solo borrar/crear slides si hay archivos nuevos
     await this.prisma.$transaction(async (tx) => {
-      if (newSlides.length) {
-        // Eliminar las existentes
-        if (existingCount) {
-          await tx.minisiteSlide.deleteMany({ where: { minisiteId } });
-        }
+      const existing = await tx.minisiteSlide.findMany({
+        where: { minisiteId },
+        orderBy: { order: 'asc' },
+      })
   
-        // Subir y crear las nuevas
-        const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)));
-        const data: Prisma.MinisiteSlideUncheckedCreateInput[] = uploads.map((u, idx) => ({
-          minisiteId,
-          imageSrc: u.secure_url,
-          title: body.slidesMeta[idx]?.title ?? '',
-          description: body.slidesMeta[idx]?.description ?? '',
-          cta: body.slidesMeta[idx]?.cta ?? '',
-          order: body.slidesMeta[idx]?.order ?? idx,
-        }));
-        await tx.minisiteSlide.createMany({ data });
+const uploads: Record<number, string> = {}
+await Promise.all(
+  newSlides.map(async (f, pos) => {
+    const url = (await this.cloud.uploadImage(f)).secure_url
+    this.log.debug(`uploaded idx=${pos} name=${f.originalname} url=${url}`)
+    uploads[pos] = url
+  }),
+)
+
+const data = body.slidesMeta.map((m, idx) => ({
+  minisiteId,
+  imageSrc: uploads[idx] ?? '',
+  title: m.title ?? '',
+  description: m.description ?? '',
+  cta: m.cta ?? '',
+  order: m.order ?? idx,
+}))
   
-        // Actualizar el contador de uso
-        await tx.companyUsage.upsert({
-          where: { companyId_code: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
-          update: { used: newSlides.length },
-          create: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS, used: newSlides.length },
-        });
-      }
-    });
+      await tx.minisiteSlide.deleteMany({ where: { minisiteId } })
+      await tx.minisiteSlide.createMany({ data })
   
-    return { ok: true };
+      await tx.companyUsage.upsert({
+        where: { companyId_code: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS } },
+        update: { used: metaCount },
+        create: { companyId: empresaId, code: FeatureCode.BANNER_PRODUCT_SLOTS, used: metaCount },
+      })
+    })
+  
+    this.log.verbose('setupMinisite ← ok')
+    return { ok: true }
   }
+  
+  
+  
   
 
   async bulkUpsertProductsIndexed(
@@ -537,4 +542,17 @@ async registerSpecialities(
     })
     return { videoUrl: uploaded.secure_url }
   }
+
+
+
+  async getMinisiteVideo(minisiteId: string): Promise<{ videoUrl: string }> {
+    const minisite = await this.prisma.minisite.findUnique({
+      where: { id: minisiteId },
+      select: { videoUrl: true },
+    })
+    if (!minisite) throw new NotFoundException('Minisite no encontrado')
+    if (!minisite.videoUrl) throw new NotFoundException('No hay video cargado para este minisite')
+    return { videoUrl: minisite.videoUrl }
+  }
+
 }

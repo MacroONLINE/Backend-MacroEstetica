@@ -121,6 +121,9 @@ let MinisiteService = class MinisiteService {
         };
     }
     async setupMinisite(empresaId, body, files) {
+        this.log.verbose(`setupMinisite → empresa=${empresaId}`);
+        const metaCount = Array.isArray(body.slidesMeta) ? body.slidesMeta.length : 0;
+        this.log.debug(`metaCount=${metaCount}`);
         let logoUrl;
         if (files.logo) {
             const res = await this.cloud.uploadImage(files.logo);
@@ -138,45 +141,48 @@ let MinisiteService = class MinisiteService {
         });
         await this.prisma.minisite.update({
             where: { empresaId },
-            data: {
-                minisiteColor: body.minisiteColor ?? undefined,
-                slogan: body.slogan,
-            },
+            data: { minisiteColor: body.minisiteColor ?? undefined, slogan: body.slogan },
         });
         const newSlides = files.slides ?? [];
-        if (newSlides.length) {
-            const plan = await this.plan(empresaId);
-            const limitRow = await this.prisma.planFeature.findUnique({
-                where: { plan_code: { plan, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
-            });
-            if (limitRow?.limit != null && newSlides.length > limitRow.limit) {
-                throw new common_1.BadRequestException(`Máximo ${limitRow.limit} slides permitidos`);
-            }
+        if (newSlides.length > metaCount) {
+            throw new common_1.BadRequestException('Demasiados archivos para slidesMeta');
+        }
+        const plan = await this.plan(empresaId);
+        const limitRow = await this.prisma.planFeature.findUnique({
+            where: { plan_code: { plan, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
+        });
+        if (limitRow?.limit != null && metaCount > limitRow.limit) {
+            throw new common_1.BadRequestException(`Máximo ${limitRow.limit} slides permitidos`);
         }
         const minisiteId = await this.minisite(empresaId);
-        const existingCount = await this.prisma.minisiteSlide.count({ where: { minisiteId } });
         await this.prisma.$transaction(async (tx) => {
-            if (newSlides.length) {
-                if (existingCount) {
-                    await tx.minisiteSlide.deleteMany({ where: { minisiteId } });
-                }
-                const uploads = await Promise.all(newSlides.map((f) => this.cloud.uploadImage(f)));
-                const data = uploads.map((u, idx) => ({
-                    minisiteId,
-                    imageSrc: u.secure_url,
-                    title: body.slidesMeta[idx]?.title ?? '',
-                    description: body.slidesMeta[idx]?.description ?? '',
-                    cta: body.slidesMeta[idx]?.cta ?? '',
-                    order: body.slidesMeta[idx]?.order ?? idx,
-                }));
-                await tx.minisiteSlide.createMany({ data });
-                await tx.companyUsage.upsert({
-                    where: { companyId_code: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
-                    update: { used: newSlides.length },
-                    create: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS, used: newSlides.length },
-                });
-            }
+            const existing = await tx.minisiteSlide.findMany({
+                where: { minisiteId },
+                orderBy: { order: 'asc' },
+            });
+            const uploads = {};
+            await Promise.all(newSlides.map(async (f, pos) => {
+                const url = (await this.cloud.uploadImage(f)).secure_url;
+                this.log.debug(`uploaded idx=${pos} name=${f.originalname} url=${url}`);
+                uploads[pos] = url;
+            }));
+            const data = body.slidesMeta.map((m, idx) => ({
+                minisiteId,
+                imageSrc: uploads[idx] ?? '',
+                title: m.title ?? '',
+                description: m.description ?? '',
+                cta: m.cta ?? '',
+                order: m.order ?? idx,
+            }));
+            await tx.minisiteSlide.deleteMany({ where: { minisiteId } });
+            await tx.minisiteSlide.createMany({ data });
+            await tx.companyUsage.upsert({
+                where: { companyId_code: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
+                update: { used: metaCount },
+                create: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS, used: metaCount },
+            });
         });
+        this.log.verbose('setupMinisite ← ok');
         return { ok: true };
     }
     async bulkUpsertProductsIndexed(empresaId, meta, files) {
@@ -422,6 +428,17 @@ let MinisiteService = class MinisiteService {
             data: { videoUrl: uploaded.secure_url },
         });
         return { videoUrl: uploaded.secure_url };
+    }
+    async getMinisiteVideo(minisiteId) {
+        const minisite = await this.prisma.minisite.findUnique({
+            where: { id: minisiteId },
+            select: { videoUrl: true },
+        });
+        if (!minisite)
+            throw new common_1.NotFoundException('Minisite no encontrado');
+        if (!minisite.videoUrl)
+            throw new common_1.NotFoundException('No hay video cargado para este minisite');
+        return { videoUrl: minisite.videoUrl };
     }
 };
 exports.MinisiteService = MinisiteService;
