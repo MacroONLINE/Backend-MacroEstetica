@@ -1,5 +1,4 @@
-// src/classroom/classroom.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common'
 import { Prisma, $Enums } from '@prisma/client'
 import { PrismaService } from 'src/prisma/prisma.service'
 import { Express } from 'express'
@@ -12,6 +11,7 @@ export interface CreateClassroomDto {
   price: number
   startDateTime: Date
   endDateTime: Date
+  empresaId: string
   channelName?: string
   categories?: $Enums.Profession[]
   oratorIds?: Ids
@@ -31,6 +31,7 @@ const selectBase: Prisma.ClassroomSelect = {
   imageUrl: true,
   channelName: true,
   categories: true,
+  empresaId: true,
   orators: { select: { id: true } },
   attendees: { select: { id: true } },
   enrollments: { select: { id: true, userId: true, status: true } },
@@ -64,6 +65,9 @@ export class ClassroomService {
   }
 
   async createClassroom(dto: CreateClassroomDto) {
+    const empresaExists = await this.prisma.empresa.findUnique({ where: { id: dto.empresaId } })
+    if (!empresaExists) throw new BadRequestException('Empresa no encontrada')
+
     const imageUrl = await this.uploadImage(dto.image)
     const created = await this.prisma.classroom.create({
       data: {
@@ -75,6 +79,7 @@ export class ClassroomService {
         channelName: dto.channelName,
         imageUrl,
         categories: dto.categories,
+        empresaId: dto.empresaId,
         orators: this.connect(dto.oratorIds),
         attendees: this.connect(dto.attendeeIds),
       },
@@ -96,6 +101,12 @@ export class ClassroomService {
 
   async updateClassroom(id: string, dto: UpdateClassroomDto) {
     await this.prisma.classroom.findUniqueOrThrow({ where: { id } })
+
+    if (dto.empresaId) {
+      const empresaExists = await this.prisma.empresa.findUnique({ where: { id: dto.empresaId } })
+      if (!empresaExists) throw new BadRequestException('Empresa no encontrada')
+    }
+
     const imageUrl = dto.image ? await this.uploadImage(dto.image) : undefined
     const updated = await this.prisma.classroom.update({
       where: { id },
@@ -108,6 +119,7 @@ export class ClassroomService {
         channelName: dto.channelName,
         imageUrl,
         categories: dto.categories ? { set: dto.categories } : undefined,
+        empresaId: dto.empresaId,
         orators: this.set(dto.oratorIds),
         attendees: this.set(dto.attendeeIds),
       },

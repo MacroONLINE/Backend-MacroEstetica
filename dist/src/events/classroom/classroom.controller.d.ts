@@ -20,9 +20,32 @@ declare class OratorDto {
 export declare class ClassroomController {
     private readonly service;
     constructor(service: ClassroomService);
-    create(dto: CreateClassroomDto, image?: Express.Multer.File): Promise<{
+    create(empresaId: string, dto: CreateClassroomDto, image?: Express.Multer.File): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -38,6 +61,7 @@ export declare class ClassroomController {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;
@@ -89,9 +113,32 @@ export declare class ClassroomController {
             profileImageUrl: string | null;
         }[];
     }>;
-    update(id: string, dto: UpdateClassroomDto, image?: Express.Multer.File): Promise<{
+    update(empresaId: string, id: string, dto: UpdateClassroomDto, image?: Express.Multer.File): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -107,6 +154,7 @@ export declare class ClassroomController {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;
@@ -162,8 +210,31 @@ export declare class ClassroomController {
         message: string;
     }>;
     upcoming(): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -179,6 +250,7 @@ export declare class ClassroomController {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;
@@ -231,8 +303,31 @@ export declare class ClassroomController {
         }[];
     }[]>;
     live(): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -248,6 +343,7 @@ export declare class ClassroomController {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;
@@ -300,8 +396,31 @@ export declare class ClassroomController {
         }[];
     }[]>;
     findOne(id: string): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -317,6 +436,7 @@ export declare class ClassroomController {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;

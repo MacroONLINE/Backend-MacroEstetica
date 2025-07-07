@@ -120,11 +120,13 @@ export declare class MinisiteService {
         description: string;
         giro: Giro;
         slogan?: string;
-        slidesMeta: SlideMeta[];
+        slidesMeta: Array<SlideMeta & {
+            imageSrc?: string;
+        }>;
         minisiteColor?: string;
     }, files: {
         logo?: Express.Multer.File;
-        slides?: Express.Multer.File[];
+        slides?: (Express.Multer.File | string)[];
     }): Promise<{
         ok: boolean;
     }>;

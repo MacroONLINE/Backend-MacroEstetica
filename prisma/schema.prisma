@@ -94,6 +94,7 @@ model Empresa {
   productos            Product[]
   categorias           ProductCompanyCategory[]
   companyUsages        CompanyUsage[]
+  classrooms           Classroom[]
 }
 
 model Subscription {
@@ -270,6 +271,8 @@ model Classroom {
   enrollments   ClassroomEnrollment[]
   attendees     User[]                @relation("ClassroomAttendees")
   orators       Instructor[]          @relation("ClassroomInstructors")
+  empresaId     String?
+  empresa       Empresa?              @relation(fields: [empresaId], references: [id], onDelete: Cascade)
 }
 
 model ClassroomEnrollment {

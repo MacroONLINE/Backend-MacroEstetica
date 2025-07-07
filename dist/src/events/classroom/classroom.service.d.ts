@@ -7,6 +7,7 @@ export interface CreateClassroomDto {
     price: number;
     startDateTime: Date;
     endDateTime: Date;
+    empresaId: string;
     channelName?: string;
     categories?: $Enums.Profession[];
     oratorIds?: Ids;
@@ -23,8 +24,31 @@ export declare class ClassroomService {
     private set;
     private markLive;
     createClassroom(dto: CreateClassroomDto): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -40,6 +64,7 @@ export declare class ClassroomService {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;
@@ -92,8 +117,31 @@ export declare class ClassroomService {
         }[];
     }>;
     getClassroomById(id: string): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -109,6 +157,7 @@ export declare class ClassroomService {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;
@@ -161,8 +210,31 @@ export declare class ClassroomService {
         }[];
     }>;
     updateClassroom(id: string, dto: UpdateClassroomDto): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -178,6 +250,7 @@ export declare class ClassroomService {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;
@@ -233,8 +306,31 @@ export declare class ClassroomService {
         message: string;
     }>;
     getUpcomingClassrooms(): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -250,6 +346,7 @@ export declare class ClassroomService {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;
@@ -302,8 +399,31 @@ export declare class ClassroomService {
         }[];
     }[]>;
     getLiveClassrooms(): Promise<{
+        empresa: {
+            subscription: $Enums.SubscriptionType | null;
+            userId: string;
+            title: string | null;
+            name: string;
+            giro: $Enums.Giro;
+            webUrl: string | null;
+            bannerImage: string | null;
+            logo: string | null;
+            profileImage: string | null;
+            ceo: string | null;
+            ceoRole: string | null;
+            location: string | null;
+            dni: string | null;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            categoria: $Enums.EmpresaCategory;
+            followers: number;
+            verified: boolean;
+            legalName: string | null;
+        };
         description: string;
         title: string;
+        empresaId: string;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -319,6 +439,7 @@ export declare class ClassroomService {
             enrollments: number;
             attendees: number;
             orators: number;
+            empresa: number;
         };
         channelName: string;
         endDateTime: Date;

@@ -121,13 +121,12 @@ let MinisiteService = class MinisiteService {
         };
     }
     async setupMinisite(empresaId, body, files) {
-        this.log.verbose(`setupMinisite → empresa=${empresaId}`);
-        const metaCount = Array.isArray(body.slidesMeta) ? body.slidesMeta.length : 0;
-        this.log.debug(`metaCount=${metaCount}`);
+        this.log.debug(`metaLen=${body.slidesMeta.length}`);
         let logoUrl;
         if (files.logo) {
             const res = await this.cloud.uploadImage(files.logo);
             logoUrl = res.secure_url;
+            this.log.debug(`logoUrl=${logoUrl}`);
         }
         await this.prisma.empresa.update({
             where: { id: empresaId },
@@ -143,46 +142,40 @@ let MinisiteService = class MinisiteService {
             where: { empresaId },
             data: { minisiteColor: body.minisiteColor ?? undefined, slogan: body.slogan },
         });
-        const newSlides = files.slides ?? [];
-        if (newSlides.length > metaCount) {
-            throw new common_1.BadRequestException('Demasiados archivos para slidesMeta');
-        }
-        const plan = await this.plan(empresaId);
-        const limitRow = await this.prisma.planFeature.findUnique({
-            where: { plan_code: { plan, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
-        });
-        if (limitRow?.limit != null && metaCount > limitRow.limit) {
-            throw new common_1.BadRequestException(`Máximo ${limitRow.limit} slides permitidos`);
-        }
+        const uploads = {};
+        await Promise.all((files.slides ?? []).map(async (item, idx) => {
+            if (typeof item !== 'string') {
+                const url = (await this.cloud.uploadImage(item)).secure_url;
+                uploads[idx] = url;
+                this.log.debug(`uploaded slide[${idx}]=${url}`);
+            }
+        }));
         const minisiteId = await this.minisite(empresaId);
-        await this.prisma.$transaction(async (tx) => {
-            const existing = await tx.minisiteSlide.findMany({
-                where: { minisiteId },
-                orderBy: { order: 'asc' },
-            });
-            const uploads = {};
-            await Promise.all(newSlides.map(async (f, pos) => {
-                const url = (await this.cloud.uploadImage(f)).secure_url;
-                this.log.debug(`uploaded idx=${pos} name=${f.originalname} url=${url}`);
-                uploads[pos] = url;
-            }));
-            const data = body.slidesMeta.map((m, idx) => ({
+        const existing = await this.prisma.minisiteSlide.findMany({
+            where: { minisiteId },
+            orderBy: { order: 'asc' },
+        });
+        const data = body.slidesMeta.map((m, idx) => {
+            const imageSrc = uploads[idx] || m.imageSrc || existing[idx]?.imageSrc || '';
+            this.log.debug(`final slide[${idx}]=${imageSrc}`);
+            return {
                 minisiteId,
-                imageSrc: uploads[idx] ?? '',
+                imageSrc,
                 title: m.title ?? '',
                 description: m.description ?? '',
                 cta: m.cta ?? '',
                 order: m.order ?? idx,
-            }));
+            };
+        });
+        await this.prisma.$transaction(async (tx) => {
             await tx.minisiteSlide.deleteMany({ where: { minisiteId } });
             await tx.minisiteSlide.createMany({ data });
             await tx.companyUsage.upsert({
                 where: { companyId_code: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS } },
-                update: { used: metaCount },
-                create: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS, used: metaCount },
+                update: { used: data.length },
+                create: { companyId: empresaId, code: client_1.FeatureCode.BANNER_PRODUCT_SLOTS, used: data.length },
             });
         });
-        this.log.verbose('setupMinisite ← ok');
         return { ok: true };
     }
     async bulkUpsertProductsIndexed(empresaId, meta, files) {

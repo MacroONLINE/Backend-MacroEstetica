@@ -171,6 +171,9 @@ export class MinisiteController {
   },
 })
 // minisite.controller.ts  – solo este handler cambia
+// minisite.controller.ts – método setup
+
+// src/empresa/minisite.controller.ts
 @UseInterceptors(AnyFilesInterceptor())
 @Put(':empresaId/setup')
 async setup(
@@ -180,30 +183,22 @@ async setup(
 ) {
   const logo = files.find(f => f.fieldname === 'logo')
 
-  const indexed: Record<number, Express.Multer.File> = {}
-  const plain: Express.Multer.File[] = []
-
-  files
-    .filter(f => f !== logo)
-    .forEach(f => {
-      const m = /slides(?:\D+)?(\d+)/.exec(f.fieldname)
-      if (m) indexed[Number(m[1])] = f
-      else plain.push(f)
-    })
-
-  const slides = [
-    ...Object.keys(indexed)
-      .map(Number)
-      .sort((a, b) => a - b)
-      .map(i => indexed[i]),
-    ...plain,
-  ]
-
-  this.logger.debug(
-    `files logo=${logo ? logo.originalname : '∅'} slides=[${slides
-      .map(f => `${f.fieldname}:${f.originalname}`)
-      .join(', ')}]`,
+  const slideFiles = files.filter(f => f.fieldname === 'slides')
+  slideFiles.forEach((f, i) =>
+    this.logger.debug(`slideFile[${i}]=${f.originalname}`),
   )
+
+  const slidesMeta = body.slidesMeta ? JSON.parse(body.slidesMeta) : []
+  const slides: (Express.Multer.File | string)[] = slidesMeta.map((m, i) =>
+    slideFiles[i] ?? m.imageSrc ?? '',
+  )
+  slides.forEach((s, i) =>
+    this.logger.debug(
+      `slide[${i}]=${typeof s === 'string' ? s : s.originalname}`,
+    ),
+  )
+
+  this.logger.debug(`logo=${logo?.originalname || '∅'} totalSlides=${slides.length}`)
 
   return this.minisite.setupMinisite(
     empresaId,
@@ -212,12 +207,16 @@ async setup(
       description: body.description,
       giro: body.giro as Giro,
       slogan: body.slogan,
-      slidesMeta: body.slidesMeta ? JSON.parse(body.slidesMeta) : [],
+      slidesMeta,
       minisiteColor: body.minisiteColor,
     },
     { logo, slides },
   )
 }
+
+
+
+
 
 
 
