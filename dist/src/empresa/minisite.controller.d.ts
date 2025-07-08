@@ -63,8 +63,11 @@ export declare class MinisiteController {
         ok: boolean;
     }>;
     bulkProducts(empresaId: string, productsRaw: string, rawFiles: Express.Multer.File[]): Promise<{
-        productId: string;
+        alias: number;
+        created: boolean;
         type: string;
+        productId?: string;
+        message: string;
     }[]>;
     getSpecialities(empresaId: string): Promise<{
         id: string;

@@ -180,17 +180,52 @@ let MinisiteService = class MinisiteService {
     }
     async bulkUpsertProductsIndexed(empresaId, meta, files) {
         const minisiteId = await this.minisite(empresaId);
-        const prepared = await Promise.all(meta.map(async (m, idx) => {
-            const bucket = files[idx] ?? { gallery: [] };
-            if (!bucket.main)
-                throw new common_1.BadRequestException(`main_${idx} es obligatorio`);
-            const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
-            const galleryUrls = await Promise.all(bucket.gallery.map((g) => this.cloud.uploadImage(g).then((r) => r.secure_url)));
-            return { meta: m, mainUrl, galleryUrls };
-        }));
-        return this.prisma.$transaction(async (tx) => {
-            const toCreate = prepared.filter((p) => !p.meta.id).length;
-            await this.checkQuota(empresaId, client_1.FeatureCode.PRODUCTS_TOTAL, toCreate);
+        const allowed = [];
+        const results = [];
+        for (let idx = 0; idx < meta.length; idx++) {
+            const m = meta[idx];
+            const branch = (m.type ?? 'NORMAL').toUpperCase();
+            let message = '';
+            let valid = true;
+            try {
+                if (branch === 'FEATURED') {
+                    await this.checkQuota(empresaId, client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                }
+                else if (branch === 'HIGHLIGHT') {
+                    await this.checkQuota(empresaId, client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                }
+                else if (branch === 'OFFER') {
+                    await this.checkQuota(empresaId, client_1.FeatureCode.OFFER_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                }
+                await this.checkQuota(empresaId, client_1.FeatureCode.PRODUCTS_TOTAL, m.id ? 0 : 1);
+                if (!m.id && m.categoryId !== undefined && m.categoryId !== null) {
+                    const current = await this.prisma.product.count({
+                        where: { companyId: empresaId, categoryId: m.categoryId },
+                    });
+                    if (current >= 12)
+                        throw new common_1.BadRequestException(`Categoría #${m.categoryId} ya tiene 12 productos`);
+                }
+                const bucket = files[idx] ?? { gallery: [] };
+                if (!bucket.main)
+                    throw new common_1.BadRequestException(`main_${idx} es obligatorio`);
+                const mainUrl = (await this.cloud.uploadImage(bucket.main)).secure_url;
+                const galleryUrls = await Promise.all(bucket.gallery.map(g => this.cloud.uploadImage(g).then(r => r.secure_url)));
+                allowed.push({ idx, meta: m, mainUrl, galleryUrls });
+            }
+            catch (e) {
+                valid = false;
+                message = e.message;
+            }
+            if (!valid) {
+                results.push({
+                    alias: m.alias,
+                    created: false,
+                    type: branch,
+                    message,
+                });
+            }
+        }
+        const txResults = await this.prisma.$transaction(async (tx) => {
             const delta = {
                 [client_1.FeatureCode.PRODUCTS_TOTAL]: 0,
                 [client_1.FeatureCode.CATEGORIES_TOTAL]: 0,
@@ -202,15 +237,10 @@ let MinisiteService = class MinisiteService {
                 [client_1.FeatureCode.CLASSROOM_TRANSMISSIONS_TOTAL]: 0,
                 [client_1.FeatureCode.SPECIALITY_IMAGES_TOTAL]: 0,
             };
-            const out = [];
-            for (const { meta: m, mainUrl, galleryUrls } of prepared) {
-                if (!m.id && m.categoryId != null) {
-                    const current = await tx.product.count({ where: { companyId: empresaId, categoryId: m.categoryId } });
-                    if (current >= 12)
-                        throw new common_1.BadRequestException(`Categoría #${m.categoryId} ya tiene 12 productos`);
-                }
-                const presentationsArr = typeof m.presentations === 'string'
-                    ? m.presentations.split(',').map((s) => s.trim()).filter(Boolean)
+            const createdResults = [];
+            for (const { meta: m, mainUrl, galleryUrls } of allowed) {
+                const presentationsArr = Array.isArray(m.presentations)
+                    ? m.presentations
                     : m.presentations ?? [];
                 const productData = {
                     name: m.name,
@@ -234,9 +264,8 @@ let MinisiteService = class MinisiteService {
                     : await tx.product.create({ data: productData });
                 if (!m.id)
                     delta[client_1.FeatureCode.PRODUCTS_TOTAL]++;
-                const type = (m.type ?? 'NORMAL').toUpperCase();
-                if (type === 'FEATURED') {
-                    await this.checkQuota(empresaId, client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                const branch = (m.type ?? 'NORMAL').toUpperCase();
+                if (branch === 'FEATURED') {
                     await tx.minisiteFeaturedProduct.upsert({
                         where: { productId: product.id },
                         update: { minisiteId, order: m.order ?? 0, tagline: m.tagline ?? '' },
@@ -245,27 +274,44 @@ let MinisiteService = class MinisiteService {
                     if (!m.id)
                         delta[client_1.FeatureCode.FEATURED_PRODUCTS_TOTAL]++;
                 }
-                else if (type === 'HIGHLIGHT') {
-                    await this.checkQuota(empresaId, client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                else if (branch === 'HIGHLIGHT') {
                     await tx.minisiteHighlightProduct.upsert({
                         where: { minisiteId_productId: { minisiteId, productId: product.id } },
-                        update: { highlightFeatures: m.highlightFeatures ?? [], highlightDescription: m.highlightDescription ?? '' },
-                        create: { minisiteId, productId: product.id, highlightFeatures: m.highlightFeatures ?? [], highlightDescription: m.highlightDescription ?? '' },
+                        update: {
+                            highlightFeatures: m.highlightFeatures ?? [],
+                            highlightDescription: m.highlightDescription ?? '',
+                        },
+                        create: {
+                            minisiteId,
+                            productId: product.id,
+                            highlightFeatures: m.highlightFeatures ?? [],
+                            highlightDescription: m.highlightDescription ?? '',
+                        },
                     });
                     if (!m.id)
                         delta[client_1.FeatureCode.HIGHLIGHT_PRODUCTS_TOTAL]++;
                 }
-                else if (type === 'OFFER') {
-                    await this.checkQuota(empresaId, client_1.FeatureCode.OFFER_PRODUCTS_TOTAL, m.id ? 0 : 1);
+                else if (branch === 'OFFER') {
                     await tx.minisiteProductOffer.upsert({
                         where: { minisiteId_productId: { minisiteId, productId: product.id } },
                         update: { title: m.title ?? product.name, description: m.offerDescription ?? '' },
-                        create: { minisiteId, productId: product.id, title: m.title ?? product.name, description: m.offerDescription ?? '' },
+                        create: {
+                            minisiteId,
+                            productId: product.id,
+                            title: m.title ?? product.name,
+                            description: m.offerDescription ?? '',
+                        },
                     });
                     if (!m.id)
                         delta[client_1.FeatureCode.OFFER_PRODUCTS_TOTAL]++;
                 }
-                out.push({ productId: product.id, type });
+                createdResults.push({
+                    alias: m.alias,
+                    created: true,
+                    type: branch,
+                    productId: product.id,
+                    message: 'Producto procesado correctamente',
+                });
             }
             for (const [code, inc] of Object.entries(delta)) {
                 if (inc === 0)
@@ -276,8 +322,9 @@ let MinisiteService = class MinisiteService {
                     create: { companyId: empresaId, code, used: inc },
                 });
             }
-            return out;
+            return createdResults;
         }, { maxWait: 10_000, timeout: 120_000 });
+        return [...results, ...txResults];
     }
     async getSpecialities(empresaId) {
         return this.prisma.minisiteSpeciality.findMany({

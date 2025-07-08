@@ -134,8 +134,11 @@ export declare class MinisiteService {
         main?: Express.Multer.File;
         gallery: Express.Multer.File[];
     }>): Promise<{
-        productId: string;
+        alias: number;
+        created: boolean;
         type: string;
+        productId?: string;
+        message: string;
     }[]>;
     getSpecialities(empresaId: string): Promise<{
         id: string;
