@@ -16,11 +16,11 @@ const selectBase = {
     id: true,
     title: true,
     description: true,
-    price: true,
     startDateTime: true,
     endDateTime: true,
-    imageUrl: true,
+    price: true,
     channelName: true,
+    imageUrl: true,
     categories: true,
     empresaId: true,
     orators: { select: { id: true } },
@@ -34,38 +34,38 @@ let ClassroomService = class ClassroomService {
     async uploadImage(file) {
         if (!file)
             return undefined;
-        const fakeUrl = `https://cdn.example.com/uploads/${file.originalname}`;
-        return fakeUrl;
+        return `https://cdn.example.com/uploads/${file.originalname}`;
     }
     connect(ids) {
-        return ids?.length ? { connect: ids.map((id) => ({ id })) } : undefined;
+        return ids?.length ? { connect: ids.map(id => ({ id })) } : undefined;
     }
     set(ids) {
-        return ids ? { set: ids.map((id) => ({ id })) } : undefined;
+        return ids ? { set: ids.map(id => ({ id })) } : undefined;
     }
     markLive(data) {
         const now = new Date();
-        const flag = (c) => (c.isLive = now >= c.startDateTime && now <= c.endDateTime);
+        const flag = (c) => {
+            c.isLive = now >= c.startDateTime && now <= c.endDateTime;
+        };
         Array.isArray(data) ? data.forEach(flag) : flag(data);
     }
-    async createClassroom(dto) {
-        const empresaExists = await this.prisma.empresa.findUnique({ where: { id: dto.empresaId } });
-        if (!empresaExists)
+    async createClassroom(empresaId, dto, image) {
+        const empresa = await this.prisma.empresa.findUnique({ where: { id: empresaId } });
+        if (!empresa)
             throw new common_1.BadRequestException('Empresa no encontrada');
-        const imageUrl = await this.uploadImage(dto.image);
+        const imageUrl = await this.uploadImage(image);
         const created = await this.prisma.classroom.create({
             data: {
                 title: dto.title,
                 description: dto.description,
-                price: dto.price,
                 startDateTime: dto.startDateTime,
                 endDateTime: dto.endDateTime,
+                price: dto.price,
                 channelName: dto.channelName,
                 imageUrl,
                 categories: dto.categories,
-                empresaId: dto.empresaId,
+                empresaId,
                 orators: this.connect(dto.oratorIds),
-                attendees: this.connect(dto.attendeeIds),
             },
             select: selectBase,
         });
@@ -73,37 +73,31 @@ let ClassroomService = class ClassroomService {
         return created;
     }
     async getClassroomById(id) {
-        const classroom = await this.prisma.classroom.findUnique({
-            where: { id },
-            select: selectBase,
-        });
+        const classroom = await this.prisma.classroom.findUnique({ where: { id }, select: selectBase });
         if (!classroom)
             throw new common_1.NotFoundException('Classroom not found');
         this.markLive(classroom);
         return classroom;
     }
-    async updateClassroom(id, dto) {
+    async updateClassroom(id, empresaId, dto, image) {
         await this.prisma.classroom.findUniqueOrThrow({ where: { id } });
-        if (dto.empresaId) {
-            const empresaExists = await this.prisma.empresa.findUnique({ where: { id: dto.empresaId } });
-            if (!empresaExists)
-                throw new common_1.BadRequestException('Empresa no encontrada');
-        }
-        const imageUrl = dto.image ? await this.uploadImage(dto.image) : undefined;
+        const empresa = await this.prisma.empresa.findUnique({ where: { id: empresaId } });
+        if (!empresa)
+            throw new common_1.BadRequestException('Empresa no encontrada');
+        const imageUrl = image ? await this.uploadImage(image) : undefined;
         const updated = await this.prisma.classroom.update({
             where: { id },
             data: {
                 title: dto.title,
                 description: dto.description,
-                price: dto.price,
                 startDateTime: dto.startDateTime,
                 endDateTime: dto.endDateTime,
+                price: dto.price,
                 channelName: dto.channelName,
                 imageUrl,
                 categories: dto.categories ? { set: dto.categories } : undefined,
-                empresaId: dto.empresaId,
+                empresaId,
                 orators: this.set(dto.oratorIds),
-                attendees: this.set(dto.attendeeIds),
             },
             select: selectBase,
         });
@@ -158,6 +152,15 @@ let ClassroomService = class ClassroomService {
         });
         this.markLive(list);
         return list;
+    }
+    async getAllOrators(empresaId) {
+        return this.prisma.instructor.findMany({
+            where: { empresaId },
+            select: {
+                id: true,
+                user: { select: { firstName: true, lastName: true, profileImageUrl: true } },
+            },
+        });
     }
 };
 exports.ClassroomService = ClassroomService;

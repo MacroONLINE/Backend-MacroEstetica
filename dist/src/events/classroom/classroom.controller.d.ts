@@ -1,19 +1,7 @@
 import { ClassroomService } from './classroom.service';
+import { CreateClassroomDto } from './dto/create-classroom.dto';
+import { UpdateClassroomDto } from './dto/update-classroom.dto';
 import { $Enums } from '@prisma/client';
-declare class CreateClassroomDto {
-    title: string;
-    description: string;
-    price: number;
-    startDateTime: Date;
-    endDateTime: Date;
-    channelName?: string;
-    categories?: $Enums.Profession[];
-    oratorIds?: string[];
-    attendeeIds?: string[];
-}
-declare const UpdateClassroomDto_base: import("@nestjs/mapped-types").MappedType<Partial<CreateClassroomDto>>;
-declare class UpdateClassroomDto extends UpdateClassroomDto_base {
-}
 declare class OratorDto {
     instructorId: string;
 }
@@ -47,10 +35,10 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -140,10 +128,10 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -236,10 +224,10 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -329,10 +317,10 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -393,6 +381,14 @@ export declare class ClassroomController {
             attendees: number;
             orators: number;
             empresa: number;
+        };
+    }[]>;
+    getOrators(empresaId: string): Promise<{
+        id: string;
+        user: {
+            firstName: string;
+            lastName: string;
+            profileImageUrl: string;
         };
     }[]>;
     findOne(id: string): Promise<{
@@ -422,10 +418,10 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -488,18 +484,6 @@ export declare class ClassroomController {
             empresa: number;
         };
     }>;
-    addOrator(id: string, dto: OratorDto): Promise<{
-        id: string;
-        orators: {
-            id: string;
-        }[];
-    }>;
-    removeOrator(id: string, dto: OratorDto): Promise<{
-        id: string;
-        orators: {
-            id: string;
-        }[];
-    }>;
     findAllByEmpresa(empresaId: string): Promise<{
         id: string;
         title: string;
@@ -527,10 +511,10 @@ export declare class ClassroomController {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -593,5 +577,17 @@ export declare class ClassroomController {
             empresa: number;
         };
     }[]>;
+    addOrator(id: string, dto: OratorDto): Promise<{
+        id: string;
+        orators: {
+            id: string;
+        }[];
+    }>;
+    removeOrator(id: string, dto: OratorDto): Promise<{
+        id: string;
+        orators: {
+            id: string;
+        }[];
+    }>;
 }
 export {};

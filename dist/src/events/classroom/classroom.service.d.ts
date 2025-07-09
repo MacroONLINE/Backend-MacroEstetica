@@ -1,21 +1,7 @@
 import { $Enums } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-type Ids = string[];
-export interface CreateClassroomDto {
-    title: string;
-    description: string;
-    price: number;
-    startDateTime: Date;
-    endDateTime: Date;
-    empresaId: string;
-    channelName?: string;
-    categories?: $Enums.Profession[];
-    oratorIds?: Ids;
-    attendeeIds?: Ids;
-    image?: Express.Multer.File;
-}
-export interface UpdateClassroomDto extends Partial<CreateClassroomDto> {
-}
+import { CreateClassroomDto } from './dto/create-classroom.dto';
+import { UpdateClassroomDto } from './dto/update-classroom.dto';
 export declare class ClassroomService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -23,7 +9,7 @@ export declare class ClassroomService {
     private connect;
     private set;
     private markLive;
-    createClassroom(dto: CreateClassroomDto): Promise<{
+    createClassroom(empresaId: string, dto: CreateClassroomDto, image?: Express.Multer.File): Promise<{
         id: string;
         title: string;
         description: string;
@@ -50,10 +36,10 @@ export declare class ClassroomService {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -143,10 +129,10 @@ export declare class ClassroomService {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -209,7 +195,7 @@ export declare class ClassroomService {
             empresa: number;
         };
     }>;
-    updateClassroom(id: string, dto: UpdateClassroomDto): Promise<{
+    updateClassroom(id: string, empresaId: string, dto: UpdateClassroomDto, image?: Express.Multer.File): Promise<{
         id: string;
         title: string;
         description: string;
@@ -236,10 +222,10 @@ export declare class ClassroomService {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -332,10 +318,10 @@ export declare class ClassroomService {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -425,10 +411,10 @@ export declare class ClassroomService {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -530,10 +516,10 @@ export declare class ClassroomService {
             createdAt: Date;
             updatedAt: Date;
             status: boolean;
-            email: string;
             firstName: string | null;
             lastName: string | null;
             phone: string | null;
+            email: string;
             emailVerified: Date | null;
             address: string | null;
             province: string | null;
@@ -596,5 +582,12 @@ export declare class ClassroomService {
             empresa: number;
         };
     }[]>;
+    getAllOrators(empresaId: string): Promise<{
+        id: string;
+        user: {
+            firstName: string;
+            lastName: string;
+            profileImageUrl: string;
+        };
+    }[]>;
 }
-export {};
