@@ -105,6 +105,9 @@ let ClassroomController = class ClassroomController {
     removeOrator(id, dto) {
         return this.service.removeOrator(id, dto.instructorId);
     }
+    findAllByEmpresa(empresaId) {
+        return this.service.getAllByEmpresa(empresaId);
+    }
 };
 exports.ClassroomController = ClassroomController;
 __decorate([
@@ -214,6 +217,38 @@ __decorate([
     __metadata("design:paramtypes", [String, OratorDto]),
     __metadata("design:returntype", void 0)
 ], ClassroomController.prototype, "removeOrator", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Listar todos los classrooms de una empresa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'comp_001' }),
+    (0, swagger_1.ApiResponse)({
+        status: 200,
+        schema: {
+            example: [
+                {
+                    id: 'cls_001',
+                    title: 'Botox Masterclass',
+                    description: 'Hands-on training',
+                    price: 120,
+                    startDateTime: '2025-06-10T14:00:00.000Z',
+                    endDateTime: '2025-06-10T17:00:00.000Z',
+                    channelName: 'classroom-btx-001',
+                    categories: ['DERMATOLOGIA'],
+                    empresaId: 'comp_001',
+                    orators: [{ id: 'instr_001' }],
+                    attendees: [{ id: 'user_001' }],
+                    enrollments: [{ id: 'enr_001', userId: 'user_001', status: 'CONFIRMED' }],
+                    imageUrl: 'https://cdn.example.com/uploads/btx.jpg',
+                    isLive: false
+                }
+            ]
+        }
+    }),
+    __param(0, (0, common_1.Param)('empresaId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], ClassroomController.prototype, "findAllByEmpresa", null);
 exports.ClassroomController = ClassroomController = __decorate([
     (0, swagger_1.ApiTags)('Classrooms'),
     (0, common_1.Controller)('empresas/:empresaId/classrooms'),

@@ -153,4 +153,41 @@ export class ClassroomController {
   removeOrator(@Param('id') id: string, @Body() dto: OratorDto) {
     return this.service.removeOrator(id, dto.instructorId)
   }
+
+
+
+  // src/classroom/classroom.controller.ts
+
+  @Get()
+  @ApiOperation({ summary: 'Listar todos los classrooms de una empresa' })
+  @ApiParam({ name: 'empresaId', example: 'comp_001' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      example: [
+        {
+          id: 'cls_001',
+          title: 'Botox Masterclass',
+          description: 'Hands-on training',
+          price: 120,
+          startDateTime: '2025-06-10T14:00:00.000Z',
+          endDateTime: '2025-06-10T17:00:00.000Z',
+          channelName: 'classroom-btx-001',
+          categories: ['DERMATOLOGIA'],
+          empresaId: 'comp_001',
+          orators: [{ id: 'instr_001' }],
+          attendees: [{ id: 'user_001' }],
+          enrollments: [{ id: 'enr_001', userId: 'user_001', status: 'CONFIRMED' }],
+          imageUrl: 'https://cdn.example.com/uploads/btx.jpg',
+          isLive: false
+        }
+      ]
+    }
+  })
+  findAllByEmpresa(@Param('empresaId') empresaId: string) {
+    return this.service.getAllByEmpresa(empresaId)
+  }
+
+
+
 }

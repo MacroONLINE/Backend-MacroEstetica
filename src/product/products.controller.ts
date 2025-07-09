@@ -185,4 +185,55 @@ async findById(
   }
 
 
+  // src/products/products.controller.ts  – nuevos endpoints
+
+@Get('highlighted')
+@ApiOperation({ summary: 'Obtener productos highlight de una empresa' })
+@ApiQuery({ name: 'companyId', required: true })
+@ApiQuery({ name: 'userId', required: false })
+async findHighlighted(
+  @Query('companyId') companyId: string,
+  @Query('userId') userId?: string,
+) {
+  if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
+  return this.productService.findHighlightedByCompany(companyId, userId)
+}
+
+@Get('offer')
+@ApiOperation({ summary: 'Obtener productos offer de una empresa' })
+@ApiQuery({ name: 'companyId', required: true })
+@ApiQuery({ name: 'userId', required: false })
+async findOffer(
+  @Query('companyId') companyId: string,
+  @Query('userId') userId?: string,
+) {
+  if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
+  return this.productService.findOfferByCompany(companyId, userId)
+}
+
+@Get('normal')
+@ApiOperation({ summary: 'Obtener productos normales de una empresa' })
+@ApiQuery({ name: 'companyId', required: true })
+@ApiQuery({ name: 'userId', required: false })
+async findNormal(
+  @Query('companyId') companyId: string,
+  @Query('userId') userId?: string,
+) {
+  if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
+  return this.productService.findNormalByCompany(companyId, userId)
+}
+
+@Get('grouped')
+@ApiOperation({ summary: 'Obtener todos los productos agrupados por tipo' })
+@ApiQuery({ name: 'companyId', required: true })
+@ApiQuery({ name: 'userId', required: false })
+async findAllGrouped(
+  @Query('companyId') companyId: string,
+  @Query('userId') userId?: string,
+) {
+  if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
+  return this.productService.findAllGroupedByType(companyId, userId)
+}
+
+
 }

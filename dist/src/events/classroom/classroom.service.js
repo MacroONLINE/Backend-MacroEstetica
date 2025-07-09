@@ -151,6 +151,14 @@ let ClassroomService = class ClassroomService {
             select: { id: true, orators: { select: { id: true } } },
         });
     }
+    async getAllByEmpresa(empresaId) {
+        const list = await this.prisma.classroom.findMany({
+            where: { empresaId },
+            select: selectBase,
+        });
+        this.markLive(list);
+        return list;
+    }
 };
 exports.ClassroomService = ClassroomService;
 exports.ClassroomService = ClassroomService = __decorate([

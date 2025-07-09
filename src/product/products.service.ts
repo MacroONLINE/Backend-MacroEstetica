@@ -121,4 +121,97 @@ export class ProductService {
     })
     return reactions.map((r) => r.productId)
   }
+
+
+// src/product/products.service.ts  – nuevos métodos
+
+async findHighlightedByCompany(
+  companyId: string,
+  userId?: string,
+) {
+  const rows = await this.prisma.minisiteHighlightProduct.findMany({
+    where: { minisite: { empresaId: companyId } },
+    select: { productId: true },
+  })
+  const ids = rows.map(r => r.productId)
+  const products = await this.prisma.product.findMany({
+    where: { id: { in: ids } },
+  })
+  if (!userId) return products
+  const liked = await this.getLikedProductIds(userId)
+  return products.map(p => ({ ...p, liked: liked.includes(p.id) }))
+}
+
+async findOfferByCompany(
+  companyId: string,
+  userId?: string,
+) {
+  const rows = await this.prisma.minisiteProductOffer.findMany({
+    where: { minisite: { empresaId: companyId } },
+    select: { productId: true },
+  })
+  const ids = rows.map(r => r.productId)
+  const products = await this.prisma.product.findMany({
+    where: { id: { in: ids } },
+  })
+  if (!userId) return products
+  const liked = await this.getLikedProductIds(userId)
+  return products.map(p => ({ ...p, liked: liked.includes(p.id) }))
+}
+
+async findNormalByCompany(
+  companyId: string,
+  userId?: string,
+) {
+  const featuredIds = (
+    await this.prisma.product.findMany({
+      where: { companyId, isFeatured: true },
+      select: { id: true },
+    })
+  ).map(p => p.id)
+
+  const highlightedIds = (
+    await this.prisma.minisiteHighlightProduct.findMany({
+      where: { minisite: { empresaId: companyId } },
+      select: { productId: true },
+    })
+  ).map(r => r.productId)
+
+  const offerIds = (
+    await this.prisma.minisiteProductOffer.findMany({
+      where: { minisite: { empresaId: companyId } },
+      select: { productId: true },
+    })
+  ).map(r => r.productId)
+
+  const exclude = [...featuredIds, ...highlightedIds, ...offerIds]
+
+  const products = await this.prisma.product.findMany({
+    where: { companyId, id: { notIn: exclude } },
+  })
+  if (!userId) return products
+  const liked = await this.getLikedProductIds(userId)
+  return products.map(p => ({ ...p, liked: liked.includes(p.id) }))
+}
+
+async findAllGroupedByType(
+  companyId: string,
+  userId?: string,
+) {
+  const featured = await this.findFeaturedByCompany(companyId, userId)
+  const highlighted = await this.findHighlightedByCompany(companyId, userId)
+  const offer = await this.findOfferByCompany(companyId, userId)
+  const normal = await this.findNormalByCompany(companyId, userId)
+  return {
+    FEATURED: featured,
+    HIGHLIGHT: highlighted,
+    OFFER: offer,
+    NORMAL: normal,
+  }
+}
+
+
+
+
+
 }
