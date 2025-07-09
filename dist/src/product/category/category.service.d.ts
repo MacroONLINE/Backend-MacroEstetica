@@ -1,6 +1,6 @@
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
 import { CreateCategoryDto } from './dto/create-category.dto';
+import { Prisma } from '@prisma/client';
 export declare class CategoryService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -66,7 +66,6 @@ export declare class CategoryService {
     }>;
     remove(id: number): Promise<{
         company: {
-            id: string;
             logo: string;
         };
     } & {
@@ -84,22 +83,6 @@ export declare class CategoryService {
         products: {
             id: string;
             name: string;
-            companyId: string;
-            createdAt: Date;
-            updatedAt: Date;
-            description: string;
-            isFeatured: boolean | null;
-            activeIngredients: string[];
-            benefits: string[];
-            categoryId: number | null;
-            features: string[];
-            imageGallery: string[];
-            imageMain: string | null;
-            isBestSeller: boolean | null;
-            isOnSale: boolean | null;
-            lab: string | null;
-            problemAddressed: string | null;
-            presentations: string[];
         }[];
         company: {
             logo: string;

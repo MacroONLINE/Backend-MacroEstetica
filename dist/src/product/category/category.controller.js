@@ -15,9 +15,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CategoryController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
+const mapped_types_1 = require("@nestjs/mapped-types");
 const category_service_1 = require("./category.service");
 const create_category_dto_1 = require("./dto/create-category.dto");
 const client_1 = require("@prisma/client");
+class UpdateCategoryDto extends (0, mapped_types_1.PartialType)(create_category_dto_1.CreateCategoryDto) {
+}
 let CategoryController = class CategoryController {
     constructor(categoryService) {
         this.categoryService = categoryService;
@@ -47,6 +50,21 @@ let CategoryController = class CategoryController {
 exports.CategoryController = CategoryController;
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Crear categoría' }),
+    (0, swagger_1.ApiBody)({ type: create_category_dto_1.CreateCategoryDto }),
+    (0, swagger_1.ApiCreatedResponse)({
+        description: 'Categoría creada exitosamente',
+        schema: {
+            example: {
+                id: 1,
+                name: 'Cosmiatría y Cosmetología',
+                bannerImageUrl: 'https://example.com/images/banner.jpg',
+                miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+                companyId: 'company-001',
+                company: { logo: 'https://example.com/images/logo.png' }
+            }
+        }
+    }),
+    (0, swagger_1.ApiBadRequestResponse)({ description: 'Datos inválidos o límite de categorías excedido' }),
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -55,6 +73,29 @@ __decorate([
 ], CategoryController.prototype, "create", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Listar todas las categorías' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Listado de todas las categorías',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    name: 'Cosmiatría y Cosmetología',
+                    bannerImageUrl: 'https://example.com/images/banner.jpg',
+                    miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+                    companyId: 'company-001',
+                    company: { logo: 'https://example.com/images/logo.png' }
+                },
+                {
+                    id: 2,
+                    name: 'Dermatología Avanzada',
+                    bannerImageUrl: 'https://example.com/images/banner2.jpg',
+                    miniSiteImageUrl: 'https://example.com/images/minisite2.jpg',
+                    companyId: 'company-002',
+                    company: { logo: 'https://example.com/images/logo2.png' }
+                }
+            ]
+        }
+    }),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -62,6 +103,21 @@ __decorate([
 ], CategoryController.prototype, "findAll", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener una categoría por ID (numérico)' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID de la categoría', example: '1' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Detalle de la categoría',
+        schema: {
+            example: {
+                id: 1,
+                name: 'Cosmiatría y Cosmetología',
+                bannerImageUrl: 'https://example.com/images/banner.jpg',
+                miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+                companyId: 'company-001',
+                company: { logo: 'https://example.com/images/logo.png' }
+            }
+        }
+    }),
+    (0, swagger_1.ApiNotFoundResponse)({ description: 'Categoría no encontrada' }),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -70,6 +126,22 @@ __decorate([
 ], CategoryController.prototype, "findOne", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Actualizar una categoría' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID de la categoría', example: '1' }),
+    (0, swagger_1.ApiBody)({ type: UpdateCategoryDto }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Categoría actualizada',
+        schema: {
+            example: {
+                id: 1,
+                name: 'Cosmiatría Moderna',
+                bannerImageUrl: 'https://example.com/images/banner-new.jpg',
+                miniSiteImageUrl: 'https://example.com/images/minisite-new.jpg',
+                companyId: 'company-001',
+                company: { logo: 'https://example.com/images/logo.png' }
+            }
+        }
+    }),
+    (0, swagger_1.ApiBadRequestResponse)({ description: 'Datos inválidos' }),
     (0, common_1.Put)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
@@ -79,6 +151,21 @@ __decorate([
 ], CategoryController.prototype, "update", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Eliminar una categoría' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID de la categoría', example: '1' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Categoría eliminada',
+        schema: {
+            example: {
+                id: 1,
+                name: 'Cosmiatría y Cosmetología',
+                bannerImageUrl: 'https://example.com/images/banner.jpg',
+                miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+                companyId: 'company-001',
+                company: { logo: 'https://example.com/images/logo.png' }
+            }
+        }
+    }),
+    (0, swagger_1.ApiNotFoundResponse)({ description: 'Categoría no encontrada' }),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -87,6 +174,26 @@ __decorate([
 ], CategoryController.prototype, "remove", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener categorías + productos de una empresa' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', description: 'ID de la empresa', example: 'company-001' }),
+    (0, swagger_1.ApiOkResponse)({
+        description: 'Listado de categorías con productos',
+        schema: {
+            example: [
+                {
+                    id: 1,
+                    name: 'Cosmiatría y Cosmetología',
+                    bannerImageUrl: 'https://example.com/images/banner.jpg',
+                    miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+                    companyId: 'company-001',
+                    products: [
+                        { id: 'prod-001', name: 'Gel Limpiador Facial' },
+                        { id: 'prod-002', name: 'Ampolla Rejuvenecedora' }
+                    ],
+                    company: { logo: 'https://example.com/images/logo.png' }
+                }
+            ]
+        }
+    }),
     (0, common_1.Get)('by-empresa/:empresaId'),
     __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),

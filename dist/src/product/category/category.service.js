@@ -18,7 +18,7 @@ let CategoryService = class CategoryService {
         this.prisma = prisma;
     }
     async create(data) {
-        await this.checkQuota(data.companyId, 1);
+        await this.checkQuota(data.companyId, client_1.FeatureCode.CATEGORIES_TOTAL, 1);
         const created = await this.prisma.productCompanyCategory.create({
             data: {
                 name: data.name,
@@ -26,7 +26,9 @@ let CategoryService = class CategoryService {
                 miniSiteImageUrl: data.miniSiteImageUrl,
                 company: { connect: { id: data.companyId } },
             },
-            include: { company: { select: { logo: true } } },
+            include: {
+                company: { select: { logo: true } },
+            },
         });
         await this.prisma.companyUsage.upsert({
             where: { companyId_code: { companyId: data.companyId, code: client_1.FeatureCode.CATEGORIES_TOTAL } },
@@ -37,38 +39,45 @@ let CategoryService = class CategoryService {
     }
     async findAll() {
         return this.prisma.productCompanyCategory.findMany({
-            include: { company: { select: { logo: true } } },
+            include: {
+                company: { select: { logo: true } },
+            },
         });
     }
     async findOne(id) {
-        return this.prisma.productCompanyCategory.findUnique({
+        const category = await this.prisma.productCompanyCategory.findUnique({
             where: { id },
-            include: { company: { select: { logo: true } } },
+            include: {
+                company: { select: { logo: true } },
+            },
         });
+        if (!category)
+            throw new common_1.NotFoundException('Category not found');
+        return category;
     }
     async update(id, data) {
+        await this.prisma.productCompanyCategory.findUniqueOrThrow({ where: { id } });
         return this.prisma.productCompanyCategory.update({
             where: { id },
             data,
-            include: { company: { select: { logo: true } } },
+            include: {
+                company: { select: { logo: true } },
+            },
         });
     }
     async remove(id) {
-        const removed = await this.prisma.productCompanyCategory.delete({
+        const category = await this.prisma.productCompanyCategory.findUniqueOrThrow({
             where: { id },
-            include: { company: { select: { id: true, logo: true } } },
+            include: { company: { select: { logo: true } } },
         });
-        await this.prisma.companyUsage.updateMany({
-            where: { companyId: removed.company.id, code: client_1.FeatureCode.CATEGORIES_TOTAL },
-            data: { used: { decrement: 1 } },
-        });
-        return removed;
+        await this.prisma.productCompanyCategory.delete({ where: { id } });
+        return category;
     }
     async findAllByEmpresa(empresaId) {
         return this.prisma.productCompanyCategory.findMany({
             where: { companyId: empresaId },
             include: {
-                products: true,
+                products: { select: { id: true, name: true } },
                 company: { select: { logo: true } },
             },
         });
@@ -84,31 +93,27 @@ let CategoryService = class CategoryService {
             },
         });
     }
-    async plan(companyId) {
-        const empresa = await this.prisma.empresa.findUnique({
-            where: { id: companyId },
+    async plan(empresaId) {
+        const e = await this.prisma.empresa.findUnique({
+            where: { id: empresaId },
             select: { subscription: true },
         });
-        if (!empresa?.subscription)
-            throw new common_1.BadRequestException('Empresa sin plan');
-        return empresa.subscription;
+        if (!e?.subscription)
+            throw new common_1.BadRequestException('Empresa without subscription');
+        return e.subscription;
     }
-    async checkQuota(companyId, increment = 1) {
+    async checkQuota(empresaId, code, increment = 1) {
+        const plan = await this.plan(empresaId);
         const feature = await this.prisma.planFeature.findUnique({
-            where: {
-                plan_code: {
-                    plan: await this.plan(companyId),
-                    code: client_1.FeatureCode.CATEGORIES_TOTAL,
-                },
-            },
+            where: { plan_code: { plan, code } },
         });
         if (!feature || feature.limit === null)
             return;
         const usage = await this.prisma.companyUsage.findUnique({
-            where: { companyId_code: { companyId, code: client_1.FeatureCode.CATEGORIES_TOTAL } },
+            where: { companyId_code: { companyId: empresaId, code } },
         });
         if ((usage?.used ?? 0) + increment > feature.limit) {
-            throw new common_1.BadRequestException('Límite de categorías excedido');
+            throw new common_1.BadRequestException(`Quota for ${code} exceeded`);
         }
     }
 };
