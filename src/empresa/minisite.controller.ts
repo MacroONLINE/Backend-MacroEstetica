@@ -170,10 +170,13 @@ export class MinisiteController {
     },
   },
 })
-// minisite.controller.ts  – solo este handler cambia
-// minisite.controller.ts – método setup
 
-// src/empresa/minisite.controller.ts
+
+// minisite.controller.ts  – handler PUT /:empresaId/setup
+// minisite.controller.ts  – método setup
+
+// minisite.controller.ts – handler PUT /:empresaId/setup
+// minisite.controller.ts – PUT /:empresaId/setup
 @UseInterceptors(AnyFilesInterceptor())
 @Put(':empresaId/setup')
 async setup(
@@ -181,24 +184,50 @@ async setup(
   @Body() body: any,
   @UploadedFiles() files: Express.Multer.File[],
 ) {
+  this.logger.debug(
+    `files received → ${
+      files.map(f => `${f.fieldname}:${f.originalname}`).join(', ') || '∅'
+    }`,
+  )
+
   const logo = files.find(f => f.fieldname === 'logo')
 
-  const slideFiles = files.filter(f => f.fieldname === 'slides')
-  slideFiles.forEach((f, i) =>
-    this.logger.debug(`slideFile[${i}]=${f.originalname}`),
-  )
+  const byIdx: Record<number, Express.Multer.File> = {}
+  const rest: Express.Multer.File[] = []
+
+  files
+    .filter(f => f !== logo)
+    .forEach(f => {
+      // indice en el *fieldname*  slides-2  |  slides_2
+      let m = /^slides[-_]?(\d+)$/.exec(f.fieldname)
+      // o en el nombre del archivo  foto-2.jpg  |  slide_3.png
+      if (!m) m = /[-_](\d+)(\.[^.]+)?$/.exec(f.originalname)
+
+      if (m) {
+        const idx = Number(m[1])
+        byIdx[idx] = f
+        this.logger.debug(`mapped idx=${idx} file=${f.originalname}`)
+      } else {
+        rest.push(f)
+        this.logger.debug(`unmapped file=${f.originalname}`)
+      }
+    })
 
   const slidesMeta = body.slidesMeta ? JSON.parse(body.slidesMeta) : []
-  const slides: (Express.Multer.File | string)[] = slidesMeta.map((m, i) =>
-    slideFiles[i] ?? m.imageSrc ?? '',
-  )
+  const slides: (Express.Multer.File | string)[] = slidesMeta.map((m, i) => {
+    if (byIdx[i]) return byIdx[i]
+    if (m.imageSrc) return m.imageSrc
+    return rest.shift() ?? ''
+  })
+
   slides.forEach((s, i) =>
     this.logger.debug(
-      `slide[${i}]=${typeof s === 'string' ? s : s.originalname}`,
+      `slide[${i}] = ${typeof s === 'string' ? s || '""' : s.originalname}`,
     ),
   )
-
-  this.logger.debug(`logo=${logo?.originalname || '∅'} totalSlides=${slides.length}`)
+  this.logger.debug(
+    `logo=${logo?.originalname || '∅'} totalSlides=${slides.length}`,
+  )
 
   return this.minisite.setupMinisite(
     empresaId,
@@ -213,6 +242,7 @@ async setup(
     { logo, slides },
   )
 }
+
 
 
 
