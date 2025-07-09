@@ -83,19 +83,6 @@ export class ProductController {
     return this.productService.findFeaturedByCompany(companyId, userId)
   }
 
-  /* ──────────────── DETALLE ──────────────── */
-
-@Get(':id')
-@ApiOperation({ summary: 'Obtener un producto por ID' })
-@ApiParam({ name: 'id', description: 'ID del producto' })
-@ApiQuery({ name: 'userId', required: false, description: 'ID del usuario para saber si lo ha dado like' })
-@ApiResponse({ status: 200, description: 'Detalle del producto, con campo liked opcional' })
-async findById(
-  @Param('id') id: string,
-  @Query('userId') userId?: string,
-) {
-  return this.productService.findById(id, userId)
-}
 
 
    /* ──────────────── ACTUALIZAR / ELIMINAR ──────────────── */
@@ -235,5 +222,20 @@ async findAllGrouped(
   return this.productService.findAllGroupedByType(companyId, userId)
 }
 
+
+  /* ──────────────── DETALLE ──────────────── */
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener un producto por ID' })
+  @ApiParam({ name: 'id', description: 'ID del producto' })
+  @ApiQuery({ name: 'userId', required: false, description: 'ID del usuario para saber si lo ha dado like' })
+  @ApiResponse({ status: 200, description: 'Detalle del producto, con campo liked opcional' })
+  async findById(
+    @Param('id') id: string,
+    @Query('userId') userId?: string,
+  ) {
+    return this.productService.findById(id, userId)
+  }
+  
 
 }
