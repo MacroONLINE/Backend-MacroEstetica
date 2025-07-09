@@ -1,6 +1,6 @@
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
 import { Prisma } from '@prisma/client';
+import { CreateCategoryDto } from './dto/create-category.dto';
 export declare class CategoryService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -9,11 +9,11 @@ export declare class CategoryService {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -24,11 +24,11 @@ export declare class CategoryService {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -39,11 +39,11 @@ export declare class CategoryService {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -54,11 +54,11 @@ export declare class CategoryService {
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -66,58 +66,61 @@ export declare class CategoryService {
     }>;
     remove(id: number): Promise<{
         company: {
+            id: string;
             logo: string;
         };
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
     findAllByEmpresa(empresaId: string): Promise<({
+        products: {
+            id: string;
+            name: string;
+            companyId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            description: string;
+            isFeatured: boolean | null;
+            activeIngredients: string[];
+            benefits: string[];
+            categoryId: number | null;
+            features: string[];
+            imageGallery: string[];
+            imageMain: string | null;
+            isBestSeller: boolean | null;
+            isOnSale: boolean | null;
+            lab: string | null;
+            problemAddressed: string | null;
+            presentations: string[];
+        }[];
         company: {
             logo: string;
         };
-        products: {
-            description: string;
-            name: string;
-            categoryId: number | null;
-            id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            isFeatured: boolean | null;
-            lab: string | null;
-            activeIngredients: string[];
-            features: string[];
-            benefits: string[];
-            problemAddressed: string | null;
-            imageMain: string | null;
-            imageGallery: string[];
-            isBestSeller: boolean | null;
-            isOnSale: boolean | null;
-            companyId: string;
-            presentations: string[];
-        }[];
     } & {
-        name: string;
         id: number;
+        name: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
-        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
     })[]>;
     findCategoriesByEmpresa(empresaId: string): Promise<{
-        name: string;
         id: number;
+        name: string;
         bannerImageUrl: string;
         miniSiteImageUrl: string;
     }[]>;
+    private plan;
+    private checkQuota;
 }
