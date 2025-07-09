@@ -19,7 +19,7 @@ export class CategoryService {
     private readonly cloud: CloudinaryService,
   ) {}
 
-  // src/product/categories/category.service.ts  – método create actualizado
+ // src/product/categories/category.service.ts
 async create(
   dto: CreateCategoryDto,
   banner?: Express.Multer.File,
@@ -34,14 +34,12 @@ async create(
     },
     include: { company: { select: { logo: true } } },
   })
-
   const bannerUrl = banner
     ? (await this.cloud.uploadImage(banner)).secure_url
     : existing?.bannerImageUrl ?? ''
   const minisiteUrl = minisite
     ? (await this.cloud.uploadImage(minisite)).secure_url
     : existing?.miniSiteImageUrl ?? ''
-
   if (existing) {
     return this.prisma.productCompanyCategory.update({
       where: { id: existing.id },
@@ -52,9 +50,7 @@ async create(
       include: { company: { select: { logo: true } } },
     })
   }
-
   await this.checkQuota(dto.companyId, FeatureCode.CATEGORIES_TOTAL, 1)
-
   const created = await this.prisma.productCompanyCategory.create({
     data: {
       name: dto.name,
@@ -64,7 +60,6 @@ async create(
     },
     include: { company: { select: { logo: true } } },
   })
-
   await this.prisma.companyUsage.upsert({
     where: {
       companyId_code: {
@@ -79,7 +74,6 @@ async create(
       used: 1,
     },
   })
-
   return created
 }
 
@@ -99,33 +93,33 @@ async create(
     return cat
   }
 
-  async update(
-    id: number,
-    patch: Prisma.ProductCompanyCategoryUpdateInput,
-    banner?: Express.Multer.File,
-    minisite?: Express.Multer.File,
-  ) {
-    const current = await this.prisma.productCompanyCategory.findUniqueOrThrow(
-      { where: { id } },
-    )
+  
+async update(
+  id: number,
+  patch: Prisma.ProductCompanyCategoryUpdateInput,
+  banner?: Express.Multer.File,
+  minisite?: Express.Multer.File,
+) {
+  const current = await this.prisma.productCompanyCategory.findUniqueOrThrow(
+    { where: { id } },
+  )
+  const bannerUrl = banner
+    ? (await this.cloud.uploadImage(banner)).secure_url
+    : current.bannerImageUrl
+  const minisiteUrl = minisite
+    ? (await this.cloud.uploadImage(minisite)).secure_url
+    : current.miniSiteImageUrl
+  return this.prisma.productCompanyCategory.update({
+    where: { id },
+    data: {
+      ...patch,
+      bannerImageUrl: bannerUrl,
+      miniSiteImageUrl: minisiteUrl,
+    },
+    include: { company: { select: { logo: true } } },
+  })
+}
 
-    const bannerUrl = banner
-      ? (await this.cloud.uploadImage(banner)).secure_url
-      : current.bannerImageUrl
-    const minisiteUrl = minisite
-      ? (await this.cloud.uploadImage(minisite)).secure_url
-      : current.miniSiteImageUrl
-
-    return this.prisma.productCompanyCategory.update({
-      where: { id },
-      data: {
-        ...patch,
-        bannerImageUrl: bannerUrl,
-        miniSiteImageUrl: minisiteUrl,
-      },
-      include: { company: { select: { logo: true } } },
-    })
-  }
 
   async remove(id: number) {
     const category = await this.prisma.productCompanyCategory.findUniqueOrThrow(

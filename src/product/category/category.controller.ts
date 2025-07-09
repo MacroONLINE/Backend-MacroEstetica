@@ -35,54 +35,57 @@ class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @ApiOperation({ summary: 'Crear categoría' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['name', 'companyId'],
-      properties: {
-        name: { type: 'string', example: 'Cosmiatría y Cosmetología' },
-        companyId: { type: 'string', example: 'company-001' },
-        bannerImage: { type: 'string', format: 'binary' },
-        miniSiteImage: { type: 'string', format: 'binary' },
-      },
+  // src/product/categories/category.controller.ts
+@ApiOperation({ summary: 'Crear categoría' })
+@ApiConsumes('multipart/form-data')
+@ApiBody({
+  schema: {
+    type: 'object',
+    required: ['name', 'companyId'],
+    properties: {
+      name: { type: 'string', example: 'Cosmiatría y Cosmetología' },
+      companyId: { type: 'string', example: 'company-001' },
+      bannerImage: { type: 'string', format: 'binary' },
+      miniSiteImage: { type: 'string', format: 'binary' },
     },
-  })
-  @ApiCreatedResponse({
-    schema: {
-      example: {
-        id: 1,
-        name: 'Cosmiatría y Cosmetología',
-        bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
-        miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
-        companyId: 'company-001',
-        company: { logo: 'https://cdn.example.com/img/logo.png' },
-      },
+  },
+})
+@ApiCreatedResponse({
+  schema: {
+    example: {
+      id: 1,
+      name: 'Cosmiatría y Cosmetología',
+      bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
+      miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
+      companyId: 'company-001',
+      company: { logo: 'https://cdn.example.com/img/logo.png' },
     },
-  })
-  @ApiBadRequestResponse({ description: 'Datos inválidos o cuota excedida' })
-  @Post()
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'bannerImage', maxCount: 1 },
-      { name: 'miniSiteImage', maxCount: 1 },
-    ]),
+  },
+})
+@ApiBadRequestResponse({ description: 'Datos inválidos o cuota excedida' })
+@Post()
+@UseInterceptors(
+  FileFieldsInterceptor([
+    { name: 'bannerImage', maxCount: 1 },
+    { name: 'miniSiteImage', maxCount: 1 },
+  ]),
+)
+create(
+  @Body() dto: CreateCategoryDto,
+  @UploadedFiles()
+  files: {
+    bannerImage?: Express.Multer.File[]
+    miniSiteImage?: Express.Multer.File[]
+  },
+) {
+  return this.categoryService.create(
+    dto,
+    files.bannerImage?.[0],
+    files.miniSiteImage?.[0],
   )
-  create(
-    @Body() dto: CreateCategoryDto,
-    @UploadedFiles()
-    files: {
-      bannerImage?: Express.Multer.File[]
-      miniSiteImage?: Express.Multer.File[]
-    },
-  ) {
-    return this.categoryService.create(
-      dto,
-      files.bannerImage?.[0],
-      files.miniSiteImage?.[0],
-    )
-  }
+}
+
+
 
   @ApiOperation({ summary: 'Listar todas las categorías' })
   @ApiOkResponse({
@@ -124,57 +127,58 @@ export class CategoryController {
     return this.categoryService.findOne(+id)
   }
 
-  @ApiOperation({ summary: 'Actualizar categoría' })
-  @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'id', example: 1 })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        name: { type: 'string', example: 'Cosmiatría Moderna' },
-        bannerImage: { type: 'string', format: 'binary' },
-        miniSiteImage: { type: 'string', format: 'binary' },
-      },
+  
+@ApiOperation({ summary: 'Actualizar categoría' })
+@ApiConsumes('multipart/form-data')
+@ApiParam({ name: 'id', example: 1 })
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      name: { type: 'string', example: 'Cosmiatría Moderna' },
+      bannerImage: { type: 'string', format: 'binary' },
+      miniSiteImage: { type: 'string', format: 'binary' },
     },
-  })
-  @ApiOkResponse({
-    schema: {
-      example: {
-        id: 1,
-        name: 'Cosmiatría Moderna',
-        bannerImageUrl: 'https://cdn.example.com/img/banner-new.jpg',
-        miniSiteImageUrl: 'https://cdn.example.com/img/minisite-new.jpg',
-        companyId: 'company-001',
-        company: { logo: 'https://cdn.example.com/img/logo.png' },
-      },
+  },
+})
+@ApiOkResponse({
+  schema: {
+    example: {
+      id: 1,
+      name: 'Cosmiatría Moderna',
+      bannerImageUrl: 'https://cdn.example.com/img/banner-new.jpg',
+      miniSiteImageUrl: 'https://cdn.example.com/img/minisite-new.jpg',
+      companyId: 'company-001',
+      company: { logo: 'https://cdn.example.com/img/logo.png' },
     },
-  })
-  @Put(':id')
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'bannerImage', maxCount: 1 },
-      { name: 'miniSiteImage', maxCount: 1 },
-    ]),
-  )
-  update(
-    @Param('id') id: string,
-    @Body() data: UpdateCategoryDto,
-    @UploadedFiles()
-    files: {
-      bannerImage?: Express.Multer.File[]
-      miniSiteImage?: Express.Multer.File[]
-    },
-  ) {
-    const patch: Prisma.ProductCompanyCategoryUpdateInput = {
-      ...data,
-    }
-    return this.categoryService.update(
-      +id,
-      patch,
-      files.bannerImage?.[0],
-      files.miniSiteImage?.[0],
-    )
+  },
+})
+@Put(':id')
+@UseInterceptors(
+  FileFieldsInterceptor([
+    { name: 'bannerImage', maxCount: 1 },
+    { name: 'miniSiteImage', maxCount: 1 },
+  ]),
+)
+update(
+  @Param('id') id: string,
+  @Body() data: UpdateCategoryDto,
+  @UploadedFiles()
+  files: {
+    bannerImage?: Express.Multer.File[]
+    miniSiteImage?: Express.Multer.File[]
+  },
+) {
+  const patch: Prisma.ProductCompanyCategoryUpdateInput = {
+    ...data,
   }
+  return this.categoryService.update(
+    +id,
+    patch,
+    files.bannerImage?.[0],
+    files.miniSiteImage?.[0],
+  )
+}
 
   @ApiOperation({ summary: 'Eliminar categoría' })
   @ApiParam({ name: 'id', example: 1 })
