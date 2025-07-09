@@ -13,64 +13,113 @@ exports.CategoryService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const client_1 = require("@prisma/client");
+const cloudinary_service_1 = require("../../cloudinary/cloudinary.service");
 let CategoryService = class CategoryService {
-    constructor(prisma) {
+    constructor(prisma, cloud) {
         this.prisma = prisma;
+        this.cloud = cloud;
     }
-    async create(data) {
-        await this.checkQuota(data.companyId, client_1.FeatureCode.CATEGORIES_TOTAL, 1);
+    async create(dto, banner, minisite) {
+        const existing = await this.prisma.productCompanyCategory.findUnique({
+            where: {
+                name_companyId: {
+                    name: dto.name,
+                    companyId: dto.companyId,
+                },
+            },
+            include: { company: { select: { logo: true } } },
+        });
+        const bannerUrl = banner
+            ? (await this.cloud.uploadImage(banner)).secure_url
+            : existing?.bannerImageUrl ?? '';
+        const minisiteUrl = minisite
+            ? (await this.cloud.uploadImage(minisite)).secure_url
+            : existing?.miniSiteImageUrl ?? '';
+        if (existing) {
+            return this.prisma.productCompanyCategory.update({
+                where: { id: existing.id },
+                data: {
+                    bannerImageUrl: bannerUrl,
+                    miniSiteImageUrl: minisiteUrl,
+                },
+                include: { company: { select: { logo: true } } },
+            });
+        }
+        await this.checkQuota(dto.companyId, client_1.FeatureCode.CATEGORIES_TOTAL, 1);
         const created = await this.prisma.productCompanyCategory.create({
             data: {
-                name: data.name,
-                bannerImageUrl: data.bannerImageUrl,
-                miniSiteImageUrl: data.miniSiteImageUrl,
-                company: { connect: { id: data.companyId } },
+                name: dto.name,
+                bannerImageUrl: bannerUrl,
+                miniSiteImageUrl: minisiteUrl,
+                companyId: dto.companyId,
             },
-            include: {
-                company: { select: { logo: true } },
-            },
+            include: { company: { select: { logo: true } } },
         });
         await this.prisma.companyUsage.upsert({
-            where: { companyId_code: { companyId: data.companyId, code: client_1.FeatureCode.CATEGORIES_TOTAL } },
+            where: {
+                companyId_code: {
+                    companyId: dto.companyId,
+                    code: client_1.FeatureCode.CATEGORIES_TOTAL,
+                },
+            },
             update: { used: { increment: 1 } },
-            create: { companyId: data.companyId, code: client_1.FeatureCode.CATEGORIES_TOTAL, used: 1 },
+            create: {
+                companyId: dto.companyId,
+                code: client_1.FeatureCode.CATEGORIES_TOTAL,
+                used: 1,
+            },
         });
         return created;
     }
     async findAll() {
         return this.prisma.productCompanyCategory.findMany({
-            include: {
-                company: { select: { logo: true } },
-            },
+            include: { company: { select: { logo: true } } },
         });
     }
     async findOne(id) {
-        const category = await this.prisma.productCompanyCategory.findUnique({
-            where: { id },
-            include: {
-                company: { select: { logo: true } },
-            },
-        });
-        if (!category)
-            throw new common_1.NotFoundException('Category not found');
-        return category;
-    }
-    async update(id, data) {
-        await this.prisma.productCompanyCategory.findUniqueOrThrow({ where: { id } });
-        return this.prisma.productCompanyCategory.update({
-            where: { id },
-            data,
-            include: {
-                company: { select: { logo: true } },
-            },
-        });
-    }
-    async remove(id) {
-        const category = await this.prisma.productCompanyCategory.findUniqueOrThrow({
+        const cat = await this.prisma.productCompanyCategory.findUnique({
             where: { id },
             include: { company: { select: { logo: true } } },
         });
+        if (!cat)
+            throw new common_1.NotFoundException('Category not found');
+        return cat;
+    }
+    async update(id, patch, banner, minisite) {
+        const current = await this.prisma.productCompanyCategory.findUniqueOrThrow({ where: { id } });
+        const bannerUrl = banner
+            ? (await this.cloud.uploadImage(banner)).secure_url
+            : current.bannerImageUrl;
+        const minisiteUrl = minisite
+            ? (await this.cloud.uploadImage(minisite)).secure_url
+            : current.miniSiteImageUrl;
+        return this.prisma.productCompanyCategory.update({
+            where: { id },
+            data: {
+                ...patch,
+                bannerImageUrl: bannerUrl,
+                miniSiteImageUrl: minisiteUrl,
+            },
+            include: { company: { select: { logo: true } } },
+        });
+    }
+    async remove(id) {
+        const category = await this.prisma.productCompanyCategory.findUniqueOrThrow({ where: { id } });
         await this.prisma.productCompanyCategory.delete({ where: { id } });
+        await this.prisma.companyUsage.upsert({
+            where: {
+                companyId_code: {
+                    companyId: category.companyId,
+                    code: client_1.FeatureCode.CATEGORIES_TOTAL,
+                },
+            },
+            update: { used: { decrement: 1 } },
+            create: {
+                companyId: category.companyId,
+                code: client_1.FeatureCode.CATEGORIES_TOTAL,
+                used: 0,
+            },
+        });
         return category;
     }
     async findAllByEmpresa(empresaId) {
@@ -120,6 +169,7 @@ let CategoryService = class CategoryService {
 exports.CategoryService = CategoryService;
 exports.CategoryService = CategoryService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        cloudinary_service_1.CloudinaryService])
 ], CategoryService);
 //# sourceMappingURL=category.service.js.map

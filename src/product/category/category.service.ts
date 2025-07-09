@@ -1,70 +1,153 @@
 // src/product/categories/category.service.ts
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common'
-import { PrismaService } from 'src/prisma/prisma.service'
+import {
+  PrismaService,
+} from 'src/prisma/prisma.service'
+import {
+  Prisma,
+  SubscriptionType,
+  FeatureCode,
+} from '@prisma/client'
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service'
 import { CreateCategoryDto } from './dto/create-category.dto'
-import { Prisma, SubscriptionType, FeatureCode } from '@prisma/client'
+import { Express } from 'express'
 
 @Injectable()
 export class CategoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly cloud: CloudinaryService,
+  ) {}
 
-  async create(data: CreateCategoryDto) {
-    await this.checkQuota(data.companyId, FeatureCode.CATEGORIES_TOTAL, 1)
-    const created = await this.prisma.productCompanyCategory.create({
+  // src/product/categories/category.service.ts  – método create actualizado
+async create(
+  dto: CreateCategoryDto,
+  banner?: Express.Multer.File,
+  minisite?: Express.Multer.File,
+) {
+  const existing = await this.prisma.productCompanyCategory.findUnique({
+    where: {
+      name_companyId: {
+        name: dto.name,
+        companyId: dto.companyId,
+      },
+    },
+    include: { company: { select: { logo: true } } },
+  })
+
+  const bannerUrl = banner
+    ? (await this.cloud.uploadImage(banner)).secure_url
+    : existing?.bannerImageUrl ?? ''
+  const minisiteUrl = minisite
+    ? (await this.cloud.uploadImage(minisite)).secure_url
+    : existing?.miniSiteImageUrl ?? ''
+
+  if (existing) {
+    return this.prisma.productCompanyCategory.update({
+      where: { id: existing.id },
       data: {
-        name: data.name,
-        bannerImageUrl: data.bannerImageUrl,
-        miniSiteImageUrl: data.miniSiteImageUrl,
-        company: { connect: { id: data.companyId } },
+        bannerImageUrl: bannerUrl,
+        miniSiteImageUrl: minisiteUrl,
       },
-      include: {
-        company: { select: { logo: true } },
-      },
+      include: { company: { select: { logo: true } } },
     })
-    await this.prisma.companyUsage.upsert({
-      where: { companyId_code: { companyId: data.companyId, code: FeatureCode.CATEGORIES_TOTAL } },
-      update: { used: { increment: 1 } },
-      create: { companyId: data.companyId, code: FeatureCode.CATEGORIES_TOTAL, used: 1 },
-    })
-    return created
   }
+
+  await this.checkQuota(dto.companyId, FeatureCode.CATEGORIES_TOTAL, 1)
+
+  const created = await this.prisma.productCompanyCategory.create({
+    data: {
+      name: dto.name,
+      bannerImageUrl: bannerUrl,
+      miniSiteImageUrl: minisiteUrl,
+      companyId: dto.companyId,
+    },
+    include: { company: { select: { logo: true } } },
+  })
+
+  await this.prisma.companyUsage.upsert({
+    where: {
+      companyId_code: {
+        companyId: dto.companyId,
+        code: FeatureCode.CATEGORIES_TOTAL,
+      },
+    },
+    update: { used: { increment: 1 } },
+    create: {
+      companyId: dto.companyId,
+      code: FeatureCode.CATEGORIES_TOTAL,
+      used: 1,
+    },
+  })
+
+  return created
+}
+
 
   async findAll() {
     return this.prisma.productCompanyCategory.findMany({
-      include: {
-        company: { select: { logo: true } },
-      },
+      include: { company: { select: { logo: true } } },
     })
   }
 
   async findOne(id: number) {
-    const category = await this.prisma.productCompanyCategory.findUnique({
+    const cat = await this.prisma.productCompanyCategory.findUnique({
       where: { id },
-      include: {
-        company: { select: { logo: true } },
-      },
+      include: { company: { select: { logo: true } } },
     })
-    if (!category) throw new NotFoundException('Category not found')
-    return category
+    if (!cat) throw new NotFoundException('Category not found')
+    return cat
   }
 
-  async update(id: number, data: Prisma.ProductCompanyCategoryUpdateInput) {
-    await this.prisma.productCompanyCategory.findUniqueOrThrow({ where: { id } })
+  async update(
+    id: number,
+    patch: Prisma.ProductCompanyCategoryUpdateInput,
+    banner?: Express.Multer.File,
+    minisite?: Express.Multer.File,
+  ) {
+    const current = await this.prisma.productCompanyCategory.findUniqueOrThrow(
+      { where: { id } },
+    )
+
+    const bannerUrl = banner
+      ? (await this.cloud.uploadImage(banner)).secure_url
+      : current.bannerImageUrl
+    const minisiteUrl = minisite
+      ? (await this.cloud.uploadImage(minisite)).secure_url
+      : current.miniSiteImageUrl
+
     return this.prisma.productCompanyCategory.update({
       where: { id },
-      data,
-      include: {
-        company: { select: { logo: true } },
+      data: {
+        ...patch,
+        bannerImageUrl: bannerUrl,
+        miniSiteImageUrl: minisiteUrl,
       },
+      include: { company: { select: { logo: true } } },
     })
   }
 
   async remove(id: number) {
-    const category = await this.prisma.productCompanyCategory.findUniqueOrThrow({
-      where: { id },
-      include: { company: { select: { logo: true } } },
-    })
+    const category = await this.prisma.productCompanyCategory.findUniqueOrThrow(
+      { where: { id } },
+    )
     await this.prisma.productCompanyCategory.delete({ where: { id } })
+
+    await this.prisma.companyUsage.upsert({
+      where: {
+        companyId_code: {
+          companyId: category.companyId,
+          code: FeatureCode.CATEGORIES_TOTAL,
+        },
+      },
+      update: { used: { decrement: 1 } },
+      create: {
+        companyId: category.companyId,
+        code: FeatureCode.CATEGORIES_TOTAL,
+        used: 0,
+      },
+    })
+
     return category
   }
 
@@ -95,7 +178,8 @@ export class CategoryService {
       where: { id: empresaId },
       select: { subscription: true },
     })
-    if (!e?.subscription) throw new BadRequestException('Empresa without subscription')
+    if (!e?.subscription)
+      throw new BadRequestException('Empresa without subscription')
     return e.subscription
   }
 

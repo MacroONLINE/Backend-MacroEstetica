@@ -617,14 +617,16 @@ async registerSpecialities(
 
 
 
-  async getMinisiteVideo(minisiteId: string): Promise<{ videoUrl: string }> {
-    const minisite = await this.prisma.minisite.findUnique({
-      where: { id: minisiteId },
-      select: { videoUrl: true },
-    })
-    if (!minisite) throw new NotFoundException('Minisite no encontrado')
-    if (!minisite.videoUrl) throw new NotFoundException('No hay video cargado para este minisite')
-    return { videoUrl: minisite.videoUrl }
-  }
+// en src/empresa/minisite.service.ts
+async getMinisiteVideoByEmpresa(empresaId: string): Promise<{ videoUrl: string }> {
+  const m = await this.prisma.minisite.findUnique({
+    where: { empresaId },
+    select: { videoUrl: true },
+  });
+  if (!m) throw new NotFoundException('Minisite no encontrado');
+  if (!m.videoUrl) throw new NotFoundException('No hay video cargado para este minisite');
+  return { videoUrl: m.videoUrl };
+}
+
 
 }

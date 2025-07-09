@@ -108,8 +108,8 @@ let MinisiteController = class MinisiteController {
     async uploadVideo(empresaId, video) {
         return this.minisite.upsertMinisiteVideo(empresaId, video);
     }
-    async getVideo(minisiteId) {
-        return this.minisite.getMinisiteVideo(minisiteId);
+    async getVideo(empresaId) {
+        return this.minisite.getMinisiteVideoByEmpresa(empresaId);
     }
 };
 exports.MinisiteController = MinisiteController;
@@ -462,17 +462,12 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], MinisiteController.prototype, "uploadVideo", null);
 __decorate([
-    (0, common_1.Get)(':minisiteId/video'),
-    (0, swagger_1.ApiOperation)({ summary: 'Obtener URL de video del minisite' }),
-    (0, swagger_1.ApiParam)({ name: 'minisiteId', description: 'ID del minisite', example: 'ms_01HTX3C21TEY5Q9Y25E4ARQ1KZ' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        schema: {
-            example: { videoUrl: 'https://cdn.example.com/videos/intro.mp4' },
-        },
-    }),
-    (0, swagger_1.ApiResponse)({ status: 404, description: 'Minisite no encontrado o sin video' }),
-    __param(0, (0, common_1.Param)('minisiteId')),
+    (0, common_1.Get)(':empresaId/video'),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener URL de video del minisite por empresaId' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', description: 'ID de la empresa', example: 'company-001' }),
+    (0, swagger_1.ApiOkResponse)({ schema: { example: { videoUrl: 'https://cdn.example.com/videos/intro.mp4' } } }),
+    (0, swagger_1.ApiNotFoundResponse)({ description: 'Minisite no encontrado o sin video' }),
+    __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)

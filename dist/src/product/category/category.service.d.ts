@@ -1,10 +1,12 @@
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
 import { Prisma } from '@prisma/client';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
 export declare class CategoryService {
     private readonly prisma;
-    constructor(prisma: PrismaService);
-    create(data: CreateCategoryDto): Promise<{
+    private readonly cloud;
+    constructor(prisma: PrismaService, cloud: CloudinaryService);
+    create(dto: CreateCategoryDto, banner?: Express.Multer.File, minisite?: Express.Multer.File): Promise<{
         company: {
             logo: string;
         };
@@ -49,7 +51,7 @@ export declare class CategoryService {
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
-    update(id: number, data: Prisma.ProductCompanyCategoryUpdateInput): Promise<{
+    update(id: number, patch: Prisma.ProductCompanyCategoryUpdateInput, banner?: Express.Multer.File, minisite?: Express.Multer.File): Promise<{
         company: {
             logo: string;
         };
@@ -65,10 +67,6 @@ export declare class CategoryService {
         iconUrl: string | null;
     }>;
     remove(id: number): Promise<{
-        company: {
-            logo: string;
-        };
-    } & {
         id: number;
         name: string;
         companyId: string;

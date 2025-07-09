@@ -1,10 +1,15 @@
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
-import { Prisma } from '@prisma/client';
+declare const UpdateCategoryDto_base: import("@nestjs/mapped-types").MappedType<Partial<CreateCategoryDto>>;
+declare class UpdateCategoryDto extends UpdateCategoryDto_base {
+}
 export declare class CategoryController {
     private readonly categoryService;
     constructor(categoryService: CategoryService);
-    create(dto: CreateCategoryDto): Promise<{
+    create(dto: CreateCategoryDto, files: {
+        bannerImage?: Express.Multer.File[];
+        miniSiteImage?: Express.Multer.File[];
+    }): Promise<{
         company: {
             logo: string;
         };
@@ -49,7 +54,10 @@ export declare class CategoryController {
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
-    update(id: string, data: Prisma.ProductCompanyCategoryUpdateInput): Promise<{
+    update(id: string, data: UpdateCategoryDto, files: {
+        bannerImage?: Express.Multer.File[];
+        miniSiteImage?: Express.Multer.File[];
+    }): Promise<{
         company: {
             logo: string;
         };
@@ -65,10 +73,6 @@ export declare class CategoryController {
         iconUrl: string | null;
     }>;
     remove(id: string): Promise<{
-        company: {
-            logo: string;
-        };
-    } & {
         id: number;
         name: string;
         companyId: string;
@@ -105,3 +109,4 @@ export declare class CategoryController {
         miniSiteImageUrl: string;
     }[]>;
 }
+export {};

@@ -1,7 +1,29 @@
 // src/product/categories/category.controller.ts
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common'
-import { ApiTags, ApiOperation, ApiCreatedResponse, ApiOkResponse, ApiParam, ApiBody, ApiBadRequestResponse, ApiNotFoundResponse } from '@nestjs/swagger'
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common'
+import {
+  ApiTags,
+  ApiOperation,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiBadRequestResponse,
+  ApiNotFoundResponse,
+  ApiParam,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger'
 import { PartialType } from '@nestjs/mapped-types'
+import { FileFieldsInterceptor } from '@nestjs/platform-express'
+import { Express } from 'express'
 import { CategoryService } from './category.service'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { Prisma } from '@prisma/client'
@@ -14,168 +36,203 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @ApiOperation({ summary: 'Crear categoría' })
-  @ApiBody({ type: CreateCategoryDto })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['name', 'companyId'],
+      properties: {
+        name: { type: 'string', example: 'Cosmiatría y Cosmetología' },
+        companyId: { type: 'string', example: 'company-001' },
+        bannerImage: { type: 'string', format: 'binary' },
+        miniSiteImage: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @ApiCreatedResponse({
-    description: 'Categoría creada exitosamente',
     schema: {
       example: {
         id: 1,
         name: 'Cosmiatría y Cosmetología',
-        bannerImageUrl: 'https://example.com/images/banner.jpg',
-        miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+        bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
+        miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
         companyId: 'company-001',
-        company: { logo: 'https://example.com/images/logo.png' }
-      }
-    }
+        company: { logo: 'https://cdn.example.com/img/logo.png' },
+      },
+    },
   })
-  @ApiBadRequestResponse({ description: 'Datos inválidos o límite de categorías excedido' })
+  @ApiBadRequestResponse({ description: 'Datos inválidos o cuota excedida' })
   @Post()
-  create(@Body() dto: CreateCategoryDto) {
-    return this.categoryService.create(dto)
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'bannerImage', maxCount: 1 },
+      { name: 'miniSiteImage', maxCount: 1 },
+    ]),
+  )
+  create(
+    @Body() dto: CreateCategoryDto,
+    @UploadedFiles()
+    files: {
+      bannerImage?: Express.Multer.File[]
+      miniSiteImage?: Express.Multer.File[]
+    },
+  ) {
+    return this.categoryService.create(
+      dto,
+      files.bannerImage?.[0],
+      files.miniSiteImage?.[0],
+    )
   }
 
   @ApiOperation({ summary: 'Listar todas las categorías' })
   @ApiOkResponse({
-    description: 'Listado de todas las categorías',
     schema: {
       example: [
         {
           id: 1,
           name: 'Cosmiatría y Cosmetología',
-          bannerImageUrl: 'https://example.com/images/banner.jpg',
-          miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+          bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
+          miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
           companyId: 'company-001',
-          company: { logo: 'https://example.com/images/logo.png' }
+          company: { logo: 'https://cdn.example.com/img/logo.png' },
         },
-        {
-          id: 2,
-          name: 'Dermatología Avanzada',
-          bannerImageUrl: 'https://example.com/images/banner2.jpg',
-          miniSiteImageUrl: 'https://example.com/images/minisite2.jpg',
-          companyId: 'company-002',
-          company: { logo: 'https://example.com/images/logo2.png' }
-        }
-      ]
-    }
+      ],
+    },
   })
   @Get()
   findAll() {
     return this.categoryService.findAll()
   }
 
-  @ApiOperation({ summary: 'Obtener una categoría por ID (numérico)' })
-  @ApiParam({ name: 'id', description: 'ID de la categoría', example: '1' })
+  @ApiOperation({ summary: 'Obtener una categoría' })
+  @ApiParam({ name: 'id', example: 1 })
   @ApiOkResponse({
-    description: 'Detalle de la categoría',
     schema: {
       example: {
         id: 1,
         name: 'Cosmiatría y Cosmetología',
-        bannerImageUrl: 'https://example.com/images/banner.jpg',
-        miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+        bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
+        miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
         companyId: 'company-001',
-        company: { logo: 'https://example.com/images/logo.png' }
-      }
-    }
+        company: { logo: 'https://cdn.example.com/img/logo.png' },
+      },
+    },
   })
-  @ApiNotFoundResponse({ description: 'Categoría no encontrada' })
+  @ApiNotFoundResponse()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoryService.findOne(+id)
   }
 
-  @ApiOperation({ summary: 'Actualizar una categoría' })
-  @ApiParam({ name: 'id', description: 'ID de la categoría', example: '1' })
-  @ApiBody({ type: UpdateCategoryDto })
+  @ApiOperation({ summary: 'Actualizar categoría' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', example: 1 })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Cosmiatría Moderna' },
+        bannerImage: { type: 'string', format: 'binary' },
+        miniSiteImage: { type: 'string', format: 'binary' },
+      },
+    },
+  })
   @ApiOkResponse({
-    description: 'Categoría actualizada',
     schema: {
       example: {
         id: 1,
         name: 'Cosmiatría Moderna',
-        bannerImageUrl: 'https://example.com/images/banner-new.jpg',
-        miniSiteImageUrl: 'https://example.com/images/minisite-new.jpg',
+        bannerImageUrl: 'https://cdn.example.com/img/banner-new.jpg',
+        miniSiteImageUrl: 'https://cdn.example.com/img/minisite-new.jpg',
         companyId: 'company-001',
-        company: { logo: 'https://example.com/images/logo.png' }
-      }
-    }
+        company: { logo: 'https://cdn.example.com/img/logo.png' },
+      },
+    },
   })
-  @ApiBadRequestResponse({ description: 'Datos inválidos' })
   @Put(':id')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'bannerImage', maxCount: 1 },
+      { name: 'miniSiteImage', maxCount: 1 },
+    ]),
+  )
   update(
     @Param('id') id: string,
-    @Body() data: Prisma.ProductCompanyCategoryUpdateInput
+    @Body() data: UpdateCategoryDto,
+    @UploadedFiles()
+    files: {
+      bannerImage?: Express.Multer.File[]
+      miniSiteImage?: Express.Multer.File[]
+    },
   ) {
-    return this.categoryService.update(+id, data)
+    const patch: Prisma.ProductCompanyCategoryUpdateInput = {
+      ...data,
+    }
+    return this.categoryService.update(
+      +id,
+      patch,
+      files.bannerImage?.[0],
+      files.miniSiteImage?.[0],
+    )
   }
 
-  @ApiOperation({ summary: 'Eliminar una categoría' })
-  @ApiParam({ name: 'id', description: 'ID de la categoría', example: '1' })
+  @ApiOperation({ summary: 'Eliminar categoría' })
+  @ApiParam({ name: 'id', example: 1 })
   @ApiOkResponse({
-    description: 'Categoría eliminada',
     schema: {
       example: {
         id: 1,
         name: 'Cosmiatría y Cosmetología',
-        bannerImageUrl: 'https://example.com/images/banner.jpg',
-        miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
+        bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
+        miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
         companyId: 'company-001',
-        company: { logo: 'https://example.com/images/logo.png' }
-      }
-    }
+        company: { logo: 'https://cdn.example.com/img/logo.png' },
+      },
+    },
   })
-  @ApiNotFoundResponse({ description: 'Categoría no encontrada' })
+  @ApiNotFoundResponse()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoryService.remove(+id)
   }
 
-  @ApiOperation({ summary: 'Obtener categorías + productos de una empresa' })
-  @ApiParam({ name: 'empresaId', description: 'ID de la empresa', example: 'company-001' })
+  @ApiOperation({ summary: 'Categorías y productos por empresa' })
+  @ApiParam({ name: 'empresaId', example: 'company-001' })
   @ApiOkResponse({
-    description: 'Listado de categorías con productos',
     schema: {
       example: [
         {
           id: 1,
           name: 'Cosmiatría y Cosmetología',
-          bannerImageUrl: 'https://example.com/images/banner.jpg',
-          miniSiteImageUrl: 'https://example.com/images/minisite.jpg',
-          companyId: 'company-001',
+          bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
+          miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
           products: [
             { id: 'prod-001', name: 'Gel Limpiador Facial' },
-            { id: 'prod-002', name: 'Ampolla Rejuvenecedora' }
+            { id: 'prod-002', name: 'Ampolla Rejuvenecedora' },
           ],
-          company: { logo: 'https://example.com/images/logo.png' }
-        }
-      ]
-    }
+          company: { logo: 'https://cdn.example.com/img/logo.png' },
+        },
+      ],
+    },
   })
   @Get('by-empresa/:empresaId')
   findAllByEmpresa(@Param('empresaId') empresaId: string) {
     return this.categoryService.findAllByEmpresa(empresaId)
   }
 
-  @ApiOperation({ summary: 'Obtener categorías de una empresa (sin productos)' })
-  @ApiParam({ name: 'empresaId', description: 'ID de la empresa', example: 'company-001' })
+  @ApiOperation({ summary: 'Categorías básicas por empresa' })
+  @ApiParam({ name: 'empresaId', example: 'company-001' })
   @ApiOkResponse({
-    description: 'Listado de categorías',
     schema: {
       example: [
         {
           id: 1,
           name: 'Cosmiatría y Cosmetología',
-          bannerImageUrl: 'https://example.com/images/banner.jpg',
-          miniSiteImageUrl: 'https://example.com/images/minisite.jpg'
+          bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
+          miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
         },
-        {
-          id: 2,
-          name: 'Dermatología Avanzada',
-          bannerImageUrl: 'https://example.com/images/banner2.jpg',
-          miniSiteImageUrl: 'https://example.com/images/minisite2.jpg'
-        }
-      ]
-    }
+      ],
+    },
   })
   @Get('empresa/:empresaId/categories')
   findCategoriesByEmpresa(@Param('empresaId') empresaId: string) {

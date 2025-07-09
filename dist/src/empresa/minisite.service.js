@@ -469,16 +469,16 @@ let MinisiteService = class MinisiteService {
         });
         return { videoUrl: uploaded.secure_url };
     }
-    async getMinisiteVideo(minisiteId) {
-        const minisite = await this.prisma.minisite.findUnique({
-            where: { id: minisiteId },
+    async getMinisiteVideoByEmpresa(empresaId) {
+        const m = await this.prisma.minisite.findUnique({
+            where: { empresaId },
             select: { videoUrl: true },
         });
-        if (!minisite)
+        if (!m)
             throw new common_1.NotFoundException('Minisite no encontrado');
-        if (!minisite.videoUrl)
+        if (!m.videoUrl)
             throw new common_1.NotFoundException('No hay video cargado para este minisite');
-        return { videoUrl: minisite.videoUrl };
+        return { videoUrl: m.videoUrl };
     }
 };
 exports.MinisiteService = MinisiteService;

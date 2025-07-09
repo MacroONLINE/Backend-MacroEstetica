@@ -19,6 +19,7 @@ import {
   ApiBody,
   ApiConflictResponse,
   ApiConsumes,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -477,20 +478,14 @@ async uploadVideo(
 
 
 
-@Get(':minisiteId/video')
-@ApiOperation({ summary: 'Obtener URL de video del minisite' })
-@ApiParam({ name: 'minisiteId', description: 'ID del minisite', example: 'ms_01HTX3C21TEY5Q9Y25E4ARQ1KZ' })
-@ApiResponse({
-  status: 200,
-  schema: {
-    example: { videoUrl: 'https://cdn.example.com/videos/intro.mp4' },
-  },
-})
-@ApiResponse({ status: 404, description: 'Minisite no encontrado o sin video' })
-async getVideo(@Param('minisiteId') minisiteId: string) {
-  return this.minisite.getMinisiteVideo(minisiteId)
+@Get(':empresaId/video')
+@ApiOperation({ summary: 'Obtener URL de video del minisite por empresaId' })
+@ApiParam({ name: 'empresaId', description: 'ID de la empresa', example: 'company-001' })
+@ApiOkResponse({ schema: { example: { videoUrl: 'https://cdn.example.com/videos/intro.mp4' } } })
+@ApiNotFoundResponse({ description: 'Minisite no encontrado o sin video' })
+async getVideo(@Param('empresaId') empresaId: string) {
+  return this.minisite.getMinisiteVideoByEmpresa(empresaId);
 }
-
 
 
 
