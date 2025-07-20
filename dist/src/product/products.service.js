@@ -111,10 +111,42 @@ let ProductService = class ProductService {
         });
         return { ...product, liked: reaction?.type === client_1.ReactionType.LIKE };
     }
+    toStrArr(v) {
+        if (v === undefined)
+            return undefined;
+        if (Array.isArray(v))
+            return v.map(String);
+        if (typeof v === 'string') {
+            try {
+                return JSON.parse(v);
+            }
+            catch (_) {
+                return v.split(',').map(s => s.trim()).filter(Boolean);
+            }
+        }
+        return [String(v)];
+    }
+    toBool(v) {
+        if (v === undefined)
+            return undefined;
+        if (typeof v === 'boolean')
+            return v;
+        return ['true', '1', 'yes', 'on'].includes(String(v).toLowerCase());
+    }
     async updateWithImages(id, body, files) {
         const current = await this.prisma.product.findUnique({ where: { id } });
         if (!current)
             throw new common_1.NotFoundException(`Producto con ID ${id} no encontrado`);
+        const metaKey = Object.keys(body).find(k => k.endsWith('_products') || k === 'products');
+        if (metaKey) {
+            try {
+                Object.assign(body, JSON.parse(body[metaKey]));
+                delete body[metaKey];
+            }
+            catch {
+                throw new common_1.BadRequestException('JSON inválido en el campo products');
+            }
+        }
         let mainUrl = current.imageMain ?? '';
         const mainFile = files.find(f => f.fieldname === 'main');
         if (mainFile) {
@@ -141,27 +173,21 @@ let ProductService = class ProductService {
             finalGallery[i] =
                 uploadedGallery[i] ?? textGallery[i] ?? current.imageGallery[i] ?? '';
         }
-        const jArr = (v) => v ? JSON.parse(v).map(String) : undefined;
-        const jBool = (v) => v === undefined ? undefined : v === 'true' || v === '1';
         const data = {
             name: body.name ?? undefined,
             description: body.description ?? undefined,
             lab: body.lab ?? undefined,
-            activeIngredients: jArr(body.activeIngredients),
-            features: jArr(body.features),
-            benefits: jArr(body.benefits),
+            activeIngredients: this.toStrArr(body.activeIngredients),
+            features: this.toStrArr(body.features),
+            benefits: this.toStrArr(body.benefits),
             problemAddressed: body.problemAddressed ?? undefined,
             imageMain: mainUrl,
             imageGallery: finalGallery,
-            isFeatured: jBool(body.isFeatured),
-            isBestSeller: jBool(body.isBestSeller),
-            isOnSale: jBool(body.isOnSale),
-            category: body.categoryId
-                ? { connect: { id: Number(body.categoryId) } }
-                : undefined,
-            company: body.companyId
-                ? { connect: { id: body.companyId } }
-                : undefined,
+            isFeatured: this.toBool(body.isFeatured),
+            isBestSeller: this.toBool(body.isBestSeller),
+            isOnSale: this.toBool(body.isOnSale),
+            category: body.categoryId ? { connect: { id: Number(body.categoryId) } } : undefined,
+            company: body.companyId ? { connect: { id: body.companyId } } : undefined,
         };
         const updated = await this.prisma.product.update({ where: { id }, data });
         const branch = (body.type ?? 'NORMAL').toUpperCase();
@@ -202,19 +228,17 @@ let ProductService = class ProductService {
             await this.prisma.minisiteHighlightProduct.upsert({
                 where: { minisiteId_productId: { minisiteId, productId: id } },
                 update: {
-                    highlightFeatures: jArr(body.highlightFeatures) ?? [],
+                    highlightFeatures: this.toStrArr(body.highlightFeatures) ?? [],
                     highlightDescription: body.highlightDescription ?? '',
                 },
                 create: {
                     minisiteId,
                     productId: id,
-                    highlightFeatures: jArr(body.highlightFeatures) ?? [],
+                    highlightFeatures: this.toStrArr(body.highlightFeatures) ?? [],
                     highlightDescription: body.highlightDescription ?? '',
                 },
             });
-            await this.prisma.minisiteFeaturedProduct.deleteMany({
-                where: { productId: id },
-            });
+            await this.prisma.minisiteFeaturedProduct.deleteMany({ where: { productId: id } });
             await this.prisma.minisiteProductOffer.deleteMany({
                 where: { productId: id, minisiteId },
             });

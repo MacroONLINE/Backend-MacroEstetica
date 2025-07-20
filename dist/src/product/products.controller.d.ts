@@ -5,8 +5,8 @@ export declare class ProductController {
     private readonly productService;
     constructor(productService: ProductService);
     create(dto: CreateProductDto): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -25,8 +25,8 @@ export declare class ProductController {
         presentations: string[];
     }>;
     findAll(companyId: string, userId?: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -45,8 +45,8 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findByCategory(companyId: string, categoryId: string, userId?: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -65,8 +65,8 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findFeatured(companyId: string, userId?: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -85,8 +85,8 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findHighlighted(companyId: string, userId?: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -105,8 +105,8 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findOffer(companyId: string, userId?: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -125,8 +125,8 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findNormal(companyId: string, userId?: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -146,8 +146,8 @@ export declare class ProductController {
     }[]>;
     findAllGrouped(companyId: string, userId?: string): Promise<{
         FEATURED: {
-            name: string;
             id: string;
+            name: string;
             description: string;
             companyId: string;
             createdAt: Date;
@@ -166,8 +166,8 @@ export declare class ProductController {
             presentations: string[];
         }[];
         HIGHLIGHT: {
-            name: string;
             id: string;
+            name: string;
             description: string;
             companyId: string;
             createdAt: Date;
@@ -186,8 +186,8 @@ export declare class ProductController {
             presentations: string[];
         }[];
         OFFER: {
-            name: string;
             id: string;
+            name: string;
             description: string;
             companyId: string;
             createdAt: Date;
@@ -206,8 +206,8 @@ export declare class ProductController {
             presentations: string[];
         }[];
         NORMAL: {
-            name: string;
             id: string;
+            name: string;
             description: string;
             companyId: string;
             createdAt: Date;
@@ -227,8 +227,8 @@ export declare class ProductController {
         }[];
     }>;
     findById(id: string, userId?: string): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -247,8 +247,8 @@ export declare class ProductController {
         presentations: string[];
     } | {
         liked: boolean;
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -267,8 +267,8 @@ export declare class ProductController {
         presentations: string[];
     }>;
     update(id: string, body: Record<string, string>, files: Express.Multer.File[]): Promise<{
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;
@@ -302,8 +302,8 @@ export declare class ProductController {
     }>;
     getProductWishlist(userId: string): Promise<{
         liked: boolean;
-        name: string;
         id: string;
+        name: string;
         description: string;
         companyId: string;
         createdAt: Date;

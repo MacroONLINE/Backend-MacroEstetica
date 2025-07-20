@@ -249,6 +249,8 @@ export declare class ProductService {
         problemAddressed: string | null;
         presentations: string[];
     }>;
+    private toStrArr;
+    private toBool;
     updateWithImages(id: string, body: Record<string, string>, files: Express.Multer.File[]): Promise<Product>;
     remove(id: string): Promise<{
         message: string;
