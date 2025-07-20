@@ -19,6 +19,7 @@ const mapped_types_1 = require("@nestjs/mapped-types");
 const platform_express_1 = require("@nestjs/platform-express");
 const category_service_1 = require("./category.service");
 const create_category_dto_1 = require("./dto/create-category.dto");
+const jwt_auth_guard_1 = require("../../auth/guards/jwt-auth.guard");
 class UpdateCategoryDto extends (0, mapped_types_1.PartialType)(create_category_dto_1.CreateCategoryDto) {
 }
 let CategoryController = class CategoryController {
@@ -68,6 +69,8 @@ __decorate([
     (0, swagger_1.ApiCreatedResponse)(),
     (0, swagger_1.ApiBadRequestResponse)(),
     (0, common_1.Post)(),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([{ name: 'miniSiteImage', maxCount: 1 }])),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.UploadedFiles)()),
@@ -77,6 +80,7 @@ __decorate([
 ], CategoryController.prototype, "create", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Listar todas las categorías' }),
+    (0, swagger_1.ApiOkResponse)(),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -86,6 +90,7 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener una categoría' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 1 }),
     (0, swagger_1.ApiNotFoundResponse)(),
+    (0, swagger_1.ApiOkResponse)(),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -106,6 +111,8 @@ __decorate([
         },
     }),
     (0, common_1.Put)(':id'),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([{ name: 'miniSiteImage', maxCount: 1 }])),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),

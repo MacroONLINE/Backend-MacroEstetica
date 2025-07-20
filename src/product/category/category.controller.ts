@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UsePipes,
   ValidationPipe,
+  UseGuards,
 } from '@nestjs/common'
 import {
   ApiTags,
@@ -22,6 +23,7 @@ import {
   ApiParam,
   ApiConsumes,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger'
 import { PartialType } from '@nestjs/mapped-types'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
@@ -29,6 +31,7 @@ import { Express } from 'express'
 import { CategoryService } from './category.service'
 import { CreateCategoryDto } from './dto/create-category.dto'
 import { Prisma } from '@prisma/client'
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
 
 class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
 
@@ -54,19 +57,21 @@ export class CategoryController {
   @ApiCreatedResponse()
   @ApiBadRequestResponse()
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'miniSiteImage', maxCount: 1 }]),
   )
   create(
     @Body() dto: CreateCategoryDto,
-    @UploadedFiles()
-    files: Record<string, Express.Multer.File[]> = {},
+    @UploadedFiles() files: Record<string, Express.Multer.File[]> = {},
   ) {
     const image = files.miniSiteImage?.[0]
     return this.categoryService.create(dto, image)
   }
 
   @ApiOperation({ summary: 'Listar todas las categorías' })
+  @ApiOkResponse()
   @Get()
   findAll() {
     return this.categoryService.findAll()
@@ -75,6 +80,7 @@ export class CategoryController {
   @ApiOperation({ summary: 'Obtener una categoría' })
   @ApiParam({ name: 'id', example: 1 })
   @ApiNotFoundResponse()
+  @ApiOkResponse()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoryService.findOne(+id)
@@ -93,14 +99,15 @@ export class CategoryController {
     },
   })
   @Put(':id')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileFieldsInterceptor([{ name: 'miniSiteImage', maxCount: 1 }]),
   )
   update(
     @Param('id') id: string,
     @Body() data: UpdateCategoryDto,
-    @UploadedFiles()
-    files: Record<string, Express.Multer.File[]> = {},
+    @UploadedFiles() files: Record<string, Express.Multer.File[]> = {},
   ) {
     const patch: Prisma.ProductCompanyCategoryUpdateInput = { ...data }
     const image = files.miniSiteImage?.[0]
