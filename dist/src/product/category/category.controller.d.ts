@@ -6,19 +6,16 @@ declare class UpdateCategoryDto extends UpdateCategoryDto_base {
 export declare class CategoryController {
     private readonly categoryService;
     constructor(categoryService: CategoryService);
-    create(dto: CreateCategoryDto, files: {
-        bannerImage?: Express.Multer.File[];
-        miniSiteImage?: Express.Multer.File[];
-    }): Promise<{
+    create(dto: CreateCategoryDto, files?: Record<string, Express.Multer.File[]>): Promise<{
         company: {
             logo: string;
         };
     } & {
-        id: number;
         name: string;
-        companyId: string;
+        id: number;
         createdAt: Date;
         updatedAt: Date;
+        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -29,11 +26,11 @@ export declare class CategoryController {
             logo: string;
         };
     } & {
-        id: number;
         name: string;
-        companyId: string;
+        id: number;
         createdAt: Date;
         updatedAt: Date;
+        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
@@ -44,67 +41,64 @@ export declare class CategoryController {
             logo: string;
         };
     } & {
-        id: number;
         name: string;
-        companyId: string;
+        id: number;
         createdAt: Date;
         updatedAt: Date;
+        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
-    update(id: string, data: UpdateCategoryDto, files: {
-        bannerImage?: Express.Multer.File[];
-        miniSiteImage?: Express.Multer.File[];
-    }): Promise<{
+    update(id: string, data: UpdateCategoryDto, files?: Record<string, Express.Multer.File[]>): Promise<{
         company: {
             logo: string;
         };
     } & {
-        id: number;
         name: string;
-        companyId: string;
+        id: number;
         createdAt: Date;
         updatedAt: Date;
+        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
     remove(id: string): Promise<{
-        id: number;
         name: string;
-        companyId: string;
+        id: number;
         createdAt: Date;
         updatedAt: Date;
+        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
     }>;
     findAllByEmpresa(empresaId: string): Promise<({
-        products: {
-            id: string;
-            name: string;
-        }[];
         company: {
             logo: string;
         };
+        products: {
+            name: string;
+            id: string;
+        }[];
     } & {
-        id: number;
         name: string;
-        companyId: string;
+        id: number;
         createdAt: Date;
         updatedAt: Date;
+        companyId: string;
         bannerImageUrl: string | null;
         miniSiteImageUrl: string | null;
         footerBanner: string | null;
         iconUrl: string | null;
     })[]>;
     findCategoriesByEmpresa(empresaId: string): Promise<{
-        id: number;
         name: string;
+        id: number;
         bannerImageUrl: string;
         miniSiteImageUrl: string;
     }[]>;

@@ -326,37 +326,6 @@ let MinisiteService = class MinisiteService {
         }, { maxWait: 10_000, timeout: 120_000 });
         return [...results, ...txResults];
     }
-    async getSpecialities(empresaId) {
-        return this.prisma.minisiteSpeciality.findMany({
-            where: { minisite: { empresaId } },
-            select: { id: true, title: true, imageUrl: true },
-        });
-    }
-    async registerSpecialities(empresaId, body, files) {
-        const metas = JSON.parse(body.specialitiesMeta || '[]');
-        const count = metas.length;
-        await this.checkQuota(empresaId, client_1.FeatureCode.SPECIALITY_IMAGES_TOTAL, count);
-        const minisiteId = await this.minisite(empresaId);
-        const uploads = await Promise.all(files.map(f => this.cloud.uploadImage(f)));
-        return this.prisma.$transaction(async (tx) => {
-            await tx.minisiteSpeciality.deleteMany({ where: { minisiteId } });
-            const data = metas.map((m, idx) => ({
-                minisiteId,
-                title: m.title,
-                imageUrl: uploads[idx]?.secure_url ?? '',
-            }));
-            await tx.minisiteSpeciality.createMany({ data });
-            await tx.companyUsage.upsert({
-                where: { companyId_code: { companyId: empresaId, code: client_1.FeatureCode.SPECIALITY_IMAGES_TOTAL } },
-                update: { used: count },
-                create: { companyId: empresaId, code: client_1.FeatureCode.SPECIALITY_IMAGES_TOTAL, used: count },
-            });
-            return tx.minisiteSpeciality.findMany({
-                where: { minisiteId },
-                select: { id: true, title: true, imageUrl: true },
-            });
-        });
-    }
     async plan(empresaId) {
         const e = await this.prisma.empresa.findUnique({ where: { id: empresaId }, select: { subscription: true } });
         if (!e?.subscription)
@@ -447,14 +416,6 @@ let MinisiteService = class MinisiteService {
                     }),
                     used,
                 };
-            case client_1.FeatureCode.SPECIALITY_IMAGES_TOTAL:
-                return {
-                    items: await this.prisma.minisiteSpeciality.findMany({
-                        where: { minisite: { empresaId } },
-                        select: { id: true, title: true, imageUrl: true },
-                    }),
-                    used,
-                };
             default:
                 throw new common_1.BadRequestException('Código no soportado');
         }
@@ -469,7 +430,7 @@ let MinisiteService = class MinisiteService {
         });
         return { videoUrl: uploaded.secure_url };
     }
-    async getMinisiteVideoByEmpresa(empresaId) {
+    async getMinisiteVideoByCompany(empresaId) {
         const m = await this.prisma.minisite.findUnique({
             where: { empresaId },
             select: { videoUrl: true },
@@ -477,7 +438,7 @@ let MinisiteService = class MinisiteService {
         if (!m)
             throw new common_1.NotFoundException('Minisite no encontrado');
         if (!m.videoUrl)
-            throw new common_1.NotFoundException('No hay video cargado para este minisite');
+            throw new common_1.NotFoundException('No hay video cargado para esta empresa');
         return { videoUrl: m.videoUrl };
     }
 };

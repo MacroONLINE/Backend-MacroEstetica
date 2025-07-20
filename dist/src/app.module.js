@@ -28,6 +28,7 @@ const instructor_module_1 = require("./instructor/instructor.module");
 const agora_module_1 = require("./agora/agora.module");
 const chat_module_1 = require("./chat/chat.module");
 const blog_module_1 = require("./blog/blog.module");
+const invitations_module_1 = require("./invitations/invitations.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -49,7 +50,8 @@ exports.AppModule = AppModule = __decorate([
             instructor_module_1.InstructorModule,
             agora_module_1.AgoraModule,
             chat_module_1.ChatModule,
-            blog_module_1.BlogModule
+            blog_module_1.BlogModule,
+            invitations_module_1.InvitationsModule
         ],
         controllers: [app_controller_1.AppController, users_controller_1.UsersController],
         providers: [app_service_1.AppService, users_service_1.UsersService],

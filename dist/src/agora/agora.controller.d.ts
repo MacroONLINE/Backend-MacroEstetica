@@ -11,7 +11,7 @@ export declare class AgoraController {
         rtmToken: string;
         channelName: string;
         uid: string;
-        role: "audience" | "host";
+        role: "host" | "audience";
         expiresAt: number;
     }>;
     getRoomId(channelName: string): Promise<{

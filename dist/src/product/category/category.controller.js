@@ -25,8 +25,9 @@ let CategoryController = class CategoryController {
     constructor(categoryService) {
         this.categoryService = categoryService;
     }
-    create(dto, files) {
-        return this.categoryService.create(dto, files.bannerImage?.[0], files.miniSiteImage?.[0]);
+    create(dto, files = {}) {
+        const image = files.miniSiteImage?.[0];
+        return this.categoryService.create(dto, image);
     }
     findAll() {
         return this.categoryService.findAll();
@@ -34,11 +35,10 @@ let CategoryController = class CategoryController {
     findOne(id) {
         return this.categoryService.findOne(+id);
     }
-    update(id, data, files) {
-        const patch = {
-            ...data,
-        };
-        return this.categoryService.update(+id, patch, files.bannerImage?.[0], files.miniSiteImage?.[0]);
+    update(id, data, files = {}) {
+        const patch = { ...data };
+        const image = files.miniSiteImage?.[0];
+        return this.categoryService.update(+id, patch, image);
     }
     remove(id) {
         return this.categoryService.remove(+id);
@@ -61,29 +61,14 @@ __decorate([
             properties: {
                 name: { type: 'string', example: 'Cosmiatría y Cosmetología' },
                 companyId: { type: 'string', example: 'company-001' },
-                bannerImage: { type: 'string', format: 'binary' },
                 miniSiteImage: { type: 'string', format: 'binary' },
             },
         },
     }),
-    (0, swagger_1.ApiCreatedResponse)({
-        schema: {
-            example: {
-                id: 1,
-                name: 'Cosmiatría y Cosmetología',
-                bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
-                miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
-                companyId: 'company-001',
-                company: { logo: 'https://cdn.example.com/img/logo.png' },
-            },
-        },
-    }),
-    (0, swagger_1.ApiBadRequestResponse)({ description: 'Datos inválidos o cuota excedida' }),
+    (0, swagger_1.ApiCreatedResponse)(),
+    (0, swagger_1.ApiBadRequestResponse)(),
     (0, common_1.Post)(),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
-        { name: 'bannerImage', maxCount: 1 },
-        { name: 'miniSiteImage', maxCount: 1 },
-    ])),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([{ name: 'miniSiteImage', maxCount: 1 }])),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
@@ -92,20 +77,6 @@ __decorate([
 ], CategoryController.prototype, "create", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Listar todas las categorías' }),
-    (0, swagger_1.ApiOkResponse)({
-        schema: {
-            example: [
-                {
-                    id: 1,
-                    name: 'Cosmiatría y Cosmetología',
-                    bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
-                    miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
-                    companyId: 'company-001',
-                    company: { logo: 'https://cdn.example.com/img/logo.png' },
-                },
-            ],
-        },
-    }),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
@@ -114,18 +85,6 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Obtener una categoría' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 1 }),
-    (0, swagger_1.ApiOkResponse)({
-        schema: {
-            example: {
-                id: 1,
-                name: 'Cosmiatría y Cosmetología',
-                bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
-                miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
-                companyId: 'company-001',
-                company: { logo: 'https://cdn.example.com/img/logo.png' },
-            },
-        },
-    }),
     (0, swagger_1.ApiNotFoundResponse)(),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -142,28 +101,12 @@ __decorate([
             type: 'object',
             properties: {
                 name: { type: 'string', example: 'Cosmiatría Moderna' },
-                bannerImage: { type: 'string', format: 'binary' },
                 miniSiteImage: { type: 'string', format: 'binary' },
             },
         },
     }),
-    (0, swagger_1.ApiOkResponse)({
-        schema: {
-            example: {
-                id: 1,
-                name: 'Cosmiatría Moderna',
-                bannerImageUrl: 'https://cdn.example.com/img/banner-new.jpg',
-                miniSiteImageUrl: 'https://cdn.example.com/img/minisite-new.jpg',
-                companyId: 'company-001',
-                company: { logo: 'https://cdn.example.com/img/logo.png' },
-            },
-        },
-    }),
     (0, common_1.Put)(':id'),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
-        { name: 'bannerImage', maxCount: 1 },
-        { name: 'miniSiteImage', maxCount: 1 },
-    ])),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([{ name: 'miniSiteImage', maxCount: 1 }])),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.UploadedFiles)()),
@@ -174,18 +117,6 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Eliminar categoría' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 1 }),
-    (0, swagger_1.ApiOkResponse)({
-        schema: {
-            example: {
-                id: 1,
-                name: 'Cosmiatría y Cosmetología',
-                bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
-                miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
-                companyId: 'company-001',
-                company: { logo: 'https://cdn.example.com/img/logo.png' },
-            },
-        },
-    }),
     (0, swagger_1.ApiNotFoundResponse)(),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
@@ -196,23 +127,6 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Categorías y productos por empresa' }),
     (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
-    (0, swagger_1.ApiOkResponse)({
-        schema: {
-            example: [
-                {
-                    id: 1,
-                    name: 'Cosmiatría y Cosmetología',
-                    bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
-                    miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
-                    products: [
-                        { id: 'prod-001', name: 'Gel Limpiador Facial' },
-                        { id: 'prod-002', name: 'Ampolla Rejuvenecedora' },
-                    ],
-                    company: { logo: 'https://cdn.example.com/img/logo.png' },
-                },
-            ],
-        },
-    }),
     (0, common_1.Get)('by-empresa/:empresaId'),
     __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),
@@ -222,18 +136,6 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Categorías básicas por empresa' }),
     (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
-    (0, swagger_1.ApiOkResponse)({
-        schema: {
-            example: [
-                {
-                    id: 1,
-                    name: 'Cosmiatría y Cosmetología',
-                    bannerImageUrl: 'https://cdn.example.com/img/banner.jpg',
-                    miniSiteImageUrl: 'https://cdn.example.com/img/minisite.jpg',
-                },
-            ],
-        },
-    }),
     (0, common_1.Get)('empresa/:empresaId/categories'),
     __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),
@@ -243,6 +145,7 @@ __decorate([
 exports.CategoryController = CategoryController = __decorate([
     (0, swagger_1.ApiTags)('product-categories'),
     (0, common_1.Controller)('product/categories'),
+    (0, common_1.UsePipes)(new common_1.ValidationPipe({ whitelist: true, transform: true })),
     __metadata("design:paramtypes", [category_service_1.CategoryService])
 ], CategoryController);
 //# sourceMappingURL=category.controller.js.map

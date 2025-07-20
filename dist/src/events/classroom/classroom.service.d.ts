@@ -95,11 +95,22 @@ export declare class ClassroomService {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }>;
     getClassroomById(id: string): Promise<{
@@ -188,11 +199,22 @@ export declare class ClassroomService {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }>;
     updateClassroom(id: string, empresaId: string, dto: UpdateClassroomDto, image?: Express.Multer.File): Promise<{
@@ -281,11 +303,22 @@ export declare class ClassroomService {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }>;
     deleteClassroom(id: string): Promise<{
@@ -377,11 +410,22 @@ export declare class ClassroomService {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }[]>;
     getLiveClassrooms(): Promise<{
@@ -470,11 +514,22 @@ export declare class ClassroomService {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }[]>;
     addOrator(classroomId: string, instructorId: string): Promise<{
@@ -575,11 +630,22 @@ export declare class ClassroomService {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }[]>;
     getAllOrators(empresaId: string): Promise<{

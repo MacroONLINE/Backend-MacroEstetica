@@ -29,9 +29,9 @@ export declare class CoursesController {
         instructorId: string | null;
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
         isFeatured: boolean | null;
-        participantsCount: number;
         commentsCount: number;
         averageRating: number;
+        participantsCount: number;
         introductoryVideoUrl: string | null;
     }>;
     getActiveCourses(userId: string): Promise<ActiveCoursesDto>;

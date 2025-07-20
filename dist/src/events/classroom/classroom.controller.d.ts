@@ -94,11 +94,22 @@ export declare class ClassroomController {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }>;
     update(empresaId: string, id: string, dto: UpdateClassroomDto, image?: Express.Multer.File): Promise<{
@@ -187,11 +198,22 @@ export declare class ClassroomController {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }>;
     remove(id: string): Promise<{
@@ -283,11 +305,22 @@ export declare class ClassroomController {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }[]>;
     live(): Promise<{
@@ -376,11 +409,22 @@ export declare class ClassroomController {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }[]>;
     getOrators(empresaId: string): Promise<{
@@ -477,11 +521,22 @@ export declare class ClassroomController {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }>;
     findAllByEmpresa(empresaId: string): Promise<{
@@ -570,11 +625,22 @@ export declare class ClassroomController {
             webUrl: string | null;
             legalName: string | null;
         };
+        invites: {
+            id: string;
+            userId: string | null;
+            status: $Enums.InviteStatus;
+            classroomId: string;
+            email: string;
+            token: string;
+            sentAt: Date;
+            acceptedAt: Date | null;
+        }[];
         _count: {
             enrollments: number;
             attendees: number;
             orators: number;
             empresa: number;
+            invites: number;
         };
     }[]>;
     addOrator(id: string, dto: OratorDto): Promise<{

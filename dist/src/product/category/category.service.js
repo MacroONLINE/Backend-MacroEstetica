@@ -20,28 +20,19 @@ let CategoryService = class CategoryService {
         this.cloud = cloud;
     }
     async create(dto, banner, minisite) {
+        if (!dto.name || !dto.companyId) {
+            throw new common_1.BadRequestException('name y companyId son obligatorios');
+        }
         const existing = await this.prisma.productCompanyCategory.findUnique({
-            where: {
-                name_companyId: {
-                    name: dto.name,
-                    companyId: dto.companyId,
-                },
-            },
+            where: { name_companyId: { name: dto.name, companyId: dto.companyId } },
             include: { company: { select: { logo: true } } },
         });
-        const bannerUrl = banner
-            ? (await this.cloud.uploadImage(banner)).secure_url
-            : existing?.bannerImageUrl ?? '';
-        const minisiteUrl = minisite
-            ? (await this.cloud.uploadImage(minisite)).secure_url
-            : existing?.miniSiteImageUrl ?? '';
+        const bannerUrl = banner ? (await this.cloud.uploadImage(banner)).secure_url : existing?.bannerImageUrl ?? '';
+        const minisiteUrl = minisite ? (await this.cloud.uploadImage(minisite)).secure_url : existing?.miniSiteImageUrl ?? '';
         if (existing) {
             return this.prisma.productCompanyCategory.update({
                 where: { id: existing.id },
-                data: {
-                    bannerImageUrl: bannerUrl,
-                    miniSiteImageUrl: minisiteUrl,
-                },
+                data: { bannerImageUrl: bannerUrl, miniSiteImageUrl: minisiteUrl },
                 include: { company: { select: { logo: true } } },
             });
         }
@@ -56,18 +47,9 @@ let CategoryService = class CategoryService {
             include: { company: { select: { logo: true } } },
         });
         await this.prisma.companyUsage.upsert({
-            where: {
-                companyId_code: {
-                    companyId: dto.companyId,
-                    code: client_1.FeatureCode.CATEGORIES_TOTAL,
-                },
-            },
+            where: { companyId_code: { companyId: dto.companyId, code: client_1.FeatureCode.CATEGORIES_TOTAL } },
             update: { used: { increment: 1 } },
-            create: {
-                companyId: dto.companyId,
-                code: client_1.FeatureCode.CATEGORIES_TOTAL,
-                used: 1,
-            },
+            create: { companyId: dto.companyId, code: client_1.FeatureCode.CATEGORIES_TOTAL, used: 1 },
         });
         return created;
     }
@@ -87,19 +69,11 @@ let CategoryService = class CategoryService {
     }
     async update(id, patch, banner, minisite) {
         const current = await this.prisma.productCompanyCategory.findUniqueOrThrow({ where: { id } });
-        const bannerUrl = banner
-            ? (await this.cloud.uploadImage(banner)).secure_url
-            : current.bannerImageUrl;
-        const minisiteUrl = minisite
-            ? (await this.cloud.uploadImage(minisite)).secure_url
-            : current.miniSiteImageUrl;
+        const bannerUrl = banner ? (await this.cloud.uploadImage(banner)).secure_url : current.bannerImageUrl;
+        const minisiteUrl = minisite ? (await this.cloud.uploadImage(minisite)).secure_url : current.miniSiteImageUrl;
         return this.prisma.productCompanyCategory.update({
             where: { id },
-            data: {
-                ...patch,
-                bannerImageUrl: bannerUrl,
-                miniSiteImageUrl: minisiteUrl,
-            },
+            data: { ...patch, bannerImageUrl: bannerUrl, miniSiteImageUrl: minisiteUrl },
             include: { company: { select: { logo: true } } },
         });
     }
@@ -107,18 +81,9 @@ let CategoryService = class CategoryService {
         const category = await this.prisma.productCompanyCategory.findUniqueOrThrow({ where: { id } });
         await this.prisma.productCompanyCategory.delete({ where: { id } });
         await this.prisma.companyUsage.upsert({
-            where: {
-                companyId_code: {
-                    companyId: category.companyId,
-                    code: client_1.FeatureCode.CATEGORIES_TOTAL,
-                },
-            },
+            where: { companyId_code: { companyId: category.companyId, code: client_1.FeatureCode.CATEGORIES_TOTAL } },
             update: { used: { decrement: 1 } },
-            create: {
-                companyId: category.companyId,
-                code: client_1.FeatureCode.CATEGORIES_TOTAL,
-                used: 0,
-            },
+            create: { companyId: category.companyId, code: client_1.FeatureCode.CATEGORIES_TOTAL, used: 0 },
         });
         return category;
     }
@@ -134,12 +99,7 @@ let CategoryService = class CategoryService {
     async findCategoriesByEmpresa(empresaId) {
         return this.prisma.productCompanyCategory.findMany({
             where: { companyId: empresaId },
-            select: {
-                id: true,
-                name: true,
-                bannerImageUrl: true,
-                miniSiteImageUrl: true,
-            },
+            select: { id: true, name: true, bannerImageUrl: true, miniSiteImageUrl: true },
         });
     }
     async plan(empresaId) {
@@ -148,13 +108,12 @@ let CategoryService = class CategoryService {
             select: { subscription: true },
         });
         if (!e?.subscription)
-            throw new common_1.BadRequestException('Empresa without subscription');
+            throw new common_1.BadRequestException('Empresa sin suscripción');
         return e.subscription;
     }
     async checkQuota(empresaId, code, increment = 1) {
-        const plan = await this.plan(empresaId);
         const feature = await this.prisma.planFeature.findUnique({
-            where: { plan_code: { plan, code } },
+            where: { plan_code: { plan: await this.plan(empresaId), code } },
         });
         if (!feature || feature.limit === null)
             return;
@@ -162,7 +121,7 @@ let CategoryService = class CategoryService {
             where: { companyId_code: { companyId: empresaId, code } },
         });
         if ((usage?.used ?? 0) + increment > feature.limit) {
-            throw new common_1.BadRequestException(`Quota for ${code} exceeded`);
+            throw new common_1.BadRequestException(`Límite de ${code} excedido`);
         }
     }
 };

@@ -45,14 +45,14 @@ export declare class MinisiteService {
     quota(empresaId: string, code: FeatureCode): Promise<UsageResponse>;
     objects(empresaId: string): Promise<Record<import(".prisma/client").$Enums.FeatureCode, any[]>>;
     objectsByCode(empresaId: string, code: FeatureCode): Promise<{
-        name: string;
         id: string;
-    }[] | {
         name: string;
+    }[] | {
         id: number;
+        name: string;
     }[] | {
-        title: string;
         id: string;
+        title: string;
     }[] | {
         id: string;
         productId: string;
@@ -78,21 +78,21 @@ export declare class MinisiteService {
     }): Promise<MinisiteHighlightProduct>;
     getMinisiteSetup(empresaId: string): Promise<{
         company: {
+            name: string;
+            title: string;
             minisite: {
                 minisiteColor: string;
                 slogan: string;
             };
-            title: string;
-            name: string;
             giro: import(".prisma/client").$Enums.Giro;
-            profileImage: string;
             location: string;
+            profileImage: string;
         };
         minisiteColor: string;
         slides: {
+            id: string;
             description: string;
             title: string;
-            id: string;
             cta: string;
             imageSrc: string;
             order: number;
@@ -102,14 +102,14 @@ export declare class MinisiteService {
             limit: number;
         };
         banners: {
-            banner: string;
-            description: string;
-            title: string;
-            logo: string;
-            empresaId: string | null;
             id: string;
+            description: string;
             createdAt: Date;
             updatedAt: Date;
+            title: string;
+            empresaId: string | null;
+            logo: string;
+            banner: string;
             date: Date | null;
             cta_url: string | null;
             cta_button_text: string;
@@ -140,18 +140,6 @@ export declare class MinisiteService {
         productId?: string;
         message: string;
     }[]>;
-    getSpecialities(empresaId: string): Promise<{
-        title: string;
-        id: string;
-        imageUrl: string;
-    }[]>;
-    registerSpecialities(empresaId: string, body: {
-        specialitiesMeta: string;
-    }, files: Express.Multer.File[]): Promise<{
-        title: string;
-        id: string;
-        imageUrl: string;
-    }[]>;
     private plan;
     private minisite;
     private checkQuota;
@@ -159,7 +147,7 @@ export declare class MinisiteService {
     upsertMinisiteVideo(empresaId: string, file: Express.Multer.File): Promise<{
         videoUrl: string;
     }>;
-    getMinisiteVideoByEmpresa(empresaId: string): Promise<{
+    getMinisiteVideoByCompany(empresaId: string): Promise<{
         videoUrl: string;
     }>;
 }

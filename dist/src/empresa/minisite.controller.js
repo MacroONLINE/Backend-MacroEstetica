@@ -99,17 +99,11 @@ let MinisiteController = class MinisiteController {
         }
         return this.minisite.bulkUpsertProductsIndexed(empresaId, meta, buckets);
     }
-    getSpecialities(empresaId) {
-        return this.minisite.getSpecialities(empresaId);
-    }
-    registerSpecialities(empresaId, specialitiesMeta, images) {
-        return this.minisite.registerSpecialities(empresaId, { specialitiesMeta }, images);
-    }
     async uploadVideo(empresaId, video) {
         return this.minisite.upsertMinisiteVideo(empresaId, video);
     }
     async getVideo(empresaId) {
-        return this.minisite.getMinisiteVideoByEmpresa(empresaId);
+        return this.minisite.getMinisiteVideoByCompany(empresaId);
     }
 };
 exports.MinisiteController = MinisiteController;
@@ -363,77 +357,6 @@ Envía **multipart/form-data** con:
     __metadata("design:returntype", Promise)
 ], MinisiteController.prototype, "bulkProducts", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Obtener specialities del minisite' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
-    (0, swagger_1.ApiOkResponse)({
-        description: 'Lista de specialities guardadas',
-        schema: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    id: { type: 'string' },
-                    title: { type: 'string' },
-                    imageUrl: { type: 'string' },
-                },
-            },
-        },
-    }),
-    (0, common_1.Get)(':empresaId/specialities'),
-    __param(0, (0, common_1.Param)('empresaId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], MinisiteController.prototype, "getSpecialities", null);
-__decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Registrar specialities (reemplaza todas)' }),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
-    (0, swagger_1.ApiBody)({
-        schema: {
-            type: 'object',
-            required: ['specialitiesMeta'],
-            properties: {
-                specialitiesMeta: {
-                    type: 'string',
-                    description: 'JSON array de objetos con { "title": string } en el mismo orden que las imágenes',
-                    example: JSON.stringify([
-                        { title: 'Nutrición integral' },
-                        { title: 'Alimentación clínica' }
-                    ]),
-                },
-                images: {
-                    type: 'array',
-                    items: { type: 'string', format: 'binary' },
-                    description: 'Archivos de imagen para cada speciality, en el mismo orden',
-                },
-            },
-        },
-    }),
-    (0, swagger_1.ApiOkResponse)({
-        description: 'Lista de specialities registradas',
-        schema: {
-            type: 'array',
-            items: {
-                type: 'object',
-                properties: {
-                    id: { type: 'string' },
-                    title: { type: 'string' },
-                    imageUrl: { type: 'string' },
-                },
-            },
-        },
-    }),
-    (0, common_1.UseInterceptors)((0, platform_express_1.AnyFilesInterceptor)()),
-    (0, common_1.Put)(':empresaId/specialities'),
-    __param(0, (0, common_1.Param)('empresaId')),
-    __param(1, (0, common_1.Body)('specialitiesMeta')),
-    __param(2, (0, common_1.UploadedFiles)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Array]),
-    __metadata("design:returntype", void 0)
-], MinisiteController.prototype, "registerSpecialities", null);
-__decorate([
     (0, swagger_1.ApiOperation)({
         summary: 'Subir / actualizar video de presentación del minisite',
         description: 'Sobrescribe la URL de video almacenada en el minisite con el nuevo archivo subido.',
@@ -464,9 +387,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':empresaId/video'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener URL de video del minisite por empresaId' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', description: 'ID de la empresa', example: 'company-001' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
     (0, swagger_1.ApiOkResponse)({ schema: { example: { videoUrl: 'https://cdn.example.com/videos/intro.mp4' } } }),
-    (0, swagger_1.ApiNotFoundResponse)({ description: 'Minisite no encontrado o sin video' }),
+    (0, swagger_1.ApiNotFoundResponse)(),
     __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

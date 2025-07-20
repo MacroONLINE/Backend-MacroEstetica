@@ -256,23 +256,24 @@ model ClassProgress {
 }
 
 model Classroom {
-  id            String                @id @default(cuid())
+  id            String                  @id @default(cuid())
   title         String
   description   String
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @default(now())
-  channelName   String?               @unique
-  endDateTime   DateTime              @default(now())
+  createdAt     DateTime                @default(now())
+  updatedAt     DateTime                @default(now())
+  channelName   String?                 @unique
+  endDateTime   DateTime                @default(now())
   imageUrl      String?
   price         Float?
-  startDateTime DateTime              @default(now())
-  categories    Profession[]          @default([MEDICO_DERMATOLOGIA])
-  isFree        Boolean               @default(false)
+  startDateTime DateTime                @default(now())
+  categories    Profession[]            @default([MEDICO_DERMATOLOGIA])
+  isFree        Boolean                 @default(false)
   enrollments   ClassroomEnrollment[]
-  attendees     User[]                @relation("ClassroomAttendees")
-  orators       Instructor[]          @relation("ClassroomInstructors")
+  attendees     User[]                  @relation("ClassroomAttendees")
+  orators       Instructor[]            @relation("ClassroomInstructors")
   empresaId     String?
-  empresa       Empresa?              @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  empresa       Empresa?                @relation(fields: [empresaId], references: [id], onDelete: Cascade)
+  invites       ClassroomOratorInvite[]
 }
 
 model ClassroomEnrollment {
@@ -912,4 +913,23 @@ enum FeatureCode {
   HIGHLIGHT_PRODUCTS_TOTAL
   OFFER_PRODUCTS_TOTAL
   SPECIALITY_IMAGES_TOTAL
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+}
+
+model ClassroomOratorInvite {
+  id          String       @id @default(cuid())
+  classroomId String
+  email       String
+  token       String       @unique
+  status      InviteStatus @default(PENDING)
+  sentAt      DateTime     @default(now())
+  acceptedAt  DateTime?
+  userId      String? // se completa al aceptar
+  classroom   Classroom    @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+
+  @@index([classroomId])
 }
