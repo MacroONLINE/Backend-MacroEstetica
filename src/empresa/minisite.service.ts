@@ -8,7 +8,6 @@ import {
   Banner,
   MinisiteFeaturedProduct,
   MinisiteHighlightProduct,
-  MinisiteSpeciality,
   Giro,
 } from '@prisma/client'
 import { UploadApiResponse } from 'cloudinary'
@@ -455,50 +454,6 @@ async bulkUpsertProductsIndexed(
 
 
 
-async getSpecialities(empresaId: string) {
-  return this.prisma.minisiteSpeciality.findMany({
-    where: { minisite: { empresaId } },
-    select: { id: true, title: true, imageUrl: true },
-  })
-}
-
-async registerSpecialities(
-  empresaId: string,
-  body: { specialitiesMeta: string },
-  files: Express.Multer.File[],
-) {
-  const metas: Array<{ title: string }> = JSON.parse(body.specialitiesMeta || '[]')
-  const count = metas.length
-
-  await this.checkQuota(empresaId, FeatureCode.SPECIALITY_IMAGES_TOTAL, count)
-
-  const minisiteId = await this.minisite(empresaId)
-  const uploads = await Promise.all(files.map(f => this.cloud.uploadImage(f)))
-
-  return this.prisma.$transaction(async tx => {
-    await tx.minisiteSpeciality.deleteMany({ where: { minisiteId } })
-
-    const data: Prisma.MinisiteSpecialityUncheckedCreateInput[] = metas.map((m, idx) => ({
-      minisiteId,
-      title: m.title,
-      imageUrl: uploads[idx]?.secure_url ?? '',
-    }))
-
-    await tx.minisiteSpeciality.createMany({ data })
-
-    await tx.companyUsage.upsert({
-      where: { companyId_code: { companyId: empresaId, code: FeatureCode.SPECIALITY_IMAGES_TOTAL } },
-      update: { used: count },
-      create: { companyId: empresaId, code: FeatureCode.SPECIALITY_IMAGES_TOTAL, used: count },
-    })
-
-    return tx.minisiteSpeciality.findMany({
-      where: { minisiteId },
-      select: { id: true, title: true, imageUrl: true },
-    })
-  })
-}
-
 
   private async plan(empresaId: string): Promise<SubscriptionType> {
     const e = await this.prisma.empresa.findUnique({ where: { id: empresaId }, select: { subscription: true } })
@@ -589,14 +544,7 @@ async registerSpecialities(
           }),
           used,
         }
-      case FeatureCode.SPECIALITY_IMAGES_TOTAL:
-        return {
-          items: await this.prisma.minisiteSpeciality.findMany({
-            where: { minisite: { empresaId } },
-            select: { id: true, title: true, imageUrl: true },
-          }),
-          used,
-        }
+     
       default:
         throw new BadRequestException('Código no soportado')
     }
@@ -617,16 +565,15 @@ async registerSpecialities(
 
 
 
-// en src/empresa/minisite.service.ts
-async getMinisiteVideoByEmpresa(empresaId: string): Promise<{ videoUrl: string }> {
-  const m = await this.prisma.minisite.findUnique({
-    where: { empresaId },
-    select: { videoUrl: true },
-  });
-  if (!m) throw new NotFoundException('Minisite no encontrado');
-  if (!m.videoUrl) throw new NotFoundException('No hay video cargado para este minisite');
-  return { videoUrl: m.videoUrl };
-}
+  async getMinisiteVideoByCompany(empresaId: string): Promise<{ videoUrl: string }> {
+    const m = await this.prisma.minisite.findUnique({
+      where: { empresaId },
+      select: { videoUrl: true },
+    })
+    if (!m) throw new NotFoundException('Minisite no encontrado')
+    if (!m.videoUrl) throw new NotFoundException('No hay video cargado para esta empresa')
+    return { videoUrl: m.videoUrl }
+  }
 
 
 }

@@ -373,80 +373,6 @@ Envía **multipart/form-data** con:
   
 
 
-  @ApiOperation({ summary: 'Obtener specialities del minisite' })
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
-  @ApiOkResponse({
-    description: 'Lista de specialities guardadas',
-    schema: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'string' },
-          title: { type: 'string' },
-          imageUrl: { type: 'string' },
-        },
-      },
-    },
-  })
-  @Get(':empresaId/specialities')
-  getSpecialities(@Param('empresaId') empresaId: string) {
-    return this.minisite.getSpecialities(empresaId);
-  }
-
-  @ApiOperation({ summary: 'Registrar specialities (reemplaza todas)' })
-  @ApiConsumes('multipart/form-data')
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      required: ['specialitiesMeta'],
-      properties: {
-        specialitiesMeta: {
-          type: 'string',
-          description: 'JSON array de objetos con { "title": string } en el mismo orden que las imágenes',
-          example: JSON.stringify([
-            { title: 'Nutrición integral' },
-            { title: 'Alimentación clínica' }
-          ]),
-        },
-        images: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-          description: 'Archivos de imagen para cada speciality, en el mismo orden',
-        },
-      },
-    },
-  })
-  @ApiOkResponse({
-    description: 'Lista de specialities registradas',
-    schema: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'string' },
-          title: { type: 'string' },
-          imageUrl: { type: 'string' },
-        },
-      },
-    },
-  })
-  @UseInterceptors(AnyFilesInterceptor())
-  @Put(':empresaId/specialities')
-  registerSpecialities(
-    @Param('empresaId') empresaId: string,
-    @Body('specialitiesMeta') specialitiesMeta: string,
-    @UploadedFiles() images: Express.Multer.File[],
-  ) {
-    return this.minisite.registerSpecialities(
-      empresaId,
-      { specialitiesMeta },
-      images,
-    );
-  }
-
-
   
 @ApiOperation({
   summary: 'Subir / actualizar video de presentación del minisite',
@@ -476,23 +402,14 @@ async uploadVideo(
   return this.minisite.upsertMinisiteVideo(empresaId, video)
 }
 
-
-
 @Get(':empresaId/video')
 @ApiOperation({ summary: 'Obtener URL de video del minisite por empresaId' })
-@ApiParam({ name: 'empresaId', description: 'ID de la empresa', example: 'company-001' })
+@ApiParam({ name: 'empresaId', example: 'company-001' })
 @ApiOkResponse({ schema: { example: { videoUrl: 'https://cdn.example.com/videos/intro.mp4' } } })
-@ApiNotFoundResponse({ description: 'Minisite no encontrado o sin video' })
+@ApiNotFoundResponse()
 async getVideo(@Param('empresaId') empresaId: string) {
-  return this.minisite.getMinisiteVideoByEmpresa(empresaId);
+  return this.minisite.getMinisiteVideoByCompany(empresaId)
 }
-
-
-
-
-
-
-
 
 
 }

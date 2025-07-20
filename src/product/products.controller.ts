@@ -9,10 +9,11 @@ import {
   Body,
   Query,
   NotFoundException,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common'
 import { ProductService } from './products.service'
 import { CreateProductDto } from './dto/create-product.dto'
-import { UpdateProductDto } from './dto/update-product.dto'
 import {
   ApiTags,
   ApiOperation,
@@ -20,15 +21,15 @@ import {
   ApiParam,
   ApiQuery,
   ApiBody,
+  ApiConsumes,
 } from '@nestjs/swagger'
 import { ReactionType } from '@prisma/client'
+import { AnyFilesInterceptor } from '@nestjs/platform-express'
 
 @ApiTags('Products')
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
-
-  /* ──────────────── CREAR ──────────────── */
 
   @Post()
   @ApiOperation({ summary: 'Crear un nuevo producto' })
@@ -36,8 +37,6 @@ export class ProductController {
   async create(@Body() dto: CreateProductDto) {
     return this.productService.create(dto)
   }
-
-  /* ──────────────── LISTADOS ──────────────── */
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los productos de una empresa' })
@@ -64,9 +63,7 @@ export class ProductController {
     if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
     const products = await this.productService.findByCategory(companyId, Number(categoryId), userId)
     if (!products.length) {
-      throw new NotFoundException(
-        `No se encontraron productos para la categoría ${categoryId} en la empresa ${companyId}`,
-      )
+      throw new NotFoundException('No se encontraron productos para la categoría indicada')
     }
     return products
   }
@@ -83,45 +80,100 @@ export class ProductController {
     return this.productService.findFeaturedByCompany(companyId, userId)
   }
 
+  @Get('highlighted')
+  @ApiOperation({ summary: 'Obtener productos highlight de una empresa' })
+  @ApiQuery({ name: 'companyId', required: true })
+  @ApiQuery({ name: 'userId', required: false })
+  async findHighlighted(
+    @Query('companyId') companyId: string,
+    @Query('userId') userId?: string,
+  ) {
+    if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
+    return this.productService.findHighlightedByCompany(companyId, userId)
+  }
 
+  @Get('offer')
+  @ApiOperation({ summary: 'Obtener productos offer de una empresa' })
+  @ApiQuery({ name: 'companyId', required: true })
+  @ApiQuery({ name: 'userId', required: false })
+  async findOffer(
+    @Query('companyId') companyId: string,
+    @Query('userId') userId?: string,
+  ) {
+    if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
+    return this.productService.findOfferByCompany(companyId, userId)
+  }
 
-   /* ──────────────── ACTUALIZAR / ELIMINAR ──────────────── */
+  @Get('normal')
+  @ApiOperation({ summary: 'Obtener productos normales de una empresa' })
+  @ApiQuery({ name: 'companyId', required: true })
+  @ApiQuery({ name: 'userId', required: false })
+  async findNormal(
+    @Query('companyId') companyId: string,
+    @Query('userId') userId?: string,
+  ) {
+    if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
+    return this.productService.findNormalByCompany(companyId, userId)
+  }
 
-   @Put(':id')
-   @ApiOperation({ summary: 'Actualizar un producto' })
-   @ApiParam({ name: 'id', description: 'ID del producto' })
-   @ApiBody({
-     description: 'Ejemplo de payload para actualizar un producto',
-     schema: {
-       example: {
-         name: 'Nuevo Nombre del Producto',
-         description: 'Descripción actualizada del producto',
-         lab: 'Laboratorio XYZ',
-         activeIngredients: ['Ingrediente A', 'Ingrediente B'],
-         features: ['Característica 1', 'Característica 2'],
-         benefits: ['Beneficio 1', 'Beneficio 2'],
-         problemAddressed: 'Problema que resuelve',
-         imageMain: 'https://cdn.ejemplo.com/images/main.jpg',
-         imageGallery: [
-           'https://cdn.ejemplo.com/images/1.jpg',
-           'https://cdn.ejemplo.com/images/2.jpg'
-         ],
-         isFeatured: true,
-         isBestSeller: false,
-         isOnSale: false,
-         categoryId: 5,
-         companyId: '123e4567-e89b-12d3-a456-426614174000'
-       }
-     }
-   })
-   @ApiResponse({ status: 200, description: 'Producto actualizado correctamente.' })
-   async update(
-     @Param('id') id: string,
-     @Body() dto: UpdateProductDto
-   ) {
-     return this.productService.update(id, dto)
-   }
- 
+  @Get('grouped')
+  @ApiOperation({ summary: 'Obtener todos los productos agrupados por tipo' })
+  @ApiQuery({ name: 'companyId', required: true })
+  @ApiQuery({ name: 'userId', required: false })
+  async findAllGrouped(
+    @Query('companyId') companyId: string,
+    @Query('userId') userId?: string,
+  ) {
+    if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
+    return this.productService.findAllGroupedByType(companyId, userId)
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Obtener un producto por ID' })
+  @ApiParam({ name: 'id', description: 'ID del producto' })
+  @ApiQuery({ name: 'userId', required: false })
+  async findById(
+    @Param('id') id: string,
+    @Query('userId') userId?: string,
+  ) {
+    return this.productService.findById(id, userId)
+  }
+
+  @Put(':id')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(AnyFilesInterceptor())
+  @ApiOperation({ summary: 'Actualizar un producto con imágenes' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        name: { type: 'string', example: 'Nuevo nombre' },
+        description: { type: 'string', example: 'Nueva descripción' },
+        lab: { type: 'string' },
+        activeIngredients: { type: 'string', example: '["A","B"]' },
+        features: { type: 'string', example: '["X","Y"]' },
+        benefits: { type: 'string', example: '["P","Q"]' },
+        problemAddressed: { type: 'string' },
+        imageMain: { type: 'string' },
+        isFeatured: { type: 'string', example: 'true' },
+        isBestSeller: { type: 'string', example: 'false' },
+        isOnSale: { type: 'string', example: 'false' },
+        categoryId: { type: 'string', example: '5' },
+        companyId: { type: 'string' },
+        main: { type: 'string', format: 'binary' },
+        gallery_0: { type: 'string', format: 'binary' },
+        gallery_1: { type: 'string', format: 'binary' },
+        gallery_2: { type: 'string', format: 'binary' },
+      },
+    },
+  })
+  async update(
+    @Param('id') id: string,
+    @Body() body: Record<string, string>,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.productService.updateWithImages(id, body, files)
+  }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Eliminar un producto' })
@@ -130,112 +182,29 @@ export class ProductController {
     return this.productService.remove(id)
   }
 
-  /* ──────────────── REACCIONES ──────────────── */
-
   @Post(':productId/user/:userId/react')
-  @ApiOperation({
-    summary: 'Like/Dislike para un producto',
-    description:
-      'Si no existe reacción, se crea. Si existe la misma, se elimina. Si existe la opuesta, se cambia.',
-  })
-  @ApiParam({ name: 'productId', description: 'ID del producto' })
-  @ApiParam({ name: 'userId', description: 'ID del usuario' })
+  @ApiOperation({ summary: 'Like/Dislike para un producto' })
+  @ApiParam({ name: 'productId' })
+  @ApiParam({ name: 'userId' })
   @ApiBody({
     schema: {
       type: 'object',
       required: ['type'],
-      properties: {
-        type: { type: 'string', enum: ['LIKE', 'DISLIKE'], example: 'LIKE' },
-      },
+      properties: { type: { type: 'string', enum: ['LIKE', 'DISLIKE'] } },
     },
   })
-  @ApiResponse({ status: 200, description: 'Reacción procesada.' })
   async reactToProduct(
     @Param('productId') productId: string,
     @Param('userId') userId: string,
     @Body('type') type: ReactionType,
   ) {
-    return this.productService.toggleProductReaction(
-      userId,
-      productId,
-      type || ReactionType.LIKE,
-    )
+    return this.productService.toggleProductReaction(userId, productId, type || ReactionType.LIKE)
   }
 
-  /* ──────────────── WISHLIST ──────────────── */
-
   @Get('user/:userId/wishlist')
-  @ApiOperation({ summary: 'Productos a los que el usuario dio like (wishlist)' })
-  @ApiParam({ name: 'userId', description: 'ID del usuario' })
+  @ApiOperation({ summary: 'Productos a los que el usuario dio like' })
+  @ApiParam({ name: 'userId' })
   async getProductWishlist(@Param('userId') userId: string) {
     return this.productService.getLikedProducts(userId)
   }
-
-
-  // src/products/products.controller.ts  – nuevos endpoints
-
-@Get('highlighted')
-@ApiOperation({ summary: 'Obtener productos highlight de una empresa' })
-@ApiQuery({ name: 'companyId', required: true })
-@ApiQuery({ name: 'userId', required: false })
-async findHighlighted(
-  @Query('companyId') companyId: string,
-  @Query('userId') userId?: string,
-) {
-  if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
-  return this.productService.findHighlightedByCompany(companyId, userId)
-}
-
-@Get('offer')
-@ApiOperation({ summary: 'Obtener productos offer de una empresa' })
-@ApiQuery({ name: 'companyId', required: true })
-@ApiQuery({ name: 'userId', required: false })
-async findOffer(
-  @Query('companyId') companyId: string,
-  @Query('userId') userId?: string,
-) {
-  if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
-  return this.productService.findOfferByCompany(companyId, userId)
-}
-
-@Get('normal')
-@ApiOperation({ summary: 'Obtener productos normales de una empresa' })
-@ApiQuery({ name: 'companyId', required: true })
-@ApiQuery({ name: 'userId', required: false })
-async findNormal(
-  @Query('companyId') companyId: string,
-  @Query('userId') userId?: string,
-) {
-  if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
-  return this.productService.findNormalByCompany(companyId, userId)
-}
-
-@Get('grouped')
-@ApiOperation({ summary: 'Obtener todos los productos agrupados por tipo' })
-@ApiQuery({ name: 'companyId', required: true })
-@ApiQuery({ name: 'userId', required: false })
-async findAllGrouped(
-  @Query('companyId') companyId: string,
-  @Query('userId') userId?: string,
-) {
-  if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
-  return this.productService.findAllGroupedByType(companyId, userId)
-}
-
-
-  /* ──────────────── DETALLE ──────────────── */
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Obtener un producto por ID' })
-  @ApiParam({ name: 'id', description: 'ID del producto' })
-  @ApiQuery({ name: 'userId', required: false, description: 'ID del usuario para saber si lo ha dado like' })
-  @ApiResponse({ status: 200, description: 'Detalle del producto, con campo liked opcional' })
-  async findById(
-    @Param('id') id: string,
-    @Query('userId') userId?: string,
-  ) {
-    return this.productService.findById(id, userId)
-  }
-  
-
 }

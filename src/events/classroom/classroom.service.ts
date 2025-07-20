@@ -22,8 +22,17 @@ const selectBase: Prisma.ClassroomSelect = {
   orators: { select: { id: true } },
   attendees: { select: { id: true } },
   enrollments: { select: { id: true, userId: true, status: true } },
+  invites: {
+    select: {
+      id: true,
+      email: true,
+      status: true,
+      sentAt: true,
+      acceptedAt: true,
+      userId: true,
+    },
+  },
 }
-
 type Payload = Prisma.ClassroomGetPayload<{ select: typeof selectBase }>
 
 @Injectable()

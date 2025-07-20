@@ -20,6 +20,7 @@ import { InstructorModule } from './instructor/instructor.module';
 import { AgoraModule } from './agora/agora.module';
 import { ChatModule } from './chat/chat.module';
 import { BlogModule } from './blog/blog.module';
+import { InvitationsModule } from './invitations/invitations.module';
 
 @Module({
   imports: [
@@ -38,7 +39,8 @@ import { BlogModule } from './blog/blog.module';
     InstructorModule,
     AgoraModule,
     ChatModule,
-    BlogModule
+    BlogModule,
+    InvitationsModule
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],
