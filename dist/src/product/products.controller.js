@@ -34,11 +34,7 @@ let ProductController = class ProductController {
     async findByCategory(companyId, categoryId, userId) {
         if (!companyId)
             throw new common_1.NotFoundException('Debe especificar un ID de empresa');
-        const products = await this.productService.findByCategory(companyId, Number(categoryId), userId);
-        if (!products.length) {
-            throw new common_1.NotFoundException('No se encontraron productos para la categoría indicada');
-        }
-        return products;
+        return this.productService.findByCategory(companyId, Number(categoryId), userId);
     }
     async findFeatured(companyId, userId) {
         if (!companyId)
@@ -84,6 +80,7 @@ let ProductController = class ProductController {
 exports.ProductController = ProductController;
 __decorate([
     (0, common_1.Post)(),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Crear un nuevo producto' }),
     (0, swagger_1.ApiResponse)({ status: 201, description: 'Producto creado correctamente.' }),
     __param(0, (0, common_1.Body)()),
@@ -173,7 +170,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Obtener un producto por ID' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del producto' }),
+    (0, swagger_1.ApiParam)({ name: 'id' }),
     (0, swagger_1.ApiQuery)({ name: 'userId', required: false }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Query)('userId')),
@@ -183,26 +180,34 @@ __decorate([
 ], ProductController.prototype, "findById", null);
 __decorate([
     (0, common_1.Put)(':id'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, common_1.UseInterceptors)((0, platform_express_1.AnyFilesInterceptor)()),
-    (0, swagger_1.ApiOperation)({ summary: 'Actualizar un producto con imágenes' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Actualizar un producto con imágenes y tipo' }),
     (0, swagger_1.ApiBody)({
         schema: {
             type: 'object',
             properties: {
-                name: { type: 'string', example: 'Nuevo nombre' },
-                description: { type: 'string', example: 'Nueva descripción' },
+                type: { type: 'string', enum: ['NORMAL', 'FEATURED', 'HIGHLIGHT', 'OFFER'] },
+                name: { type: 'string' },
+                description: { type: 'string' },
                 lab: { type: 'string' },
-                activeIngredients: { type: 'string', example: '["A","B"]' },
-                features: { type: 'string', example: '["X","Y"]' },
-                benefits: { type: 'string', example: '["P","Q"]' },
+                activeIngredients: { type: 'string' },
+                features: { type: 'string' },
+                benefits: { type: 'string' },
                 problemAddressed: { type: 'string' },
                 imageMain: { type: 'string' },
-                isFeatured: { type: 'string', example: 'true' },
-                isBestSeller: { type: 'string', example: 'false' },
-                isOnSale: { type: 'string', example: 'false' },
-                categoryId: { type: 'string', example: '5' },
+                isFeatured: { type: 'string' },
+                isBestSeller: { type: 'string' },
+                isOnSale: { type: 'string' },
+                categoryId: { type: 'string' },
                 companyId: { type: 'string' },
+                order: { type: 'string' },
+                tagline: { type: 'string' },
+                highlightFeatures: { type: 'string' },
+                highlightDescription: { type: 'string' },
+                title: { type: 'string' },
+                offerDescription: { type: 'string' },
                 main: { type: 'string', format: 'binary' },
                 gallery_0: { type: 'string', format: 'binary' },
                 gallery_1: { type: 'string', format: 'binary' },
@@ -219,8 +224,9 @@ __decorate([
 ], ProductController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Eliminar un producto' }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID del producto' }),
+    (0, swagger_1.ApiParam)({ name: 'id' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -228,6 +234,7 @@ __decorate([
 ], ProductController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)(':productId/user/:userId/react'),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Like/Dislike para un producto' }),
     (0, swagger_1.ApiParam)({ name: 'productId' }),
     (0, swagger_1.ApiParam)({ name: 'userId' }),

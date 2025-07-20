@@ -183,7 +183,99 @@ export class ProductService {
         : undefined,
     }
 
-    return this.prisma.product.update({ where: { id }, data })
+    const updated = await this.prisma.product.update({ where: { id }, data })
+
+    const branch = (body.type ?? 'NORMAL').toUpperCase()
+    const minisiteIdRow = await this.prisma.minisite.findFirst({
+      where: { empresaId: updated.companyId },
+      select: { id: true },
+    })
+    if (!minisiteIdRow) return updated
+    const minisiteId = minisiteIdRow.id
+
+    if (branch === 'FEATURED') {
+      await this.prisma.minisiteFeaturedProduct.upsert({
+        where: { productId: id },
+        update: {
+          minisiteId,
+          order: body.order ? Number(body.order) : 0,
+          tagline: body.tagline ?? '',
+        },
+        create: {
+          minisiteId,
+          productId: id,
+          order: body.order ? Number(body.order) : 0,
+          tagline: body.tagline ?? '',
+        },
+      })
+      await this.prisma.minisiteHighlightProduct.deleteMany({
+        where: { productId: id, minisiteId },
+      })
+      await this.prisma.minisiteProductOffer.deleteMany({
+        where: { productId: id, minisiteId },
+      })
+      await this.prisma.product.update({
+        where: { id },
+        data: { isFeatured: true },
+      })
+    } else if (branch === 'HIGHLIGHT') {
+      await this.prisma.minisiteHighlightProduct.upsert({
+        where: { minisiteId_productId: { minisiteId, productId: id } },
+        update: {
+          highlightFeatures: jArr(body.highlightFeatures) ?? [],
+          highlightDescription: body.highlightDescription ?? '',
+        },
+        create: {
+          minisiteId,
+          productId: id,
+          highlightFeatures: jArr(body.highlightFeatures) ?? [],
+          highlightDescription: body.highlightDescription ?? '',
+        },
+      })
+      await this.prisma.minisiteFeaturedProduct.deleteMany({
+        where: { productId: id },
+      })
+      await this.prisma.minisiteProductOffer.deleteMany({
+        where: { productId: id, minisiteId },
+      })
+      await this.prisma.product.update({
+        where: { id },
+        data: { isFeatured: false },
+      })
+    } else if (branch === 'OFFER') {
+      await this.prisma.minisiteProductOffer.upsert({
+        where: { minisiteId_productId: { minisiteId, productId: id } },
+        update: { title: body.title ?? updated.name, description: body.offerDescription ?? '' },
+        create: {
+          minisiteId,
+          productId: id,
+          title: body.title ?? updated.name,
+          description: body.offerDescription ?? '',
+        },
+      })
+      await this.prisma.minisiteFeaturedProduct.deleteMany({ where: { productId: id } })
+      await this.prisma.minisiteHighlightProduct.deleteMany({
+        where: { productId: id, minisiteId },
+      })
+      await this.prisma.product.update({
+        where: { id },
+        data: { isFeatured: false },
+      })
+    } else {
+      await this.prisma.minisiteFeaturedProduct.deleteMany({ where: { productId: id } })
+      await this.prisma.minisiteHighlightProduct.deleteMany({
+        where: { productId: id, minisiteId },
+      })
+      await this.prisma.minisiteProductOffer.deleteMany({
+        where: { productId: id, minisiteId },
+      })
+      await this.prisma.product.update({
+        where: { id },
+        data: { isFeatured: false },
+      })
+    }
+
+    return updated
   }
 
   async remove(id: string) {

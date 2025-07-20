@@ -5,16 +5,16 @@ export declare class ProductController {
     private readonly productService;
     constructor(productService: ProductService);
     create(dto: CreateProductDto): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -25,16 +25,16 @@ export declare class ProductController {
         presentations: string[];
     }>;
     findAll(companyId: string, userId?: string): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -45,16 +45,16 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findByCategory(companyId: string, categoryId: string, userId?: string): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -65,16 +65,16 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findFeatured(companyId: string, userId?: string): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -85,16 +85,16 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findHighlighted(companyId: string, userId?: string): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -105,16 +105,16 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findOffer(companyId: string, userId?: string): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -125,16 +125,16 @@ export declare class ProductController {
         presentations: string[];
     }[]>;
     findNormal(companyId: string, userId?: string): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -146,16 +146,16 @@ export declare class ProductController {
     }[]>;
     findAllGrouped(companyId: string, userId?: string): Promise<{
         FEATURED: {
-            description: string;
             name: string;
-            categoryId: number | null;
             id: string;
+            description: string;
+            companyId: string;
             createdAt: Date;
             updatedAt: Date;
             isFeatured: boolean | null;
-            companyId: string;
             activeIngredients: string[];
             benefits: string[];
+            categoryId: number | null;
             features: string[];
             imageGallery: string[];
             imageMain: string | null;
@@ -166,16 +166,16 @@ export declare class ProductController {
             presentations: string[];
         }[];
         HIGHLIGHT: {
-            description: string;
             name: string;
-            categoryId: number | null;
             id: string;
+            description: string;
+            companyId: string;
             createdAt: Date;
             updatedAt: Date;
             isFeatured: boolean | null;
-            companyId: string;
             activeIngredients: string[];
             benefits: string[];
+            categoryId: number | null;
             features: string[];
             imageGallery: string[];
             imageMain: string | null;
@@ -186,16 +186,16 @@ export declare class ProductController {
             presentations: string[];
         }[];
         OFFER: {
-            description: string;
             name: string;
-            categoryId: number | null;
             id: string;
+            description: string;
+            companyId: string;
             createdAt: Date;
             updatedAt: Date;
             isFeatured: boolean | null;
-            companyId: string;
             activeIngredients: string[];
             benefits: string[];
+            categoryId: number | null;
             features: string[];
             imageGallery: string[];
             imageMain: string | null;
@@ -206,16 +206,16 @@ export declare class ProductController {
             presentations: string[];
         }[];
         NORMAL: {
-            description: string;
             name: string;
-            categoryId: number | null;
             id: string;
+            description: string;
+            companyId: string;
             createdAt: Date;
             updatedAt: Date;
             isFeatured: boolean | null;
-            companyId: string;
             activeIngredients: string[];
             benefits: string[];
+            categoryId: number | null;
             features: string[];
             imageGallery: string[];
             imageMain: string | null;
@@ -227,16 +227,16 @@ export declare class ProductController {
         }[];
     }>;
     findById(id: string, userId?: string): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -247,16 +247,16 @@ export declare class ProductController {
         presentations: string[];
     } | {
         liked: boolean;
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -267,16 +267,16 @@ export declare class ProductController {
         presentations: string[];
     }>;
     update(id: string, body: Record<string, string>, files: Express.Multer.File[]): Promise<{
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;
@@ -302,16 +302,16 @@ export declare class ProductController {
     }>;
     getProductWishlist(userId: string): Promise<{
         liked: boolean;
-        description: string;
         name: string;
-        categoryId: number | null;
         id: string;
+        description: string;
+        companyId: string;
         createdAt: Date;
         updatedAt: Date;
         isFeatured: boolean | null;
-        companyId: string;
         activeIngredients: string[];
         benefits: string[];
+        categoryId: number | null;
         features: string[];
         imageGallery: string[];
         imageMain: string | null;

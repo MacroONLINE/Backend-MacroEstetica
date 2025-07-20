@@ -22,6 +22,7 @@ import {
   ApiQuery,
   ApiBody,
   ApiConsumes,
+  ApiBearerAuth,
 } from '@nestjs/swagger'
 import { ReactionType } from '@prisma/client'
 import { AnyFilesInterceptor } from '@nestjs/platform-express'
@@ -32,6 +33,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Crear un nuevo producto' })
   @ApiResponse({ status: 201, description: 'Producto creado correctamente.' })
   async create(@Body() dto: CreateProductDto) {
@@ -61,11 +63,7 @@ export class ProductController {
     @Query('userId') userId?: string,
   ) {
     if (!companyId) throw new NotFoundException('Debe especificar un ID de empresa')
-    const products = await this.productService.findByCategory(companyId, Number(categoryId), userId)
-    if (!products.length) {
-      throw new NotFoundException('No se encontraron productos para la categoría indicada')
-    }
-    return products
+    return this.productService.findByCategory(companyId, Number(categoryId), userId)
   }
 
   @Get('featured')
@@ -130,7 +128,7 @@ export class ProductController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Obtener un producto por ID' })
-  @ApiParam({ name: 'id', description: 'ID del producto' })
+  @ApiParam({ name: 'id' })
   @ApiQuery({ name: 'userId', required: false })
   async findById(
     @Param('id') id: string,
@@ -140,26 +138,34 @@ export class ProductController {
   }
 
   @Put(':id')
+  @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(AnyFilesInterceptor())
-  @ApiOperation({ summary: 'Actualizar un producto con imágenes' })
+  @ApiOperation({ summary: 'Actualizar un producto con imágenes y tipo' })
   @ApiBody({
     schema: {
       type: 'object',
       properties: {
-        name: { type: 'string', example: 'Nuevo nombre' },
-        description: { type: 'string', example: 'Nueva descripción' },
+        type: { type: 'string', enum: ['NORMAL', 'FEATURED', 'HIGHLIGHT', 'OFFER'] },
+        name: { type: 'string' },
+        description: { type: 'string' },
         lab: { type: 'string' },
-        activeIngredients: { type: 'string', example: '["A","B"]' },
-        features: { type: 'string', example: '["X","Y"]' },
-        benefits: { type: 'string', example: '["P","Q"]' },
+        activeIngredients: { type: 'string' },
+        features: { type: 'string' },
+        benefits: { type: 'string' },
         problemAddressed: { type: 'string' },
         imageMain: { type: 'string' },
-        isFeatured: { type: 'string', example: 'true' },
-        isBestSeller: { type: 'string', example: 'false' },
-        isOnSale: { type: 'string', example: 'false' },
-        categoryId: { type: 'string', example: '5' },
+        isFeatured: { type: 'string' },
+        isBestSeller: { type: 'string' },
+        isOnSale: { type: 'string' },
+        categoryId: { type: 'string' },
         companyId: { type: 'string' },
+        order: { type: 'string' },
+        tagline: { type: 'string' },
+        highlightFeatures: { type: 'string' },
+        highlightDescription: { type: 'string' },
+        title: { type: 'string' },
+        offerDescription: { type: 'string' },
         main: { type: 'string', format: 'binary' },
         gallery_0: { type: 'string', format: 'binary' },
         gallery_1: { type: 'string', format: 'binary' },
@@ -176,13 +182,15 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Eliminar un producto' })
-  @ApiParam({ name: 'id', description: 'ID del producto' })
+  @ApiParam({ name: 'id' })
   async remove(@Param('id') id: string) {
     return this.productService.remove(id)
   }
 
   @Post(':productId/user/:userId/react')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Like/Dislike para un producto' })
   @ApiParam({ name: 'productId' })
   @ApiParam({ name: 'userId' })
