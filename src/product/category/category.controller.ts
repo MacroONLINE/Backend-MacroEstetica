@@ -50,6 +50,7 @@ export class CategoryController {
       properties: {
         name: { type: 'string', example: 'Cosmiatría y Cosmetología' },
         companyId: { type: 'string', example: 'company-001' },
+        bannerImage: { type: 'string', format: 'binary' },
         miniSiteImage: { type: 'string', format: 'binary' },
       },
     },
@@ -60,14 +61,19 @@ export class CategoryController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
-    FileFieldsInterceptor([{ name: 'miniSiteImage', maxCount: 1 }]),
+    FileFieldsInterceptor([
+      { name: 'bannerImage', maxCount: 1 },
+      { name: 'miniSiteImage', maxCount: 1 },
+    ]),
   )
   create(
     @Body() dto: CreateCategoryDto,
-    @UploadedFiles() files: Record<string, Express.Multer.File[]> = {},
+    @UploadedFiles()
+    files: Record<string, Express.Multer.File[]> = {},
   ) {
-    const image = files.miniSiteImage?.[0]
-    return this.categoryService.create(dto, image)
+    const bannerImage = files.bannerImage?.[0]
+    const miniSiteImage = files.miniSiteImage?.[0]
+    return this.categoryService.create(dto, bannerImage, miniSiteImage)
   }
 
   @ApiOperation({ summary: 'Listar todas las categorías' })
@@ -94,6 +100,7 @@ export class CategoryController {
       type: 'object',
       properties: {
         name: { type: 'string', example: 'Cosmiatría Moderna' },
+        bannerImage: { type: 'string', format: 'binary' },
         miniSiteImage: { type: 'string', format: 'binary' },
       },
     },
@@ -102,16 +109,21 @@ export class CategoryController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
-    FileFieldsInterceptor([{ name: 'miniSiteImage', maxCount: 1 }]),
+    FileFieldsInterceptor([
+      { name: 'bannerImage', maxCount: 1 },
+      { name: 'miniSiteImage', maxCount: 1 },
+    ]),
   )
   update(
     @Param('id') id: string,
     @Body() data: UpdateCategoryDto,
-    @UploadedFiles() files: Record<string, Express.Multer.File[]> = {},
+    @UploadedFiles()
+    files: Record<string, Express.Multer.File[]> = {},
   ) {
     const patch: Prisma.ProductCompanyCategoryUpdateInput = { ...data }
-    const image = files.miniSiteImage?.[0]
-    return this.categoryService.update(+id, patch, image)
+    const bannerImage = files.bannerImage?.[0]
+    const miniSiteImage = files.miniSiteImage?.[0]
+    return this.categoryService.update(+id, patch, bannerImage, miniSiteImage)
   }
 
   @ApiOperation({ summary: 'Eliminar categoría' })

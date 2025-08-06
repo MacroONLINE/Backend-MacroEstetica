@@ -59,7 +59,7 @@ async function bootstrap() {
   // Iniciar la aplicación en el puerto 3001
   await app.listen(3010);
   logger.log('🚀 Aplicación escuchando en http://localhost:3001');
-  logger.log('📡 WebSocket activo en ws://localhost:3001');
+  logger.log('📡 WebSocket activo en ws://localhost:3010');
 }
 
 bootstrap();

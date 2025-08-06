@@ -27,8 +27,9 @@ let CategoryController = class CategoryController {
         this.categoryService = categoryService;
     }
     create(dto, files = {}) {
-        const image = files.miniSiteImage?.[0];
-        return this.categoryService.create(dto, image);
+        const bannerImage = files.bannerImage?.[0];
+        const miniSiteImage = files.miniSiteImage?.[0];
+        return this.categoryService.create(dto, bannerImage, miniSiteImage);
     }
     findAll() {
         return this.categoryService.findAll();
@@ -38,8 +39,9 @@ let CategoryController = class CategoryController {
     }
     update(id, data, files = {}) {
         const patch = { ...data };
-        const image = files.miniSiteImage?.[0];
-        return this.categoryService.update(+id, patch, image);
+        const bannerImage = files.bannerImage?.[0];
+        const miniSiteImage = files.miniSiteImage?.[0];
+        return this.categoryService.update(+id, patch, bannerImage, miniSiteImage);
     }
     remove(id) {
         return this.categoryService.remove(+id);
@@ -62,6 +64,7 @@ __decorate([
             properties: {
                 name: { type: 'string', example: 'Cosmiatría y Cosmetología' },
                 companyId: { type: 'string', example: 'company-001' },
+                bannerImage: { type: 'string', format: 'binary' },
                 miniSiteImage: { type: 'string', format: 'binary' },
             },
         },
@@ -71,7 +74,10 @@ __decorate([
     (0, common_1.Post)(),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([{ name: 'miniSiteImage', maxCount: 1 }])),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
+        { name: 'bannerImage', maxCount: 1 },
+        { name: 'miniSiteImage', maxCount: 1 },
+    ])),
     __param(0, (0, common_1.Body)()),
     __param(1, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
@@ -106,6 +112,7 @@ __decorate([
             type: 'object',
             properties: {
                 name: { type: 'string', example: 'Cosmiatría Moderna' },
+                bannerImage: { type: 'string', format: 'binary' },
                 miniSiteImage: { type: 'string', format: 'binary' },
             },
         },
@@ -113,7 +120,10 @@ __decorate([
     (0, common_1.Put)(':id'),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
-    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([{ name: 'miniSiteImage', maxCount: 1 }])),
+    (0, common_1.UseInterceptors)((0, platform_express_1.FileFieldsInterceptor)([
+        { name: 'bannerImage', maxCount: 1 },
+        { name: 'miniSiteImage', maxCount: 1 },
+    ])),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.UploadedFiles)()),

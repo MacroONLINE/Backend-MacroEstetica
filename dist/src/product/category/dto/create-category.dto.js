@@ -16,39 +16,33 @@ class CreateCategoryDto {
 }
 exports.CreateCategoryDto = CreateCategoryDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Name of the category',
-        example: 'Cosmiatría y Cosmetología',
-    }),
+    (0, swagger_1.ApiProperty)({ example: 'Cosmiatría y Cosmetología' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateCategoryDto.prototype, "name", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'URL for the banner image of the category',
-        example: 'https://example.com/images/banner.jpg',
-    }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], CreateCategoryDto.prototype, "bannerImageUrl", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'URL for the minisite image of the category',
-        example: 'https://example.com/images/minisite.jpg',
-    }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], CreateCategoryDto.prototype, "miniSiteImageUrl", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'ID of the associated company',
-        example: 'company-001',
-    }),
+    (0, swagger_1.ApiProperty)({ example: 'company-001' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateCategoryDto.prototype, "companyId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        format: 'binary',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreateCategoryDto.prototype, "bannerImage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        format: 'binary',
+        required: false,
+    }),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], CreateCategoryDto.prototype, "miniSiteImage", void 0);
 //# sourceMappingURL=create-category.dto.js.map
