@@ -55,8 +55,8 @@ export class CategoryController {
       },
     },
   })
-  @ApiCreatedResponse()
-  @ApiBadRequestResponse()
+  @ApiCreatedResponse({ description: 'Categoría creada correctamente' })
+  @ApiBadRequestResponse({ description: 'Datos inválidos' })
   @Post()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
@@ -77,16 +77,16 @@ export class CategoryController {
   }
 
   @ApiOperation({ summary: 'Listar todas las categorías' })
-  @ApiOkResponse()
+  @ApiOkResponse({ description: 'Lista de categorías' })
   @Get()
   findAll() {
     return this.categoryService.findAll()
   }
 
-  @ApiOperation({ summary: 'Obtener una categoría' })
+  @ApiOperation({ summary: 'Obtener una categoría por ID' })
   @ApiParam({ name: 'id', example: 1 })
-  @ApiNotFoundResponse()
-  @ApiOkResponse()
+  @ApiNotFoundResponse({ description: 'Categoría no encontrada' })
+  @ApiOkResponse({ description: 'Categoría encontrada' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.categoryService.findOne(+id)
@@ -128,21 +128,24 @@ export class CategoryController {
 
   @ApiOperation({ summary: 'Eliminar categoría' })
   @ApiParam({ name: 'id', example: 1 })
-  @ApiNotFoundResponse()
+  @ApiNotFoundResponse({ description: 'Categoría no encontrada' })
+  @ApiOkResponse({ description: 'Categoría eliminada' })
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.categoryService.remove(+id)
   }
 
-  @ApiOperation({ summary: 'Categorías y productos por empresa' })
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
+  @ApiOperation({ summary: 'Categorías y productos por empresa (con toda la información de productos)' })
+  @ApiParam({ name: 'empresaId', example: 'company-001', description: 'ID de la empresa' })
+  @ApiOkResponse({ description: 'Lista de categorías con productos completos' })
   @Get('by-empresa/:empresaId')
   findAllByEmpresa(@Param('empresaId') empresaId: string) {
     return this.categoryService.findAllByEmpresa(empresaId)
   }
 
   @ApiOperation({ summary: 'Categorías básicas por empresa' })
-  @ApiParam({ name: 'empresaId', example: 'company-001' })
+  @ApiParam({ name: 'empresaId', example: 'company-001', description: 'ID de la empresa' })
+  @ApiOkResponse({ description: 'Lista básica de categorías' })
   @Get('empresa/:empresaId/categories')
   findCategoriesByEmpresa(@Param('empresaId') empresaId: string) {
     return this.categoryService.findCategoriesByEmpresa(empresaId)
