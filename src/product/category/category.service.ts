@@ -107,7 +107,16 @@ export class CategoryService {
     return this.prisma.productCompanyCategory.findMany({
       where: { companyId: empresaId },
       include: {
-        products: { select: { id: true, name: true } },
+        products: {
+          include: {
+            company: true,
+            category: true,
+            featured: true,
+            highlightProducts: true,
+            offers: true,
+            reactions: true,
+          },
+        },
         company: { select: { logo: true } },
       },
     })
