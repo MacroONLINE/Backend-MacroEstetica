@@ -20,6 +20,15 @@ let UsersService = class UsersService {
         this.prisma = prisma;
         this.cloudinary = cloudinary;
     }
+    normalizeEmpresa(input) {
+        const { category, target, userId, ...rest } = input || {};
+        const data = { ...rest };
+        if (category)
+            data.categoria = category;
+        if (target)
+            data.target = target;
+        return data;
+    }
     async createUser(data) {
         return this.prisma.user.create({
             data,
@@ -43,17 +52,18 @@ let UsersService = class UsersService {
     async createOrUpdateEmpresa(userId, dto) {
         if (!dto.name)
             throw new common_1.HttpException('name required', common_1.HttpStatus.BAD_REQUEST);
-        if (dto.dni) {
+        const data = this.normalizeEmpresa(dto);
+        if (data.dni) {
             const duplicate = await this.prisma.empresa.findFirst({
-                where: { dni: dto.dni, userId: { not: userId } },
+                where: { dni: data.dni, userId: { not: userId } },
             });
             if (duplicate)
                 throw new common_1.HttpException('DNI already in use', common_1.HttpStatus.CONFLICT);
         }
         return this.prisma.empresa.upsert({
             where: { userId },
-            update: dto,
-            create: { ...dto, userId },
+            update: data,
+            create: { ...data, userId },
         });
     }
     async createOrUpdateInstructor(userId, dto) {

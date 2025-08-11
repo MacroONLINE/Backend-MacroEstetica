@@ -6,7 +6,6 @@ import {
   Body,
   Query,
   Param,
-  Req,
   UploadedFile,
   UseInterceptors,
   HttpException,
@@ -25,7 +24,6 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express'
 import * as bcrypt from 'bcrypt'
 import { UsersService } from './users.service'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UpdateMedicoDto } from './dto/update-medico.dto'
@@ -107,11 +105,12 @@ export class UsersController {
           name: 'DermaTech SA',
           dni: 'RFC-12345678',
           giro: 'EMPRESA_PROFESIONAL_PERFIL',
+          categoria: 'EMPRESA_PERFIL',
+          target: 'COSMETOLOGO',
           subscription: 'ORO',
           bannerImage: 'https://cdn.miapp.com/banners/dermatech.jpg',
           logo: 'https://cdn.miapp.com/logos/dermatech.png',
-          webUrl: 'https://dermatech.mx',
-          followers: 300,
+          webUrl: 'https://dermatech.mx'
         },
       },
     },
@@ -149,161 +148,147 @@ export class UsersController {
     return this.usersService.createOrUpdateInstructor(dto.userId, dto)
   }
 
-  // ——— únicamente el endpoint genérico update-profile con soporte de archivo ———
-@ApiOperation({ summary: 'Update full profile (generic)' })
-@ApiParam({ name: 'userId', description: 'User ID' })
-@ApiConsumes('multipart/form-data')
-@ApiBody({
-  description:
-    'Envía los campos de usuario y las secciones (medico, instructor, empresa) que apliquen. ' +
-    'Para sustituir el documento de verificación adjunta opcionalmente `file` (binary).',
-  schema: {
-    type: 'object',
-    properties: {
-      /* …campos del usuario… */
-      firstName:  { type: 'string', example: 'María' },
-      lastName:   { type: 'string', example: 'López' },
-      phone:      { type: 'string', example: '+525511112233' },
-      /* …sub-objetos según rol… */
-      medico:     { $ref: getSchemaPath(UpdateMedicoDto) },
-      empresa:    { $ref: getSchemaPath(UpdateEmpresaDto) },
-      instructor: { $ref: getSchemaPath(UpdateInstructorDto) },
-      /* archivo opcional */
-      file: { type: 'string', format: 'binary' },
+  @ApiOperation({ summary: 'Update full profile (generic)' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description:
+      'Envía los campos de usuario y las secciones (medico, instructor, empresa) que apliquen. Para sustituir el documento de verificación adjunta opcionalmente `file` (binary).',
+    schema: {
+      type: 'object',
+      properties: {
+        firstName:  { type: 'string', example: 'María' },
+        lastName:   { type: 'string', example: 'López' },
+        phone:      { type: 'string', example: '+525511112233' },
+        medico:     { $ref: getSchemaPath(UpdateMedicoDto) },
+        empresa:    { $ref: getSchemaPath(UpdateEmpresaDto) },
+        instructor: { $ref: getSchemaPath(UpdateInstructorDto) },
+        file: { type: 'string', format: 'binary' },
+      },
     },
-  },
-  examples: {
-    user: {
-      summary: 'Solo datos de usuario',
-      value: { firstName: 'María', lastName: 'López', phone: '+525511112233' },
-    },
-    medico: {
-      summary: 'Usuario MEDICO',
-      value: {
-        firstName: 'Ana',
-        lastName: 'Ramírez',
-        medico: {
-          userId: 'usr123',
-          profession: 'MEDICO_MEDICINA_ESTETICA',
-          type: 'MEDICO',
+    examples: {
+      user: {
+        summary: 'Solo datos de usuario',
+        value: { firstName: 'María', lastName: 'López', phone: '+525511112233' },
+      },
+      medico: {
+        summary: 'Usuario MEDICO',
+        value: {
+          firstName: 'Ana',
+          lastName: 'Ramírez',
+          medico: {
+            userId: 'usr123',
+            profession: 'MEDICO_MEDICINA_ESTETICA',
+            type: 'MEDICO',
+          },
+        },
+      },
+      instructor: {
+        summary: 'Usuario INSTRUCTOR',
+        value: {
+          firstName: 'Carlos',
+          lastName: 'Díaz',
+          instructor: {
+            userId: 'usr456',
+            profession: 'MEDICINA_ESTETICA',
+            type: 'MEDICO',
+            description: 'Experto en láser dermatológico',
+          },
+        },
+      },
+      empresa: {
+        summary: 'Usuario EMPRESA',
+        value: {
+          firstName: 'Laura',
+          lastName: 'Gómez',
+          empresa: {
+            userId: 'usr789',
+            name: 'Spa Belleza',
+            giro: 'EMPRESA_APARATOLOGIA_PERFIL',
+            categoria: 'EMPRESA_PERFIL',
+            target: 'COSMETOLOGO'
+          },
         },
       },
     },
-    instructor: {
-      summary: 'Usuario INSTRUCTOR',
-      value: {
-        firstName: 'Carlos',
-        lastName: 'Díaz',
-        instructor: {
-          userId: 'usr456',
-          profession: 'MEDICINA_ESTETICA',
-          type: 'MEDICO',
-          description: 'Experto en láser dermatológico',
-        },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @Put(':userId/profile')
+  async updateProfile(
+    @Param('userId') userId: string,
+    @Body() dto: UpdateProfileDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    return this.usersService.updateProfile(userId, dto, file)
+  }
+
+  @ApiOperation({ summary: 'Upload or replace profile picture' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: { type: 'string', format: 'binary', description: 'Imagen a subir' },
       },
     },
-    empresa: {
-      summary: 'Usuario EMPRESA',
-      value: {
-        firstName: 'Laura',
-        lastName: 'Gómez',
-        empresa: {
-          userId: 'usr789',
-          name: 'Spa Belleza',
-          giro: 'EMPRESA_APARATOLOGIA_PERFIL',
-        },
-      },
-    },
-  },
-})
-@UseInterceptors(FileInterceptor('file'))
-@Put(':userId/profile')
-async updateProfile(
-  @Param('userId') userId: string,
-  @Body() dto: UpdateProfileDto,
-  @UploadedFile() file?: Express.Multer.File,
-) {
-  return this.usersService.updateProfile(userId, dto, file)
-}
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @Put(':userId/profile-image')
+  async uploadProfileImage(
+    @Param('userId') userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) throw new HttpException('File required', HttpStatus.BAD_REQUEST)
+    return this.usersService.updateProfileImage(userId, file)
+  }
 
+  @ApiOperation({ summary: 'Change password' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiBody({ type: ChangePasswordDto })
+  @Put(':userId/change-password')
+  async changePassword(
+    @Param('userId') userId: string,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.usersService.changePassword(userId, dto)
+  }
 
-/* ---------- upload profile picture ---------- */
-@ApiOperation({ summary: 'Upload or replace profile picture' })
-@ApiParam({ name: 'userId', description: 'User ID' })
-@ApiConsumes('multipart/form-data')
-@ApiBody({
-  schema: {
-    type: 'object',
-    required: ['file'],
-    properties: {
-      file: { type: 'string', format: 'binary', description: 'Imagen a subir' },
-    },
-  },
-})
-@UseInterceptors(FileInterceptor('file'))
-@Put(':userId/profile-image')
-async uploadProfileImage(
-  @Param('userId') userId: string,
-  @UploadedFile() file: Express.Multer.File,
-) {
-  if (!file) throw new HttpException('File required', HttpStatus.BAD_REQUEST)
-  return this.usersService.updateProfileImage(userId, file)
-}
+  @ApiOperation({ summary: 'Change email' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiBody({ type: ChangeEmailDto })
+  @Put(':userId/change-email')
+  async changeEmail(
+    @Param('userId') userId: string,
+    @Body() dto: ChangeEmailDto,
+  ) {
+    return this.usersService.changeEmail(userId, dto)
+  }
 
-/* ---------- change password ---------- */
-@ApiOperation({ summary: 'Change password' })
-@ApiParam({ name: 'userId', description: 'User ID' })
-@ApiBody({ type: ChangePasswordDto })
-@Put(':userId/change-password')
-async changePassword(
-  @Param('userId') userId: string,
-  @Body() dto: ChangePasswordDto,
-) {
-  return this.usersService.changePassword(userId, dto)
-}
+  @ApiOperation({ summary: 'Get MEDICO details of a user' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'Detalles del médico o null' })
+  @Get(':userId/medico')
+  async getMedico(@Param('userId') userId: string) {
+    return this.usersService.getMedicoByUserId(userId)
+  }
 
-/* ---------- change email ---------- */
-@ApiOperation({ summary: 'Change email' })
-@ApiParam({ name: 'userId', description: 'User ID' })
-@ApiBody({ type: ChangeEmailDto })
-@Put(':userId/change-email')
-async changeEmail(
-  @Param('userId') userId: string,
-  @Body() dto: ChangeEmailDto,
-) {
-  return this.usersService.changeEmail(userId, dto)
-}
+  @ApiOperation({ summary: 'Get EMPRESA details of a user' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'Detalles de la empresa o null' })
+  @Get(':userId/empresa')
+  async getEmpresa(@Param('userId') userId: string) {
+    return this.usersService.getEmpresaByUserId(userId)
+  }
 
-
-  /* ---------- queries por rol SIN bearer ---------- */
-
-/* ---- MEDICO ---- */
-@ApiOperation({ summary: 'Get MEDICO details of a user' })
-@ApiParam({ name: 'userId', description: 'User ID' })
-@ApiResponse({ status: 200, description: 'Detalles del médico o null' })
-@Get(':userId/medico')
-async getMedico(@Param('userId') userId: string) {
-  return this.usersService.getMedicoByUserId(userId)
-}
-
-/* ---- EMPRESA ---- */
-@ApiOperation({ summary: 'Get EMPRESA details of a user' })
-@ApiParam({ name: 'userId', description: 'User ID' })
-@ApiResponse({ status: 200, description: 'Detalles de la empresa o null' })
-@Get(':userId/empresa')
-async getEmpresa(@Param('userId') userId: string) {
-  return this.usersService.getEmpresaByUserId(userId)
-}
-
-/* ---- INSTRUCTOR ---- */
-@ApiOperation({ summary: 'Get INSTRUCTOR details of a user' })
-@ApiParam({ name: 'userId', description: 'User ID' })
-@ApiResponse({ status: 200, description: 'Detalles del instructor o null' })
-@Get(':userId/instructor')
-async getInstructor(@Param('userId') userId: string) {
-  return this.usersService.getInstructorByUserId(userId)
-}
-
+  @ApiOperation({ summary: 'Get INSTRUCTOR details of a user' })
+  @ApiParam({ name: 'userId', description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'Detalles del instructor o null' })
+  @Get(':userId/instructor')
+  async getInstructor(@Param('userId') userId: string) {
+    return this.usersService.getInstructorByUserId(userId)
+  }
 
   @ApiOperation({ summary: 'Get user by ID' })
   @ApiParam({ name: 'id', description: 'User ID' })

@@ -166,11 +166,12 @@ __decorate([
                     name: 'DermaTech SA',
                     dni: 'RFC-12345678',
                     giro: 'EMPRESA_PROFESIONAL_PERFIL',
+                    categoria: 'EMPRESA_PERFIL',
+                    target: 'COSMETOLOGO',
                     subscription: 'ORO',
                     bannerImage: 'https://cdn.miapp.com/banners/dermatech.jpg',
                     logo: 'https://cdn.miapp.com/logos/dermatech.png',
-                    webUrl: 'https://dermatech.mx',
-                    followers: 300,
+                    webUrl: 'https://dermatech.mx'
                 },
             },
         },
@@ -214,8 +215,7 @@ __decorate([
     (0, swagger_1.ApiParam)({ name: 'userId', description: 'User ID' }),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, swagger_1.ApiBody)({
-        description: 'Envía los campos de usuario y las secciones (medico, instructor, empresa) que apliquen. ' +
-            'Para sustituir el documento de verificación adjunta opcionalmente `file` (binary).',
+        description: 'Envía los campos de usuario y las secciones (medico, instructor, empresa) que apliquen. Para sustituir el documento de verificación adjunta opcionalmente `file` (binary).',
         schema: {
             type: 'object',
             properties: {
@@ -267,6 +267,8 @@ __decorate([
                         userId: 'usr789',
                         name: 'Spa Belleza',
                         giro: 'EMPRESA_APARATOLOGIA_PERFIL',
+                        categoria: 'EMPRESA_PERFIL',
+                        target: 'COSMETOLOGO'
                     },
                 },
             },

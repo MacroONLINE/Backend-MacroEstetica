@@ -30,7 +30,13 @@ export class UsersService {
     private cloudinary: CloudinaryService,
   ) {}
 
-  /* ──────────────── CREACIÓN BÁSICA ──────────────── */
+  private normalizeEmpresa(input: any): Prisma.EmpresaUncheckedCreateInput {
+    const { category, target, userId, ...rest } = input || {}
+    const data: any = { ...rest }
+    if (category) data.categoria = category
+    if (target) data.target = target
+    return data
+  }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user.create({
@@ -39,8 +45,6 @@ export class UsersService {
     })
   }
 
-  /* ──────────────── ACTUALIZACIÓN GENERAL (LEGACY) ──────────────── */
-
   async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
     return this.prisma.user.update({
       where: { id },
@@ -48,8 +52,6 @@ export class UsersService {
       include: { medico: true, empresa: true, instructor: true },
     })
   }
-
-  /* ──────────────── MÉDICO ──────────────── */
 
   async createOrUpdateMedico(
     userId: string,
@@ -62,8 +64,6 @@ export class UsersService {
     })
   }
 
-  /* ──────────────── EMPRESA ──────────────── */
-
   async createOrUpdateEmpresa(
     userId: string,
     dto: UpdateEmpresaDto,
@@ -71,9 +71,11 @@ export class UsersService {
     if (!dto.name)
       throw new HttpException('name required', HttpStatus.BAD_REQUEST)
 
-    if (dto.dni) {
+    const data = this.normalizeEmpresa(dto)
+
+    if (data.dni) {
       const duplicate = await this.prisma.empresa.findFirst({
-        where: { dni: dto.dni, userId: { not: userId } },
+        where: { dni: data.dni, userId: { not: userId } },
       })
       if (duplicate)
         throw new HttpException('DNI already in use', HttpStatus.CONFLICT)
@@ -81,12 +83,10 @@ export class UsersService {
 
     return this.prisma.empresa.upsert({
       where: { userId },
-      update: dto,
-      create: { ...dto, userId },
+      update: data,
+      create: { ...data, userId },
     })
   }
-
-  /* ──────────────── INSTRUCTOR ──────────────── */
 
   async createOrUpdateInstructor(
     userId: string,
@@ -98,56 +98,47 @@ export class UsersService {
       update: data,
       create: {
         ...data,
-        user: { connect: { id: userId } }, // ‹userId› se conecta por relación
+        user: { connect: { id: userId } },
       } as Prisma.InstructorCreateInput,
     })
   }
 
-// users.service.ts  ➜  reemplaza SOLO este método
-async updateProfile(
-  userId: string,
-  dto: UpdateProfileDto,
-  file?: Express.Multer.File,
-) {
-  let uploadedUrl: string | undefined
-  if (file) {
-    const uploaded = await this.cloudinary.uploadImage(file)
-    uploadedUrl = uploaded.secure_url
-  }
-
-  const { medico, empresa, instructor, ...userFields } = dto
-  await this.prisma.user.update({ where: { id: userId }, data: userFields })
-
-  const user = await this.prisma.user.findUnique({ where: { id: userId } })
-  if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
-
-  /* ---------- MEDICO ---------- */
-  if (medico || user.role === Role.MEDICO) {
-    const medPayload: UpdateMedicoDto = {
-      userId,
-      ...(medico ?? {}),
-      ...(uploadedUrl ? { verification: uploadedUrl } : {}),
+  async updateProfile(
+    userId: string,
+    dto: UpdateProfileDto,
+    file?: Express.Multer.File,
+  ) {
+    let uploadedUrl: string | undefined
+    if (file) {
+      const uploaded = await this.cloudinary.uploadImage(file)
+      uploadedUrl = uploaded.secure_url
     }
-    await this.createOrUpdateMedico(userId, medPayload)
+
+    const { medico, empresa, instructor, ...userFields } = dto
+    await this.prisma.user.update({ where: { id: userId }, data: userFields })
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND)
+
+    if (medico || user.role === Role.MEDICO) {
+      const medPayload: UpdateMedicoDto = {
+        userId,
+        ...(medico ?? {}),
+        ...(uploadedUrl ? { verification: uploadedUrl } : {}),
+      }
+      await this.createOrUpdateMedico(userId, medPayload)
+    }
+
+    if (empresa) {
+      await this.createOrUpdateEmpresa(userId, empresa)
+    }
+
+    if (instructor) {
+      await this.createOrUpdateInstructor(userId, instructor)
+    }
+
+    return this.findUserById(userId)
   }
-
-  /* ---------- EMPRESA ---------- */
-  if (empresa) {
-    await this.createOrUpdateEmpresa(userId, empresa)
-  }
-
-  /* ---------- INSTRUCTOR ---------- */
-  if (instructor) {
-    await this.createOrUpdateInstructor(userId, instructor)
-  }
-
-  return this.findUserById(userId)
-}
-
-
-
-
-  /* ──────────────── FOTO DE PERFIL ──────────────── */
 
   async updateProfileImage(userId: string, file: Express.Multer.File) {
     const upload = await this.cloudinary.uploadImage(file)
@@ -156,8 +147,6 @@ async updateProfile(
       data: { profileImageUrl: upload.secure_url },
     })
   }
-
-  /* ──────────────── PASSWORD & EMAIL ──────────────── */
 
   async changePassword(userId: string, dto: ChangePasswordDto) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } })
@@ -186,8 +175,6 @@ async updateProfile(
     await this.prisma.user.update({ where: { id: userId }, data: { email } })
     return { message: 'Email updated' }
   }
-
-  /* ──────────────── QUERIES ──────────────── */
 
   async getMedicoByUserId(userId: string): Promise<Medico | null> {
     return this.prisma.medico.findUnique({ where: { userId } })
