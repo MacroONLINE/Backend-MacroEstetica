@@ -1,8 +1,9 @@
-import { Giro, SubscriptionType } from '@prisma/client';
+import { Giro, SubscriptionType, EmpresaCategory } from '@prisma/client';
 export declare class UpdateEmpresaDto {
     userId: string;
     name: string;
     giro?: Giro;
+    categoria?: EmpresaCategory;
     subscription?: SubscriptionType;
     webUrl?: string;
     bannerImage?: string;

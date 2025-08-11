@@ -85,6 +85,7 @@ model Empresa {
   webUrl               String?
   legalName            String?
   banners              Banner[]
+  target               Target                   @default(COSMETOLOGO)
   blogPosts            BlogPost[]
   user                 User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
   empresaSubscriptions EmpresaSubscription[]

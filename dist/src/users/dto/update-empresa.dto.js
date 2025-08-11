@@ -33,6 +33,12 @@ __decorate([
     __metadata("design:type", String)
 ], UpdateEmpresaDto.prototype, "giro", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: client_1.EmpresaCategory }),
+    (0, class_validator_1.IsEnum)(client_1.EmpresaCategory),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateEmpresaDto.prototype, "categoria", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({ enum: client_1.SubscriptionType }),
     (0, class_validator_1.IsEnum)(client_1.SubscriptionType),
     (0, class_validator_1.IsOptional)(),

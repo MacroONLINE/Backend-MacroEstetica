@@ -18,6 +18,7 @@ export declare class InstructorService {
             title: string | null;
             name: string;
             giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             webUrl: string | null;
             bannerImage: string | null;
             logo: string | null;
@@ -29,10 +30,10 @@ export declare class InstructorService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
             verified: boolean;
             legalName: string | null;
+            target: import(".prisma/client").$Enums.Target;
         };
         category: {
             name: string;
@@ -50,8 +51,8 @@ export declare class InstructorService {
             createdAt: Date;
             updatedAt: Date;
             rating: number;
-            price: number;
             target: import(".prisma/client").$Enums.Target;
+            price: number;
             whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             courseImageUrl: string;
@@ -100,6 +101,7 @@ export declare class InstructorService {
             title: string | null;
             name: string;
             giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             webUrl: string | null;
             bannerImage: string | null;
             logo: string | null;
@@ -111,10 +113,10 @@ export declare class InstructorService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
             verified: boolean;
             legalName: string | null;
+            target: import(".prisma/client").$Enums.Target;
         };
         category: {
             name: string;
@@ -132,8 +134,8 @@ export declare class InstructorService {
             createdAt: Date;
             updatedAt: Date;
             rating: number;
-            price: number;
             target: import(".prisma/client").$Enums.Target;
+            price: number;
             whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             courseImageUrl: string;
@@ -182,6 +184,7 @@ export declare class InstructorService {
             title: string | null;
             name: string;
             giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             webUrl: string | null;
             bannerImage: string | null;
             logo: string | null;
@@ -193,10 +196,10 @@ export declare class InstructorService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
             verified: boolean;
             legalName: string | null;
+            target: import(".prisma/client").$Enums.Target;
         };
         category: {
             name: string;
@@ -214,8 +217,8 @@ export declare class InstructorService {
             createdAt: Date;
             updatedAt: Date;
             rating: number;
-            price: number;
             target: import(".prisma/client").$Enums.Target;
+            price: number;
             whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             courseImageUrl: string;
@@ -264,6 +267,7 @@ export declare class InstructorService {
             title: string | null;
             name: string;
             giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             webUrl: string | null;
             bannerImage: string | null;
             logo: string | null;
@@ -275,10 +279,10 @@ export declare class InstructorService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
             verified: boolean;
             legalName: string | null;
+            target: import(".prisma/client").$Enums.Target;
         };
         category: {
             name: string;
@@ -296,8 +300,8 @@ export declare class InstructorService {
             createdAt: Date;
             updatedAt: Date;
             rating: number;
-            price: number;
             target: import(".prisma/client").$Enums.Target;
+            price: number;
             whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             courseImageUrl: string;
@@ -346,6 +350,7 @@ export declare class InstructorService {
             title: string | null;
             name: string;
             giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             webUrl: string | null;
             bannerImage: string | null;
             logo: string | null;
@@ -357,10 +362,10 @@ export declare class InstructorService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
             verified: boolean;
             legalName: string | null;
+            target: import(".prisma/client").$Enums.Target;
         };
         category: {
             name: string;
@@ -378,8 +383,8 @@ export declare class InstructorService {
             createdAt: Date;
             updatedAt: Date;
             rating: number;
-            price: number;
             target: import(".prisma/client").$Enums.Target;
+            price: number;
             whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             courseImageUrl: string;
@@ -428,6 +433,7 @@ export declare class InstructorService {
             title: string | null;
             name: string;
             giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             webUrl: string | null;
             bannerImage: string | null;
             logo: string | null;
@@ -439,10 +445,10 @@ export declare class InstructorService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
             verified: boolean;
             legalName: string | null;
+            target: import(".prisma/client").$Enums.Target;
         };
         category: {
             name: string;
@@ -460,8 +466,8 @@ export declare class InstructorService {
             createdAt: Date;
             updatedAt: Date;
             rating: number;
-            price: number;
             target: import(".prisma/client").$Enums.Target;
+            price: number;
             whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             courseImageUrl: string;
@@ -510,6 +516,7 @@ export declare class InstructorService {
             title: string | null;
             name: string;
             giro: import(".prisma/client").$Enums.Giro;
+            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             webUrl: string | null;
             bannerImage: string | null;
             logo: string | null;
@@ -521,10 +528,10 @@ export declare class InstructorService {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            categoria: import(".prisma/client").$Enums.EmpresaCategory;
             followers: number;
             verified: boolean;
             legalName: string | null;
+            target: import(".prisma/client").$Enums.Target;
         };
         category: {
             name: string;
@@ -542,8 +549,8 @@ export declare class InstructorService {
             createdAt: Date;
             updatedAt: Date;
             rating: number;
-            price: number;
             target: import(".prisma/client").$Enums.Target;
+            price: number;
             whatYouWillLearn: Prisma.JsonValue | null;
             bannerUrl: string;
             courseImageUrl: string;

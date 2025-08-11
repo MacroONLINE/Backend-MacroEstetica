@@ -60,6 +60,7 @@ export declare class UsersController {
         title: string | null;
         name: string;
         giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         webUrl: string | null;
         bannerImage: string | null;
         logo: string | null;
@@ -71,10 +72,10 @@ export declare class UsersController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         followers: number;
         verified: boolean;
         legalName: string | null;
+        target: import(".prisma/client").$Enums.Target;
     }>;
     updateInstructor(dto: UpdateInstructorDto): Promise<{
         userId: string;
@@ -161,6 +162,7 @@ export declare class UsersController {
         title: string | null;
         name: string;
         giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         webUrl: string | null;
         bannerImage: string | null;
         logo: string | null;
@@ -172,10 +174,10 @@ export declare class UsersController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         followers: number;
         verified: boolean;
         legalName: string | null;
+        target: import(".prisma/client").$Enums.Target;
     }>;
     getInstructor(userId: string): Promise<{
         userId: string;

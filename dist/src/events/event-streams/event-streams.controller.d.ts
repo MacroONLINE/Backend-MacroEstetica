@@ -61,6 +61,7 @@ export declare class EventStreamsController {
                 title: string | null;
                 name: string;
                 giro: import(".prisma/client").$Enums.Giro;
+                categoria: import(".prisma/client").$Enums.EmpresaCategory;
                 webUrl: string | null;
                 bannerImage: string | null;
                 logo: string | null;
@@ -72,10 +73,10 @@ export declare class EventStreamsController {
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
-                categoria: import(".prisma/client").$Enums.EmpresaCategory;
                 followers: number;
                 verified: boolean;
                 legalName: string | null;
+                target: import(".prisma/client").$Enums.Target;
             };
             organizers: {
                 name: string;
@@ -91,6 +92,7 @@ export declare class EventStreamsController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            target: import(".prisma/client").$Enums.Target | null;
             endDateTime: Date;
             price: number;
             startDateTime: Date;
@@ -100,7 +102,6 @@ export declare class EventStreamsController {
             mainImageUrl: string | null;
             mapUrl: string | null;
             physicalLocation: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
             leadingCompanyId: string | null;
         };
         orators: {

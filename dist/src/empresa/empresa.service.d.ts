@@ -34,6 +34,7 @@ export declare class EmpresaService {
         title: string | null;
         name: string;
         giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         webUrl: string | null;
         bannerImage: string | null;
         logo: string | null;
@@ -45,10 +46,10 @@ export declare class EmpresaService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         followers: number;
         verified: boolean;
         legalName: string | null;
+        target: import(".prisma/client").$Enums.Target;
     })[]>;
     getAllByGiro(giro: Giro): Promise<({
         user: {
@@ -79,6 +80,7 @@ export declare class EmpresaService {
         title: string | null;
         name: string;
         giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         webUrl: string | null;
         bannerImage: string | null;
         logo: string | null;
@@ -90,10 +92,10 @@ export declare class EmpresaService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         followers: number;
         verified: boolean;
         legalName: string | null;
+        target: import(".prisma/client").$Enums.Target;
     })[]>;
     getAllByTarget(target: Target): Promise<({
         user: {
@@ -124,6 +126,7 @@ export declare class EmpresaService {
         title: string | null;
         name: string;
         giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         webUrl: string | null;
         bannerImage: string | null;
         logo: string | null;
@@ -135,10 +138,10 @@ export declare class EmpresaService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         followers: number;
         verified: boolean;
         legalName: string | null;
+        target: import(".prisma/client").$Enums.Target;
     })[]>;
     getAllByGiroAndTarget(giro: Giro, target: Target): Promise<({
         user: {
@@ -169,6 +172,7 @@ export declare class EmpresaService {
         title: string | null;
         name: string;
         giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         webUrl: string | null;
         bannerImage: string | null;
         logo: string | null;
@@ -180,10 +184,10 @@ export declare class EmpresaService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         followers: number;
         verified: boolean;
         legalName: string | null;
+        target: import(".prisma/client").$Enums.Target;
     })[]>;
     getEmpresaConMinisite(empresaId: string): Promise<{
         minisite: {
@@ -263,9 +267,9 @@ export declare class EmpresaService {
                 createdAt: Date;
                 updatedAt: Date;
                 minisiteId: string;
+                order: number | null;
                 cta: string | null;
                 imageSrc: string | null;
-                order: number | null;
             }[];
             specialities: {
                 title: string;
@@ -410,6 +414,7 @@ export declare class EmpresaService {
         title: string | null;
         name: string;
         giro: import(".prisma/client").$Enums.Giro;
+        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         webUrl: string | null;
         bannerImage: string | null;
         logo: string | null;
@@ -421,10 +426,10 @@ export declare class EmpresaService {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        categoria: import(".prisma/client").$Enums.EmpresaCategory;
         followers: number;
         verified: boolean;
         legalName: string | null;
+        target: import(".prisma/client").$Enums.Target;
     }>;
     uploadCatalogue(empresaId: string, file: Express.Multer.File): Promise<{
         message: string;

@@ -24,6 +24,7 @@ export declare class WorkshopsController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            target: import(".prisma/client").$Enums.Target | null;
             endDateTime: Date;
             price: number;
             startDateTime: Date;
@@ -33,7 +34,6 @@ export declare class WorkshopsController {
             mainImageUrl: string | null;
             mapUrl: string | null;
             physicalLocation: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
             leadingCompanyId: string | null;
         };
         enrollments: ({
@@ -128,6 +128,7 @@ export declare class WorkshopsController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
+            target: import(".prisma/client").$Enums.Target | null;
             endDateTime: Date;
             price: number;
             startDateTime: Date;
@@ -137,7 +138,6 @@ export declare class WorkshopsController {
             mainImageUrl: string | null;
             mapUrl: string | null;
             physicalLocation: string | null;
-            target: import(".prisma/client").$Enums.Target | null;
             leadingCompanyId: string | null;
         };
         enrollments: ({

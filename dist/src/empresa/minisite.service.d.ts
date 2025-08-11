@@ -45,14 +45,14 @@ export declare class MinisiteService {
     quota(empresaId: string, code: FeatureCode): Promise<UsageResponse>;
     objects(empresaId: string): Promise<Record<import(".prisma/client").$Enums.FeatureCode, any[]>>;
     objectsByCode(empresaId: string, code: FeatureCode): Promise<{
-        id: string;
         name: string;
+        id: string;
     }[] | {
+        name: string;
         id: number;
-        name: string;
     }[] | {
-        id: string;
         title: string;
+        id: string;
     }[] | {
         id: string;
         productId: string;
@@ -78,38 +78,38 @@ export declare class MinisiteService {
     }): Promise<MinisiteHighlightProduct>;
     getMinisiteSetup(empresaId: string): Promise<{
         company: {
-            name: string;
-            title: string;
             minisite: {
                 minisiteColor: string;
                 slogan: string;
             };
+            title: string;
+            name: string;
             giro: import(".prisma/client").$Enums.Giro;
-            location: string;
             profileImage: string;
+            location: string;
         };
         minisiteColor: string;
         slides: {
-            id: string;
             description: string;
             title: string;
+            id: string;
+            order: number;
             cta: string;
             imageSrc: string;
-            order: number;
         }[];
         slideUsage: {
             used: number;
             limit: number;
         };
         banners: {
-            id: string;
+            banner: string;
             description: string;
+            title: string;
+            logo: string;
+            empresaId: string | null;
+            id: string;
             createdAt: Date;
             updatedAt: Date;
-            title: string;
-            empresaId: string | null;
-            logo: string;
-            banner: string;
             date: Date | null;
             cta_url: string | null;
             cta_button_text: string;

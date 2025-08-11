@@ -69,8 +69,8 @@ __decorate([
             },
         },
     }),
-    (0, swagger_1.ApiCreatedResponse)(),
-    (0, swagger_1.ApiBadRequestResponse)(),
+    (0, swagger_1.ApiCreatedResponse)({ description: 'Categoría creada correctamente' }),
+    (0, swagger_1.ApiBadRequestResponse)({ description: 'Datos inválidos' }),
     (0, common_1.Post)(),
     (0, swagger_1.ApiBearerAuth)(),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
@@ -86,17 +86,17 @@ __decorate([
 ], CategoryController.prototype, "create", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Listar todas las categorías' }),
-    (0, swagger_1.ApiOkResponse)(),
+    (0, swagger_1.ApiOkResponse)({ description: 'Lista de categorías' }),
     (0, common_1.Get)(),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], CategoryController.prototype, "findAll", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Obtener una categoría' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Obtener una categoría por ID' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 1 }),
-    (0, swagger_1.ApiNotFoundResponse)(),
-    (0, swagger_1.ApiOkResponse)(),
+    (0, swagger_1.ApiNotFoundResponse)({ description: 'Categoría no encontrada' }),
+    (0, swagger_1.ApiOkResponse)({ description: 'Categoría encontrada' }),
     (0, common_1.Get)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -134,7 +134,8 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Eliminar categoría' }),
     (0, swagger_1.ApiParam)({ name: 'id', example: 1 }),
-    (0, swagger_1.ApiNotFoundResponse)(),
+    (0, swagger_1.ApiNotFoundResponse)({ description: 'Categoría no encontrada' }),
+    (0, swagger_1.ApiOkResponse)({ description: 'Categoría eliminada' }),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -142,8 +143,9 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], CategoryController.prototype, "remove", null);
 __decorate([
-    (0, swagger_1.ApiOperation)({ summary: 'Categorías y productos por empresa' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
+    (0, swagger_1.ApiOperation)({ summary: 'Categorías y productos por empresa (con toda la información de productos)' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001', description: 'ID de la empresa' }),
+    (0, swagger_1.ApiOkResponse)({ description: 'Lista de categorías con productos completos' }),
     (0, common_1.Get)('by-empresa/:empresaId'),
     __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),
@@ -152,7 +154,8 @@ __decorate([
 ], CategoryController.prototype, "findAllByEmpresa", null);
 __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'Categorías básicas por empresa' }),
-    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001' }),
+    (0, swagger_1.ApiParam)({ name: 'empresaId', example: 'company-001', description: 'ID de la empresa' }),
+    (0, swagger_1.ApiOkResponse)({ description: 'Lista básica de categorías' }),
     (0, common_1.Get)('empresa/:empresaId/categories'),
     __param(0, (0, common_1.Param)('empresaId')),
     __metadata("design:type", Function),

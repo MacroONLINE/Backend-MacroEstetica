@@ -17,8 +17,8 @@ export declare class CoursesController {
         createdAt: Date;
         updatedAt: Date;
         rating: number;
-        price: number;
         target: import(".prisma/client").$Enums.Target;
+        price: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
         bannerUrl: string;
         courseImageUrl: string;
