@@ -4,18 +4,19 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import * as express from 'express';
 import { IoAdapter } from '@nestjs/platform-socket.io';
+import * as morgan from 'morgan';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   logger.log('🚀 Inicializando aplicación...');
 
-  // Crear la aplicación deshabilitando el bodyParser predeterminado
   const app = await NestFactory.create(AppModule, {
     bodyParser: false,
     logger: ['log', 'error', 'warn', 'debug'],
   });
 
-  // Middleware para capturar el rawBody SOLO para /payment/webhook
+  app.use(morgan('dev'));
+
   app.use(
     '/payment/webhook',
     express.raw({ type: 'application/json' }),
@@ -27,24 +28,20 @@ async function bootstrap() {
   );
   logger.log('✅ Middleware raw configurado para /payment/webhook.');
 
-  // Middleware estándar para manejar JSON en las demás rutas
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   logger.log('✅ Middleware JSON y URL-encoded habilitados.');
 
-  // Habilitar CORS
   app.enableCors({
-    origin: '*', // Permite todas las conexiones (ajustar si es necesario)
+    origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   logger.log('✅ CORS habilitado.');
 
-  // 🔥 Habilitar adaptador de WebSockets
   app.useWebSocketAdapter(new IoAdapter(app));
   logger.log('✅ WebSocket Adapter configurado.');
 
-  // Configuración de Swagger
   const config = new DocumentBuilder()
     .setTitle('📖 Documentación de la API')
     .setDescription('API para la aplicación con soporte WebSockets')
@@ -56,9 +53,8 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
   logger.log('✅ Swagger configurado en /api-docs.');
 
-  // Iniciar la aplicación en el puerto 3001
-  await app.listen(3010);
-  logger.log('🚀 Aplicación escuchando en http://localhost:3001');
+  await app.listen(3010, '0.0.0.0');
+  logger.log('🚀 Aplicación escuchando en http://localhost:3010');
   logger.log('📡 WebSocket activo en ws://localhost:3010');
 }
 

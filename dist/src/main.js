@@ -6,6 +6,7 @@ const swagger_1 = require("@nestjs/swagger");
 const common_1 = require("@nestjs/common");
 const express = require("express");
 const platform_socket_io_1 = require("@nestjs/platform-socket.io");
+const morgan = require("morgan");
 async function bootstrap() {
     const logger = new common_1.Logger('Bootstrap');
     logger.log('🚀 Inicializando aplicación...');
@@ -13,6 +14,7 @@ async function bootstrap() {
         bodyParser: false,
         logger: ['log', 'error', 'warn', 'debug'],
     });
+    app.use(morgan('dev'));
     app.use('/payment/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
         req['rawBody'] = req.body;
         console.log('✅ RawBody recibido en /payment/webhook:', req['rawBody']);
@@ -39,8 +41,8 @@ async function bootstrap() {
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup('api-docs', app, document);
     logger.log('✅ Swagger configurado en /api-docs.');
-    await app.listen(3010);
-    logger.log('🚀 Aplicación escuchando en http://localhost:3001');
+    await app.listen(3010, '0.0.0.0');
+    logger.log('🚀 Aplicación escuchando en http://localhost:3010');
     logger.log('📡 WebSocket activo en ws://localhost:3010');
 }
 bootstrap();
