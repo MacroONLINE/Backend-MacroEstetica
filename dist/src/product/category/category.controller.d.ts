@@ -93,23 +93,6 @@ export declare class CategoryController {
                 footerBanner: string | null;
                 iconUrl: string | null;
             };
-            reactions: {
-                userId: string;
-                type: import(".prisma/client").$Enums.ReactionType;
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                productId: string;
-            }[];
-            featured: {
-                id: string;
-                createdAt: Date;
-                updatedAt: Date;
-                productId: string;
-                minisiteId: string;
-                order: number | null;
-                tagline: string | null;
-            };
             highlightProducts: {
                 id: string;
                 createdAt: Date;
@@ -120,6 +103,15 @@ export declare class CategoryController {
                 highlightDescription: string | null;
                 hoghlightImageUrl: string | null;
             }[];
+            featured: {
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                productId: string;
+                minisiteId: string;
+                order: number | null;
+                tagline: string | null;
+            };
             offers: {
                 description: string | null;
                 title: string;
@@ -128,6 +120,14 @@ export declare class CategoryController {
                 updatedAt: Date;
                 productId: string;
                 minisiteId: string;
+            }[];
+            reactions: {
+                userId: string;
+                type: import(".prisma/client").$Enums.ReactionType;
+                id: string;
+                createdAt: Date;
+                updatedAt: Date;
+                productId: string;
             }[];
             company: {
                 subscription: import(".prisma/client").$Enums.SubscriptionType | null;
@@ -144,13 +144,13 @@ export declare class CategoryController {
                 ceoRole: string | null;
                 location: string | null;
                 dni: string | null;
+                target: import(".prisma/client").$Enums.Target;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
                 followers: number;
                 verified: boolean;
                 legalName: string | null;
-                target: import(".prisma/client").$Enums.Target;
             };
         } & {
             description: string;
@@ -159,10 +159,9 @@ export declare class CategoryController {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            isFeatured: boolean | null;
-            companyId: string;
-            activeIngredients: string[];
             benefits: string[];
+            isFeatured: boolean | null;
+            activeIngredients: string[];
             features: string[];
             imageGallery: string[];
             imageMain: string | null;
@@ -171,6 +170,7 @@ export declare class CategoryController {
             lab: string | null;
             problemAddressed: string | null;
             presentations: string[];
+            companyId: string;
         })[];
     } & {
         name: string;

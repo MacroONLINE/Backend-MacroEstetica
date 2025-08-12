@@ -13,25 +13,25 @@ export declare class CoursesController {
         description: string;
         title: string;
         categoryId: string;
+        target: import(".prisma/client").$Enums.Target;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         rating: number;
-        target: import(".prisma/client").$Enums.Target;
         price: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        averageRating: number;
+        aboutDescription: string | null;
+        isFeatured: boolean | null;
         bannerUrl: string;
         courseImageUrl: string;
-        aboutDescription: string | null;
         totalHours: number;
         level: string;
         discountPercentage: number | null;
         instructorId: string | null;
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
-        isFeatured: boolean | null;
-        commentsCount: number;
-        averageRating: number;
         participantsCount: number;
+        commentsCount: number;
         introductoryVideoUrl: string | null;
     }>;
     getActiveCourses(userId: string): Promise<ActiveCoursesDto>;
@@ -49,8 +49,8 @@ export declare class CoursesController {
         createdAt: Date;
         updatedAt: Date;
         imageUrl: string | null;
-        moduleId: string | null;
         videoUrl: string | null;
+        moduleId: string | null;
     }>;
     createComment(dto: CreateCommentDto): Promise<{
         userId: string;
@@ -180,8 +180,8 @@ export declare class CoursesController {
             createdAt: Date;
             updatedAt: Date;
             imageUrl: string | null;
-            moduleId: string | null;
             videoUrl: string | null;
+            moduleId: string | null;
         })[];
     } & {
         description: string;
@@ -237,8 +237,8 @@ export declare class CoursesController {
             createdAt: Date;
             updatedAt: Date;
             imageUrl: string | null;
-            moduleId: string | null;
             videoUrl: string | null;
+            moduleId: string | null;
         })[];
     } & {
         description: string;

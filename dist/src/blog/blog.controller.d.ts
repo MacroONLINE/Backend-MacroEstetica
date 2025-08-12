@@ -23,8 +23,8 @@ export declare class BlogController {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        colorHex: string;
         iconUrl: string | null;
+        colorHex: string;
     }[]>;
     incrementReaderCount(id: string): Promise<{
         totalReaders: number;

@@ -44,11 +44,11 @@ export declare class EventStreamsController {
                 country: string | null;
                 countryCode: string | null;
                 zipCode: string | null;
+                password: string;
                 id: string;
                 email: string;
                 emailVerified: Date | null;
                 role: import(".prisma/client").$Enums.Role;
-                password: string;
                 createdAt: Date;
                 updatedAt: Date;
                 newsletter: boolean;
@@ -70,13 +70,13 @@ export declare class EventStreamsController {
                 ceoRole: string | null;
                 location: string | null;
                 dni: string | null;
+                target: import(".prisma/client").$Enums.Target;
                 id: string;
                 createdAt: Date;
                 updatedAt: Date;
                 followers: number;
                 verified: boolean;
                 legalName: string | null;
-                target: import(".prisma/client").$Enums.Target;
             };
             organizers: {
                 name: string;
@@ -89,10 +89,10 @@ export declare class EventStreamsController {
             }[];
         } & {
             title: string;
+            target: import(".prisma/client").$Enums.Target | null;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            target: import(".prisma/client").$Enums.Target | null;
             endDateTime: Date;
             price: number;
             startDateTime: Date;

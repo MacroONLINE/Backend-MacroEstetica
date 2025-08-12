@@ -21,7 +21,11 @@ let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
-    async login(data) {
+    async login(body) {
+        const data = Array.isArray(body) ? body[0] : body;
+        if (!data || typeof data.email !== 'string' || typeof data.password !== 'string') {
+            throw new common_1.BadRequestException('email and password are required');
+        }
         const user = await this.authService.validateUser(data.email, data.password);
         if (!user) {
             throw new common_1.UnauthorizedException('Invalid credentials');
@@ -34,14 +38,28 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'User login' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Login successful' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid credentials' }),
+    (0, swagger_1.ApiBody)({
+        schema: {
+            oneOf: [
+                { $ref: (0, swagger_1.getSchemaPath)(login_dto_1.LoginDto) },
+                {
+                    type: 'array',
+                    minItems: 1,
+                    maxItems: 1,
+                    items: { $ref: (0, swagger_1.getSchemaPath)(login_dto_1.LoginDto) },
+                },
+            ],
+        },
+    }),
     (0, common_1.Post)('login'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [login_dto_1.LoginDto]),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('auth'),
+    (0, swagger_1.ApiExtraModels)(login_dto_1.LoginDto),
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])
 ], AuthController);

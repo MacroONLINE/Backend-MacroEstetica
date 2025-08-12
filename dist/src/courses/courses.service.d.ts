@@ -16,25 +16,25 @@ export declare class CoursesService {
         description: string;
         title: string;
         categoryId: string;
+        target: import(".prisma/client").$Enums.Target;
         id: string;
         createdAt: Date;
         updatedAt: Date;
         rating: number;
-        target: import(".prisma/client").$Enums.Target;
         price: number;
         whatYouWillLearn: import("@prisma/client/runtime/library").JsonValue | null;
+        averageRating: number;
+        aboutDescription: string | null;
+        isFeatured: boolean | null;
         bannerUrl: string;
         courseImageUrl: string;
-        aboutDescription: string | null;
         totalHours: number;
         level: string;
         discountPercentage: number | null;
         instructorId: string | null;
         requirements: import("@prisma/client/runtime/library").JsonValue | null;
-        isFeatured: boolean | null;
-        commentsCount: number;
-        averageRating: number;
         participantsCount: number;
+        commentsCount: number;
         introductoryVideoUrl: string | null;
     }>;
     createModule(dto: CreateModuleDto): Promise<{
@@ -51,8 +51,8 @@ export declare class CoursesService {
         createdAt: Date;
         updatedAt: Date;
         imageUrl: string | null;
-        moduleId: string | null;
         videoUrl: string | null;
+        moduleId: string | null;
     }>;
     createCategory(dto: CreateCategoryDto): Promise<{
         name: string;
@@ -134,8 +134,8 @@ export declare class CoursesService {
         createdAt: Date;
         updatedAt: Date;
         imageUrl: string | null;
-        moduleId: string | null;
         videoUrl: string | null;
+        moduleId: string | null;
     }>;
     isUserEnrolled(courseId: string, userId: string): Promise<{
         enrolled: boolean;
@@ -187,8 +187,8 @@ export declare class CoursesService {
             createdAt: Date;
             updatedAt: Date;
             imageUrl: string | null;
-            moduleId: string | null;
             videoUrl: string | null;
+            moduleId: string | null;
         })[];
     } & {
         description: string;
@@ -244,8 +244,8 @@ export declare class CoursesService {
             createdAt: Date;
             updatedAt: Date;
             imageUrl: string | null;
-            moduleId: string | null;
             videoUrl: string | null;
+            moduleId: string | null;
         })[];
     } & {
         description: string;
