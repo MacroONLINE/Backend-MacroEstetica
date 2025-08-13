@@ -39,8 +39,10 @@ export class UsersService {
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
+    const payload = { ...data }
+    if (!payload.role) payload.role = Role.COSMETOLOGO
     return this.prisma.user.create({
-      data,
+      data: payload,
       include: { medico: true, empresa: true, instructor: true },
     })
   }
@@ -48,7 +50,7 @@ export class UsersService {
   async updateUser(id: string, data: Prisma.UserUpdateInput): Promise<User> {
     return this.prisma.user.update({
       where: { id },
-      data: { ...data, role: Role.COSMETOLOGO },
+      data: { ...data },
       include: { medico: true, empresa: true, instructor: true },
     })
   }
@@ -81,11 +83,19 @@ export class UsersService {
         throw new HttpException('DNI already in use', HttpStatus.CONFLICT)
     }
 
-    return this.prisma.empresa.upsert({
-      where: { userId },
-      update: data,
-      create: { ...data, userId },
-    })
+    const [empresa] = await this.prisma.$transaction([
+      this.prisma.empresa.upsert({
+        where: { userId },
+        update: data,
+        create: { ...data, userId },
+      }),
+      this.prisma.user.update({
+        where: { id: userId },
+        data: { role: Role.EMPRESA },
+      }),
+    ])
+
+    return empresa
   }
 
   async createOrUpdateInstructor(

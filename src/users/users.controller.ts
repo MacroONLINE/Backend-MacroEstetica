@@ -32,6 +32,7 @@ import { UpdateEmpresaDto } from './dto/update-empresa.dto'
 import { UpdateProfileDto } from './dto/update-profile.dto/update-profile.dto'
 import { ChangePasswordDto } from './dto/change-password.dto/change-password.dto'
 import { ChangeEmailDto } from './dto/change-email.dto/change-email.dto'
+import { Role } from '@prisma/client'
 
 @ApiTags('users')
 @Controller('users')
@@ -58,7 +59,7 @@ export class UsersController {
     const exists = await this.usersService.findUserByEmail(dto.email)
     if (exists) throw new HttpException('User already exists', HttpStatus.CONFLICT)
     const hashed = await bcrypt.hash(dto.password, 10)
-    const user = await this.usersService.createUser({ ...dto, password: hashed })
+    const user = await this.usersService.createUser({ ...dto, password: hashed, role: Role.COSMETOLOGO })
     return { message: 'User created successfully', userId: user.id }
   }
 

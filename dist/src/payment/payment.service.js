@@ -20,9 +20,7 @@ let PaymentService = PaymentService_1 = class PaymentService {
         this.configService = configService;
         this.prisma = prisma;
         this.logger = new common_1.Logger(PaymentService_1.name);
-        this.stripe = new stripe_1.default(this.configService.get('STRIPE_SECRET_KEY'), {
-            apiVersion: '2024-11-20.acacia',
-        });
+        this.stripe = new stripe_1.default(process.env.STRIPE_SECRET_KEY);
     }
     async createCheckoutSession(courseId, userId, email) {
         const course = await this.prisma.course.findUnique({
