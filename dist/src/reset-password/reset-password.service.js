@@ -20,18 +20,7 @@ let ResetPasswordService = class ResetPasswordService {
         this.prisma = prisma;
         this.jwtService = jwtService;
     }
-    async generateResetToken(email) {
-        const user = await this.prisma.user.findUnique({ where: { email } });
-        if (!user)
-            throw new Error('Usuario no encontrado');
-        const token = this.jwtService.sign({ email }, { expiresIn: '1h' });
-        await this.prisma.passwordReset.create({
-            data: {
-                email,
-                token,
-                expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-            },
-        });
+    createTransport() {
         const transporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST,
             port: parseInt(process.env.SMTP_PORT, 10),
@@ -41,15 +30,40 @@ let ResetPasswordService = class ResetPasswordService {
                 pass: process.env.SMTP_PASS,
             },
         });
-        await transporter.sendMail({
-            from: `"Soporte Técnico" <${process.env.SMTP_USER}>`,
-            to: email,
-            subject: 'Recuperación de contraseña',
-            html: `<p>Hola,</p>
-             <p>Hemos recibido una solicitud para restablecer tu contraseña. Usa este enlace para crear una nueva contraseña:</p>
-             <a href="${process.env.APP_URL}/reset-password/${token}">Restablecer contraseña</a>
-             <p>Este enlace es válido por 1 hora.</p>`,
+        return transporter;
+    }
+    async generateResetToken(email) {
+        const user = await this.prisma.user.findUnique({ where: { email } });
+        if (!user)
+            throw new Error('Usuario no encontrado');
+        const expiresInSec = 60 * 60;
+        const token = this.jwtService.sign({ email }, { expiresIn: expiresInSec });
+        const expiresAt = new Date(Date.now() + expiresInSec * 1000);
+        await this.prisma.passwordReset.create({
+            data: { email, token, expiresAt },
         });
+        const transporter = this.createTransport();
+        try {
+            await transporter.verify();
+            const resetUrl = `${process.env.APP_URL}/reset-password/${encodeURIComponent(token)}`;
+            await transporter.sendMail({
+                from: `"${process.env.SMTP_NAME}" <${process.env.SMTP_FROM}>`,
+                to: email,
+                replyTo: process.env.SMTP_REPLY_TO || process.env.SMTP_FROM,
+                subject: 'Recuperación de contraseña',
+                html: `
+          <p>Hola ${user.firstName ?? ''},</p>
+          <p>Hemos recibido una solicitud para restablecer tu contraseña.</p>
+          <p>Usa este enlace para crear una nueva contraseña (válido por 1 hora):</p>
+          <p><a href="${resetUrl}">Restablecer contraseña</a></p>
+          <p>Si no fuiste tú, ignora este mensaje.</p>
+        `,
+            });
+        }
+        catch (err) {
+            await this.prisma.passwordReset.delete({ where: { token } });
+            throw err;
+        }
         return token;
     }
     async resetPassword(token, newPassword) {

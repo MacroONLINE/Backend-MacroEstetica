@@ -4,6 +4,7 @@ export declare class ResetPasswordService {
     private readonly prisma;
     private readonly jwtService;
     constructor(prisma: PrismaService, jwtService: JwtService);
+    private createTransport;
     generateResetToken(email: string): Promise<string>;
     resetPassword(token: string, newPassword: string): Promise<void>;
 }
