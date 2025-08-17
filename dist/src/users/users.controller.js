@@ -27,6 +27,7 @@ const update_empresa_dto_1 = require("./dto/update-empresa.dto");
 const update_profile_dto_1 = require("./dto/update-profile.dto/update-profile.dto");
 const change_password_dto_1 = require("./dto/change-password.dto/change-password.dto");
 const change_email_dto_1 = require("./dto/change-email.dto/change-email.dto");
+const client_1 = require("@prisma/client");
 let UsersController = UsersController_1 = class UsersController {
     constructor(usersService) {
         this.usersService = usersService;
@@ -42,7 +43,7 @@ let UsersController = UsersController_1 = class UsersController {
         if (exists)
             throw new common_1.HttpException('User already exists', common_1.HttpStatus.CONFLICT);
         const hashed = await bcrypt.hash(dto.password, 10);
-        const user = await this.usersService.createUser({ ...dto, password: hashed });
+        const user = await this.usersService.createUser({ ...dto, password: hashed, role: client_1.Role.COSMETOLOGO });
         return { message: 'User created successfully', userId: user.id };
     }
     async completeProfile(dto) {

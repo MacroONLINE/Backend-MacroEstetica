@@ -30,15 +30,18 @@ let UsersService = class UsersService {
         return data;
     }
     async createUser(data) {
+        const payload = { ...data };
+        if (!payload.role)
+            payload.role = client_1.Role.COSMETOLOGO;
         return this.prisma.user.create({
-            data,
+            data: payload,
             include: { medico: true, empresa: true, instructor: true },
         });
     }
     async updateUser(id, data) {
         return this.prisma.user.update({
             where: { id },
-            data: { ...data, role: client_1.Role.COSMETOLOGO },
+            data: { ...data },
             include: { medico: true, empresa: true, instructor: true },
         });
     }
@@ -60,11 +63,18 @@ let UsersService = class UsersService {
             if (duplicate)
                 throw new common_1.HttpException('DNI already in use', common_1.HttpStatus.CONFLICT);
         }
-        return this.prisma.empresa.upsert({
-            where: { userId },
-            update: data,
-            create: { ...data, userId },
-        });
+        const [empresa] = await this.prisma.$transaction([
+            this.prisma.empresa.upsert({
+                where: { userId },
+                update: data,
+                create: { ...data, userId },
+            }),
+            this.prisma.user.update({
+                where: { id: userId },
+                data: { role: client_1.Role.EMPRESA },
+            }),
+        ]);
+        return empresa;
     }
     async createOrUpdateInstructor(userId, dto) {
         const { userId: _discard, ...data } = dto;

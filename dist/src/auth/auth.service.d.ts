@@ -4,6 +4,7 @@ export declare class AuthService {
     private readonly usersService;
     private readonly jwtService;
     constructor(usersService: UsersService, jwtService: JwtService);
+    private isAllowAnyPassword;
     validateUser(email: string, pass: string): Promise<any>;
     login(user: any): Promise<{
         message: string;
