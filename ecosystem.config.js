@@ -3,45 +3,32 @@ module.exports = {
     apps: [
       {
         name: 'macro-backend',
-        cwd: '/root/backend',              // <-- ajusta si tu backend está en otra ruta
-        script: 'dist/main.js',            // o 'dist/src/main.js' según tu build
+        cwd: '/root/backend',
+        script: 'dist/main.js',
         instances: 1,
         exec_mode: 'fork',
         autorestart: true,
         watch: false,
         max_memory_restart: '512M',
         env: {
-          NODE_ENV: 'production',
+          NODE_ENV: 'develop',
           PORT: '3010',
   
-          // App
           APP_URL: 'https://macroestetica.com/api-backend',
   
-          // JWT
           JWT_SECRET: 'J747N9i7PPjsTkXYeZWVywI933WCZ+T43EdHntfnsuU=',
           JWT_EXPIRATION: '30d',
   
-          // DB
           DATABASE_URL: 'postgresql://amcroestetica_dbusr:G7x!U2p$K9qR5vnZ@127.0.0.1:5432/macro_db?schema=public',
           SHADOW_DATABASE_URL: 'postgresql://amcroestetica_dbusr:G7x!U2p$K9qR5vnZ@127.0.0.1:5432/macro_db_shadow',
   
-          // Cloudinary
           CLOUDINARY_CLOUD_NAME: 'dwcrzwawj',
           CLOUDINARY_API_KEY: '336531311612847',
           CLOUDINARY_API_SECRET: 'IYc67eU8jW2qSb5q-MRi7wNfKrs',
   
-          // ===========================
-          // STRIPE - TEST MODE (ACTIVO)
-          // ===========================
-          // ⚠️ Reemplaza con tu publishable key de TEST:
-          STRIPE_SECRET_KEY: sk_test_51QP74lGpVwhT9fv0sY8XdH6OpVAfuSLdGaVMUqvt1PNAecGV1eBhod9VG5afFDeJO96B5Q5f8GYIIV2F9dZd5hYp00vVeroU4n,
-          STRIPE_WEBHOOK_SECRET:whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj,
-          // ===========================
-          // STRIPE - LIVE (COMENTADO)
-          // ===========================
-          // STRIPE_PUBLISHABLE_KEY: 'pk_live_51QP74lGpVwhT9fv0DsSqKsdVCy5bJ0 cPd4vomuXUEZvvTjVHjGRbzWlawAFIDsUA51vdhK32ZhSwzIuNYJwTE7D900fJaC9O4J',
-          // STRIPE_SECRET_KEY: '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',
-          // STRIPE_WEBHOOK_SECRET: 'whsec_live_REEMPLAZA_SI_USAS_PROD',
+          // Stripe (TEST)
+          STRIPE_SECRET_KEY: 'sk_test_51QP74lGpVwhT9fv0sY8XdH6OpVAfuSLdGaVMUqvt1PNAecGV1eBhod9VG5afFDeJO96B5Q5f8GYIIV2F9dZd5hYp00vVeroU4n',
+          STRIPE_WEBHOOK_SECRET: 'whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj',
   
           // Agora
           AGORA_APP_ID: '30eeedb05a31430eac4d19dbe1b73ab7',
@@ -62,14 +49,8 @@ module.exports = {
           SMTP_NAME: 'Macroestética',
           SMTP_REPLY_TO: 'joaquin.elia@hotmail.com',
   
-          // Flags
           ALLOW_ANY_PASSWORD: 'true',
         },
-  
-        // (Opcional) logs dedicados
-        // out_file: '/root/backend/pm2-out.log',
-        // error_file: '/root/backend/pm2-err.log',
-        // log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       },
     ],
   };
