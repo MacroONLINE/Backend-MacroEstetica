@@ -4,7 +4,7 @@ module.exports = {
       {
         name: 'macro-backend',
         cwd: '/root/backend',
-        script: 'dist/main.js',
+        script: 'dist/src/main.js',
         instances: 1,
         exec_mode: 'fork',
         autorestart: true,
