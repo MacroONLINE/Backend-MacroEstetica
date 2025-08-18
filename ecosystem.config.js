@@ -11,7 +11,7 @@ module.exports = {
         watch: false,
         max_memory_restart: '512M',
         env: {
-          NODE_ENV: 'develop',
+          NODE_ENV: 'production',
           PORT: '3010',
   
           // App
@@ -34,15 +34,12 @@ module.exports = {
           // STRIPE - TEST MODE (ACTIVO)
           // ===========================
           // ⚠️ Reemplaza con tu publishable key de TEST:
-          STRIPE_PUBLISHABLE_KEY: 'pk_test_REEMPLAZA_AQUI',
-          STRIPE_SECRET_KEY: 'sk_test_51QP74lGpVwhT9fv0sY8XdH6OpVAfuSLdGaVMUqvt1PNAecGV1eBhod9VG5afFDeJO96B5Q5f8GYIIV2F9dZd5hYp00vVeroU4n',
-          // Asegúrate que este sea el webhook de TEST (desde "View test data"):
-          STRIPE_WEBHOOK_SECRET: 'whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj',
-  
+          STRIPE_SECRET_KEY: sk_test_51QP74lGpVwhT9fv0sY8XdH6OpVAfuSLdGaVMUqvt1PNAecGV1eBhod9VG5afFDeJO96B5Q5f8GYIIV2F9dZd5hYp00vVeroU4n,
+          STRIPE_WEBHOOK_SECRET:whsec_6W5UG3Adau1bUdNXlEsp3lqVjfSSKidj,
           // ===========================
           // STRIPE - LIVE (COMENTADO)
           // ===========================
-          // STRIPE_PUBLISHABLE_KEY: 'pk_live_51QP74lGpVwhT9fv0DsSqKsdVCy5bJ0cPd4vomuXUEZvvTjVHjGRbzWlawAFIDsUA51vdhK32ZhSwzIuNYJwTE7D900fJaC9O4J',
+          // STRIPE_PUBLISHABLE_KEY: 'pk_live_51QP74lGpVwhT9fv0DsSqKsdVCy5bJ0 cPd4vomuXUEZvvTjVHjGRbzWlawAFIDsUA51vdhK32ZhSwzIuNYJwTE7D900fJaC9O4J',
           // STRIPE_SECRET_KEY: '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',
           // STRIPE_WEBHOOK_SECRET: 'whsec_live_REEMPLAZA_SI_USAS_PROD',
   
