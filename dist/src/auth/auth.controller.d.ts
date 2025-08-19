@@ -8,4 +8,9 @@ export declare class AuthController {
         access_token: string;
         user: any;
     }>;
+    exchangeNextAuth(req: any): Promise<{
+        message: string;
+        access_token: string;
+        user: any;
+    }>;
 }

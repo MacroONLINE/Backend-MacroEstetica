@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const login_dto_1 = require("../users/dto/login.dto");
 const swagger_1 = require("@nestjs/swagger");
+const passport_1 = require("@nestjs/passport");
 let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
@@ -27,6 +28,17 @@ let AuthController = class AuthController {
             throw new common_1.BadRequestException('email and password are required');
         }
         const user = await this.authService.validateUser(data.email, data.password);
+        if (!user) {
+            throw new common_1.UnauthorizedException('Invalid credentials');
+        }
+        return this.authService.login(user);
+    }
+    async exchangeNextAuth(req) {
+        const email = req.user?.email;
+        if (!email) {
+            throw new common_1.BadRequestException('email not found in token');
+        }
+        const user = await this.authService.validateUser(email, '');
         if (!user) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
@@ -57,6 +69,17 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, swagger_1.ApiOperation)({ summary: 'Exchange NextAuth token for backend token' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Exchange successful' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid token' }),
+    (0, common_1.Post)('exchange-nextauth'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('nextauth')),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "exchangeNextAuth", null);
 exports.AuthController = AuthController = __decorate([
     (0, swagger_1.ApiTags)('auth'),
     (0, swagger_1.ApiExtraModels)(login_dto_1.LoginDto),
