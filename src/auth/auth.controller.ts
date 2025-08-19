@@ -1,8 +1,10 @@
-import { Controller, Post, Body, UnauthorizedException, BadRequestException, UseGuards, Req } from '@nestjs/common';
+// src/auth/auth.controller.ts
+import { Controller, Post, Body, UnauthorizedException, BadRequestException, UseGuards, Req, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from '../users/dto/login.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiExtraModels, getSchemaPath, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import * as jwt from 'jsonwebtoken';
 
 @ApiTags('auth')
 @ApiExtraModels(LoginDto)
@@ -54,5 +56,25 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials');
     }
     return this.authService.login(user);
+  }
+
+  @ApiOperation({ summary: 'Who am I' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Get('whoami')
+  async whoami(@Req() req: any) {
+    const auth = req.headers['authorization'] || '';
+    const token = typeof auth === 'string' && auth.startsWith('Bearer ') ? auth.slice(7) : '';
+    const dec: any = token ? jwt.decode(token) : null;
+    const now = Math.floor(Date.now() / 1000);
+    return {
+      ok: !!req.user,
+      user: req.user || null,
+      tokenExp: dec?.exp || null,
+      tokenIat: dec?.iat || null,
+      now,
+      secondsToExpire: dec?.exp ? dec.exp - now : null,
+      headerPresent: !!token,
+    };
   }
 }
