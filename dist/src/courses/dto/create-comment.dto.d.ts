@@ -1,6 +1,0 @@
-export declare class CreateCommentDto {
-    userId: string;
-    classId: string;
-    content: string;
-    parentCommentId?: string;
-}

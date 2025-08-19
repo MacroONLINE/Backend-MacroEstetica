@@ -18,7 +18,7 @@ import { NextAuthStrategy } from './nextauth.startegy';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '1h' },
+        signOptions: { expiresIn: config.get<string>('JWT_EXPIRATION') || '30d' },
       }),
     }),
   ],
