@@ -26,7 +26,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { PartialType } from '@nestjs/mapped-types'
-import { FileFieldsInterceptor } from '@nestjs/platform-express'
+import { AnyFilesInterceptor } from '@nestjs/platform-express'
 import { Express } from 'express'
 import { CategoryService } from './category.service'
 import { CreateCategoryDto } from './dto/create-category.dto'
@@ -60,19 +60,16 @@ export class CategoryController {
   @Post()
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'bannerImage', maxCount: 1 },
-      { name: 'miniSiteImage', maxCount: 1 },
-    ]),
-  )
+  @UseInterceptors(AnyFilesInterceptor())
   create(
     @Body() dto: CreateCategoryDto,
-    @UploadedFiles()
-    files: Record<string, Express.Multer.File[]> = {},
+    @UploadedFiles() files: Express.Multer.File[] = [],
   ) {
-    const bannerImage = files.bannerImage?.[0]
-    const miniSiteImage = files.miniSiteImage?.[0]
+    const bannerImage =
+      files.find(f => ['bannerImage', 'banner', 'banner_file'].includes(f.fieldname))
+    const miniSiteImage =
+      files.find(f => ['miniSiteImage', 'miniSite', 'minisite', 'mini_site'].includes(f.fieldname))
+
     return this.categoryService.create(dto, bannerImage, miniSiteImage)
   }
 
@@ -108,21 +105,18 @@ export class CategoryController {
   @Put(':id')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'bannerImage', maxCount: 1 },
-      { name: 'miniSiteImage', maxCount: 1 },
-    ]),
-  )
+  @UseInterceptors(AnyFilesInterceptor())
   update(
     @Param('id') id: string,
     @Body() data: UpdateCategoryDto,
-    @UploadedFiles()
-    files: Record<string, Express.Multer.File[]> = {},
+    @UploadedFiles() files: Express.Multer.File[] = [],
   ) {
+    const bannerImage =
+      files.find(f => ['bannerImage', 'banner', 'banner_file'].includes(f.fieldname))
+    const miniSiteImage =
+      files.find(f => ['miniSiteImage', 'miniSite', 'minisite', 'mini_site'].includes(f.fieldname))
+
     const patch: Prisma.ProductCompanyCategoryUpdateInput = { ...data }
-    const bannerImage = files.bannerImage?.[0]
-    const miniSiteImage = files.miniSiteImage?.[0]
     return this.categoryService.update(+id, patch, bannerImage, miniSiteImage)
   }
 
