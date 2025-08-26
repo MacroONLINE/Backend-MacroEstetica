@@ -9,7 +9,7 @@ import { PrismaModule } from '../prisma/prisma.module';
     PrismaModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET, 
-      signOptions: { expiresIn: process.env.JWT_EXPIRATION || '1h' }, 
+      signOptions: { expiresIn: process.env.JWT_EXPIRATION || '30d' }, 
     }),
   ],
   controllers: [ResetPasswordController],

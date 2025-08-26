@@ -19,7 +19,6 @@ export class CategoryService {
     minisite?: Express.Multer.File,
   ) {
     console.log('[CategoryService.create] dto:', dto)
-
     console.log('[CategoryService.create] incoming files:', {
       hasBanner: !!banner,
       bannerField: banner?.fieldname,
@@ -115,21 +114,50 @@ export class CategoryService {
       update: { used: { increment: 1 } },
       create: { companyId: dto.companyId, code: FeatureCode.CATEGORIES_TOTAL, used: 1 },
     })
-    console.log('[CategoryService.create] usage incremented for company:', dto.companyId)
+
+    const feature = await this.prisma.planFeature.findUnique({
+      where: { plan_code: { plan: await this.plan(dto.companyId), code: FeatureCode.CATEGORIES_TOTAL } },
+    })
+    const usage = await this.prisma.companyUsage.findUnique({
+      where: { companyId_code: { companyId: dto.companyId, code: FeatureCode.CATEGORIES_TOTAL } },
+    })
+    const remaining = feature?.limit == null ? null : Math.max(0, feature.limit - (usage?.used ?? 0))
+    console.log('[CategoryService.create] usage after create:', {
+      companyId: dto.companyId,
+      used: usage?.used ?? 0,
+      limit: feature?.limit ?? null,
+      remaining,
+    })
 
     return created
   }
 
   async findAll() {
-    return this.prisma.productCompanyCategory.findMany({
+    const rows = await this.prisma.productCompanyCategory.findMany({
       include: { company: { select: { logo: true } } },
     })
+    console.log('[CategoryService.findAll] count:', rows.length)
+    if (rows.length) {
+      console.log('[CategoryService.findAll] sample row:', {
+        id: rows[0].id,
+        name: rows[0].name,
+        bannerImageUrl: rows[0].bannerImageUrl,
+        miniSiteImageUrl: rows[0].miniSiteImageUrl,
+      })
+    }
+    return rows
   }
 
   async findOne(id: number) {
     const cat = await this.prisma.productCompanyCategory.findUnique({
       where: { id },
       include: { company: { select: { logo: true } } },
+    })
+    console.log('[CategoryService.findOne]', {
+      id,
+      found: !!cat,
+      bannerImageUrl: cat?.bannerImageUrl,
+      miniSiteImageUrl: cat?.miniSiteImageUrl,
     })
     if (!cat) throw new NotFoundException('Category not found')
     return cat
@@ -143,7 +171,6 @@ export class CategoryService {
   ) {
     console.log('[CategoryService.update] id:', id)
     console.log('[CategoryService.update] patch keys:', Object.keys(patch as any))
-
     console.log('[CategoryService.update] incoming files:', {
       hasBanner: !!banner,
       bannerField: banner?.fieldname,
@@ -216,18 +243,40 @@ export class CategoryService {
   }
 
   async remove(id: number) {
+    console.log('[CategoryService.remove] id:', id)
     const category = await this.prisma.productCompanyCategory.findUniqueOrThrow({ where: { id } })
     await this.prisma.productCompanyCategory.delete({ where: { id } })
+
     await this.prisma.companyUsage.upsert({
       where: { companyId_code: { companyId: category.companyId, code: FeatureCode.CATEGORIES_TOTAL } },
       update: { used: { decrement: 1 } },
       create: { companyId: category.companyId, code: FeatureCode.CATEGORIES_TOTAL, used: 0 },
     })
+
+    await this.prisma.companyUsage.updateMany({
+      where: { companyId: category.companyId, code: FeatureCode.CATEGORIES_TOTAL, used: { lt: 0 } },
+      data: { used: 0 },
+    })
+
+    const feature = await this.prisma.planFeature.findUnique({
+      where: { plan_code: { plan: await this.plan(category.companyId), code: FeatureCode.CATEGORIES_TOTAL } },
+    })
+    const usage = await this.prisma.companyUsage.findUnique({
+      where: { companyId_code: { companyId: category.companyId, code: FeatureCode.CATEGORIES_TOTAL } },
+    })
+    const remaining = feature?.limit == null ? null : Math.max(0, feature.limit - (usage?.used ?? 0))
+    console.log('[CategoryService.remove] usage after remove:', {
+      companyId: category.companyId,
+      used: usage?.used ?? 0,
+      limit: feature?.limit ?? null,
+      remaining,
+    })
+
     return category
   }
 
   async findAllByEmpresa(empresaId: string) {
-    return this.prisma.productCompanyCategory.findMany({
+    const rows = await this.prisma.productCompanyCategory.findMany({
       where: { companyId: empresaId },
       include: {
         products: {
@@ -243,13 +292,32 @@ export class CategoryService {
         company: { select: { logo: true } },
       },
     })
+    console.log('[CategoryService.findAllByEmpresa]', {
+      empresaId,
+      count: rows.length,
+      sample: rows[0]
+        ? {
+            id: rows[0].id,
+            name: rows[0].name,
+            bannerImageUrl: rows[0].bannerImageUrl,
+            miniSiteImageUrl: rows[0].miniSiteImageUrl,
+          }
+        : null,
+    })
+    return rows
   }
 
   async findCategoriesByEmpresa(empresaId: string) {
-    return this.prisma.productCompanyCategory.findMany({
+    const rows = await this.prisma.productCompanyCategory.findMany({
       where: { companyId: empresaId },
       select: { id: true, name: true, bannerImageUrl: true, miniSiteImageUrl: true },
     })
+    console.log('[CategoryService.findCategoriesByEmpresa]', {
+      empresaId,
+      count: rows.length,
+      sample: rows[0] ?? null,
+    })
+    return rows
   }
 
   private async plan(empresaId: string): Promise<SubscriptionType> {
